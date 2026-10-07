@@ -101,10 +101,10 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
 
         with ui.column().classes("w-full max-w-6xl mx-auto p-4 md:p-8 gap-5"):
             banner = ROOT / "public" / "ClaudeAgentsSDK_LandingPage.png"
-            if banner.exists():
+            if banner.exists() and lesson not in LESSONS:
                 ui.image("/assets/ClaudeAgentsSDK_LandingPage.png").classes(
-                    "rounded-2xl max-h-56"
-                ).props("fit=cover")
+                    "rounded-2xl w-full max-w-2xl mx-auto"
+                ).props("fit=contain")
             if lesson not in LESSONS:
                 with ui.card().classes("course-card w-full p-8"):
                     ui.label("Build agents with Python").classes("course-title")
