@@ -57,7 +57,10 @@ def main() -> None:
                 run_lesson(
                     arguments.id,
                     RunRequest(
-                        mode="live" if arguments.live else "offline", prompt=arguments.prompt
+                        mode="live" if arguments.live else "offline",
+                        prompt=arguments.prompt,
+                        max_turns=LESSONS[arguments.id].max_turns,
+                        max_budget_usd=LESSONS[arguments.id].max_budget_usd,
                     ),
                 )
             )

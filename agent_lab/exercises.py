@@ -14,7 +14,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from agent_lab.models import Lesson, RunRequest
+from agent_lab.models import Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, inside, redact
 from agent_lab.services import (
     Approval,
@@ -683,13 +683,16 @@ async def worktrees(root: Path, request: RunRequest, lesson: Lesson) -> dict[str
     import shutil
 
     if not shutil.which("git"):
-        raise ValueError("Install Git to run the worktree lesson.")
+        raise LessonError("Install Git to run the worktree lesson.")
     repo = root / "repo"
     repo.mkdir(exist_ok=True)
 
     async def git(*args: str) -> str:
         process = await asyncio.create_subprocess_exec(
             "git",
+            # Nested lesson workspaces can exceed the Windows 260-character path limit.
+            "-c",
+            "core.longpaths=true",
             "-C",
             str(repo),
             *args,
@@ -704,7 +707,7 @@ async def worktrees(root: Path, request: RunRequest, lesson: Lesson) -> dict[str
                 process.kill()
                 await process.wait()
         if process.returncode:
-            raise ValueError(
+            raise LessonError(
                 f"Git fixture operation failed: {stderr.decode(errors='replace')[:300]}"
             )
         return stdout.decode()

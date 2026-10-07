@@ -13,7 +13,7 @@ from claude_agent_sdk import CLINotFoundError
 from agent_lab.config import Settings
 from agent_lab.curriculum import get_lesson
 from agent_lab.exercises import run_exercise, seed_workspace
-from agent_lab.models import Event, RunRequest
+from agent_lab.models import Event, LessonError, RunRequest
 
 
 class BusyError(Exception):
@@ -113,7 +113,7 @@ class RunService:
         except TimeoutError:
             status = "failed"
             await emit(Event(kind="error", data={"message": "Lesson deadline exceeded."}))
-        except PermissionError as exc:
+        except (PermissionError, LessonError) as exc:
             status = "failed"
             await emit(Event(kind="error", data={"message": str(exc)}))
         except CLINotFoundError:

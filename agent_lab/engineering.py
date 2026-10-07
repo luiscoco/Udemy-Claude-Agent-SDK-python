@@ -21,7 +21,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from agent_lab.config import Settings
 from agent_lab.doctor import resolve_cli_path
-from agent_lab.models import Event, RunRequest
+from agent_lab.models import Event, LessonError, RunRequest
 from agent_lab.policy import inside
 from agent_lab.services import Board, Budget, Journal, Plan, TaskSpec, execute_plan
 
@@ -34,6 +34,27 @@ src/report.py: tag_counts(notes) counts a tag at most once per note.
 A note is a dictionary with a tags list. Import normalize_tag from tags.
 Do not change any other files. The host writes and tests your proposed code.
 """
+
+
+# The only calls and attribute methods validate_source() accepts; developers are told both.
+CALLS = {
+    "str",
+    "int",
+    "len",
+    "set",
+    "list",
+    "dict",
+    "tuple",
+    "sum",
+    "sorted",
+    "map",
+    "enumerate",
+    "range",
+    "any",
+    "all",
+    "normalize_tag",
+}
+METHODS = {"strip", "lower", "get", "items", "values", "keys", "append", "add"}
 
 
 class SourceFile(BaseModel):
@@ -116,33 +137,17 @@ def validate_source(source: str, filename: str) -> None:
         ast.USub,
         ast.UAdd,
     }
-    methods = {"strip", "lower", "get", "items", "values", "keys", "append", "add"}
-    calls = {
-        "str",
-        "int",
-        "len",
-        "set",
-        "list",
-        "dict",
-        "tuple",
-        "sum",
-        "sorted",
-        "map",
-        "enumerate",
-        "range",
-        "normalize_tag",
-    }
     for node in ast.walk(tree):
         if type(node) not in permitted_types:
             raise ValueError(f"Unsupported Python construct: {type(node).__name__}")
         if isinstance(node, ast.Name) and node.id.startswith("__"):
             raise ValueError("Dunder names are not allowed.")
-        if isinstance(node, ast.Attribute) and node.attr not in methods:
+        if isinstance(node, ast.Attribute) and node.attr not in METHODS:
             raise ValueError("Only approved data transformation methods are allowed.")
         if (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Name)
-            and node.func.id not in calls
+            and node.func.id not in CALLS
         ):
             raise ValueError(f"Call {node.func.id} is not permitted by the fixture policy.")
         if isinstance(node, ast.ImportFrom) and (
@@ -233,7 +238,8 @@ async def run_live_team(
                 if isinstance(message, ResultMessage):
                     result = message
         if result is None or result.is_error or result.structured_output is None:
-            raise ValueError(f"{role} produced no valid structured result.")
+            reason = f" ({result.subtype})" if result is not None and result.is_error else ""
+            raise LessonError(f"Agent {role} produced no valid structured result{reason}.")
         ledger.record(result.total_cost_usd or 0)
         proposal = schema.model_validate(result.structured_output)
         journal.append(
@@ -268,10 +274,10 @@ async def run_live_team(
         or len(plan.tasks) != 3
         or any(len(task.files) != 1 for task in plan.tasks)
     ):
-        raise ValueError("The model plan does not match the host's three-file fixture scope.")
+        raise LessonError("The lead's plan does not match the host's three-file fixture scope.")
     tag_task = next(task for task in plan.tasks if task.files == ["src/tags.py"])
     if any(task.id != tag_task.id and tag_task.id not in task.depends_on for task in plan.tasks):
-        raise ValueError("Search and report must depend on the tags task.")
+        raise LessonError("The lead's plan must make search and report depend on the tags task.")
     board = Board({task.id for task in plan.tasks} | {"lead"})
     source_files: dict[str, str] = {}
 
@@ -284,7 +290,11 @@ async def run_live_team(
             report: DevelopmentReport = await propose(
                 task.id,
                 ISSUE
-                + f"\nYour owned file: {task.files[0]}. Return only that file and a handoff. Allowed Python: plain functions, data transformations, approved builtins, and from tags import normalize_tag. No classes, decorators, filesystem, processes, network, eval or dunder access.\nCompleted dependencies:\n"
+                + f"\nYour owned file: {task.files[0]}. Return only that file and a handoff. Allowed Python: plain functions, data transformations and from tags import normalize_tag. Approved calls: "
+                + ", ".join(sorted(CALLS))
+                + ". Approved methods: "
+                + ", ".join(sorted(METHODS))
+                + ". No classes, decorators, filesystem, processes, network, eval or dunder access.\nCompleted dependencies:\n"
                 + json.dumps(dependencies)
                 + "\nHost feedback: "
                 + feedback,
@@ -299,7 +309,9 @@ async def run_live_team(
             except ValueError as exc:
                 feedback = str(exc)
                 if attempt == 1:
-                    raise
+                    raise LessonError(
+                        f"The host rejected {task.files[0]} twice: {feedback}"
+                    ) from exc
         for item in report.files:
             path = inside(work, item.path)
             await asyncio.to_thread(path.parent.mkdir, parents=True, exist_ok=True)
@@ -309,13 +321,27 @@ async def run_live_team(
         journal.append({"event": "completed", "step": task.id, "files": task.files})
         return {"files": task.files, "handoff": report.handoff}
 
-    results = await execute_plan(plan, developer, max_parallel=2)
+    try:
+        results = await execute_plan(plan, developer, max_parallel=2)
+    except ExceptionGroup as group:
+        # Surface the first host-generated reason instead of an opaque task-group error.
+        failures = group.subgroup(LessonError)
+        if failures is None:
+            raise
+        first: BaseException = failures.exceptions[0]
+        while isinstance(first, ExceptionGroup):
+            first = first.exceptions[0]
+        raise first from group
     passed, checks = await acceptance(work)
     await emit(Event(kind="verification", data={"passed": passed, "checks": checks}))
     review: TeamReview = await propose(
         "reviewer",
         ISSUE
-        + "\nReview the following source implementations for concrete defects. Do not rewrite source.\n"
+        + "\nReview the following source implementations for concrete behaviour defects against"
+        + " the issue. The host requires exactly 'from tags import normalize_tag' and plain"
+        + " functions; these, and style preferences, are not defects."
+        + f" The host's acceptance checks {'passed' if passed else 'failed'}."
+        + " Approve with no findings when the code is correct. Do not rewrite source.\n"
         + json.dumps(source_files),
         TeamReview,
     )
@@ -337,4 +363,15 @@ async def run_live_team(
         )
     )
     if not release:
-        raise ValueError("The host release gate failed; human review is required.")
+        reasons = [
+            reason
+            for failed, reason in (
+                (not passed, "acceptance checks failed"),
+                (not review.approved or bool(review.findings), "the reviewer reported findings"),
+                (ledger.spent > ledger.limit, "spend exceeded the budget threshold"),
+            )
+            if failed
+        ]
+        raise LessonError(
+            f"The host release gate failed: {', '.join(reasons)}. Human review is required."
+        )

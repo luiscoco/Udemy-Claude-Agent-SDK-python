@@ -26,7 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from agent_lab.config import Settings
 from agent_lab.doctor import resolve_cli_path
-from agent_lab.models import Event, Lesson, RunRequest
+from agent_lab.models import Event, Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, redact
 from agent_lab.services import Calculation, Orders, Summary, retrieve
 
@@ -60,6 +60,15 @@ def message_data(message: Any) -> dict[str, Any]:
         else {"value": str(message)}
     )
     return {"message_class": type(message).__name__, **redact(payload)}
+
+
+def failure_message(result: ResultMessage, request: RunRequest) -> str:
+    """Explain a failed ResultMessage by its subtype, without echoing SDK payloads."""
+    if result.subtype == "error_max_turns":
+        return f"The agent used all {request.max_turns} turns before finishing. Increase Maximum turns and run again."
+    if result.subtype == "error_max_budget_usd":
+        return f"The run reached the {request.max_budget_usd:.2f} USD budget threshold before finishing. Increase the budget threshold and run again."
+    return f"The SDK returned a failed run ({result.subtype})."
 
 
 async def run_sdk(
@@ -309,7 +318,7 @@ async def run_sdk(
             )
             if isinstance(message, ResultMessage):
                 if message.is_error:
-                    raise RuntimeError("The SDK returned a failed run.")
+                    raise LessonError(failure_message(message, request))
                 if profile == "structured" and message.structured_output is not None:
                     parsed = Summary.model_validate(message.structured_output)
                     await emit(Event(kind="validated", data=parsed.model_dump()))

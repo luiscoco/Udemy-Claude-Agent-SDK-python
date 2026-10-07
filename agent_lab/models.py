@@ -36,3 +36,10 @@ class Lesson(BaseModel):
     exercise: str
     live_profile: str = "query"
     notes: str = ""
+    # Live-run defaults shown in the UI and used by the CLI.
+    max_turns: int = 4
+    max_budget_usd: float = 0.10
+
+
+class LessonError(Exception):
+    """A host-generated failure whose message is safe to show to the student."""

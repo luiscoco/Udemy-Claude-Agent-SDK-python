@@ -173,3 +173,34 @@ async def test_401_stops_stream_and_closes_sdk_connection(tmp_path, monkeypatch,
             Settings(enable_live=True), {}, callback, callback,
         )
     assert closed == [True]
+
+
+@pytest.mark.parametrize(
+    ("subtype", "expected"),
+    [
+        ("error_max_turns", "used all 4 turns"),
+        ("error_max_budget_usd", "0.10 USD budget threshold"),
+        ("error_during_execution", "failed run (error_during_execution)"),
+    ],
+)
+def test_failed_result_explains_its_subtype(subtype, expected):
+    from agent_lab.sdk import failure_message
+
+    result = ResultMessage(
+        subtype=subtype,
+        duration_ms=1,
+        duration_api_ms=1,
+        is_error=True,
+        num_turns=4,
+        session_id="sdk-fixture",
+    )
+    assert expected in failure_message(result, RunRequest())
+
+
+def test_lessons_that_need_more_room_have_live_defaults():
+    assert LESSONS[1].max_turns == 4 and LESSONS[1].max_budget_usd == 0.10
+    assert LESSONS[16].max_turns == 8
+    assert LESSONS[32].max_turns == 12
+    assert LESSONS[75].max_budget_usd == 0.50
+    for lesson in LESSONS.values():
+        RunRequest(max_turns=lesson.max_turns, max_budget_usd=lesson.max_budget_usd)

@@ -164,13 +164,19 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (
-                                ui.number("Maximum turns", value=4, min=1, max=12, precision=0)
+                                ui.number(
+                                    "Maximum turns", value=current.max_turns, min=1, max=12, precision=0
+                                )
                                 .props("outlined dense")
                                 .classes("w-48")
                             )
                             budget = (
                                 ui.number(
-                                    "Budget threshold (USD)", value=0.10, min=0.01, max=1, step=0.01
+                                    "Budget threshold (USD)",
+                                    value=current.max_budget_usd,
+                                    min=0.01,
+                                    max=1,
+                                    step=0.01,
                                 )
                                 .props("outlined dense")
                                 .classes("w-48")
@@ -203,7 +209,8 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                             if handle is None:
                                 return
                             choices = []
-                            with ui.dialog() as dialog, ui.card().classes("w-full max-w-xl"):
+                            # consume() runs as a background task, so enter the page's slot explicitly.
+                            with client, ui.dialog() as dialog, ui.card().classes("w-full max-w-xl"):
                                 ui.label("The agent needs your answer").classes("text-xl font-bold")
                                 for question in data["questions"]:
                                     ui.label(question["question"])

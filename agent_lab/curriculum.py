@@ -1,5 +1,7 @@
 """The course contract: stable lesson numbers, objectives and executable exercises."""
 
+from typing import Any
+
 from agent_lab.models import Lesson
 
 # Each exercise runs real local Python code. Offline mode never fabricates SDK events.
@@ -257,7 +259,7 @@ ROWS = [
         32,
         "Plan mode",
         "Validate a plan separately from executing it; use the SDK plan permission mode.",
-        "Plan how to improve notes.txt. Do not change any files.",
+        "Read notes.txt, then plan how to improve it. Do not change any files.",
         "plan",
         "plan",
     ),
@@ -639,6 +641,14 @@ ADAPTATIONS = {
     75: "Offline mode uses scripted workers. Live mode runs a lead, parallel developers and reviewer through the SDK; the host validates structured source proposals, runs acceptance checks and decides the release gate. This bounded Python fixture does not push a GitHub PR or implement the original full worktree merge and recovery workflow.",
 }
 
+# Live runs that need more than the default 4 turns or 0.10 USD to finish.
+LIVE_LIMITS: dict[int, dict[str, Any]] = {
+    16: {"max_turns": 8},
+    32: {"max_turns": 12},
+    # Six structured agent calls, each capped at a tenth of the threshold.
+    75: {"max_budget_usd": 0.50},
+}
+
 LESSONS = {
     row[0]: Lesson(
         id=row[0],
@@ -649,6 +659,7 @@ LESSONS = {
         live_profile=row[5],
         topic=next(name for name, ids in TOPICS.items() if row[0] in ids),
         notes=ADAPTATIONS.get(row[0], ""),
+        **LIVE_LIMITS.get(row[0], {}),
     )
     for row in ROWS
 }
