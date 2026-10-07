@@ -1,0 +1,677 @@
+[
+  {
+    "id": 1,
+    "title": "query()",
+    "document": "Tab1-query().md",
+    "module": "agent_lab.lessons.lesson_01",
+    "exercise_function": "message_exercise",
+    "live_profile": "query",
+    "adaptation": ""
+  },
+  {
+    "id": 2,
+    "title": "Options",
+    "document": "Tab2-Options.md",
+    "module": "agent_lab.lessons.lesson_02",
+    "exercise_function": "sdk_contract",
+    "live_profile": "options",
+    "adaptation": ""
+  },
+  {
+    "id": 3,
+    "title": "Built-in tools",
+    "document": "Tab3-Built-in-tools.md",
+    "module": "agent_lab.lessons.lesson_03",
+    "exercise_function": "workspace",
+    "live_profile": "read",
+    "adaptation": ""
+  },
+  {
+    "id": 4,
+    "title": "Permissions",
+    "document": "Tab4-Permissions.md",
+    "module": "agent_lab.lessons.lesson_04",
+    "exercise_function": "permission_cases",
+    "live_profile": "read",
+    "adaptation": ""
+  },
+  {
+    "id": 5,
+    "title": "Custom tools",
+    "document": "Tab5-Custom-tools.md",
+    "module": "agent_lab.lessons.lesson_05",
+    "exercise_function": "calculator",
+    "live_profile": "calculator",
+    "adaptation": ""
+  },
+  {
+    "id": 6,
+    "title": "Sessions",
+    "document": "Tab6-Sessions.md",
+    "module": "agent_lab.lessons.lesson_06",
+    "exercise_function": "sessions",
+    "live_profile": "conversation",
+    "adaptation": ""
+  },
+  {
+    "id": 7,
+    "title": "Hooks",
+    "document": "Tab7-Hooks.md",
+    "module": "agent_lab.lessons.lesson_07",
+    "exercise_function": "permission_cases",
+    "live_profile": "hooks",
+    "adaptation": ""
+  },
+  {
+    "id": 8,
+    "title": "Subagents",
+    "document": "Tab8-Subagents.md",
+    "module": "agent_lab.lessons.lesson_08",
+    "exercise_function": "subagents",
+    "live_profile": "subagents",
+    "adaptation": ""
+  },
+  {
+    "id": 9,
+    "title": "System prompts",
+    "document": "Tab9-System-prompts.md",
+    "module": "agent_lab.lessons.lesson_09",
+    "exercise_function": "system_prompts",
+    "live_profile": "system",
+    "adaptation": ""
+  },
+  {
+    "id": 10,
+    "title": "Structured output and interrupt",
+    "document": "Tab10-Structured-output-and-interrupt.md",
+    "module": "agent_lab.lessons.lesson_10",
+    "exercise_function": "structured",
+    "live_profile": "structured",
+    "adaptation": ""
+  },
+  {
+    "id": 11,
+    "title": "Skills",
+    "document": "Tab11-Skills.md",
+    "module": "agent_lab.lessons.lesson_11",
+    "exercise_function": "project_markdown",
+    "live_profile": "skills",
+    "adaptation": ""
+  },
+  {
+    "id": 12,
+    "title": "Streaming input",
+    "document": "Tab12-Streaming-input.md",
+    "module": "agent_lab.lessons.lesson_12",
+    "exercise_function": "streaming",
+    "live_profile": "streaming",
+    "adaptation": ""
+  },
+  {
+    "id": 13,
+    "title": "MCP servers",
+    "document": "Tab13-MCP-servers.md",
+    "module": "agent_lab.lessons.lesson_13",
+    "exercise_function": "mcp",
+    "live_profile": "mcp",
+    "adaptation": ""
+  },
+  {
+    "id": 14,
+    "title": "Thinking, effort and models",
+    "document": "Tab14-Thinking-effort-and-models.md",
+    "module": "agent_lab.lessons.lesson_14",
+    "exercise_function": "sdk_contract",
+    "live_profile": "thinking",
+    "adaptation": ""
+  },
+  {
+    "id": 15,
+    "title": "Cost and usage",
+    "document": "Tab15-Cost-and-usage.md",
+    "module": "agent_lab.lessons.lesson_15",
+    "exercise_function": "budget",
+    "live_profile": "query",
+    "adaptation": ""
+  },
+  {
+    "id": 16,
+    "title": "Settings and environment",
+    "document": "Tab16-Settings-and-env.md",
+    "module": "agent_lab.lessons.lesson_16",
+    "exercise_function": "sdk_contract",
+    "live_profile": "read",
+    "adaptation": ""
+  },
+  {
+    "id": 17,
+    "title": "Checkpointing and rewind",
+    "document": "Tab17-Checkpointing-and-rewind.md",
+    "module": "agent_lab.lessons.lesson_17",
+    "exercise_function": "checkpoint",
+    "live_profile": "query",
+    "adaptation": "Offline rewind is a host file snapshot. Live SDK checkpointing needs a write-enabled session; this lab does not grant writes to the model."
+  },
+  {
+    "id": 18,
+    "title": "Sandbox",
+    "document": "Tab18-Sandbox.md",
+    "module": "agent_lab.lessons.lesson_18",
+    "exercise_function": "sdk_contract",
+    "live_profile": "query",
+    "adaptation": "The local path policy is not OS sandboxing. Configure a supported OS sandbox independently before running untrusted shell code."
+  },
+  {
+    "id": 19,
+    "title": "Session management",
+    "document": "Tab19-Session-management.md",
+    "module": "agent_lab.lessons.lesson_19",
+    "exercise_function": "sdk_contract",
+    "live_profile": "conversation",
+    "adaptation": ""
+  },
+  {
+    "id": 20,
+    "title": "Hooks in depth",
+    "document": "Tab20-Hooks-in-depth.md",
+    "module": "agent_lab.lessons.lesson_20",
+    "exercise_function": "permission_cases",
+    "live_profile": "hooks",
+    "adaptation": ""
+  },
+  {
+    "id": 21,
+    "title": "Slash commands",
+    "document": "Tab21-Slash-commands.md",
+    "module": "agent_lab.lessons.lesson_21",
+    "exercise_function": "project_markdown",
+    "live_profile": "commands",
+    "adaptation": ""
+  },
+  {
+    "id": 22,
+    "title": "CLAUDE.md and memory",
+    "document": "Tab22-CLAUDE-md-and-memory.md",
+    "module": "agent_lab.lessons.lesson_22",
+    "exercise_function": "project_markdown",
+    "live_profile": "memory",
+    "adaptation": ""
+  },
+  {
+    "id": 23,
+    "title": "Plugins",
+    "document": "Tab23-Plugins.md",
+    "module": "agent_lab.lessons.lesson_23",
+    "exercise_function": "plugins",
+    "live_profile": "plugins",
+    "adaptation": ""
+  },
+  {
+    "id": 24,
+    "title": "Harnesses",
+    "document": "Tab24-Harnesses.md",
+    "module": "agent_lab.lessons.lesson_24",
+    "exercise_function": "orchestration",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 25,
+    "title": "Compaction and context",
+    "document": "Tab25-Compaction-and-context.md",
+    "module": "agent_lab.lessons.lesson_25",
+    "exercise_function": "compaction",
+    "live_profile": "query",
+    "adaptation": ""
+  },
+  {
+    "id": 26,
+    "title": "Query control methods",
+    "document": "Tab26-Query-control-methods.md",
+    "module": "agent_lab.lessons.lesson_26",
+    "exercise_function": "sdk_contract",
+    "live_profile": "conversation",
+    "adaptation": ""
+  },
+  {
+    "id": 27,
+    "title": "Background tasks",
+    "document": "Tab27-Background-tasks.md",
+    "module": "agent_lab.lessons.lesson_27",
+    "exercise_function": "background",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 28,
+    "title": "Errors, retries and recovery",
+    "document": "Tab28-Errors-retries-and-recovery.md",
+    "module": "agent_lab.lessons.lesson_28",
+    "exercise_function": "retry",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 29,
+    "title": "Images and file input",
+    "document": "Tab29-Images-and-file-input.md",
+    "module": "agent_lab.lessons.lesson_29",
+    "exercise_function": "images",
+    "live_profile": "query",
+    "adaptation": "This exercise creates an image content block locally; the live text lesson does not upload that image."
+  },
+  {
+    "id": 30,
+    "title": "Todo tracking",
+    "document": "Tab30-Todo-tracking.md",
+    "module": "agent_lab.lessons.lesson_30",
+    "exercise_function": "todos",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 31,
+    "title": "AskUserQuestion",
+    "document": "Tab31-AskUserQuestion.md",
+    "module": "agent_lab.lessons.lesson_31",
+    "exercise_function": "questions",
+    "live_profile": "questions",
+    "adaptation": ""
+  },
+  {
+    "id": 32,
+    "title": "Plan mode",
+    "document": "Tab32-Plan-mode.md",
+    "module": "agent_lab.lessons.lesson_32",
+    "exercise_function": "orchestration",
+    "live_profile": "plan",
+    "adaptation": ""
+  },
+  {
+    "id": 33,
+    "title": "MCP elicitation",
+    "document": "Tab33-MCP-elicitation.md",
+    "module": "agent_lab.lessons.lesson_33",
+    "exercise_function": "sdk_contract",
+    "live_profile": "query",
+    "adaptation": "This lesson inspects elicitation support in the pinned Python SDK and validates responses locally."
+  },
+  {
+    "id": 34,
+    "title": "Output styles",
+    "document": "Tab34-Output-styles.md",
+    "module": "agent_lab.lessons.lesson_34",
+    "exercise_function": "project_markdown",
+    "live_profile": "styles",
+    "adaptation": ""
+  },
+  {
+    "id": 35,
+    "title": "Session stores",
+    "document": "Tab35-Session-stores.md",
+    "module": "agent_lab.lessons.lesson_35",
+    "exercise_function": "store",
+    "live_profile": "exercise",
+    "adaptation": "The host JSON store is an application transcript store, not a substitute for the SDK's session state."
+  },
+  {
+    "id": 36,
+    "title": "Process spawning",
+    "document": "Tab36-Process-spawning.md",
+    "module": "agent_lab.lessons.lesson_36",
+    "exercise_function": "spawn",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 37,
+    "title": "Permission prompt tool",
+    "document": "Tab37-Permission-prompt-tool.md",
+    "module": "agent_lab.lessons.lesson_37",
+    "exercise_function": "permission_cases",
+    "live_profile": "hooks",
+    "adaptation": ""
+  },
+  {
+    "id": 38,
+    "title": "Prompt suggestions",
+    "document": "Tab38-Prompt-suggestions.md",
+    "module": "agent_lab.lessons.lesson_38",
+    "exercise_function": "todos",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 39,
+    "title": "Project configuration root",
+    "document": "Tab39-Project-config-root.md",
+    "module": "agent_lab.lessons.lesson_39",
+    "exercise_function": "workspace",
+    "live_profile": "read",
+    "adaptation": ""
+  },
+  {
+    "id": 40,
+    "title": "Resume and conversation history",
+    "document": "Tab40-Resume-drops-turn.md",
+    "module": "agent_lab.lessons.lesson_40",
+    "exercise_function": "sdk_contract",
+    "live_profile": "conversation",
+    "adaptation": "The interactive lab preserves context within one run. Cross-run SDK resume requires a persistent configuration directory and a saved session id."
+  },
+  {
+    "id": 41,
+    "title": "Interactive Python client lifecycle",
+    "document": "Tab41-Interactive-Python-client-lifecycle.md",
+    "module": "agent_lab.lessons.lesson_41",
+    "exercise_function": "sdk_contract",
+    "live_profile": "conversation",
+    "adaptation": "This lesson uses Python's public interactive client lifecycle."
+  },
+  {
+    "id": 42,
+    "title": "Web tools",
+    "document": "Tab42-Web-tools.md",
+    "module": "agent_lab.lessons.lesson_42",
+    "exercise_function": "web",
+    "live_profile": "web",
+    "adaptation": ""
+  },
+  {
+    "id": 43,
+    "title": "Remote MCP and resources",
+    "document": "Tab43-Remote-MCP-and-resources.md",
+    "module": "agent_lab.lessons.lesson_43",
+    "exercise_function": "mcp",
+    "live_profile": "query",
+    "adaptation": "The standalone remote MCP client requires a separately running trusted MCP endpoint. The browser exercise inspects transport types locally."
+  },
+  {
+    "id": 44,
+    "title": "Observability with OpenTelemetry",
+    "document": "Tab44-Observability-with-OpenTelemetry.md",
+    "module": "agent_lab.lessons.lesson_44",
+    "exercise_function": "telemetry",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 45,
+    "title": "Cloud providers",
+    "document": "Tab45-Cloud-providers.md",
+    "module": "agent_lab.lessons.lesson_45",
+    "exercise_function": "providers",
+    "live_profile": "query",
+    "adaptation": "The exercise validates provider selection locally; real provider calls require your cloud account, model access and credentials."
+  },
+  {
+    "id": 46,
+    "title": "Prompt caching and cost optimization",
+    "document": "Tab46-Prompt-caching-and-cost-optimization.md",
+    "module": "agent_lab.lessons.lesson_46",
+    "exercise_function": "cache",
+    "live_profile": "exercise",
+    "adaptation": "Offline usage is labelled fixture data. Live runs report actual SDK usage and cost; no billing savings are promised."
+  },
+  {
+    "id": 47,
+    "title": "Multi-agent orchestration",
+    "document": "Tab47-Multi-agent-orchestration.md",
+    "module": "agent_lab.lessons.lesson_47",
+    "exercise_function": "orchestration",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 48,
+    "title": "Security hardening",
+    "document": "Tab48-Security-hardening.md",
+    "module": "agent_lab.lessons.lesson_48",
+    "exercise_function": "permission_cases",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 49,
+    "title": "Deployment and headless CI",
+    "document": "Tab49-Deploy-and-CI-headless.md",
+    "module": "agent_lab.lessons.lesson_49",
+    "exercise_function": "ci",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 50,
+    "title": "Full-stack support capstone",
+    "document": "Tab50-Full-stack-capstone.md",
+    "module": "agent_lab.lessons.lesson_50",
+    "exercise_function": "database",
+    "live_profile": "support",
+    "adaptation": ""
+  },
+  {
+    "id": 51,
+    "title": "Unit testing agents without the API",
+    "document": "Tab51-Unit-testing-agents-without-the-API.md",
+    "module": "agent_lab.lessons.lesson_51",
+    "exercise_function": "message_exercise",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 52,
+    "title": "Evals in depth",
+    "document": "Tab52-Evals-in-depth.md",
+    "module": "agent_lab.lessons.lesson_52",
+    "exercise_function": "evals",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 53,
+    "title": "Debugging an agent run",
+    "document": "Tab53-Debugging-an-agent-run.md",
+    "module": "agent_lab.lessons.lesson_53",
+    "exercise_function": "debugging",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 54,
+    "title": "Designing tools the model uses well",
+    "document": "Tab54-Designing-tools-the-model-uses-well.md",
+    "module": "agent_lab.lessons.lesson_54",
+    "exercise_function": "calculator",
+    "live_profile": "calculator",
+    "adaptation": ""
+  },
+  {
+    "id": 55,
+    "title": "Upgrading the SDK safely",
+    "document": "Tab55-Upgrading-the-SDK-safely.md",
+    "module": "agent_lab.lessons.lesson_55",
+    "exercise_function": "sdk_contract",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 56,
+    "title": "Agent teams and inter-agent messaging",
+    "document": "Tab56-Agent-teams-and-inter-agent-messaging.md",
+    "module": "agent_lab.lessons.lesson_56",
+    "exercise_function": "board",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 57,
+    "title": "Parallel workers in Git worktrees",
+    "document": "Tab57-Parallel-workers-in-git-worktrees.md",
+    "module": "agent_lab.lessons.lesson_57",
+    "exercise_function": "worktrees",
+    "live_profile": "exercise",
+    "adaptation": "The worktree exercise needs Git and creates a disposable local repository. No remote is contacted or pushed."
+  },
+  {
+    "id": 58,
+    "title": "Tool search and large tool catalogs",
+    "document": "Tab58-Tool-search-and-large-tool-catalogs.md",
+    "module": "agent_lab.lessons.lesson_58",
+    "exercise_function": "tool_search",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 59,
+    "title": "Model routing",
+    "document": "Tab59-Model-routing.md",
+    "module": "agent_lab.lessons.lesson_59",
+    "exercise_function": "routing",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 60,
+    "title": "Durable long-running agents",
+    "document": "Tab60-Durable-long-running-agents.md",
+    "module": "agent_lab.lessons.lesson_60",
+    "exercise_function": "durable",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 61,
+    "title": "Exposing an agent as an MCP server",
+    "document": "Tab61-Exposing-your-agent-as-an-MCP-server.md",
+    "module": "agent_lab.lessons.lesson_61",
+    "exercise_function": "mcp",
+    "live_profile": "query",
+    "adaptation": "The standalone agent MCP server invokes the SDK only when explicitly started with live access enabled."
+  },
+  {
+    "id": 62,
+    "title": "Retrieval through custom tools",
+    "document": "Tab62-Retrieval-RAG-through-custom-tools.md",
+    "module": "agent_lab.lessons.lesson_62",
+    "exercise_function": "retrieval",
+    "live_profile": "retrieval",
+    "adaptation": ""
+  },
+  {
+    "id": 63,
+    "title": "A safe database agent",
+    "document": "Tab63-A-safe-database-agent.md",
+    "module": "agent_lab.lessons.lesson_63",
+    "exercise_function": "database",
+    "live_profile": "database",
+    "adaptation": ""
+  },
+  {
+    "id": 64,
+    "title": "Browser automation with Playwright MCP",
+    "document": "Tab64-Browser-automation-with-Playwright-MCP.md",
+    "module": "agent_lab.lessons.lesson_64",
+    "exercise_function": "mcp",
+    "live_profile": "query",
+    "adaptation": "An external browser MCP integration is provided separately; it needs its own browser installation and service startup."
+  },
+  {
+    "id": 65,
+    "title": "Human approval across channels",
+    "document": "Tab65-Human-approval-over-Slack-Teams-or-email.md",
+    "module": "agent_lab.lessons.lesson_65",
+    "exercise_function": "approval",
+    "live_profile": "exercise",
+    "adaptation": "Default delivery is a local approval exercise. Channel adapters require explicit configuration and are never called by an offline run."
+  },
+  {
+    "id": 66,
+    "title": "Real-time frontends over WebSocket",
+    "document": "Tab66-Real-time-frontends-over-WebSocket.md",
+    "module": "agent_lab.lessons.lesson_66",
+    "exercise_function": "websocket",
+    "live_profile": "query",
+    "adaptation": ""
+  },
+  {
+    "id": 67,
+    "title": "Multi-tenant SaaS architecture",
+    "document": "Tab67-A-multi-tenant-SaaS-architecture.md",
+    "module": "agent_lab.lessons.lesson_67",
+    "exercise_function": "database",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 68,
+    "title": "Scheduled and event-driven agents",
+    "document": "Tab68-Scheduled-and-event-driven-agents.md",
+    "module": "agent_lab.lessons.lesson_68",
+    "exercise_function": "durable",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 69,
+    "title": "Embedding the SDK in a Python desktop app",
+    "document": "Tab69-Embedding-the-SDK-in-a-Python-desktop-app.md",
+    "module": "agent_lab.lessons.lesson_69",
+    "exercise_function": "desktop",
+    "live_profile": "query",
+    "adaptation": "This lesson teaches NiceGUI native mode with the same Python service used by the browser UI."
+  },
+  {
+    "id": 70,
+    "title": "The Python SDK",
+    "document": "Tab70-The-Python-SDK.md",
+    "module": "agent_lab.lessons.lesson_70",
+    "exercise_function": "sdk_contract",
+    "live_profile": "calculator",
+    "adaptation": ""
+  },
+  {
+    "id": 71,
+    "title": "A data analysis agent",
+    "document": "Tab71-A-data-analysis-agent.md",
+    "module": "agent_lab.lessons.lesson_71",
+    "exercise_function": "analysis",
+    "live_profile": "analysis",
+    "adaptation": ""
+  },
+  {
+    "id": 72,
+    "title": "Document generation with Skills",
+    "document": "Tab72-Document-generation-with-Skills.md",
+    "module": "agent_lab.lessons.lesson_72",
+    "exercise_function": "document",
+    "live_profile": "exercise",
+    "adaptation": "The offline exercise generates a real .docx. Review the output in Word before sharing; this exercise does not perform visual document QA."
+  },
+  {
+    "id": 73,
+    "title": "An autonomous PR reviewer and fixer",
+    "document": "Tab73-An-autonomous-PR-reviewer-and-fixer.md",
+    "module": "agent_lab.lessons.lesson_73",
+    "exercise_function": "review",
+    "live_profile": "exercise",
+    "adaptation": "The Python exercise validates and tests a local fixture patch. It does not publish a GitHub pull request."
+  },
+  {
+    "id": 74,
+    "title": "Prompt injection red-teaming",
+    "document": "Tab74-Prompt-injection-red-teaming.md",
+    "module": "agent_lab.lessons.lesson_74",
+    "exercise_function": "permission_cases",
+    "live_profile": "exercise",
+    "adaptation": ""
+  },
+  {
+    "id": 75,
+    "title": "Capstone: an autonomous engineering team",
+    "document": "Tab75-Capstone-2-an-autonomous-engineering-team.md",
+    "module": "agent_lab.lessons.lesson_75",
+    "exercise_function": "team",
+    "live_profile": "engineering_team",
+    "adaptation": "Offline mode uses scripted workers. Live mode runs a lead, parallel developers and reviewer through the SDK; the host validates structured source proposals, runs acceptance checks and decides the release gate. This bounded Python fixture does not push a GitHub PR or implement the original full worktree merge and recovery workflow."
+  }
+]

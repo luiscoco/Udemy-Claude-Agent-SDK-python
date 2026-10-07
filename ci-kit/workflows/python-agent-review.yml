@@ -1,0 +1,24 @@
+name: Python SDK review gate
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+      - run: uv sync --locked
+      - run: uv run pytest
+      - name: Review Python diff with the real SDK
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LAB_ENABLE_LIVE: 'true'
+          BASE_REF: HEAD~1
+        run: uv run python -m agent_lab.integrations.review_ci

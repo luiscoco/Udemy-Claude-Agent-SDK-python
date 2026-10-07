@@ -1,0 +1,17 @@
+.venv/
+.lab-data/
+.migration/
+.presentation-build/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.coverage
+htmlcov/
+build/
+dist/
+.env
+.env.*
+!.env.example

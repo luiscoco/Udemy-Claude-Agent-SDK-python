@@ -1,0 +1,26 @@
+{
+  "description": "Audit hooks of atmira-ops: add context at session start, log every tool call, block confidential tickets.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/audit.py\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/audit.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
