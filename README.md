@@ -1,4 +1,4 @@
-# Claude Agent SDK Lab — Python edition
+# Claude Agent SDK Lab Python edition
 
 Learn the official Python Claude Agent SDK through 75 numbered exercises and a
 browser lab authored in Python. The stack is **Python, FastAPI, Uvicorn, NiceGUI,
