@@ -20,53 +20,48 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 40](http://127.0.0.1:8080/?lesson=40).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `resume`, line 2013). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("resume")
-async def resume(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Resume needs the SDK's own transcript in the same config dir; host files do not count."""
-    from claude_agent_sdk import ClaudeAgentOptions
+import os
 
-    config = root / "isolated-config"
-    session_id = write_fixture_session(config)
-    # A host transcript is application data: the SDK neither lists nor resumes it.
-    (root / "host-transcript.json").write_text(
-        json.dumps([{"role": "user", "content": "Remember HOST-ONLY."}]), encoding="utf-8"
-    )
-    same_dir, other_dir = await probe_sessions([config, root / "empty-config"], session_id)
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, list_sessions, query
+
+
+async def ask(prompt: str, options: ClaudeAgentOptions) -> str:
+    session_id = ""
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            session_id = message.session_id
+    return session_id
+
+
+async def main() -> None:
+    # The CLI and list_sessions() must both see the same config dir.
+    os.environ["CLAUDE_CONFIG_DIR"] = os.path.abspath("claude-config")
+    first = await ask("Remember the code word CONTEXT.", ClaudeAgentOptions())
     variants = {
-        "continue this session": ClaudeAgentOptions(resume=session_id),
-        "branch into a new session": ClaudeAgentOptions(resume=session_id, fork_session=True),
-        "most recent session": ClaudeAgentOptions(continue_conversation=True),
+        "resume": ClaudeAgentOptions(resume=first),
+        "fork": ClaudeAgentOptions(resume=first, fork_session=True),
+        "continue": ClaudeAgentOptions(continue_conversation=True),
     }
-    return {
-        "resume_options": [
-            {
-                "goal": goal,
-                "resume": options.resume,
-                "fork_session": options.fork_session,
-                "continue_conversation": options.continue_conversation,
-            }
-            for goal, options in variants.items()
-        ],
-        "sdk_sessions_in_run_config": [row["session_id"] for row in same_dir["sessions"]],
-        "host_transcript_listed": any(
-            "HOST-ONLY" in (row.get("first_prompt") or "") for row in same_dir["sessions"]
-        ),
-        "sessions_in_another_config_dir": len(other_dir["sessions"]),
-        "rule": "Resume with the same CLAUDE_CONFIG_DIR that recorded the session.",
-    }
+    for name, options in variants.items():
+        print(name, await ask("What is the code word?", options))
+    for info in list_sessions():
+        print(info.session_id, info.summary)
 ```
+
+ask() captures ResultMessage.session_id, then ClaudeAgentOptions(resume=first), resume plus fork_session=True, and continue_conversation=True reopen it from one CLAUDE_CONFIG_DIR.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `resume` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2013); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

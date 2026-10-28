@@ -23,10 +23,12 @@ from agent_lab.ui_learning import (
     appearance_controls,
     check_card,
     completed,
+    concept_code_card,
     home_page,
     learn_panel,
     lesson_header,
     record,
+    run_summary,
     set_preference,
     tutor_panel,
     update,
@@ -51,7 +53,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
     @ui.page("/")
     async def home(lesson: int = 0) -> None:
         ui.colors(primary="#7c3aed", secondary="#0f766e", accent="#f59e0b")
-        ui.add_css("""
+        ui.add_css(
+            """
             html { font-size: 18px; }
             body { background: #f5f5fa; color: #222238; font-size: 18px; line-height: 1.6; }
             .text-xs { font-size: 16px !important; line-height: 1.5 !important; }
@@ -77,7 +80,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
             .response-prose pre { overflow-x: auto; max-width: 100%; padding: 16px; border-radius: 10px; }
             .response-prose table { display: block; overflow-x: auto; max-width: 100%; }
             .response-prose h1, .response-prose h2, .response-prose h3 { margin-top: 1em; font-weight: 700; }
-        """ + APPEARANCE_CSS)
+        """
+            + APPEARANCE_CSS
+        )
         client = ui.context.client
         handle: RunHandle | None = None
         consumer: asyncio.Task[Any] | None = None
@@ -117,7 +122,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                     with ui.expansion(topic, value=bool(term) or lesson in ids).classes("w-full"):
                         for item in matches:
                             mark = " ✓" if completed(item.id) else ""
-                            ui.link(f"{item.id}. {item.title}{mark}", f"/?lesson={item.id}").classes(
+                            ui.link(
+                                f"{item.id}. {item.title}{mark}", f"/?lesson={item.id}"
+                            ).classes(
                                 "text-sm"
                                 + (" font-bold text-purple-700" if item.id == lesson else "")
                             )
@@ -158,12 +165,18 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                     walkthrough_panel(lesson)
                 with ui.tab_panel(visual_tab).classes("p-0 flex flex-col gap-5"):
                     visual_panel(lesson)
-                with ui.tab_panel(source_tab).classes("p-0"):
-                    ui.label("This is the host exercise used by the UI, CLI, and API.")
-                    ui.code(source, language="python").classes("w-full")
-                    ui.label(
-                        "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
-                    )
+                with ui.tab_panel(source_tab).classes("p-0 flex flex-col gap-5"):
+                    concept_code_card(lesson)
+                    with ui.expansion(
+                        "How the offline lab checks this concept", icon="science"
+                    ).classes("w-full course-card"):
+                        ui.label(
+                            "The host exercise run by Run the exercise, the CLI and the API."
+                        ).classes("text-sm text-slate-500")
+                        ui.code(source, language="python").classes("w-full")
+                        ui.label(
+                            "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
+                        ).classes("text-sm text-slate-500")
                 with ui.tab_panel(tutor_tab).classes("p-0 flex flex-col gap-5"):
                     tutor_panel(lesson, tutor, exercise_context(current.exercise))
                 with ui.tab_panel(run_tab).classes("p-0 flex flex-col gap-5"):
@@ -178,7 +191,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         offline_follow_up = exercise_uses(current.exercise, "follow_up")
                         prompt = (
                             ui.textarea(
-                                "Prompt (optional)" if offline_prompt else "Agent prompt (live mode)",
+                                "Prompt (optional)"
+                                if offline_prompt
+                                else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
                             )
                             .props("outlined autogrow clearable")
@@ -204,7 +219,11 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         with ui.row().classes("w-full items-center"):
                             turns = (
                                 ui.number(
-                                    "Maximum turns", value=current.max_turns, min=1, max=12, precision=0
+                                    "Maximum turns",
+                                    value=current.max_turns,
+                                    min=1,
+                                    max=12,
+                                    precision=0,
                                 )
                                 .props("outlined dense")
                                 .classes("w-48")
@@ -235,20 +254,31 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
 
                         @ui.refreshable
                         def output() -> None:
-                            render_output(output_state, current.exercise, handle.id if handle else None)
+                            render_output(
+                                output_state, current.exercise, handle.id if handle else None
+                            )
 
                         output()
-                        with ui.expansion("Diagnostics — raw events", icon="code").classes("w-full"):
-                            ui.label("For debugging and SDK lessons. These events are not the agent’s answer.").classes("text-sm text-slate-500")
+                        with ui.expansion("Diagnostics — raw events", icon="code").classes(
+                            "w-full"
+                        ):
+                            ui.label(
+                                "For debugging and SDK lessons. These events are not the agent’s answer."
+                            ).classes("text-sm text-slate-500")
                             log = ui.log(max_lines=500).classes(
                                 "w-full h-64 bg-slate-950 text-slate-100 rounded-xl"
                             )
+
                         async def show_question(data: dict[str, Any]) -> None:
                             if handle is None:
                                 return
                             choices = []
                             # consume() runs as a background task, so enter the page's slot explicitly.
-                            with client, ui.dialog() as dialog, ui.card().classes("w-full max-w-xl"):
+                            with (
+                                client,
+                                ui.dialog() as dialog,
+                                ui.card().classes("w-full max-w-xl"),
+                            ):
                                 ui.label("The agent needs your answer").classes("text-xl font-bold")
                                 for question in data["questions"]:
                                     ui.label(question["question"])
@@ -361,8 +391,13 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             mode=output_state.mode,
                             responded=bool(output_state.response_texts or output_state.results),
                         )
-                        update(lesson, check=check_result.model_dump())
+                        update(
+                            lesson,
+                            check=check_result.model_dump(),
+                            last_run=run_summary(output_state, check_result),
+                        )
                         checks.refresh()
+
             with ui.row().classes("w-full justify-between"):
                 if lesson > 1:
                     ui.link("← Previous lesson", f"/?lesson={lesson - 1}")

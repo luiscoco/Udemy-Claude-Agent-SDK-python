@@ -20,65 +20,59 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 32](http://127.0.0.1:8080/?lesson=32).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `plan_mode`, line 1278). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("plan")
-async def plan_mode(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Plan in plan mode, validate the plan, and only execute after approval."""
-    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    TextBlock,
+)
+from pydantic import BaseModel
 
-    from agent_lab.scripted_cli import ScriptedCLI
 
-    proposal = (
-        '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
-        '{"id": "T2", "files": ["src/search.py"], "depends_on": ["T1"]}, '
-        '{"id": "T3", "files": ["src/report.py"], "depends_on": ["T1"]}]}'
-    )
-    cli = ScriptedCLI([[proposal]])
-    started: list[str] = []
-    timeline: list[dict[str, Any]] = []
+class Plan(BaseModel):
+    steps: list[str]
+    files: list[str]
 
-    async def worker(task: TaskSpec) -> dict[str, Any]:
-        started.append(task.id)
-        return {"owned_files": task.files, "verified": True}
 
-    async with asyncio.timeout(20):
-        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
-            await client.set_permission_mode("plan")
-            timeline.append({"step": "enter plan mode", "cli_mode": cli.permission_mode})
-            await client.query("Plan the tag normalization change. Do not edit files.")
-            reply = await scripted_turn(client)
-            plan = Plan.model_validate_json(reply["text"])
-            timeline.append(
-                {
-                    "step": "plan validated",
-                    "waves": plan.waves(),
-                    "workers_started": len(started),
-                }
-            )
-            timeline.append({"step": "human approves the plan", "approved": True})
-            await client.set_permission_mode("default")
-            timeline.append({"step": "leave plan mode", "cli_mode": cli.permission_mode})
-    results = await execute_plan(plan, worker)
-    timeline.append({"step": "execute", "workers_started": len(started)})
-    return {
-        "timeline": timeline,
-        "workers_before_approval": timeline[1]["workers_started"],
-        "results": results,
-        "live_option": 'ClaudeAgentOptions(permission_mode="plan")',
-        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
-    }
+async def reply_text(client: ClaudeSDKClient) -> str:
+    parts: list[str] = []
+    async for message in client.receive_response():
+        if isinstance(message, AssistantMessage):
+            parts += [
+                block.text for block in message.content if isinstance(block, TextBlock)
+            ]
+    return "".join(parts)
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(permission_mode="plan", allowed_tools=["Read"])
+    async with ClaudeSDKClient(options) as client:
+        await client.query(
+            "Read notes.txt and plan improvements. Reply only JSON {steps, files}."
+        )
+        plan = Plan.model_validate_json(await reply_text(client))
+        if input(f"Approve {plan.steps} touching {plan.files}? [y/N] ").lower() != "y":
+            return
+        # Leave plan mode only after a person approved the validated plan.
+        await client.set_permission_mode("acceptEdits")
+        await client.query("Execute the approved plan exactly as written.")
+        print(await reply_text(client))
 ```
+
+ClaudeAgentOptions(permission_mode="plan") makes the first turn read-only; Plan.model_validate_json checks the proposal and set_permission_mode("acceptEdits") runs only after approval.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `plan_mode` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1278); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

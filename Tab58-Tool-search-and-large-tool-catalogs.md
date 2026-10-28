@@ -20,42 +20,58 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 58](http://127.0.0.1:8080/?lesson=58).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `tool_search`, line 1592). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("tool_search")
-def tool_search(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    catalog = [
-        {"name": "orders.read", "description": "read customer orders"},
-        {"name": "policy.search", "description": "search refund policy"},
-        {"name": "sales.analyze", "description": "compute sales totals"},
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, SdkMcpTool, create_sdk_mcp_server, tool
+
+
+def make_tool(name: str, description: str) -> SdkMcpTool[Any]:
+    async def handler(args: dict[str, Any]) -> dict[str, Any]:
+        return {"content": [{"type": "text", "text": f"{name} ran with {args}"}]}
+
+    return tool(name, description, {"query": str})(handler)
+
+
+CATALOG = [
+    make_tool("orders_read", "read customer orders"),
+    make_tool("policy_search", "search refund policy"),
+    make_tool("sales_analyze", "compute sales totals"),
+]
+
+
+def options_for(request: str, limit: int = 2) -> ClaudeAgentOptions:
+    terms = set(request.lower().split())
+
+    def score(item: SdkMcpTool[Any]) -> int:
+        return len(terms & set(item.description.split()))
+
+    selected = [
+        item
+        for item in sorted(CATALOG, key=score, reverse=True)[:limit]
+        if score(item) > 0
     ]
-    query = request.prompt or "search refund policy"
-    terms = set(query.lower().split())
-    scored: list[dict[str, Any]] = [
-        {**item, "score": len(terms & set(item["description"].split()))} for item in catalog
-    ]
-    ranked = sorted(scored, key=lambda item: item["score"], reverse=True)
-    # A tool that shares nothing with the request is never shown just to fill a slot.
-    selected = [item for item in ranked if item["score"] > 0][:2]
-    return {
-        "query": query,
-        "catalog_size": len(catalog),
-        "scores": ranked,
-        "selected": selected,
-        "no_match": "" if selected else "No tool matches; ask the user to clarify.",
-        "note": "Host catalog selection is distinct from the SDK's native tool-search protocol.",
-    }
+    server = create_sdk_mcp_server("shop", tools=selected)
+    return ClaudeAgentOptions(
+        mcp_servers={"shop": server},
+        tools=[],  # no built-ins: the model sees only the subset
+        allowed_tools=[f"mcp__shop__{item.name}" for item in selected],
+    )
 ```
+
+options_for() scores CATALOG against the request, registers only the top matches with create_sdk_mcp_server, sets tools=[] to hide built-ins and pre-approves exactly those mcp__shop__ names in allowed_tools.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `tool_search` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1592); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

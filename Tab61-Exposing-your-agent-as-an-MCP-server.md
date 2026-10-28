@@ -20,42 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 61](http://127.0.0.1:8080/?lesson=61).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `agent_mcp`, line 953). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("agent_mcp")
-async def agent_mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Call the agent-backed MCP tool end to end with live access forced off."""
-    from mcp.shared.memory import create_connected_server_and_client_session
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+from mcp.server.fastmcp import FastMCP
 
-    from agent_lab.config import Settings
-    from agent_lab.integrations.agent_mcp import build_server
+server = FastMCP("python-agent")
 
-    # Forced offline: this exercise must never start a paid run, whatever .env says.
-    server = build_server(Settings(enable_live=False, data_dir=root / "agent-mcp"))
-    async with asyncio.timeout(30):
-        async with create_connected_server_and_client_session(server) as session:
-            tools = await session.list_tools()
-            result = await session.call_tool("explain_python_agent", {"prompt": "What is MCP?"})
-    tool = tools.tools[0]
-    return {
-        "outer_client": "MCP ClientSession (in-memory transport)",
-        "tool": {"name": tool.name, "input_schema": tool.inputSchema},
-        "inner_agent": "RunService -> claude-agent-sdk live run of lesson 1",
-        "call_is_error": result.isError,
-        "call_result": tool_text(result),
-        "live_gate": "The inner run refused to start because live access is disabled.",
-    }
+
+@server.tool()
+async def explain_python_agent(prompt: str) -> dict[str, object]:
+    """Ask a bounded, tool-free teaching agent one question."""
+    # The outer MCP client only chooses the prompt; the inner run's limits are fixed here.
+    options = ClaudeAgentOptions(
+        tools=[],
+        setting_sources=[],
+        max_turns=1,
+        max_budget_usd=0.05,
+        permission_mode="dontAsk",
+    )
+    result: ResultMessage | None = None
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            result = message
+    if result is None or result.is_error:
+        raise RuntimeError("The inner agent run did not finish.")
+    return {"answer": result.result, "cost_usd": result.total_cost_usd}
 ```
+
+`@server.tool()` makes `explain_python_agent` a typed MCP tool, and its handler builds fixed `ClaudeAgentOptions` (no tools, `max_turns=1`, `max_budget_usd=0.05`) before calling `query()`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `agent_mcp` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 953); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

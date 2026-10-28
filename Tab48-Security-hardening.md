@@ -20,46 +20,88 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 48](http://127.0.0.1:8080/?lesson=48).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `permission_cases`, line 262). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("permissions", "security", "redteam")
-def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    cases = [
-        ("normal read", "Read", {"file_path": "notes.txt"}, True),
-        ("path traversal", "Read", {"file_path": "../outside.txt"}, False),
-        ("secret read", "Read", {"file_path": ".env"}, False),
-        ("shell injection", "Bash", {"command": "echo preapproved"}, False),
-        ("unapproved write", "Write", {"file_path": "notes.txt"}, False),
-    ]
-    rows: list[dict[str, Any]] = []
-    for label, tool, arguments, expected in cases:
-        allowed, reason = decide(root, tool, arguments)
-        rows.append(
-            {
-                "case": label,
-                "tool": tool,
-                "allowed": allowed,
-                "expected": expected,
-                "passed": allowed == expected,
-                "reason": reason,
-            }
+from pathlib import Path
+from typing import Any, cast
+
+from claude_agent_sdk import (
+    ClaudeAgentOptions,
+    HookContext,
+    HookInput,
+    HookJSONOutput,
+    HookMatcher,
+    PermissionResult,
+    PermissionResultAllow,
+    PermissionResultDeny,
+    ToolPermissionContext,
+)
+
+WORKSPACE, ALLOWED, PROTECTED = (
+    Path("workspace").resolve(),
+    {"Read", "Grep", "Glob"},
+    {".env", ".git"},
+)
+
+
+def decide(tool: str, args: dict[str, Any]) -> tuple[bool, str]:
+    target = (
+        WORKSPACE / str(args.get("file_path") or args.get("path") or ".")
+    ).resolve()
+    if (
+        tool not in ALLOWED
+        or not target.is_relative_to(WORKSPACE)
+        or PROTECTED & set(target.parts)
+    ):
+        return (
+            False,
+            f"{tool} on {target.name}: tool not listed, path outside or protected",
         )
+    return True, "allowed by policy"
+
+
+async def can_use_tool(
+    tool: str, args: dict[str, Any], _: ToolPermissionContext
+) -> PermissionResult:
+    allowed, reason = decide(tool, args)
+    return PermissionResultAllow() if allowed else PermissionResultDeny(message=reason)
+
+
+async def pre_tool(
+    data: HookInput, _id: str | None, _ctx: HookContext
+) -> HookJSONOutput:
+    allowed, reason = decide(
+        str(data.get("tool_name")), cast(dict[str, Any], data.get("tool_input"))
+    )
     return {
-        "decisions": rows,
-        "pass_rate": sum(row["passed"] for row in rows) / len(rows),
-        "redacted": redact({"api_key": "fixture-only", "text": "Bearer fake-fixture-token"}),
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecisionReason": reason,
+            "permissionDecision": "allow" if allowed else "deny",
+        }
     }
+
+
+OPTIONS = ClaudeAgentOptions(
+    cwd=WORKSPACE,
+    tools=sorted(ALLOWED),
+    can_use_tool=can_use_tool,
+    hooks={"PreToolUse": [HookMatcher(hooks=[pre_tool])]},
+)
 ```
+
+One decide() policy is called from both can_use_tool and the PreToolUse HookMatcher, and tools=sorted(ALLOWED) removes every other built-in tool before either check runs.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `permission_cases` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 262); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

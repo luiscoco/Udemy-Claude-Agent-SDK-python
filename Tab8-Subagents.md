@@ -20,33 +20,43 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 8](http://127.0.0.1:8080/?lesson=8).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `subagents`, line 513). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("subagents")
-def subagents(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from claude_agent_sdk import AgentDefinition
+from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, ResultMessage, query
 
-    reviewer = AgentDefinition(
-        description="Read-only Python lesson reviewer",
-        prompt="Read notes.txt and explain one improvement. Do not edit files.",
-        tools=["Read", "Glob", "Grep"],
+reviewer = AgentDefinition(
+    description="Reviews lesson notes without editing them.",
+    prompt="Read notes.txt and suggest one improvement. Never modify files.",
+    tools=["Read", "Glob", "Grep"],
+)
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(
+        agents={"reviewer": reviewer},
+        # The main agent needs the Agent tool to delegate at all.
+        tools=["Agent", "Read", "Glob", "Grep"],
+        allowed_tools=["Agent", "Read", "Glob", "Grep"],
+        max_turns=6,
     )
-    return {
-        "reviewer": dataclasses.asdict(reviewer),
-        "delegation_tool": "Agent",
-        "host_authority": "A subagent's role description does not override its tool permissions.",
-    }
+    prompt = "Ask the reviewer subagent to inspect notes.txt."
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+`AgentDefinition(description, prompt, tools=[...])` defines the reviewer, `agents={"reviewer": reviewer}` registers it, and the `Agent` tool in the main catalog lets the main agent delegate.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `subagents` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 513); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

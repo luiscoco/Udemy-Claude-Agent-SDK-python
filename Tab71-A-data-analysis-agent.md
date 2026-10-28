@@ -20,34 +20,67 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 71](http://127.0.0.1:8080/?lesson=71).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `analysis`, line 2218). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("analysis")
-def analysis(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    rows = list(csv.DictReader(io.StringIO((root / "sales.csv").read_text(encoding="utf-8"))))
-    totals: dict[str, int] = {}
-    for row in rows:
-        totals[row["region"]] = totals.get(row["region"], 0) + int(row["amount"])
+import csv
+import json
+from collections import defaultdict
+from decimal import Decimal
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, create_sdk_mcp_server, tool
+
+
+def totals_with_ledger(path: str) -> dict[str, Any]:
+    totals: defaultdict[str, Decimal] = defaultdict(Decimal)
+    ledger: list[str] = []
+    with open(path, newline="", encoding="utf-8") as source:
+        for row in csv.DictReader(source):
+            totals[row["region"]] += Decimal(row["amount"])
+            ledger.append(
+                f"{row['region']} += {row['amount']} -> {totals[row['region']]}"
+            )
     return {
-        "rows": len(rows),
-        "totals": totals,
-        "grand_total": sum(totals.values()),
-        "ledger": [
-            {"operation": "sum", "column": "amount", "group_by": "region", "source": "sales.csv"}
-        ],
-        "computed_by": "Python host, not the model",
+        "totals": {region: str(value) for region, value in totals.items()},
+        "ledger": ledger,
     }
+
+
+def build_options(csv_path: str) -> ClaudeAgentOptions:
+    @tool(
+        "analyze_sales",
+        "Return Python-computed sales totals by region and their ledger.",
+        {},
+    )
+    async def analyze_sales(args: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "content": [
+                {"type": "text", "text": json.dumps(totals_with_ledger(csv_path))}
+            ]
+        }
+
+    return ClaudeAgentOptions(
+        tools=[],
+        mcp_servers={
+            "lesson": create_sdk_mcp_server(name="lesson", tools=[analyze_sales])
+        },
+        allowed_tools=["mcp__lesson__analyze_sales"],
+        system_prompt="Explain the totals from analyze_sales. Never recompute or alter a number.",
+    )
 ```
+
+`totals_with_ledger()` sums `amount` by `region` with `csv.DictReader` and `Decimal`, and the `analyze_sales` tool returns those totals plus the ledger for the model to explain.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `analysis` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2218); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

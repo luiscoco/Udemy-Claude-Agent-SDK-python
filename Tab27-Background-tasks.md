@@ -20,37 +20,54 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 27](http://127.0.0.1:8080/?lesson=27).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `background`, line 1027). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("background")
-async def background(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    stopped = asyncio.Event()
+import asyncio
 
-    async def worker():
-        try:
-            await asyncio.Event().wait()
-        finally:
-            stopped.set()
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+from claude_agent_sdk import TaskNotificationMessage, TaskStartedMessage
 
-    task = asyncio.create_task(worker())
-    await asyncio.sleep(0)
-    task.cancel()
+
+async def heartbeat() -> None:
     try:
-        await task
-    except asyncio.CancelledError:
-        pass
-    return {"cancelled": task.cancelled(), "cleanup_ran": stopped.is_set()}
+        await asyncio.Event().wait()  # runs until cancelled
+    finally:
+        print("heartbeat cleaned up")
+
+
+async def main() -> None:
+    running: set[str] = set()
+    options = ClaudeAgentOptions(
+        tools=["Bash"], allowed_tools=["Bash(pytest:*)"], cwd="workspace"
+    )
+    async with ClaudeSDKClient(options=options) as client:
+        watcher = asyncio.create_task(heartbeat())
+        try:
+            await client.query("Run pytest in the background and report when it ends.")
+            async for message in client.receive_response():
+                if isinstance(message, TaskStartedMessage):
+                    running.add(message.task_id)
+                elif isinstance(message, TaskNotificationMessage):
+                    running.discard(message.task_id)
+        finally:
+            for task_id in running:
+                await client.stop_task(task_id)
+            watcher.cancel()
+            await asyncio.gather(watcher, return_exceptions=True)
 ```
+
+The host owns both kinds of background work: `watcher.cancel()` then awaiting it via `asyncio.gather(..., return_exceptions=True)` for its asyncio task, and `client.stop_task(task_id)` for agent tasks still in `running`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `background` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1027); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

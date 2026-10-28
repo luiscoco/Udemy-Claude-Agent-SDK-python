@@ -20,63 +20,50 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 49](http://127.0.0.1:8080/?lesson=49).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `ci`, line 1427). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("ci")
-async def ci(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Run the real CLI headlessly, as a CI job would, and record its exit codes."""
-    env = os.environ | {
-        "LAB_ENABLE_LIVE": "false",
-        "ANTHROPIC_API_KEY": "",
-        "LAB_DATA_DIR": str(root / "ci-data"),
-    }
-    runs = []
-    for label, arguments in (
-        ("passing lesson", ["lesson", "5"]),
-        ("unknown lesson", ["lesson", "99"]),
-    ):
-        command = [sys.executable, "-m", "agent_lab", *arguments]
-        process = await asyncio.create_subprocess_exec(
-            *command,
-            env=env,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        try:
-            async with asyncio.timeout(60):
-                stdout, stderr = await process.communicate()
-        except TimeoutError:
-            process.kill()
-            await process.wait()
-            raise
-        lines = [json.loads(line) for line in stdout.decode().splitlines() if line.startswith("{")]
-        runs.append(
-            {
-                "case": label,
-                "command": "agent-lab " + " ".join(arguments),
-                "exit_code": process.returncode,
-                "json_events": len(lines),
-                "final_status": lines[-1]["data"].get("status") if lines else None,
-                "stderr_first_line": (stderr.decode().strip().splitlines() or [""])[-1][:160],
-            }
-        )
-    return {
-        "runs": runs,
-        "ci_gate": "A job fails on any nonzero exit code.",
-        "checks": ["uv run ruff check agent_lab tests", "uv run mypy agent_lab", "uv run pytest"],
-        "network_api_needed": False,
-    }
+import asyncio
+import sys
+
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKError, ResultMessage, query
+
+
+async def run(prompt: str) -> int:
+    options = ClaudeAgentOptions(
+        tools=["Read", "Grep", "Glob"],
+        allowed_tools=["Read", "Grep", "Glob"],
+        max_turns=6,
+        max_budget_usd=0.50,
+    )
+    try:
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                print(message.result or "")
+                return 1 if message.is_error else 0
+    except ClaudeSDKError as error:
+        print(f"agent run failed: {error}", file=sys.stderr)
+    return 1
+
+
+def cli() -> None:
+    if len(sys.argv) != 2:
+        print("usage: review-agent PROMPT", file=sys.stderr)
+        sys.exit(2)
+    sys.exit(asyncio.run(run(sys.argv[1])))
 ```
+
+run() maps ResultMessage.is_error and ClaudeSDKError to exit codes 0 and 1, and cli() exits 2 on bad usage before any agent starts, which is what a CI job checks.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `ci` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1427); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

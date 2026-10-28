@@ -20,45 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 64](http://127.0.0.1:8080/?lesson=64).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `browser`, line 2166). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("browser")
-async def browser(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Inspect the browser MCP service's single tool and the origin rule it enforces."""
-    from agent_lab.integrations import browser_mcp
+import sys
 
-    tools = await browser_mcp.mcp.list_tools()
-    origin = browser_mcp.teaching_origin()
-    candidates = [
-        origin + "/?lesson=1",
-        origin.replace("127.0.0.1", "localhost"),
-        "http://127.0.0.1:9999/",
-        "http://127.0.0.1.evil.example/",
-        "file:///C:/Windows/win.ini",
-    ]
-    return {
-        "server": browser_mcp.mcp.name,
-        "tools": [{"name": item.name, "input_schema": item.inputSchema} for item in tools],
-        "teaching_origin": origin,
-        "origin_checks": [
-            {"url": url, "allowed": browser_mcp.same_origin(url, origin)} for url in candidates
-        ],
-        "versus_shell": "The agent can only ask for a page at one origin; it cannot run "
-        "commands, read files or reach other hosts. A shell tool would allow all of that.",
-        "browser_launched": False,
-        "start_service": "uv sync --locked --extra browser && uv run playwright install chromium",
-    }
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(
+        tools=[],  # no Bash, Read or Write: the browser service is the only capability
+        mcp_servers={
+            "browser": {
+                "type": "stdio",
+                "command": sys.executable,
+                "args": ["-m", "agent_lab.integrations.browser_mcp"],
+                "env": {"LAB_BROWSER_ORIGIN": "http://127.0.0.1:8080"},
+            }
+        },
+        strict_mcp_config=True,
+        allowed_tools=["mcp__browser__inspect_page"],
+        max_turns=4,
+    )
+    prompt = "Use inspect_page on http://127.0.0.1:8080/ and report the page title."
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+`mcp_servers={"browser": {"type": "stdio", ...}}` with `tools=[]`, `strict_mcp_config=True` and `allowed_tools=["mcp__browser__inspect_page"]` gives the agent one browser capability and no shell.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `browser` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2166); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

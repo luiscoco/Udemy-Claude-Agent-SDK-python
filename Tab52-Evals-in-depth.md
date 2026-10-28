@@ -20,38 +20,68 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 52](http://127.0.0.1:8080/?lesson=52).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `evals`, line 1490). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("evals")
-def evals(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    cases = [
-        ("refunds requested", "refunds#1"),
-        ("password reset links", "security#1"),
-        ("lunar rover", None),
-    ]
-    rows: list[dict[str, Any]] = []
-    for query, expected in cases:
-        hits = retrieve(query)
-        actual = hits[0]["id"] if hits else None
-        rows.append(
-            {"query": query, "expected": expected, "actual": actual, "passed": actual == expected}
-        )
+from typing import Any
+
+from claude_agent_sdk import tool
+
+DOCS = {
+    "refunds#1": "Refunds are requested within 30 days of delivery.",
+    "security#1": "Password reset links expire after one hour.",
+}
+CASES = [
+    ("refunds requested", "refunds#1"),
+    ("password reset links", "security#1"),
+    ("lunar rover", None),
+]
+BASELINE = 1.0
+
+
+def retrieve(query: str) -> str | None:
+    words = set(query.lower().split())
+    score, doc = max(
+        (len(words & set(text.lower().split())), doc) for doc, text in DOCS.items()
+    )
+    return doc if score > 0 else None
+
+
+@tool(
+    "search_policy",
+    "Return the id of the policy section that best matches the query.",
+    {"query": str},
+)
+async def search_policy(args: dict[str, Any]) -> dict[str, Any]:
     return {
-        "cases": rows,
-        "pass_rate": sum(row["passed"] for row in rows) / len(rows),
-        "baseline": 1.0,
+        "content": [
+            {"type": "text", "text": retrieve(args["query"]) or "no matching section"}
+        ]
     }
+
+
+def run_evals() -> float:
+    pass_rate = sum(retrieve(query) == expected for query, expected in CASES) / len(
+        CASES
+    )
+    if pass_rate < BASELINE:
+        raise SystemExit(
+            f"regression: pass rate {pass_rate:.2f} is below baseline {BASELINE}"
+        )
+    return pass_rate
 ```
+
+run_evals() scores the labelled CASES against retrieve(), the same function the search_policy tool calls, and fails when the pass rate drops below BASELINE.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `evals` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1490); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

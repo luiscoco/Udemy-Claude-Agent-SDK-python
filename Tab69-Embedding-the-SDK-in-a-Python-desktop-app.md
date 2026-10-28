@@ -20,41 +20,54 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 69](http://127.0.0.1:8080/?lesson=69).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `desktop`, line 2194). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("desktop")
-def desktop(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """The native window and the browser use the same FastAPI app and lesson service."""
-    from importlib.util import find_spec
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+from nicegui import app, ui
 
-    from agent_lab.api import create_app
-    from agent_lab.config import Settings
-    from agent_lab.runtime import RunService
 
-    service = RunService(Settings(enable_live=False, data_dir=root / "desktop-runs"))
-    app = create_app(service, with_ui=False)
-    paths = {str(getattr(route, "path", "")) for route in app.routes}
-    routes = sorted(path for path in paths if path.startswith("/api"))
-    return {
-        "browser_command": "uv run agent-lab serve",
-        "native_command": "uv run agent-lab serve --native",
-        "native_window_available": find_spec("webview") is not None,
-        "install_native": "uv sync --locked --extra desktop",
-        "shared_service": type(app.state.runner).__name__,
-        "shared_api_routes": routes,
-        "notes": lesson.notes,
-    }
+async def explain(prompt: str) -> str:
+    """The one lesson service: the HTTP API and the desktop window both call it."""
+    options = ClaudeAgentOptions(tools=[], max_turns=1, max_budget_usd=0.05)
+    answer = ""
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage) and message.result:
+            answer = message.result
+    return answer
+
+
+@app.post("/api/explain")
+async def api_explain(prompt: str) -> dict[str, str]:
+    return {"answer": await explain(prompt)}
+
+
+@ui.page("/")
+def index() -> None:
+    question = ui.input("Prompt")
+    output = ui.markdown()
+
+    async def ask() -> None:
+        output.content = await explain(question.value)
+
+    ui.button("Ask", on_click=ask)
+
+
+def launch(desktop: bool) -> None:
+    ui.run(native=desktop, window_size=(1200, 800) if desktop else None, reload=False)
 ```
+
+`explain()` is the single service; `@app.post("/api/explain")` and the `@ui.page("/")` button both call it, and `ui.run(native=desktop)` only chooses between a browser and a pywebview window.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `desktop` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2194); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

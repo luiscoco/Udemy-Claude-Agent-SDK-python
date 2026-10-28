@@ -20,31 +20,58 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 35](http://127.0.0.1:8080/?lesson=35).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `store`, line 1326). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("store")
-def store(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    target = root / "transcript.json"
-    temporary = target.with_suffix(".tmp")
-    rows = [{"role": "user", "text": request.prompt or lesson.prompt}]
-    temporary.write_text(json.dumps(rows), encoding="utf-8")
-    temporary.replace(target)
-    return {
-        "round_trip": json.loads(target.read_text(encoding="utf-8")),
-        "atomic_replacement": True,
-        "note": lesson.notes,
-    }
+import json
+from pathlib import Path
+
+from claude_agent_sdk import (
+    ClaudeAgentOptions,
+    InMemorySessionStore,
+    ResultMessage,
+    query,
+)
+
+
+def load_transcript(path: Path) -> list[dict[str, str]]:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+
+
+def save_transcript(path: Path, rows: list[dict[str, str]]) -> None:
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    temporary.replace(
+        path
+    )  # atomic: readers see the old file or the new one, never half
+
+
+async def main() -> None:
+    path = Path("transcript.json")
+    rows = load_transcript(path)
+    prompt = "Remember the code word CONTEXT."
+    # SDK session state is mirrored through session_store, never through your host file.
+    options = ClaudeAgentOptions(session_store=InMemorySessionStore())
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            rows.append(
+                {"role": "user", "text": prompt, "session_id": message.session_id}
+            )
+            rows.append({"role": "assistant", "text": message.result or ""})
+    save_transcript(path, rows)
 ```
+
+save_transcript writes transcript.tmp and calls temporary.replace(path) for an atomic update, while session_store=InMemorySessionStore() is the SDK's own, separate mirror.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `store` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1326); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

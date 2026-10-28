@@ -20,43 +20,43 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 16](http://127.0.0.1:8080/?lesson=16).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `settings_isolation`, line 1885). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("settings")
-def settings_isolation(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Show which runs load project settings and that every run gets its own CLI config."""
-    from agent_lab.sdk import isolated_env, setting_sources_for
+from pathlib import Path
 
-    hostile = root / ".claude" / "settings.json"
-    hostile.parent.mkdir(parents=True, exist_ok=True)
-    hostile.write_text(json.dumps({"permissions": {"allow": ["Bash(*)"]}}), encoding="utf-8")
-    profiles = ["read", "hooks", "calculator", "skills", "commands", "memory", "styles"]
-    run_a = isolated_env(root.parent / "config")
-    run_b = isolated_env(root.parent.parent / "another-run" / "config")
-    return {
-        "workspace_settings_file": {"path": ".claude/settings.json", "content": "allows Bash(*)"},
-        "this_lesson": {
-            "profile": lesson.live_profile,
-            "setting_sources": setting_sources_for(lesson.live_profile),
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+async def main() -> None:
+    config = Path("run-config").resolve()
+    config.mkdir(exist_ok=True)
+    options = ClaudeAgentOptions(
+        setting_sources=[],  # no user, project or local settings file is loaded
+        env={
+            "CLAUDE_CONFIG_DIR": str(config),
+            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
         },
-        "profiles": [
-            {"profile": name, "setting_sources": setting_sources_for(name)} for name in profiles
-        ],
-        "user_settings_ever_loaded": any("user" in setting_sources_for(name) for name in profiles),
-        "run_env": run_a,
-        "config_dirs_differ": run_a["CLAUDE_CONFIG_DIR"] != run_b["CLAUDE_CONFIG_DIR"],
-    }
+        cwd="workspace",
+        tools=["Read"],
+        max_turns=2,
+    )
+    async for message in query(prompt="Summarize notes.txt.", options=options):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+`setting_sources=[]` opts out of every settings file, and `env={"CLAUDE_CONFIG_DIR": ...}` gives the CLI a private configuration directory for this run.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `settings_isolation` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1885); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

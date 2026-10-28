@@ -17,7 +17,9 @@ def test_every_lesson_has_a_python_entry_point_and_consistent_tutorial():
         assert f"# Lesson {row['id']}: {row['title']}" in document
         assert f"uv run agent-lab lesson {row['id']}" in document
         assert not re.search(r"```(?:ts|typescript|js|javascript)\b", document)
-        for destination in re.findall(r"\]\(([^)]+)\)", document):
+        # Links in prose only: code blocks can contain "](" (for example type[T](...)).
+        prose = re.sub(r"```.*?```", "", document, flags=re.S)
+        for destination in re.findall(r"\]\(([^)]+)\)", prose):
             if destination.startswith(("http:", "https:", "#")):
                 continue
             assert (ROOT / destination).is_file(), (row["document"], destination)

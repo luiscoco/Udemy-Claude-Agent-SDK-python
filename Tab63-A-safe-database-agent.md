@@ -20,34 +20,61 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 63](http://127.0.0.1:8080/?lesson=63).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `database`, line 1473). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("database")
-def database(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    orders = Orders(root / "orders.sqlite")
-    try:
-        alice = orders.list("alice")
-        injected = orders.list("alice' OR 1=1 --")
-        protected = orders.cancel("bob", "A-001", 1, approved=True)
-        return {
-            "alice": alice,
-            "sql_injection_result": injected,
-            "cross_tenant_update": protected,
-            "mutations": "Only host-approved, version-checked updates are allowed.",
-        }
-    finally:
-        orders.close()
+import json
+import sqlite3
+from contextlib import closing
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, create_sdk_mcp_server, tool
+
+
+def build_options(db_path: str, tenant: str) -> ClaudeAgentOptions:
+    @tool(
+        "list_orders", "List the signed-in customer's orders. Takes no arguments.", {}
+    )
+    async def list_orders(args: dict[str, Any]) -> dict[str, Any]:
+        with closing(sqlite3.connect(db_path)) as db:
+            rows = db.execute(
+                "SELECT id, status, version FROM orders WHERE tenant = ? LIMIT 10",
+                (tenant,),
+            ).fetchall()
+        return {"content": [{"type": "text", "text": json.dumps(rows)}]}
+
+    server = create_sdk_mcp_server(name="db", tools=[list_orders])
+    return ClaudeAgentOptions(
+        tools=[], mcp_servers={"db": server}, allowed_tools=["mcp__db__list_orders"]
+    )
+
+
+def cancel_order(
+    db_path: str, tenant: str, order_id: str, version: int, approved: bool
+) -> bool:
+    """A write the model can only propose; the host runs it after human approval."""
+    if not approved:
+        raise PermissionError("Host approval required.")
+    with closing(sqlite3.connect(db_path)) as db, db:
+        cursor = db.execute(
+            "UPDATE orders SET status = 'cancelled', version = version + 1"
+            " WHERE tenant = ? AND id = ? AND version = ? AND status = 'pending'",
+            (tenant, order_id, version),
+        )
+    return cursor.rowcount == 1
 ```
+
+`list_orders` has an empty `{}` schema and runs a `?`-parameterized query for the host's tenant, while `cancel_order` writes only with `approved=True` and a matching `version`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `database` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1473); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

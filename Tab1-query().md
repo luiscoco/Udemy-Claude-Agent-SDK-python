@@ -20,48 +20,43 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 1](http://127.0.0.1:8080/?lesson=1).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `message_exercise`, line 93). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("messages", "testing")
-async def message_exercise(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from claude_agent_sdk import AssistantMessage, ResultMessage, TextBlock
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ResultMessage,
+    TextBlock,
+    query,
+)
 
-    async def recorded_messages():
-        yield AssistantMessage(content=[TextBlock(text="Recorded test text")], model="fixture")
-        yield ResultMessage(
-            subtype="success",
-            duration_ms=0,
-            duration_api_ms=0,
-            is_error=False,
-            num_turns=1,
-            session_id="offline-fixture",
-            total_cost_usd=0,
-            result="Recorded test text",
-        )
 
-    text: list[str] = []
-    results: list[dict[str, Any]] = []
-    async for message in recorded_messages():
+async def main() -> None:
+    options = ClaudeAgentOptions(max_turns=2, max_budget_usd=0.10)
+    async for message in query(
+        prompt="Explain what an agent loop is.", options=options
+    ):
         if isinstance(message, AssistantMessage):
-            text.extend(block.text for block in message.content if isinstance(block, TextBlock))
+            for block in message.content:
+                if isinstance(block, TextBlock):
+                    print(block.text)
         elif isinstance(message, ResultMessage):
-            results.append({"session_id": message.session_id, "cost": message.total_cost_usd})
-    return {
-        "source": "recorded unit-test fixture; no SDK process was started",
-        "text": text,
-        "results": results,
-    }
+            # The last message: outcome and accounting, not more reply text.
+            print(message.subtype, message.session_id, message.total_cost_usd)
 ```
+
+`async for message in query(prompt=..., options=...)` drives the run; the isinstance checks separate AssistantMessage TextBlock text from the final ResultMessage.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `message_exercise` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 93); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

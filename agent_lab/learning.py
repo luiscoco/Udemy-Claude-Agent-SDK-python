@@ -61,6 +61,16 @@ class EvidenceCheck(Strict):
     value: Any = None
 
 
+class ConceptPoint(Strict):
+    title: str = Field(min_length=1, max_length=60)
+    text: str = Field(min_length=1, max_length=240)
+
+
+class Misconception(Strict):
+    claim: str = Field(min_length=1, max_length=160)
+    correction: str = Field(min_length=1, max_length=300)
+
+
 class LessonGuide(Strict):
     id: int = Field(ge=1, le=75)
     prerequisites: list[int]
@@ -77,6 +87,11 @@ class LessonGuide(Strict):
     reference: str
     recovery: list[str] = Field(min_length=1)
     quiz: list[Question] = Field(min_length=2, max_length=3)
+    # The lesson's concept as real SDK code: shown in Learn, Python source and the infographic.
+    concept_code: str = Field(min_length=1)
+    code_focus: str = Field(min_length=1)
+    concept_points: list[ConceptPoint] = Field(min_length=3, max_length=3)
+    misconception: Misconception
 
     @model_validator(mode="after")
     def consistent(self) -> "LessonGuide":
@@ -211,10 +226,12 @@ def tutor_context(lesson_id: int) -> dict[str, Any]:
         "challenge": item.challenge,
         "hints": item.hints,
         "notes": lesson.notes,
+        "concept_code": item.concept_code,
+        "code_focus": item.code_focus,
     }
 
 
-def prepared_answer(lesson_id: int, intent: str, source: str = "") -> str:
+def prepared_answer(lesson_id: int, intent: str, latest_run: str = "") -> str:
     """An offline, grounded tutor answer built only from this lesson's authored content."""
     if intent not in TUTOR_INTENTS:
         raise ValueError(f"Unknown tutor intent: {intent}")
@@ -230,11 +247,15 @@ def prepared_answer(lesson_id: int, intent: str, source: str = "") -> str:
     elif intent == "expected":
         body = f"### Expected result\n\n{context['expected']}\n\n### Evidence to inspect\n\n{context['inspect']}\n\nAn offline run shows local Python evidence. It does not prove that a live Claude call succeeded."
     elif intent == "code":
-        excerpt = "\n".join(source.splitlines()[:40])
-        code = f"\n\n```python\n{excerpt}\n```" if excerpt else ""
-        body = f"### The exercise code\n\n{context['lab']}{code}\n\nOpen the Python source tab for the full function and its surrounding checks."
+        body = (
+            f"### The concept in code\n\n```python\n{context['concept_code']}\n```\n\n"
+            f"{context['code_focus']}\n\nThe Python source tab also shows the offline lab "
+            "that checks this concept."
+        )
     else:
         body = f"### Exercise goal\n\n{context['objective']}\n\n### What happens\n\n{context['lab']}\n\n### What to inspect\n\n{context['inspect']}"
+    if latest_run and intent in {"explain", "expected"}:
+        body += f"\n\n### Your latest run\n\n{latest_run}"
     if context["notes"]:
         body += f"\n\n> Note: {context['notes']}"
     return f"{heading}\n\n{body}"

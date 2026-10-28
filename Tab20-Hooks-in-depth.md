@@ -20,78 +20,61 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 20](http://127.0.0.1:8080/?lesson=20).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `hook_pipeline`, line 343). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("hook_pipeline")
-async def hook_pipeline(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Dispatch matched hooks around a host tool loop, as the CLI does for each tool call."""
-    from claude_agent_sdk import HookContext, HookInput, HookJSONOutput, HookMatcher
+from claude_agent_sdk import (
+    ClaudeAgentOptions,
+    HookContext,
+    HookInput,
+    HookJSONOutput,
+    HookMatcher,
+)
 
-    timeline: list[dict[str, Any]] = []
 
-    async def audit(kind: str, data: dict[str, Any]) -> None:
-        step = {"hook": "PreToolUse hook", "audit": "PostToolUse audit"}[kind]
-        timeline.append({"step": step, **data})
-
-    config = lesson_hooks(lambda name, arguments: decide(root, name, arguments), audit)
-
-    async def write_alert(
-        arguments: HookInput, tool_use_id: str | None, context: HookContext
-    ) -> HookJSONOutput:
-        timeline.append({"step": "write alert hook", "tool": arguments.get("tool_name")})
+async def guard_writes(
+    data: HookInput, tool_use_id: str | None, context: HookContext
+) -> HookJSONOutput:
+    if data["hook_event_name"] != "PreToolUse":
         return {}
-
-    # A matcher-scoped hook: it would only ever see Write or Edit results.
-    config["PostToolUse"].append(HookMatcher(matcher="Write|Edit", hooks=[write_alert]))
-    for number, (label, tool, arguments) in enumerate(TOOL_CALLS, 1):
-        tool_use_id = f"toolu_{number}"
-        timeline.append({"step": "tool requested", "case": label, "tool": tool})
-        allowed = True
-        for matcher in config["PreToolUse"]:
-            if matches(matcher.matcher, tool):
-                for callback in matcher.hooks:
-                    output = await call_hook(
-                        callback, hook_input("PreToolUse", tool, arguments), tool_use_id
-                    )
-                    allowed &= output["hookSpecificOutput"]["permissionDecision"] == "allow"
-        if not allowed:
-            timeline.append({"step": "tool blocked", "tool": tool})
-            continue
-        # Only allowed reads reach this point; the host performs the read itself.
-        result = inside(root, arguments["file_path"]).read_text(encoding="utf-8")
-        timeline.append({"step": "tool executed", "tool": tool, "characters": len(result)})
-        for matcher in config["PostToolUse"]:
-            if matches(matcher.matcher, tool):
-                for callback in matcher.hooks:
-                    await call_hook(
-                        callback,
-                        hook_input("PostToolUse", tool, arguments, tool_response=result),
-                        tool_use_id,
-                    )
-    executed = [row for row in timeline if row["step"] == "tool executed"]
-    audited = [row for row in timeline if row["step"] == "PostToolUse audit"]
+    allowed = str(data["tool_input"].get("file_path", "")).startswith("src/")
     return {
-        "matchers": {
-            event: [matcher.matcher or "*" for matcher in matchers]
-            for event, matchers in config.items()
-        },
-        "timeline": timeline,
-        "executed": len(executed),
-        "audited": len(audited),
-        "every_execution_audited": len(executed) == len(audited),
-        "write_alerts": sum(row["step"] == "write alert hook" for row in timeline),
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "allow" if allowed else "deny",
+            "permissionDecisionReason": "Writes must stay under src/.",
+        }
     }
+
+
+async def audit(
+    data: HookInput, tool_use_id: str | None, context: HookContext
+) -> HookJSONOutput:
+    if data["hook_event_name"] == "PostToolUse":
+        print(data["tool_name"], tool_use_id, len(str(data["tool_response"])))
+    return {}
+
+
+def build_options() -> ClaudeAgentOptions:
+    return ClaudeAgentOptions(
+        hooks={
+            "PreToolUse": [HookMatcher(matcher="Write|Edit", hooks=[guard_writes])],
+            "PostToolUse": [HookMatcher(hooks=[audit])],
+        }
+    )
 ```
+
+`HookMatcher(matcher="Write|Edit", hooks=[guard_writes])` returns a `permissionDecision` before the tool runs, and the unscoped PostToolUse `audit` hook reads `tool_response` after it runs.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `hook_pipeline` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 343); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

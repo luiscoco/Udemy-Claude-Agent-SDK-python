@@ -20,49 +20,51 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 18](http://127.0.0.1:8080/?lesson=18).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sandbox`, line 589). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("sandbox")
-async def sandbox(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Show that a path policy guards tool calls, not the processes they start."""
-    from claude_agent_sdk.types import SandboxSettings
+from pathlib import Path
+from typing import Any
 
-    outside = root.parent / "outside-secret.txt"
-    outside.write_text("host data outside the lesson workspace", encoding="utf-8")
-    try:
-        allowed, reason = decide(root, "Read", {"file_path": "../outside-secret.txt"})
-        process = await asyncio.create_subprocess_exec(
-            sys.executable,
-            "-I",
-            "-c",
-            "print(open('../outside-secret.txt').read())",
-            cwd=root,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.DEVNULL,
-        )
-        async with asyncio.timeout(30):
-            stdout, _ = await process.communicate()
-    finally:
-        outside.unlink(missing_ok=True)
-    return {
-        "read_tool_through_policy": {"allowed": allowed, "reason": reason},
-        "child_process_read_outside": process.returncode == 0 and bool(stdout.strip()),
-        "lesson": "The path policy stopped the Read tool, but a process it would have allowed "
-        "to run reads the same file. Only OS isolation confines processes.",
-        "sdk_sandbox_settings": sorted(SandboxSettings.__annotations__),
-        "lab_choice": "Bash is never enabled, so no model-started process exists to confine.",
+from claude_agent_sdk import ClaudeAgentOptions, SandboxSettings, ToolPermissionContext
+from claude_agent_sdk import PermissionResultAllow, PermissionResultDeny
+
+
+def build_options(workspace: Path) -> ClaudeAgentOptions:
+    async def path_policy(
+        name: str, tool_input: dict[str, Any], context: ToolPermissionContext
+    ) -> PermissionResultAllow | PermissionResultDeny:
+        target = (workspace / str(tool_input.get("file_path", "."))).resolve()
+        if target.is_relative_to(workspace.resolve()):
+            return PermissionResultAllow()
+        return PermissionResultDeny(message="Path is outside the workspace.")
+
+    # The policy judges tool calls; only the sandbox confines processes Bash starts.
+    sandbox: SandboxSettings = {
+        "enabled": True,
+        "autoAllowBashIfSandboxed": False,
+        "allowUnsandboxedCommands": False,
+        "network": {"allowedDomains": ["pypi.org"]},
     }
+    return ClaudeAgentOptions(
+        tools=["Read", "Bash"],
+        cwd=str(workspace),
+        can_use_tool=path_policy,
+        sandbox=sandbox,
+    )
 ```
+
+`path_policy` (a `can_use_tool` callback) decides which tool calls run, while `sandbox=SandboxSettings(...)` is what confines the processes those calls start.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `sandbox` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 589); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

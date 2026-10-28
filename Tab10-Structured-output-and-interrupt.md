@@ -20,60 +20,51 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 10](http://127.0.0.1:8080/?lesson=10).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `structured`, line 641). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("structured")
-async def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Validate a structured answer, then interrupt a streaming turn with the real client."""
-    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ClaudeSDKClient
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage, query
+from pydantic import BaseModel, Field
 
-    from agent_lab.scripted_cli import ScriptedCLI
 
-    parsed = Summary.model_validate(
-        {"summary": "Host-validated example", "next_steps": ["Run the Python lesson"]}
+class Summary(BaseModel):
+    summary: str = Field(min_length=1, max_length=500)
+    next_steps: list[str] = Field(min_length=2, max_length=2)
+
+
+async def structured() -> Summary | None:
+    schema = Summary.model_json_schema()
+    options = ClaudeAgentOptions(
+        output_format={"type": "json_schema", "schema": schema}
     )
-    try:
-        Summary.model_validate({"summary": "", "next_steps": []})
-        invalid = "accepted"
-    except ValidationError as exc:
-        invalid = f"rejected: {exc.error_count()} validation errors"
-    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=1.0)
-    received, subtype = 0, None
-    async with asyncio.timeout(20):
-        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
-            await client.query("Count to six slowly.")
-            async for message in client.receive_response():
-                if isinstance(message, AssistantMessage):
-                    received += 1
-                    if received == 2:
-                        await client.interrupt()
-                else:
-                    subtype = getattr(message, "subtype", None)
-    return {
-        "schema": Summary.model_json_schema(),
-        "validated": parsed.model_dump(),
-        "invalid_answer": invalid,
-        "interrupt": {
-            "chunks_planned": 6,
-            "chunks_received": received,
-            "result_subtype": subtype,
-            "control_requests": [
-                m["request"]["subtype"] for m in cli.received if m["type"] == "control_request"
-            ],
-        },
-        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
-    }
+    async for message in query(
+        prompt="Summarize learning Python agents.", options=options
+    ):
+        if isinstance(message, ResultMessage) and message.structured_output is not None:
+            return Summary.model_validate(message.structured_output)
+    return None
+
+
+async def interrupted() -> None:
+    async with ClaudeSDKClient(options=ClaudeAgentOptions(tools=[])) as client:
+        await client.query("Write a long essay about asyncio.")
+        await client.interrupt()
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(message.subtype, message.is_error)
 ```
+
+`output_format={"type": "json_schema", ...}` requests structured data, `Summary.model_validate(message.structured_output)` checks it, and `client.interrupt()` stops the running turn.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `structured` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 641); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

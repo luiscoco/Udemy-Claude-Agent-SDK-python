@@ -20,65 +20,70 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 55](http://127.0.0.1:8080/?lesson=55).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `upgrade`, line 2118). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("upgrade")
-def upgrade(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Compare the declared pin, the lockfile and the installed SDK, then gate on interfaces."""
-    import tomllib
+import importlib.metadata
+import inspect
 
-    import claude_agent_sdk as sdk
+import claude_agent_sdk
 
-    from agent_lab.config import ROOT
+# pyproject.toml pins claude-agent-sdk==0.2.163; uv.lock locks the tree; CI runs `uv sync --locked`.
+PIN = "0.2.163"
+EXPORTS = [
+    "query",
+    "tool",
+    "create_sdk_mcp_server",
+    "ClaudeAgentOptions",
+    "ClaudeSDKClient",
+    "HookMatcher",
+    "PermissionResultAllow",
+    "PermissionResultDeny",
+    "ResultMessage",
+]
+CLIENT_METHODS = ["connect", "query", "receive_response", "interrupt", "disconnect"]
+OPTION_FIELDS = [
+    "model",
+    "max_turns",
+    "max_budget_usd",
+    "can_use_tool",
+    "hooks",
+    "mcp_servers",
+]
 
-    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-    pin = next(
-        item for item in project["project"]["dependencies"] if item.startswith("claude-agent-sdk")
-    )
-    lock = tomllib.loads((ROOT / "uv.lock").read_text(encoding="utf-8"))
-    locked = next(item["version"] for item in lock["package"] if item["name"] == "claude-agent-sdk")
+
+def compatibility_problems() -> list[str]:
+    problems: list[str] = []
     installed = importlib.metadata.version("claude-agent-sdk")
-    required = [
-        "query",
-        "tool",
-        "create_sdk_mcp_server",
-        "ClaudeAgentOptions",
-        "ClaudeSDKClient",
-        "HookMatcher",
-        "PermissionResultAllow",
-        "PermissionResultDeny",
-        "Transport",
-        "list_sessions",
+    if installed != PIN:
+        problems.append(f"installed {installed} but pinned {PIN}")
+    problems += [
+        f"missing export {name}"
+        for name in EXPORTS
+        if not hasattr(claude_agent_sdk, name)
     ]
-    methods = ["connect", "query", "receive_response", "interrupt", "set_model", "disconnect"]
-    missing = [name for name in required if not hasattr(sdk, name)]
-    missing += [
-        f"ClaudeSDKClient.{name}" for name in methods if not hasattr(sdk.ClaudeSDKClient, name)
+    client = claude_agent_sdk.ClaudeSDKClient
+    problems += [
+        f"ClaudeSDKClient lost {m}" for m in CLIENT_METHODS if not hasattr(client, m)
     ]
-    # A candidate release that dropped one method the app uses must be blocked.
-    candidate_missing = ["ClaudeSDKClient.interrupt"]
-    return {
-        "declared_pin": pin,
-        "locked_version": locked,
-        "installed_version": installed,
-        "pin_lock_install_match": pin.endswith(f"=={locked}") and locked == installed,
-        "required_interfaces": len(required) + len(methods),
-        "missing_interfaces": missing,
-        "current_gate": "pass" if not missing else "blocked",
-        "simulated_candidate": {"missing": candidate_missing, "gate": "blocked"},
-        "reproducible_install": "uv sync --locked",
-    }
+    fields = inspect.signature(claude_agent_sdk.ClaudeAgentOptions).parameters
+    problems += [
+        f"ClaudeAgentOptions lost {f}" for f in OPTION_FIELDS if f not in fields
+    ]
+    return problems
 ```
+
+compatibility_problems() compares the installed version with the exact pin and checks, with hasattr and inspect.signature, every export, ClaudeSDKClient method and ClaudeAgentOptions field the app relies on.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `upgrade` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2118); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

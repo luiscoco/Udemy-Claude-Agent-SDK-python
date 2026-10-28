@@ -20,61 +20,61 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 38](http://127.0.0.1:8080/?lesson=38).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `todos`, line 1112). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("todos", "suggestions")
-def todos(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Validate todo transitions and derive the next suggestion from the resulting state."""
-    allowed = {"pending": {"in_progress"}, "in_progress": {"completed", "pending"}}
-    tasks = {"read": "pending", "verify": "pending", "release": "pending"}
-    requested = [
-        ("read", "in_progress"),
-        ("read", "completed"),
-        ("release", "completed"),  # skips in_progress
-        ("verify", "in_progress"),
-        ("release", "in_progress"),  # a second task in progress
-        ("read", "pending"),  # reopens completed work
-    ]
-    transitions = []
-    for task, target in requested:
-        current = tasks[task]
-        if target not in allowed.get(current, set()):
-            reason = f"{current} cannot move to {target}"
-        elif target == "in_progress" and "in_progress" in tasks.values():
-            reason = "another task is already in progress"
-        else:
-            reason = ""
-            tasks[task] = target
-        transitions.append(
-            {"task": task, "from": current, "to": target, "accepted": not reason, "reason": reason}
-        )
-    active = next((task for task, state in tasks.items() if state == "in_progress"), None)
-    waiting = next((task for task, state in tasks.items() if state == "pending"), None)
-    suggestion = (
-        f"Finish {active} before starting another task."
-        if active
-        else f"Start {waiting}."
-        if waiting
-        else "All tasks are complete."
-    )
-    return {
-        "transitions": transitions,
-        "rejected": sum(not row["accepted"] for row in transitions),
-        "tasks": [{"id": task, "status": state} for task, state in tasks.items()],
-        "suggestion": suggestion,
-        "source": "derived from validated host state",
-    }
+from typing import Literal
+
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    ToolUseBlock,
+)
+from pydantic import BaseModel
+
+
+class Todo(BaseModel):
+    content: str
+    status: Literal["pending", "in_progress", "completed"]
+
+
+def suggestion(todos: list[Todo]) -> str | None:
+    active = [todo.content for todo in todos if todo.status == "in_progress"]
+    waiting = [todo.content for todo in todos if todo.status == "pending"]
+    if active:
+        return f"Finish: {active[0]}"
+    return f"Start: {waiting[0]}" if waiting else None
+
+
+async def main() -> None:
+    todos: list[Todo] = []
+    async with ClaudeSDKClient(
+        ClaudeAgentOptions(tools=["TodoWrite", "Read"])
+    ) as client:
+        await client.query("Plan the release checklist and track it with TodoWrite.")
+        async for message in client.receive_response():
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, ToolUseBlock) and block.name == "TodoWrite":
+                        todos = [
+                            Todo.model_validate(item) for item in block.input["todos"]
+                        ]
+    # The host, not the model, derives the next prompt from validated state.
+    print("Suggested next prompt:", suggestion(todos))
 ```
+
+The receive_response loop validates each TodoWrite ToolUseBlock into Todo models, and suggestion() derives the next prompt from the in-progress or pending task.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `todos` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1112); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

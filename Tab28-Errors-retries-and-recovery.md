@@ -20,61 +20,57 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 28](http://127.0.0.1:8080/?lesson=28).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `retry`, line 1047). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("retry")
-async def retry(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Retry transient failures with backoff inside a deadline, without repeating a write."""
-    applied: dict[str, str] = {}  # idempotency key -> result: the host's write ledger
-    attempts: list[dict[str, Any]] = []
+import asyncio
+from typing import Any
 
-    async def write_refund(key: str, attempt: int) -> str:
-        if key not in applied:
-            applied[key] = "refund A-100 for 500 cents"
-        if attempt == 1:
-            # The write succeeded, but its response was lost: the classic ambiguous failure.
-            raise ConnectionError("Connection reset after the request was sent")
-        if attempt == 2:
-            raise TimeoutError("Upstream timed out")
-        return applied[key]
+from claude_agent_sdk import ClaudeAgentOptions, CLIConnectionError, ResultMessage
+from claude_agent_sdk import create_sdk_mcp_server, query, tool
 
-    key = "refund-A-100-500"
-    delays = [0.01, 0.02]
-    result = None
-    try:
-        async with asyncio.timeout(2):
-            for attempt in range(1, 4):
-                try:
-                    result = await write_refund(key, attempt)
-                    attempts.append({"attempt": attempt, "outcome": "succeeded"})
-                    break
-                except (ConnectionError, TimeoutError) as exc:
-                    attempts.append({"attempt": attempt, "outcome": type(exc).__name__})
-                    if attempt == 3:
-                        raise
-                    await asyncio.sleep(delays[attempt - 1])
-    except TimeoutError as exc:
-        raise LessonError("The retry deadline expired before the write was confirmed.") from exc
-    return {
-        "deadline_seconds": 2,
-        "backoff_seconds": delays,
-        "attempts": attempts,
-        "result": result,
-        "idempotency_key": key,
-        "writes_applied": len(applied),
-        "duplicate_write_prevented": len(applied) == 1 and len(attempts) > 1,
-    }
+applied: set[str] = set()
+
+
+@tool(
+    "refund",
+    "Refund one order. Repeating it for the same order is a no-op.",
+    {"order_id": str},
+)
+async def refund(args: dict[str, Any]) -> dict[str, Any]:
+    key = f"refund:{args['order_id']}"  # host-derived idempotency key
+    status = "already applied" if key in applied else "applied"
+    applied.add(key)
+    return {"content": [{"type": "text", "text": f"{key} {status}"}]}
+
+
+async def run_with_retry(prompt: str) -> str | None:
+    server = create_sdk_mcp_server(name="billing", tools=[refund])
+    options = ClaudeAgentOptions(
+        mcp_servers={"billing": server}, allowed_tools=["mcp__billing__refund"]
+    )
+    async with asyncio.timeout(120):
+        for attempt in range(3):
+            try:
+                async for message in query(prompt=prompt, options=options):
+                    if isinstance(message, ResultMessage):
+                        return message.result
+            except CLIConnectionError:
+                await asyncio.sleep(2**attempt)
+    return None
 ```
+
+`run_with_retry` retries only `CLIConnectionError` with `2**attempt` backoff inside one `asyncio.timeout(120)` deadline, and the `refund` tool checks a host-derived idempotency key before applying the write.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `retry` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1047); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

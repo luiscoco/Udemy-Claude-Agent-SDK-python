@@ -20,82 +20,65 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 73](http://127.0.0.1:8080/?lesson=73).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `review`, line 2352). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("review")
-async def review(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Accept only in-scope findings, apply the approved patch and prove it with a test."""
-    source = root / "src" / "tags.py"
-    source.parent.mkdir(parents=True, exist_ok=True)
-    source.write_text("def normalize(tag: str) -> str:\n    return tag.lower()\n", encoding="utf-8")
-    workflow = root / ".github" / "workflows" / "ci.yml"
-    workflow.parent.mkdir(parents=True, exist_ok=True)
-    workflow.write_text("name: CI\n", encoding="utf-8")
-    changed_lines = {"src/tags.py": {1, 2}}
-    findings: list[dict[str, Any]] = [
-        {
-            "file": "src/tags.py",
-            "line": 2,
-            "severity": "medium",
-            "message": "Strip whitespace before normalizing case.",
-            "patch": {"old": "    return tag.lower()", "new": "    return tag.strip().lower()"},
-        },
-        {
-            "file": ".github/workflows/ci.yml",
-            "line": 1,
-            "severity": "high",
-            "message": "Untrusted fixture asks to disable CI.",
-            "patch": {"old": "name: CI", "new": "name: CI (disabled)"},
-        },
+import asyncio
+import sys
+from pathlib import Path
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+from pydantic import BaseModel
+
+
+class Finding(BaseModel):
+    path: str
+    line: int
+    old: str
+    new: str
+
+
+class Review(BaseModel):
+    findings: list[Finding]
+
+
+async def review(diff: str, changed: dict[str, set[int]]) -> list[Finding]:
+    review_format = {"type": "json_schema", "schema": Review.model_json_schema()}
+    found = Review(findings=[])
+    async for message in query(
+        prompt=diff, options=ClaudeAgentOptions(tools=[], output_format=review_format)
+    ):
+        if isinstance(message, ResultMessage) and message.structured_output is not None:
+            found = Review.model_validate(message.structured_output)
+    # Findings are claims: keep only those on lines this PR changed in approved files.
+    return [
+        item for item in found.findings if item.line in changed.get(item.path, set())
     ]
-    accepted = [row for row in findings if row["line"] in changed_lines.get(row["file"], set())]
 
-    async def run_test() -> str:
-        check = "from tags import normalize; assert normalize('  Python ') == 'python'"
-        process = await asyncio.create_subprocess_exec(
-            sys.executable,
-            "-I",
-            "-c",
-            f"import sys; sys.path.insert(0, 'src'); {check}",
-            cwd=root,
-            stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.DEVNULL,
-        )
-        async with asyncio.timeout(30):
-            return "passed" if await process.wait() == 0 else "failed"
 
-    before = await run_test()
-    for row in accepted:
-        target = inside(root, row["file"])
-        text = target.read_text(encoding="utf-8")
-        if row["patch"]["old"] not in text:
-            raise LessonError(f"Patch for {row['file']} no longer applies.")
-        target.write_text(text.replace(row["patch"]["old"], row["patch"]["new"]), encoding="utf-8")
-    after = await run_test()
-    return {
-        "accepted": [{k: v for k, v in row.items() if k != "patch"} for row in accepted],
-        "rejected": [
-            {k: v for k, v in row.items() if k != "patch"}
-            for row in findings
-            if row not in accepted
-        ],
-        "test_before_patch": before,
-        "test_after_patch": after,
-        "out_of_scope_file_unchanged": workflow.read_text(encoding="utf-8") == "name: CI\n",
-        "gate": "Changed lines and host-approved file scope",
-        "publication": "Local fixture only; no pull request is published.",
-    }
+async def apply_and_test(repo: Path, finding: Finding) -> bool:
+    target = repo / finding.path
+    target.write_text(
+        target.read_text(encoding="utf-8").replace(finding.old, finding.new, 1),
+        encoding="utf-8",
+    )
+    test = await asyncio.create_subprocess_exec(
+        sys.executable, "-m", "pytest", "-q", cwd=repo
+    )
+    return await test.wait() == 0
 ```
+
+`review()` validates `structured_output` as `Review` and keeps a `Finding` only if `item.line in changed.get(item.path, set())`; `apply_and_test()` applies the patch and runs pytest in a subprocess.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `review` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2352); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

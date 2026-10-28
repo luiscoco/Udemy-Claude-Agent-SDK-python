@@ -20,35 +20,39 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 19](http://127.0.0.1:8080/?lesson=19).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `session_management`, line 1995). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("session_management")
-async def session_management(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Call list_sessions and get_session_messages against an isolated config directory."""
-    config = root / "isolated-config"
-    session_id = write_fixture_session(config)
-    (probe,) = await probe_sessions([config], session_id)
-    return {
-        "config_dir": "isolated-config (this run only; your own transcripts are never read)",
-        "sessions": [
-            {key: row[key] for key in ("session_id", "summary", "first_prompt", "cwd")}
-            for row in probe["sessions"]
-        ],
-        "messages": [{"type": row["type"], "text": message_text(row)} for row in probe["messages"]],
-        "info_found": probe["info_found"],
-        "source": "official session functions reading a fixture transcript",
-    }
+import os
+from pathlib import Path
+
+from claude_agent_sdk import get_session_info, get_session_messages, list_sessions
+
+
+def inspect_run_sessions(config_dir: Path, workspace: Path) -> None:
+    # Call this in a child process: the session functions read CLAUDE_CONFIG_DIR.
+    os.environ["CLAUDE_CONFIG_DIR"] = str(config_dir)
+    project = str(workspace)
+    for session in list_sessions(directory=project, limit=5):
+        info = get_session_info(session.session_id, directory=project)
+        print(session.session_id, session.summary, info.created_at if info else None)
+        for message in get_session_messages(
+            session.session_id, directory=project, limit=3
+        ):
+            print("  ", message.type, message.uuid)
 ```
+
+`os.environ["CLAUDE_CONFIG_DIR"]` scopes where transcripts are read, then `list_sessions`, `get_session_info` and `get_session_messages` read only that run's sessions.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `session_management` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1995); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

@@ -20,29 +20,48 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 11](http://127.0.0.1:8080/?lesson=11).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `project_markdown`, line 752). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("skills", "commands", "memory", "styles")
-def project_markdown(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    return {
-        "files": {
-            p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
-            for p in root.rglob("*.md")
-        },
-        "setting_sources": ["project"],
-        "warning": "Only enable settings for a trusted lesson workspace.",
-    }
+from pathlib import Path
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+SKILL_MD = """---
+name: lesson-summary
+description: Summarize a lesson file in three bullet points.
+---
+Read the requested file and return exactly three bullet points.
+"""
+
+
+async def main(workspace: Path) -> None:
+    skill_dir = workspace / ".claude" / "skills" / "lesson-summary"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text(SKILL_MD, encoding="utf-8")
+    options = ClaudeAgentOptions(
+        cwd=workspace,
+        setting_sources=["project"],
+        skills=["lesson-summary"],
+        tools=["Read"],
+    )
+    prompt = "Use the lesson-summary skill to summarize notes.txt."
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+The SKILL.md frontmatter (`name`, `description`) defines the skill, and `setting_sources=["project"]` plus `skills=["lesson-summary"]` opt in to loading exactly that skill.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `project_markdown` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 752); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

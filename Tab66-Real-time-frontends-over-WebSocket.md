@@ -20,66 +20,59 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 66](http://127.0.0.1:8080/?lesson=66).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `websocket`, line 1712). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("websocket")
-async def websocket(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Serve the real WebSocket endpoint on loopback and drive it as a browser would."""
-    from websockets.asyncio.client import connect
-    from websockets.exceptions import ConnectionClosed
+import asyncio
 
-    from agent_lab.api import create_app
-    from agent_lab.config import Settings
-    from agent_lab.runtime import RunService
+from claude_agent_sdk import ClaudeAgentOptions, query
+from fastapi import FastAPI, WebSocket
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-    inner = RunService(Settings(enable_live=False, data_dir=root / "ws-runs"))
-    app = create_app(inner, with_ui=False)
-    async with EmbeddedServer(app).running() as base:
-        endpoint = base.replace("http", "ws") + "/api/lessons/5/ws"
-        async with asyncio.timeout(30):
-            async with connect(endpoint) as socket:
-                await socket.send(json.dumps({"mode": "offline"}))
-                kinds = []
-                async for raw in socket:
-                    event = json.loads(raw)
-                    kinds.append(event["kind"])
-                    if event["kind"] == "done":
-                        final_status = event["data"]["status"]
-                        break
-            async with connect(endpoint) as socket:
-                await socket.send(json.dumps({"mode": "offline", "cwd": "outside"}))
-                try:
-                    await socket.recv()
-                    invalid_close = None
-                except ConnectionClosed as exc:
-                    invalid_close = exc.rcvd.code if exc.rcvd else None
-            async with connect(base.replace("http", "ws") + "/api/lessons/57/ws") as socket:
-                await socket.send(json.dumps({"mode": "offline"}))
-                await socket.recv()  # started, then the browser goes away mid-run
-            for _ in range(250):
-                if not inner.active:
-                    break
-                await asyncio.sleep(0.02)
-    await inner.close()
-    return {
-        "endpoint": "/api/lessons/{lesson_id}/ws",
-        "server_events": kinds,
-        "final_status": final_status,
-        "invalid_request_close_code": invalid_close,
-        "owned_runs_after_disconnect": len(inner.active),
-        "disconnect": "Closing the socket cancels and awaits the owned run.",
-    }
+app = FastAPI()
+
+
+class RunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prompt: str = Field(min_length=1, max_length=2000)
+
+
+@app.websocket("/ws/run")
+async def run_socket(websocket: WebSocket) -> None:
+    await websocket.accept()
+    try:
+        body = RunRequest.model_validate(await websocket.receive_json())
+    except ValidationError:
+        await websocket.close(code=1008)
+        return
+
+    async def stream() -> None:
+        async for message in query(
+            prompt=body.prompt, options=ClaudeAgentOptions(tools=[], max_turns=2)
+        ):
+            await websocket.send_json({"kind": type(message).__name__})
+
+    run = asyncio.create_task(stream())
+    listener = asyncio.create_task(
+        websocket.receive_text()
+    )  # ends when the browser disconnects
+    await asyncio.wait({run, listener}, return_when=asyncio.FIRST_COMPLETED)
+    for task in (run, listener):
+        task.cancel()
+    await asyncio.gather(run, listener, return_exceptions=True)
 ```
+
+`RunRequest.model_validate(await websocket.receive_json())` checks the request, and `asyncio.wait(..., FIRST_COMPLETED)` followed by `cancel()` and `gather()` stops the `query()` task when the socket closes.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `websocket` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1712); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

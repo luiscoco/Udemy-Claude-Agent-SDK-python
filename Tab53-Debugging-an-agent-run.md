@@ -20,37 +20,62 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 53](http://127.0.0.1:8080/?lesson=53).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `debugging`, line 1511). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("debugging")
-def debugging(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    # The workspace is <data_dir>/<run_id>/work, so its parent is named after the run.
-    run_id = root.parent.name
-    return {
-        "trace": redact(
-            {
-                "correlation_id": run_id,
-                "request": {"api_key": "fixture-secret"},
-                "events": [
-                    {"type": "started", "correlation_id": run_id},
-                    {"type": "verified", "correlation_id": run_id},
-                ],
+import re
+import uuid
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+SECRET_KEY = re.compile(r"token|secret|password|api.?key|authorization", re.IGNORECASE)
+SECRET_VALUE = re.compile(r"sk-ant-[\w-]+|Bearer\s+\S+")
+
+
+def redact(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            k: "[REDACTED]" if SECRET_KEY.search(k) else redact(v)
+            for k, v in value.items()
+        }
+    if isinstance(value, list):
+        return [redact(item) for item in value]
+    return SECRET_VALUE.sub("[REDACTED]", value) if isinstance(value, str) else value
+
+
+async def main() -> None:
+    run_id = uuid.uuid4().hex
+    trace: list[dict[str, Any]] = []
+    options = ClaudeAgentOptions(
+        max_turns=3,
+        stderr=lambda line: trace.append({"run_id": run_id, "stderr": line}),
+    )
+    async for message in query(
+        prompt="List the Python files in src/.", options=options
+    ):
+        event: dict[str, Any] = {"run_id": run_id, "type": type(message).__name__}
+        if isinstance(message, ResultMessage):
+            event |= {
+                "session_id": message.session_id,
+                "subtype": message.subtype,
+                "errors": message.errors,
             }
-        ),
-        "match_with": "The run_id of the STARTED and DONE events under Diagnostics.",
-        "raw_sdk_logs": "Never returned to the browser.",
-    }
+        trace.append(event)
+    print(redact(trace))  # only the redacted bundle leaves the process
 ```
+
+Every message and every CLI stderr line (via the stderr callback) is tagged with one run_id, and the bundle passes through redact() before it is printed or shared.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `debugging` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1511); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

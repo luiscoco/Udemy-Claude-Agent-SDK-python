@@ -20,76 +20,67 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 75](http://127.0.0.1:8080/?lesson=75).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `team`, line 2417). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("team")
-async def team(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    plan = Plan(
-        tasks=[
-            TaskSpec(id="T1", files=["src/tags.py"]),
-            TaskSpec(id="T2", files=["src/search.py"], depends_on=["T1"]),
-            TaskSpec(id="T3", files=["src/report.py"], depends_on=["T1"]),
-        ]
-    )
-    sources = {
-        "T1": "def normalize_tag(value: str) -> str:\n    return value.strip().lower()\n",
-        "T2": "from tags import normalize_tag\ndef find_by_tag(notes, tag):\n    return [n for n in notes if normalize_tag(tag) in [normalize_tag(t) for t in n['tags']]]\n",
-        "T3": "from tags import normalize_tag\ndef tag_counts(notes):\n    counts = {}\n    for note in notes:\n        for tag in set(map(normalize_tag, note['tags'])):\n            counts[tag] = counts.get(tag, 0) + 1\n    return counts\n",
-    }
-    board = Board({"T1", "T2", "T3", "lead"})
-    journal = Journal(root / "team.jsonl")
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+from pydantic import BaseModel, Field, model_validator
 
-    async def developer(task: TaskSpec):
-        path = inside(root, task.files[0])
-        path.parent.mkdir(exist_ok=True)
-        code = sources[task.id]
-        compile(code, str(path), "exec")
-        path.write_text(code, encoding="utf-8")
-        board.send(task.id, "lead", f"Compiled {task.files[0]}")
-        journal.append({"event": "completed", "step": task.id, "file": task.files[0]})
-        return {"file": task.files[0], "compiled": True}
 
-    results = await execute_plan(plan, developer)
-    probe = "from tags import normalize_tag\nfrom search import find_by_tag\nfrom report import tag_counts\nnotes=[{'tags':[' Python ','python','AI']}]\nassert normalize_tag(' PYTHON ') == 'python'\nassert len(find_by_tag(notes, 'python')) == 1\nassert tag_counts(notes) == {'python':1, 'ai':1}\nprint('3 acceptance checks passed')\n"
-    (root / "src" / "acceptance.py").write_text(probe, encoding="utf-8")
-    process = await asyncio.create_subprocess_exec(
-        sys.executable,
-        "-I",
-        "-c",
-        "import sys; sys.path.insert(0, '.'); exec(open('acceptance.py').read())",
-        cwd=root / "src",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+class Task(BaseModel):
+    id: str
+    files: list[str] = Field(min_length=1)
+    depends_on: list[str] = []
+
+
+class Plan(BaseModel):
+    tasks: list[Task] = Field(min_length=1, max_length=4)
+
+    @model_validator(mode="after")
+    def one_owner_per_file(self) -> "Plan":
+        owned = [name for task in self.tasks for name in task.files]
+        if len(owned) != len(set(owned)) or not all(
+            name.startswith("src/") for name in owned
+        ):
+            raise ValueError("Every src/ file needs exactly one owner.")
+        return self
+
+
+async def propose[T: BaseModel](
+    role: str, prompt: str, schema: type[T], budget_usd: float
+) -> T:
+    proposal_format = {"type": "json_schema", "schema": schema.model_json_schema()}
+    options = ClaudeAgentOptions(
+        tools=[], max_turns=2, max_budget_usd=budget_usd, output_format=proposal_format
     )
-    try:
-        async with asyncio.timeout(15):
-            stdout, _ = await process.communicate()
-    finally:
-        if process.returncode is None:
-            process.kill()
-            await process.wait()
-    return {
-        "plan": plan.model_dump(),
-        "waves": plan.waves(),
-        "workers": "scripted Python fixtures",
-        "results": results,
-        "messages": board.messages,
-        "journal": journal.replay(),
-        "release_gate": process.returncode == 0,
-        "acceptance": stdout.decode().strip(),
-        "published": False,
-    }
+    results = [
+        m
+        async for m in query(prompt=prompt, options=options)
+        if isinstance(m, ResultMessage)
+    ]
+    if not results or results[-1].is_error or results[-1].structured_output is None:
+        raise RuntimeError(f"The {role} returned no valid proposal.")
+    return schema.model_validate(results[-1].structured_output)
+
+
+def release_gate(
+    tests_passed: bool, review_approved: bool, spent_usd: float, limit_usd: float
+) -> bool:
+    # Agents propose; only the host's own checks decide whether anything ships.
+    return tests_passed and review_approved and spent_usd <= limit_usd
 ```
+
+`propose()` runs each role through `query()` with `output_format` from a Pydantic schema, `Plan.one_owner_per_file` validates ownership, and `release_gate()` lets the host decide the release.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `team` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2417); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

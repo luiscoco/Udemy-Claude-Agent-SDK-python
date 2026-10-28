@@ -77,7 +77,7 @@ def test_automatic_check_reports_failures_without_grading_the_student():
 
 @pytest.mark.parametrize("intent", TUTOR_INTENTS)
 def test_prepared_tutor_answers_are_grounded_in_the_lesson(intent):
-    text = prepared_answer(5, intent, "def calculator():\n    return 42")
+    text = prepared_answer(5, intent)
     assert text.startswith("## Lesson 5: Custom tools")
     if intent == "code":
         assert "```python" in text
@@ -379,8 +379,9 @@ def test_browser_exports_progress_and_imports_it_into_another_browser(server, tm
         second.goto(base + "/")
         second.locator("input[type=file]").set_input_files(str(exported))
         second.get_by_text("Replace your progress?").wait_for()
-        second.get_by_role("button", name="Replace progress").click()
-        second.wait_for_load_state()
+        # Replacing progress reloads the page; wait for it before navigating again.
+        with second.expect_navigation():
+            second.get_by_role("button", name="Replace progress").click()
         second.goto(base + "/?lesson=5")
         assert second.get_by_label("Private notes").input_value() == "moved between browsers"
         browser.close()
@@ -399,4 +400,27 @@ def test_browser_renders_the_generated_exercise_diagram(server):
         diagram.wait_for(timeout=15000)
         assert "Scripted CLI fixture" in (diagram.text_content() or "")
         assert page.get_by_text("Syntax error").count() == 0
+        browser.close()
+
+
+def test_browser_lessons_focus_on_concept_code_and_show_live_tutor_option(server):
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page.goto(base + "/?lesson=1")
+        page.get_by_text("The concept in code").first.wait_for()
+        assert page.locator(".nicegui-code").filter(has_text="query(").count() >= 1
+        page.get_by_role("tab", name="Python source").click()
+        page.get_by_text("How the offline lab checks this concept").wait_for()
+        # The harness is folded away; the concept code is what the tab shows first.
+        assert not page.get_by_text("recorded_messages").first.is_visible()
+        page.get_by_role("tab", name="Visual guide").click()
+        page.locator(".infographic").get_by_text("LESSON 01", exact=True).wait_for()
+        page.get_by_role("tab", name="AI Tutor").click()
+        page.get_by_role("button", name="Live Claude answer").click()
+        page.get_by_text("Live answers are turned off").wait_for()
+        assert page.get_by_role("button", name="Ask the tutor").is_disabled()
         browser.close()

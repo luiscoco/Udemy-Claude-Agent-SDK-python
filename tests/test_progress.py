@@ -41,7 +41,10 @@ def test_export_round_trips_exactly_what_the_app_stores():
     assert document["format"] == "agent-lab-progress" and document["version"] == 1
     assert "unrelated_key" not in document["progress"]
     restored = import_progress(exported)
-    assert restored == {key: STORE[key] for key in restored}
+    # Records gain the empty last_run default; everything the store held comes back.
+    expected = {key: STORE[key] for key in restored}
+    expected["lessons"]["5"] = expected["lessons"]["5"] | {"last_run": ""}
+    assert restored == expected
 
 
 def test_export_of_an_empty_browser_is_still_importable():

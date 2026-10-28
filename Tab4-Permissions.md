@@ -20,46 +20,53 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 4](http://127.0.0.1:8080/?lesson=4).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `permission_cases`, line 262). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("permissions", "security", "redteam")
-def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    cases = [
-        ("normal read", "Read", {"file_path": "notes.txt"}, True),
-        ("path traversal", "Read", {"file_path": "../outside.txt"}, False),
-        ("secret read", "Read", {"file_path": ".env"}, False),
-        ("shell injection", "Bash", {"command": "echo preapproved"}, False),
-        ("unapproved write", "Write", {"file_path": "notes.txt"}, False),
-    ]
-    rows: list[dict[str, Any]] = []
-    for label, tool, arguments, expected in cases:
-        allowed, reason = decide(root, tool, arguments)
-        rows.append(
-            {
-                "case": label,
-                "tool": tool,
-                "allowed": allowed,
-                "expected": expected,
-                "passed": allowed == expected,
-                "reason": reason,
-            }
+from pathlib import Path
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, PermissionResult, PermissionResultAllow
+from claude_agent_sdk import PermissionResultDeny, ToolPermissionContext, query
+
+WORKSPACE = Path("workspace").resolve()
+
+
+async def can_use_tool(
+    name: str, tool_input: dict[str, Any], context: ToolPermissionContext
+) -> PermissionResult:
+    if name != "Read":
+        return PermissionResultDeny(message=f"{name} is not allowed in this lesson.")
+    target = (WORKSPACE / str(tool_input.get("file_path", ""))).resolve()
+    if not target.is_relative_to(WORKSPACE) or target.name == ".env":
+        return PermissionResultDeny(
+            message="That path is outside the readable workspace."
         )
-    return {
-        "decisions": rows,
-        "pass_rate": sum(row["passed"] for row in rows) / len(rows),
-        "redacted": redact({"api_key": "fixture-only", "text": "Bearer fake-fixture-token"}),
-    }
+    return PermissionResultAllow()
+
+
+async def main() -> None:
+    # No allowed_tools: a pre-approval rule would skip can_use_tool entirely.
+    options = ClaudeAgentOptions(
+        tools=["Read"], cwd=WORKSPACE, can_use_tool=can_use_tool
+    )
+    async for message in query(
+        prompt="Read notes.txt. Do not write files.", options=options
+    ):
+        print(type(message).__name__)
 ```
+
+The `can_use_tool` callback returns `PermissionResultAllow()` or `PermissionResultDeny(message=...)` for every call, and `tools=["Read"]` with no `allowed_tools` keeps it in charge.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `permission_cases` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 262); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

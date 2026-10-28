@@ -20,59 +20,54 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 24](http://127.0.0.1:8080/?lesson=24).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `harness`, line 1236). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("harness")
-async def harness(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Treat model output as a proposal: validate it, and execute only what passes."""
-    # Fixtures standing in for model replies, from good to unusable.
-    proposals = {
-        "valid plan": '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
-        '{"id": "T2", "files": ["src/search.py"], "depends_on": ["T1"]}]}',
-        "two owners for one file": '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
-        '{"id": "T2", "files": ["src/tags.py"]}]}',
-        "dependency cycle": '{"tasks": [{"id": "T1", "files": ["src/a.py"], "depends_on": ["T2"]}, '
-        '{"id": "T2", "files": ["src/b.py"], "depends_on": ["T1"]}]}',
-        "file outside src": '{"tasks": [{"id": "T1", "files": [".github/workflows/ci.yml"]}]}',
-        "prose instead of JSON": "Sure! First T1, then T2.",
-    }
-    reviewed = []
-    accepted: Plan | None = None
-    for label, text in proposals.items():
-        try:
-            plan = Plan.model_validate_json(text)
-        except ValidationError as exc:
-            problem = exc.errors()[0]["msg"].removeprefix("Value error, ")
-            reviewed.append({"proposal": label, "accepted": False, "problem": problem})
-            continue
-        reviewed.append({"proposal": label, "accepted": True, "problem": ""})
-        accepted = accepted or plan
-    started: list[str] = []
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
-    async def worker(task: TaskSpec) -> dict[str, Any]:
-        started.append(task.id)
-        return {"owned_files": task.files, "verified": True, "source": "scripted host worker"}
 
-    assert accepted is not None
-    results = await execute_plan(accepted, worker)
-    return {
-        "proposals": reviewed,
-        "executed": [row["proposal"] for row in reviewed if row["accepted"]],
-        "waves": accepted.waves(),
-        "workers_started": started,
-        "results": results,
-    }
+class Task(BaseModel):
+    id: str
+    files: list[str] = Field(min_length=1)
+
+    @field_validator("files")
+    @classmethod
+    def inside_src(cls, files: list[str]) -> list[str]:
+        if not all(name.startswith("src/") for name in files):
+            raise ValueError("every file must be under src/")
+        return files
+
+
+class Plan(BaseModel):
+    tasks: list[Task] = Field(min_length=1)
+
+
+async def propose_plan(goal: str) -> Plan | None:
+    schema = Plan.model_json_schema()
+    options = ClaudeAgentOptions(
+        tools=[], output_format={"type": "json_schema", "schema": schema}
+    )
+    async for message in query(prompt=goal, options=options):
+        if isinstance(message, ResultMessage) and message.structured_output is not None:
+            try:
+                return Plan.model_validate(message.structured_output)
+            except ValidationError:
+                return None  # rejected proposals never reach a worker
+    return None
 ```
+
+The model's `structured_output` is only a proposal until `Plan.model_validate(...)` accepts it; a `ValidationError` returns `None`, so nothing is executed.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `harness` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1236); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

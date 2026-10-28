@@ -20,70 +20,54 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 57](http://127.0.0.1:8080/?lesson=57).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `worktrees`, line 1539). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("worktrees")
-async def worktrees(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import shutil
+import asyncio
+from pathlib import Path
 
-    if not shutil.which("git"):
-        raise LessonError("Install Git to run the worktree lesson.")
-    repo = root / "repo"
-    repo.mkdir(exist_ok=True)
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
 
-    async def git(*args: str) -> str:
-        process = await asyncio.create_subprocess_exec(
-            "git",
-            # Nested lesson workspaces can exceed the Windows 260-character path limit.
-            "-c",
-            "core.longpaths=true",
-            "-C",
-            str(repo),
-            *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        try:
-            async with asyncio.timeout(15):
-                stdout, stderr = await process.communicate()
-        finally:
-            if process.returncode is None:
-                process.kill()
-                await process.wait()
-        if process.returncode:
-            raise LessonError(
-                f"Git fixture operation failed: {stderr.decode(errors='replace')[:300]}"
-            )
-        return stdout.decode()
+GIT_LOCK = asyncio.Lock()
 
-    await git("init", "-b", "main")
-    await git(
-        "-c",
-        "user.name=Python Lab",
-        "-c",
-        "user.email=lab@example.invalid",
-        "commit",
-        "--allow-empty",
-        "-m",
-        "fixture",
+
+async def git(repo: Path, *args: str) -> None:
+    async with GIT_LOCK:  # one operation on shared repository state at a time
+        process = await asyncio.create_subprocess_exec("git", "-C", str(repo), *args)
+        async with asyncio.timeout(15):
+            if await process.wait() != 0:
+                raise RuntimeError(f"git {' '.join(args)} failed")
+
+
+async def worker(repo: Path, task_id: str, task: str) -> str | None:
+    tree = repo.parent / f"{repo.name}-{task_id}"
+    await git(repo, "worktree", "add", "-b", f"agent/{task_id}", str(tree))
+    options = ClaudeAgentOptions(
+        cwd=tree, allowed_tools=["Read", "Edit", "Grep"], max_turns=8
     )
-    for task in ("T1", "T2"):
-        await git("worktree", "add", "-b", task, str(root / task))
-    return {
-        "worktrees": (await git("worktree", "list", "--porcelain")).splitlines(),
-        "remote_operations": False,
-    }
+    async for message in query(prompt=task, options=options):
+        if isinstance(message, ResultMessage):
+            return message.result
+    return None
+
+
+async def main(repo: Path) -> None:
+    async with asyncio.TaskGroup() as group:
+        group.create_task(worker(repo, "T1", "Add type hints to src/tags.py."))
+        group.create_task(worker(repo, "T2", "Add docstrings to src/search.py."))
 ```
+
+Each worker runs git worktree add on its own branch through the GIT_LOCK-guarded git() helper, then points ClaudeAgentOptions(cwd=tree) at that worktree so parallel agents never share a working copy.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `worktrees` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1539); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

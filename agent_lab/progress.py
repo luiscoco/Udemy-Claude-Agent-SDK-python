@@ -52,6 +52,7 @@ class LessonRecord(Strict):
     answers: dict[str, int] = Field(default_factory=dict, max_length=10)
     check: Check | None = None
     tutor: list[SavedAnswer] = Field(default_factory=list, max_length=20)
+    last_run: str = Field(default="", max_length=6000)
 
 
 class Progress(Strict):

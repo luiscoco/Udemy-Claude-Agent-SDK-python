@@ -20,26 +20,45 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 9](http://127.0.0.1:8080/?lesson=9).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `system_prompts`, line 529). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("system_prompts")
-def system_prompts(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    return {
-        "custom": "Teach Python agents using concise explanations.",
-        "preset": {"type": "preset", "preset": "claude_code", "append": "Use Python examples."},
-        "difference": "A custom prompt replaces the default; a preset retains its base instructions.",
-    }
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+# A plain string replaces the default Claude Code instructions entirely.
+replaced = ClaudeAgentOptions(
+    system_prompt="You are a terse Python tutor. Answer in at most three bullet points.",
+)
+
+# The preset keeps the Claude Code base instructions and appends yours.
+extended = ClaudeAgentOptions(
+    system_prompt={
+        "type": "preset",
+        "preset": "claude_code",
+        "append": "Teach using Python examples.",
+    },
+)
+
+
+async def main() -> None:
+    prompt = "Explain your response format briefly."
+    for options in (replaced, extended):
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                print(message.result)
 ```
+
+`system_prompt="..."` replaces the default instructions, while `system_prompt={"type": "preset", "preset": "claude_code", "append": ...}` keeps them and adds yours.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `system_prompts` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 529); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

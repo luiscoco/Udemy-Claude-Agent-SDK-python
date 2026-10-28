@@ -20,38 +20,58 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 29](http://127.0.0.1:8080/?lesson=29).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `images`, line 1091). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("images")
-def images(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    # A real one-pixel PNG, not a fabricated model image response.
-    data = base64.b64decode(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS9sAAAAASUVORK5CYII="
-    )
-    (root / "pixel.png").write_bytes(data)
-    return {
-        "block": {
-            "type": "image",
-            "source": {
-                "type": "base64",
-                "media_type": "image/png",
-                "data": base64.b64encode(data).decode(),
-            },
+import base64
+from collections.abc import AsyncIterator
+from pathlib import Path
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
+
+
+async def image_turn(path: Path) -> AsyncIterator[dict[str, Any]]:
+    data = path.read_bytes()
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ValueError("media_type says image/png, so the bytes must be a PNG")
+    image = {
+        "type": "image",
+        "source": {
+            "type": "base64",
+            "media_type": "image/png",
+            "data": base64.b64encode(data).decode(),
         },
-        "bytes": len(data),
-        "note": lesson.notes,
     }
+    content = [image, {"type": "text", "text": "Describe this image in one sentence."}]
+    yield {
+        "type": "user",
+        "message": {"role": "user", "content": content},
+        "parent_tool_use_id": None,
+    }
+
+
+async def main() -> None:
+    async with ClaudeSDKClient(
+        options=ClaudeAgentOptions(tools=[], max_turns=1)
+    ) as client:
+        await client.query(image_turn(Path("workspace/pixel.png")))
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(message.result)
 ```
+
+`image_turn` yields a user message whose content holds an `image` block with a base64 `source`, after checking the PNG signature matches `media_type`; `client.query` streams it.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `images` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1091); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

@@ -20,29 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 21](http://127.0.0.1:8080/?lesson=21).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `project_markdown`, line 752). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("skills", "commands", "memory", "styles")
-def project_markdown(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    return {
-        "files": {
-            p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
-            for p in root.rglob("*.md")
-        },
-        "setting_sources": ["project"],
-        "warning": "Only enable settings for a trusted lesson workspace.",
-    }
+from pathlib import Path
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+async def main() -> None:
+    workspace = Path("workspace")
+    command = workspace / ".claude" / "commands" / "lesson-summary.md"
+    command.parent.mkdir(parents=True, exist_ok=True)
+    command.write_text(
+        "Summarize notes.txt in three Python-focused bullets.\n", encoding="utf-8"
+    )
+    options = ClaudeAgentOptions(
+        cwd=str(workspace),
+        setting_sources=[
+            "project"
+        ],  # without this, .claude/commands is never discovered
+        tools=["Read"],
+        allowed_tools=["Read"],
+        max_turns=3,
+    )
+    async for message in query(prompt="/lesson-summary", options=options):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+The Markdown file at `.claude/commands/lesson-summary.md` becomes a command only because `setting_sources=["project"]` is set, and the prompt `/lesson-summary` invokes it.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `project_markdown` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 752); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

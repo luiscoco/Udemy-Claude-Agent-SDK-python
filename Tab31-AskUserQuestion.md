@@ -20,76 +20,60 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 31](http://127.0.0.1:8080/?lesson=31).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `questions`, line 1156). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("questions")
-async def questions(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Validate AskUserQuestion input, then route the user's answer through can_use_tool."""
-    from agent_lab.hooks import permission_callback
-    from agent_lab.sdk import Questions
+import asyncio
+from typing import Any
 
-    def question(**changes: Any) -> dict[str, Any]:
-        item = {
-            "question": "Which teaching style?",
-            "header": "Style",
-            "options": [
-                {"label": "Concise", "description": "One short example"},
-                {"label": "Detailed", "description": "Explain each step"},
-            ],
-            "multiSelect": False,
-        }
-        return {"questions": [item | changes]}
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ToolPermissionContext
+from claude_agent_sdk import (
+    PermissionResult,
+    PermissionResultAllow,
+    PermissionResultDeny,
+)
+from pydantic import BaseModel, Field
 
-    candidates = {
-        "valid question": question(),
-        "only one option": question(options=[{"label": "Concise", "description": "Short"}]),
-        "header too long": question(header="A header that is far too long to fit"),
-        "unknown field": question(priority="high"),
-    }
-    shape_checks = []
-    for label, body in candidates.items():
-        try:
-            Questions.model_validate(body)
-            shape_checks.append({"case": label, "valid": True, "problem": ""})
-        except ValidationError as exc:
-            error = exc.errors()[0]
-            where = ".".join(str(part) for part in error["loc"])
-            shape_checks.append(
-                {"case": label, "valid": False, "problem": f"{where}: {error['msg']}"}
-            )
-    shown: list[str] = []
 
-    async def ask(arguments: dict[str, Any]) -> dict[str, Any]:
-        shown.extend(item["question"] for item in arguments["questions"])
-        return {"Which teaching style?": "Concise"}  # stands in for the user's click
+class Question(BaseModel):
+    question: str
+    header: str = Field(max_length=30)
+    options: list[dict[str, str]] = Field(min_length=2, max_length=4)
 
-    callback = permission_callback(
-        lambda name, arguments: (name == "AskUserQuestion", "Only AskUserQuestion is enabled."),
-        ask,
-    )
-    answered = await callback("AskUserQuestion", candidates["valid question"], None)
-    other = await callback("Bash", {"command": "ls"}, None)
-    return {
-        "shape_checks": shape_checks,
-        "shown_to_user": shown,
-        "routed": {
-            "result_type": type(answered).__name__,
-            "answers": answered.updated_input["answers"],
-        },
-        "other_tool": {"result_type": type(other).__name__, "message": other.message},
-        "source": "real can_use_tool callback; the answer stands in for the user",
-    }
+
+async def can_use_tool(
+    name: str, tool_input: dict[str, Any], _: ToolPermissionContext
+) -> PermissionResult:
+    if name != "AskUserQuestion":
+        return PermissionResultDeny(message="Only AskUserQuestion is enabled.")
+    answers: dict[str, str] = {}
+    for q in (Question.model_validate(item) for item in tool_input["questions"]):
+        labels = ", ".join(option["label"] for option in q.options)
+        answers[q.question] = await asyncio.to_thread(
+            input, f"{q.question} ({labels}): "
+        )
+    return PermissionResultAllow(updated_input={**tool_input, "answers": answers})
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(tools=["AskUserQuestion"], can_use_tool=can_use_tool)
+    async with ClaudeSDKClient(options) as client:
+        await client.query("Use AskUserQuestion to ask which response style I prefer.")
+        async for message in client.receive_response():
+            print(message)
 ```
+
+The can_use_tool callback catches AskUserQuestion, validates each question with the Question model, and returns PermissionResultAllow(updated_input={..., "answers": answers}).
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `questions` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1156); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

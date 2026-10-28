@@ -20,52 +20,50 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 68](http://127.0.0.1:8080/?lesson=68).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `scheduled`, line 1850). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("scheduled")
-async def scheduled(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Process each trigger id once and await in-flight jobs before shutting down."""
-    journal = Journal(root / "triggers.jsonl")
-    deliveries = ["evt-1", "evt-2", "evt-1", "evt-3", "evt-2"]  # at-least-once delivery
-    accepted, duplicates = [], []
-    tasks: set[asyncio.Task[str]] = set()
+import asyncio
 
-    async def job(trigger: str) -> str:
-        await asyncio.sleep(0.05)
-        journal.append({"event": "completed", "step": trigger})
-        return trigger
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
 
-    for trigger in deliveries:
-        seen = {row["step"] for row in journal.replay() if row.get("event") == "received"}
-        if trigger in seen:
-            duplicates.append(trigger)
-            continue
-        journal.append({"event": "received", "step": trigger})
-        accepted.append(trigger)
-        tasks.add(asyncio.create_task(job(trigger)))
-    in_flight = sum(not task.done() for task in tasks)
-    # Graceful shutdown: stop accepting work, then await owned tasks within a deadline.
-    async with asyncio.timeout(5):
-        finished = await asyncio.gather(*tasks)
-    return {
-        "deliveries": deliveries,
-        "accepted": accepted,
-        "duplicates_ignored": duplicates,
-        "in_flight_at_shutdown": in_flight,
-        "completed_before_exit": sorted(finished),
-        "journal": journal.replay(),
-    }
+
+class Dispatcher:
+    def __init__(self) -> None:
+        self.seen: set[str] = set()  # persist this in production
+        self.jobs: set[asyncio.Task[None]] = set()
+
+    def receive(self, trigger_id: str, prompt: str) -> bool:
+        if trigger_id in self.seen:
+            return False  # at-least-once delivery: a redelivered trigger is ignored
+        self.seen.add(trigger_id)
+        job = asyncio.create_task(self.run(prompt))
+        self.jobs.add(job)
+        job.add_done_callback(self.jobs.discard)
+        return True
+
+    async def run(self, prompt: str) -> None:
+        options = ClaudeAgentOptions(tools=[], max_turns=2, max_budget_usd=0.10)
+        async for message in query(prompt=prompt, options=options):
+            if isinstance(message, ResultMessage):
+                print(message.subtype, message.total_cost_usd)
+
+    async def shutdown(self, deadline: float = 30) -> None:
+        if self.jobs:
+            await asyncio.wait(set(self.jobs), timeout=deadline)
 ```
+
+`receive()` checks `trigger_id in self.seen` before `asyncio.create_task(self.run(...))`, and `shutdown()` awaits the owned `self.jobs` with `asyncio.wait(..., timeout=deadline)`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `scheduled` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1850); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

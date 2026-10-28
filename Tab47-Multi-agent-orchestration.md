@@ -20,38 +20,58 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 47](http://127.0.0.1:8080/?lesson=47).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `orchestration`, line 1215). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("orchestration")
-async def orchestration(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    plan = Plan(
-        tasks=[
-            TaskSpec(id="T1", files=["src/tags.py"]),
-            TaskSpec(id="T2", files=["src/search.py"], depends_on=["T1"]),
-            TaskSpec(id="T3", files=["src/report.py"], depends_on=["T1"]),
-        ]
-    )
+import asyncio
 
-    async def worker(task: TaskSpec):
-        await asyncio.sleep(0)
-        return {"owned_files": task.files, "verified": True, "source": "scripted host worker"}
+from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, ResultMessage, query
 
-    return {
-        "plan": plan.model_dump(),
-        "waves": plan.waves(),
-        "results": await execute_plan(plan, worker),
-    }
+REVIEWER = AgentDefinition(
+    description="Reviews one module for bugs.",
+    prompt="Review only the file you are given and list concrete defects.",
+    tools=["Read", "Grep"],
+)
+WAVES = [
+    ["src/tags.py"],
+    ["src/search.py", "src/report.py"],
+]  # wave 2 depends on wave 1
+
+
+async def run_task(path: str, limit: asyncio.Semaphore) -> str:
+    async with limit:
+        options = ClaudeAgentOptions(
+            agents={"reviewer": REVIEWER},
+            allowed_tools=["Read", "Grep", "Agent"],
+            max_turns=4,
+        )
+        async for message in query(
+            prompt=f"Use the reviewer agent on {path}.", options=options
+        ):
+            if isinstance(message, ResultMessage):
+                return message.result or ""
+    return ""
+
+
+async def main() -> None:
+    limit = asyncio.Semaphore(2)
+    for wave in WAVES:
+        async with asyncio.TaskGroup() as group:
+            tasks = [group.create_task(run_task(path, limit)) for path in wave]
+        print({path: task.result()[:80] for path, task in zip(wave, tasks)})
 ```
+
+AgentDefinition declares the subagent, while the host loop over WAVES with asyncio.TaskGroup and asyncio.Semaphore(2) decides what runs, in what order and how many at once.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `orchestration` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1215); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

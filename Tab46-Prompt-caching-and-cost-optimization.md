@@ -20,33 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 46](http://127.0.0.1:8080/?lesson=46).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `cache`, line 1411). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("cache")
-def cache(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    usage = {
-        "input_tokens": 100,
-        "cache_read_input_tokens": 900,
-        "cache_creation_input_tokens": 0,
-        "output_tokens": 50,
-    }
-    return {
-        "source": "recorded usage fixture",
-        "usage": usage,
-        "cache_read_ratio": usage["cache_read_input_tokens"]
-        / (usage["input_tokens"] + usage["cache_read_input_tokens"]),
-    }
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+def cache_read_ratio(usage: dict[str, Any]) -> float:
+    uncached = usage.get("input_tokens", 0)
+    cached = usage.get("cache_read_input_tokens", 0)
+    total = uncached + cached
+    return cached / total if total else 0.0
+
+
+async def main() -> None:
+    # A long, unchanging system prompt is a prefix the API can reuse from cache.
+    options = ClaudeAgentOptions(
+        system_prompt="You are the ACME support assistant. Policies: ...",
+        max_turns=2,
+    )
+    async for message in query(prompt="Summarize the refund policy.", options=options):
+        if isinstance(message, ResultMessage) and message.usage:
+            print("cache reads:", message.usage.get("cache_read_input_tokens", 0))
+            print("cache writes:", message.usage.get("cache_creation_input_tokens", 0))
+            print(f"cache read ratio: {cache_read_ratio(message.usage):.0%}")
+            print("cost USD:", message.total_cost_usd)
 ```
+
+The ResultMessage branch reads usage['cache_read_input_tokens'] and cache_creation_input_tokens, and cache_read_ratio turns them into a measured hit rate next to total_cost_usd.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `cache` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1411); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

@@ -20,38 +20,69 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 65](http://127.0.0.1:8080/?lesson=65).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `approval`, line 1691). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("approval")
-def approval(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    action = Refund(
-        order_id="A-001", amount_cents=4200, reason="Fixture return approved by the host"
+import hashlib
+import hmac
+import secrets
+import time
+from typing import Any
+
+from claude_agent_sdk import (
+    PermissionResultAllow,
+    PermissionResultDeny,
+    ToolPermissionContext,
+)
+from pydantic import BaseModel, ConfigDict
+
+
+class Refund(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    order_id: str
+    amount_cents: int
+
+    def fingerprint(self) -> str:
+        return hashlib.sha256(self.model_dump_json().encode()).hexdigest()
+
+
+APPROVED: dict[
+    str, tuple[str, float]
+] = {}  # token -> (fingerprint, expiry); filled only by approve()
+
+
+def approve(
+    action: Refund, ttl: float = 120
+) -> str:  # the human clicked; channels only notify
+    token = secrets.token_urlsafe(32)
+    APPROVED[token] = (action.fingerprint(), time.monotonic() + ttl)
+    return token
+
+
+async def gate(
+    name: str, args: dict[str, Any], ctx: ToolPermissionContext
+) -> PermissionResultAllow | PermissionResultDeny:
+    wanted = (
+        Refund.model_validate(args).fingerprint() if name == "mcp__shop__refund" else ""
     )
-    pending = Approval(action)
-    pending.decide(pending.token, True)
-    pending.consume(action)
-    try:
-        pending.consume(action)
-    except ValueError:
-        reuse_denied = True
-    return {
-        "action": action.model_dump(),
-        "fingerprint": pending.fingerprint,
-        "state": pending.state,
-        "reuse_denied": reuse_denied,
-        "delivery": "local fixture, no external notification",
-    }
+    for token, (bound, expires) in list(APPROVED.items()):
+        if wanted and hmac.compare_digest(bound, wanted) and time.monotonic() < expires:
+            del APPROVED[token]  # single use
+            return PermissionResultAllow()
+    return PermissionResultDeny(message="No live approval for this exact action.")
 ```
+
+`approve()` stores a `secrets.token_urlsafe` token bound to the frozen `Refund`'s SHA-256 `fingerprint()` with an expiry, and `gate` allows `mcp__shop__refund` only for a matching, unexpired token, deleting it on use.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `approval` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1691); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

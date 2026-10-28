@@ -20,34 +20,58 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 5](http://127.0.0.1:8080/?lesson=5).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `calculator`, line 432). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("calculator")
-def calculator(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    good = Calculation(a=19.0, b=23.0)
-    errors = []
-    for bad in ({"a": True, "b": 1}, {"a": float("nan"), "b": 1}, {"a": 1, "b": 1, "shell": "bad"}):
-        try:
-            Calculation.model_validate(bad)
-        except ValueError:
-            errors.append("Invalid calculator arguments rejected by host validation.")
+import json
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, create_sdk_mcp_server, query, tool
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+
+class Calculation(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    a: float = Field(ge=-1_000_000, le=1_000_000, allow_inf_nan=False)
+    b: float = Field(ge=-1_000_000, le=1_000_000, allow_inf_nan=False)
+
+
+@tool(
+    "add", "Add two finite numbers. Returns their sum.", Calculation.model_json_schema()
+)
+async def add(args: dict[str, Any]) -> dict[str, Any]:
+    try:
+        # The schema is a hint to the model; this check is what the host enforces.
+        parsed = Calculation.model_validate(args)
+    except ValidationError as error:
+        return {"content": [{"type": "text", "text": str(error)}], "is_error": True}
     return {
-        "schema": Calculation.model_json_schema(),
-        "input": good.model_dump(),
-        "sum": good.a + good.b,
-        "rejected": errors,
+        "content": [{"type": "text", "text": json.dumps({"sum": parsed.a + parsed.b})}]
     }
+
+
+async def main() -> None:
+    calc = create_sdk_mcp_server(name="calc", tools=[add])
+    options = ClaudeAgentOptions(
+        mcp_servers={"calc": calc}, tools=[], allowed_tools=["mcp__calc__add"]
+    )
+    async for message in query(
+        prompt="Use the calculator to add 19 and 23.", options=options
+    ):
+        print(type(message).__name__)
 ```
+
+`@tool("add", ...)` turns the function into a tool, `Calculation.model_validate(args)` enforces the input inside it, and `create_sdk_mcp_server` exposes it as `mcp__calc__add`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `calculator` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 432); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

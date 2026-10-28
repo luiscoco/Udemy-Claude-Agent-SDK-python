@@ -20,53 +20,55 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 70](http://127.0.0.1:8080/?lesson=70).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `python_sdk`, line 171). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("python_sdk")
-async def python_sdk(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Check every SDK import the app uses, then build and call a native Python tool."""
-    import ast
+from typing import Any
 
-    import claude_agent_sdk as sdk
+from claude_agent_sdk import (
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    SdkMcpTool,
+    create_sdk_mcp_server,
+    tool,
+)
 
-    from agent_lab.config import ROOT
 
-    used: dict[str, set[str]] = {}
-    for path in sorted((ROOT / "agent_lab").rglob("*.py")):
-        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
-            if isinstance(node, ast.ImportFrom) and node.module == "claude_agent_sdk":
-                for alias in node.names:
-                    used.setdefault(alias.name, set()).add(path.relative_to(ROOT).as_posix())
-    missing = sorted(name for name in used if not hasattr(sdk, name))
+@tool("add", "Add two numbers and return their sum.", {"a": float, "b": float})
+async def add(args: dict[str, Any]) -> dict[str, Any]:
+    return {"content": [{"type": "text", "text": str(args["a"] + args["b"])}]}
 
-    @sdk.tool("add", "Add two finite numbers.", Calculation.model_json_schema())
-    async def add(arguments: dict[str, Any]) -> dict[str, Any]:
-        parsed = Calculation.model_validate(arguments)
-        return {"content": [{"type": "text", "text": str(parsed.a + parsed.b)}]}
 
-    server = sdk.create_sdk_mcp_server(name="lesson", tools=[add])
-    result = await add.handler({"a": 19.0, "b": 23.0})
-    return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "imported_names": sorted(used),
-        "files_importing": sorted({file for files in used.values() for file in files}),
-        "all_imports_resolve": not missing,
-        "missing": missing,
-        "tool": {"name": add.name, "input_schema": add.input_schema},
-        "handler_result": result["content"][0]["text"],
-        "server": {"type": server["type"], "name": server["name"]},
-    }
+async def test_add_handler() -> None:
+    assert isinstance(add, SdkMcpTool)
+    result = await add.handler({"a": 20, "b": 22})
+    assert result["content"][0]["text"] == "42"
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(
+        tools=[],
+        mcp_servers={"calc": create_sdk_mcp_server(name="calc", tools=[add])},
+        allowed_tools=["mcp__calc__add"],
+        max_turns=3,
+    )
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Use the calculator to add 20 and 22.")
+        async for message in client.receive_response():
+            print(type(message).__name__)
 ```
+
+`@tool("add", ..., {"a": float, "b": float})` turns the function into an `SdkMcpTool` whose `.handler` is awaited directly in `test_add_handler`, then served with `create_sdk_mcp_server` to `ClaudeSDKClient`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `python_sdk` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 171); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

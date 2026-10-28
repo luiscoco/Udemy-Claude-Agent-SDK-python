@@ -20,51 +20,55 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 54](http://127.0.0.1:8080/?lesson=54).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `tool_design`, line 459). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("tool_design")
-def tool_design(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Turn validation failures into per-field messages the model can act on."""
-    cases = {
-        "boolean instead of number": {"a": True, "b": 1},
-        "not a number": {"a": float("nan"), "b": 1},
-        "unexpected field": {"a": 1, "b": 1, "shell": "rm -rf /"},
-        "missing argument": {"a": 1},
-        "out of range": {"a": 2e6, "b": 1},
-    }
-    feedback = []
-    for label, arguments in cases.items():
-        try:
-            Calculation.model_validate(arguments)
-        except ValidationError as exc:
-            for error in exc.errors():
-                feedback.append(
-                    {
-                        "case": label,
-                        "field": ".".join(str(part) for part in error["loc"]) or "(input)",
-                        "problem": error["msg"],
-                        "fix": FIX_HINTS.get(error["type"], "Check the input schema."),
-                    }
-                )
-    schema = Calculation.model_json_schema()
-    return {
-        "tool_description": "Add two finite numbers between -1000000 and 1000000. Returns their sum.",
-        "input_schema": schema,
-        "valid_call": {"input": {"a": 12.5, "b": 29.5}, "sum": 42.0},
-        "feedback": feedback,
-        "every_error_actionable": all(row["fix"] != "Check the input schema." for row in feedback),
-    }
+from typing import Any
+
+from claude_agent_sdk import tool
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
+
+
+class AddInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    a: float = Field(ge=-1e9, le=1e9, description="First number to add")
+    b: float = Field(ge=-1e9, le=1e9, description="Second number to add")
+
+
+def feedback(error: ValidationError) -> str:
+    return "; ".join(
+        f"{'.'.join(map(str, e['loc'])) or 'input'}: {e['msg']}. Fix: send only a and b, numbers in [-1e9, 1e9]."
+        for e in error.errors()
+    )
+
+
+@tool(
+    "add",
+    "Add two numbers a and b and return the exact sum. Use it for arithmetic, not for counting text.",
+    AddInput.model_json_schema(),
+)
+async def add(args: dict[str, Any]) -> dict[str, Any]:
+    try:
+        data = AddInput.model_validate(args)
+    except ValidationError as error:
+        return {
+            "content": [{"type": "text", "text": feedback(error)}],
+            "is_error": True,
+        }
+    return {"content": [{"type": "text", "text": str(data.a + data.b)}]}
 ```
+
+The @tool call pairs a precise description with AddInput.model_json_schema(), and the handler turns a Pydantic ValidationError into is_error feedback naming the field, the problem and the fix.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `tool_design` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 459); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

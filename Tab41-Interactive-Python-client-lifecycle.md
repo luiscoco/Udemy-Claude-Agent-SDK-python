@@ -20,47 +20,42 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 41](http://127.0.0.1:8080/?lesson=41).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `client_lifecycle`, line 722). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("client_lifecycle")
-async def client_lifecycle(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Connect, run two turns in one session, disconnect, and refuse use after close."""
-    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, CLIConnectionError
+from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ClaudeSDKClient
+from claude_agent_sdk import CLIConnectionError, TextBlock
 
-    from agent_lab.scripted_cli import ScriptedCLI
 
-    cli = ScriptedCLI([["Remembered: PYTHON-SESSION."], ["The label was PYTHON-SESSION."]])
-    client = ClaudeSDKClient(ClaudeAgentOptions(), transport=cli)
-    async with asyncio.timeout(20):
-        async with client:
-            await client.query("Remember PYTHON-SESSION.")
-            first = await scripted_turn(client)
-            await client.query("Which label?")
-            second = await scripted_turn(client)
+async def turn(client: ClaudeSDKClient, prompt: str) -> None:
+    await client.query(prompt)
+    async for message in client.receive_response():
+        if isinstance(message, AssistantMessage):
+            print("".join(b.text for b in message.content if isinstance(b, TextBlock)))
+
+
+async def main() -> None:
+    client = ClaudeSDKClient(ClaudeAgentOptions(max_turns=1))
+    async with client:  # connect() on enter, disconnect() on exit
+        await turn(client, "Introduce yourself as a Python teaching assistant.")
+        await turn(client, "Repeat your role in five words.")
     try:
-        await client.query("After disconnect")
-        after_close = "accepted"
-    except CLIConnectionError as exc:
-        after_close = f"CLIConnectionError: {exc}"
-    return {
-        "turns": [first, second],
-        "same_session": first["session_id"] == second["session_id"],
-        "lifecycle": cli.lifecycle,
-        "transport_ready_after_exit": cli.is_ready(),
-        "query_after_disconnect": after_close,
-        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
-    }
+        await client.query("Are you still there?")
+    except CLIConnectionError as error:
+        print("client is closed:", error)
 ```
+
+async with client connects and disconnects, each turn() pairs client.query with receive_response, and the final query raises CLIConnectionError.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `client_lifecycle` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 722); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

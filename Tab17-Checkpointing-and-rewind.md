@@ -20,27 +20,42 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 17](http://127.0.0.1:8080/?lesson=17).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `checkpoint`, line 994). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("checkpoint")
-def checkpoint(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    path = inside(root, "notes.txt")
-    before = path.read_bytes()
-    path.write_text("A host edit for the checkpoint exercise.\n", encoding="utf-8")
-    changed = path.read_text(encoding="utf-8")
-    path.write_bytes(before)
-    return {"changed": changed, "restored": path.read_bytes() == before, "note": lesson.notes}
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, UserMessage
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(
+        enable_file_checkpointing=True,
+        extra_args={"replay-user-messages": None},  # stream UserMessage.uuid values
+        tools=["Read", "Edit"],
+        allowed_tools=["Read", "Edit"],
+        cwd="workspace",
+    )
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Rewrite notes.txt as a bulleted list.")
+        checkpoint: str | None = None
+        async for message in client.receive_response():
+            if isinstance(message, UserMessage) and message.uuid and checkpoint is None:
+                checkpoint = message.uuid
+        if checkpoint is not None:
+            # Files return to the checkpoint; the conversation history is unchanged.
+            await client.rewind_files(checkpoint)
 ```
+
+`enable_file_checkpointing=True` tracks file edits, the first `UserMessage.uuid` marks the checkpoint, and `client.rewind_files(checkpoint)` restores the files.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `checkpoint` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 994); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

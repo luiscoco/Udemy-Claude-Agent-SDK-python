@@ -20,33 +20,45 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 15](http://127.0.0.1:8080/?lesson=15).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `budget`, line 978). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("budget")
-def budget(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    ledger = Budget(limit=0.10)
-    ledger.before_call()
-    ledger.record(0.08)
-    try:
-        ledger.before_call(0.03)
-    except ValueError as exc:
-        rejected = str(exc)
-    return {
-        "fixture_cost_usd": ledger.spent,
-        "next_call": rejected,
-        "note": "SDK max_budget_usd is a threshold, not an exact billing guarantee.",
-    }
+from dataclasses import dataclass
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+@dataclass
+class Ledger:
+    limit_usd: float
+    spent_usd: float = 0.0
+
+    def can_start(self, reserve_usd: float) -> bool:
+        return self.spent_usd + reserve_usd <= self.limit_usd
+
+
+async def ask(ledger: Ledger, prompt: str, reserve_usd: float = 0.03) -> None:
+    if not ledger.can_start(reserve_usd):
+        raise RuntimeError("Budget exhausted: the host refuses to start a new call.")
+    # max_budget_usd only stops this one run; the ledger decides whether it may start.
+    options = ClaudeAgentOptions(tools=[], max_budget_usd=reserve_usd)
+    async for message in query(prompt=prompt, options=options):
+        if isinstance(message, ResultMessage):
+            ledger.spent_usd += message.total_cost_usd or 0.0
+            print(message.total_cost_usd, message.usage)
 ```
+
+`ledger.can_start(reserve_usd)` refuses a call before it starts, `max_budget_usd` caps the single run, and `message.total_cost_usd` from the ResultMessage updates the ledger.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `budget` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 978); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

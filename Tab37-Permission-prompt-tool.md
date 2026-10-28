@@ -20,45 +20,58 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 37](http://127.0.0.1:8080/?lesson=37).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `permission_callback_cases`, line 404). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("permission_callback")
-async def permission_callback_cases(
-    root: Path, request: RunRequest, lesson: Lesson
-) -> dict[str, Any]:
-    """Call the live can_use_tool callback and show the SDK result object it returns."""
-    callback = permission_callback(lambda name, arguments: decide(root, name, arguments))
-    results = []
-    for label, tool, arguments in TOOL_CALLS:
-        outcome = await callback(tool, arguments, None)
-        results.append(
-            {
-                "case": label,
-                "tool": tool,
-                "result_type": type(outcome).__name__,
-                "behavior": outcome.behavior,
-                "message": getattr(outcome, "message", ""),
-                "input_unchanged": getattr(outcome, "updated_input", None) == arguments,
-            }
+from pathlib import Path
+from typing import Any
+
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ToolPermissionContext
+from claude_agent_sdk import (
+    PermissionResult,
+    PermissionResultAllow,
+    PermissionResultDeny,
+)
+
+WORKSPACE = Path("workspace").resolve()
+
+
+async def can_use_tool(
+    name: str, tool_input: dict[str, Any], context: ToolPermissionContext
+) -> PermissionResult:
+    if name == "Bash":
+        return PermissionResultDeny(message="Shell access is disabled.", interrupt=True)
+    if name == "Write":
+        target = (WORKSPACE / tool_input["file_path"]).resolve()
+        if not target.is_relative_to(WORKSPACE):
+            return PermissionResultDeny(message="Write only inside the workspace.")
+        return PermissionResultAllow(
+            updated_input={**tool_input, "file_path": str(target)}
         )
-    return {
-        "results": results,
-        "allowed": sum(row["behavior"] == "allow" for row in results),
-        "denied": sum(row["behavior"] == "deny" for row in results),
-        "note": "A PreToolUse hook that returns allow or deny decides first; can_use_tool is "
-        "asked only when no hook or rule settled the call.",
-    }
+    return PermissionResultDeny(message=f"{name} is not enabled here.")
+
+
+async def main() -> None:
+    # Called only for tool calls that no hook or permission rule has already decided.
+    tools = ["Read", "Write", "Bash"]
+    options = ClaudeAgentOptions(cwd=WORKSPACE, tools=tools, can_use_tool=can_use_tool)
+    async with ClaudeSDKClient(options) as client:
+        await client.query("Read notes.txt and save a summary to summary.txt.")
+        async for message in client.receive_response():
+            print(message)
 ```
+
+can_use_tool returns PermissionResultDeny(message=..., interrupt=True) for Bash, and PermissionResultAllow(updated_input=...) with a resolved path for in-workspace Write calls.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `permission_callback_cases` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 404); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

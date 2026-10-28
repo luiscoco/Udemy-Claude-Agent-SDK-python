@@ -20,33 +20,52 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 45](http://127.0.0.1:8080/?lesson=45).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `providers`, line 1395). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("providers")
-def providers(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    selected = [
-        name
-        for name in ("CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY")
-        if os.getenv(name) == "1"
-    ]
-    if len(selected) > 1:
-        raise ValueError("Select only one cloud provider.")
-    return {
-        "selected": selected or ["direct Anthropic API"],
-        "credentials": "not read or displayed",
-        "notes": lesson.notes,
-    }
+import os
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+FLAGS = {
+    "CLAUDE_CODE_USE_BEDROCK": "Amazon Bedrock",
+    "CLAUDE_CODE_USE_VERTEX": "Google Vertex AI",
+    "CLAUDE_CODE_USE_FOUNDRY": "Microsoft Foundry",
+}
+
+
+def selected_provider() -> str:
+    enabled = [name for name in FLAGS if os.environ.get(name) == "1"]
+    if len(enabled) > 1:
+        raise RuntimeError(f"Set at most one provider flag, found {enabled}")
+    if enabled:
+        return FLAGS[enabled[0]]
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("Set ANTHROPIC_API_KEY or exactly one provider flag")
+    return "Anthropic API"
+
+
+async def main() -> None:
+    print("provider:", selected_provider())
+    # The CLI inherits the environment; credentials never appear in code or prompts.
+    async for message in query(
+        prompt="Say hello.", options=ClaudeAgentOptions(max_turns=1)
+    ):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+selected_provider checks the three CLAUDE_CODE_USE_* flags, raises if more than one is "1", and falls back to ANTHROPIC_API_KEY without reading any secret value into code.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `providers` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1395); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

@@ -20,37 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 6](http://127.0.0.1:8080/?lesson=6).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sessions`, line 493). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("sessions")
-def sessions(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    turns = [
-        {"role": "user", "content": request.prompt or lesson.prompt},
-        {"role": "user", "content": request.follow_up},
-    ]
-    return {
-        "planned_turns": turns,
-        "live_lifecycle": [
-            "async with ClaudeSDKClient(options)",
-            "await client.query(first)",
-            "async for message in client.receive_response()",
-            "await client.query(follow_up)",
-            "consume response",
-            "disconnect in the same owning task",
-        ],
-        "source": "host conversation plan; no model response",
-    }
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    ResultMessage,
+    TextBlock,
+)
+
+
+async def ask(client: ClaudeSDKClient, prompt: str) -> None:
+    await client.query(prompt)
+    async for message in client.receive_response():
+        if isinstance(message, AssistantMessage):
+            print("".join(b.text for b in message.content if isinstance(b, TextBlock)))
+        elif isinstance(message, ResultMessage):
+            print("session:", message.session_id)
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(tools=[], max_turns=2)
+    async with ClaudeSDKClient(options=options) as client:
+        await ask(client, "Remember this label for the next turn: PYTHON-SESSION.")
+        # Same client, same conversation: the second turn sees the first.
+        await ask(client, "What label did I ask you to remember?")
 ```
+
+`async with ClaudeSDKClient(options=...) as client` owns one connection; each `client.query(...)` followed by `client.receive_response()` is a turn in the same conversation.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `sessions` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 493); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

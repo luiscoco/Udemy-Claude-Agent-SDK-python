@@ -20,59 +20,53 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 39](http://127.0.0.1:8080/?lesson=39).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `config_root`, line 220). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("config_root")
-def config_root(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Resolve project paths safely and load project settings only for allowlisted projects."""
-    from claude_agent_sdk import ClaudeAgentOptions
+from pathlib import Path
 
-    projects = root / "projects"
-    for name, allow in (("course-app", "Read"), ("downloaded-repo", "Bash(*)")):
-        settings = projects / name / ".claude" / "settings.json"
-        settings.parent.mkdir(parents=True, exist_ok=True)
-        settings.write_text(json.dumps({"permissions": {"allow": [allow]}}), encoding="utf-8")
-    rows: list[dict[str, Any]] = []
-    for requested in (
+from claude_agent_sdk import ClaudeAgentOptions, SettingSource
+
+BASE = Path("projects").resolve()
+TRUSTED = {"course-app"}
+
+
+def options_for(requested: str) -> ClaudeAgentOptions:
+    root = (BASE / requested).resolve()
+    if root == BASE or not root.is_relative_to(BASE):
+        raise ValueError(f"{requested!r} is outside the projects folder")
+    project = BASE / root.relative_to(BASE).parts[0]
+    # [] disables filesystem settings; None would load every source.
+    sources: list[SettingSource] = ["project"] if project.name in TRUSTED else []
+    return ClaudeAgentOptions(cwd=project, setting_sources=sources)
+
+
+def main() -> None:
+    for requested in [
         "course-app",
+        "course-app/src",
         "downloaded-repo",
-        "course-app/../downloaded-repo",
-        "../outside",
-        "course-app/.claude",
-    ):
+        "../secrets",
+        "/etc",
+    ]:
         try:
-            path = inside(projects, requested)
-        except ValueError as exc:
-            rows.append({"requested": requested, "resolved": None, "error": str(exc)})
-            continue
-        trusted = path.name in TRUSTED_PROJECTS and path.is_dir()
-        options = ClaudeAgentOptions(cwd=str(path), setting_sources=["project"] if trusted else [])
-        rows.append(
-            {
-                "requested": requested,
-                "resolved": path.relative_to(projects).as_posix(),
-                "trusted": trusted,
-                "setting_sources": options.setting_sources,
-            }
-        )
-    return {
-        "trusted_projects": sorted(TRUSTED_PROJECTS),
-        "resolutions": rows,
-        "untrusted_settings_loaded": any(
-            row.get("setting_sources") and row["resolved"] != "course-app" for row in rows
-        ),
-    }
+            options = options_for(requested)
+            print(requested, "->", options.cwd, options.setting_sources)
+        except ValueError as error:
+            print("refused:", error)
 ```
+
+options_for resolves the request under BASE, rejects anything not is_relative_to(BASE), and sets setting_sources=["project"] only for names in TRUSTED.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `config_root` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 220); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

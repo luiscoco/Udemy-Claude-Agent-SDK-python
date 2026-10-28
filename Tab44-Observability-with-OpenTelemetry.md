@@ -20,39 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 44](http://127.0.0.1:8080/?lesson=44).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `telemetry`, line 1373). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("telemetry")
-def telemetry(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+import os
 
-    exporter = InMemorySpanExporter()
-    provider = TracerProvider()
-    provider.add_span_processor(SimpleSpanProcessor(exporter))
-    with provider.get_tracer("agent-lab").start_as_current_span("lesson.host") as span:
-        span.set_attribute("lesson.id", lesson.id)
-        span.set_attribute("run.mode", "offline")
-    spans = exporter.get_finished_spans()
-    result = {
-        "span": spans[0].name,
-        "attributes": dict(spans[0].attributes or {}),
-        "external_export": False,
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+def telemetry_env() -> dict[str, str]:
+    endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
+    if not endpoint:
+        return {}  # no backend configured, so nothing is exported
+    return {
+        "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+        "OTEL_METRICS_EXPORTER": "otlp",
+        "OTEL_LOGS_EXPORTER": "otlp",
+        "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": endpoint,
+        "OTEL_RESOURCE_ATTRIBUTES": "lesson.id=44,run.mode=live",
     }
-    provider.shutdown()
-    return result
+
+
+async def main() -> None:
+    options = ClaudeAgentOptions(env=telemetry_env(), max_turns=1)
+    async for message in query(prompt="Explain the trace attributes.", options=options):
+        if isinstance(message, ResultMessage):
+            print(message.session_id, message.duration_ms, message.total_cost_usd)
 ```
+
+telemetry_env returns OTLP exporter settings only when OTEL_EXPORTER_OTLP_ENDPOINT is configured, and ClaudeAgentOptions(env=...) hands them to the CLI.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `telemetry` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1373); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

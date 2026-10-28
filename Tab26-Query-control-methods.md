@@ -20,55 +20,46 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 26](http://127.0.0.1:8080/?lesson=26).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `control`, line 684). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("control")
-async def control(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Call ClaudeSDKClient control methods and observe their effect on the next turn."""
-    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+import asyncio
 
-    from agent_lab.scripted_cli import ScriptedCLI
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
-    cli = ScriptedCLI([["Before the switch."], ["After the switch."]])
-    owner = asyncio.current_task()
-    async with asyncio.timeout(20):
-        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
-            info = await client.get_server_info()
-            await client.query("First turn")
-            before = await scripted_turn(client)
-            await client.set_model("claude-sonnet-5-5")
-            await client.set_permission_mode("plan")
-            await client.query("Second turn")
-            after = await scripted_turn(client)
-            try:
-                await client.get_mcp_status()
-                unsupported = "accepted"
-            except Exception as exc:
-                unsupported = str(exc)
-            same_owner = asyncio.current_task() is owner
-    return {
-        "server_info_keys": sorted(info or {}),
-        "before": {"models": before["models"], "text": before["text"]},
-        "after": {"models": after["models"], "text": after["text"]},
-        "cli_permission_mode": cli.permission_mode,
-        "control_requests": [
-            m["request"]["subtype"] for m in cli.received if m["type"] == "control_request"
-        ],
-        "unsupported_request": unsupported,
-        "context_owned_by_one_task": same_owner,
-        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
-    }
+
+async def main() -> None:
+    options = ClaudeAgentOptions(tools=["Read"], cwd="workspace", max_turns=3)
+    async with ClaudeSDKClient(options=options) as client:
+        info = await client.get_server_info()
+        print("commands:", len((info or {}).get("commands", [])))
+        await client.query("Explain notes.txt.")
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(message.result)
+        await client.set_model("claude-sonnet-5-5")
+        await client.set_permission_mode("plan")
+        await client.query("Plan an improvement to notes.txt.")
+        try:
+            async with asyncio.timeout(60):
+                async for message in client.receive_response():
+                    if isinstance(message, ResultMessage):
+                        print(message.result)
+        except TimeoutError:
+            await client.interrupt()
 ```
+
+`get_server_info`, `set_model`, `set_permission_mode` and `interrupt` are awaited on one connected `ClaudeSDKClient`, all inside the task that owns its `async with` block.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `control` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 684); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

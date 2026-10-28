@@ -4,6 +4,8 @@ Progress lives in NiceGUI's per-browser user storage. It stays on this machine a
 never sent to Claude; clearing the browser's cookies starts a fresh record.
 """
 
+import json
+import re
 from datetime import UTC, datetime
 from typing import Any
 
@@ -22,6 +24,7 @@ from agent_lab.learning import (
     visual_guides_for,
 )
 from agent_lab.models import LessonError
+from agent_lab.policy import redact
 from agent_lab.progress import KEYS as PROGRESS_KEYS
 from agent_lab.progress import MAX_BYTES as PROGRESS_MAX_BYTES
 from agent_lab.progress import export_progress, import_progress
@@ -56,6 +59,7 @@ def record(lesson_id: int) -> dict[str, Any]:
         "answers": dict(saved.get("answers", {})),
         "check": saved.get("check"),
         "tutor": list(saved.get("tutor", [])),
+        "last_run": saved.get("last_run", ""),
     }
 
 
@@ -203,6 +207,14 @@ def lesson_header(lesson_id: int, live_enabled: bool) -> None:
             ui.link(f"Lesson {number}", f"/?lesson={number}").classes("text-sm")
 
 
+def concept_code_card(lesson_id: int) -> None:
+    """The SDK code for this lesson's concept, as a developer would write it."""
+    item = guide(lesson_id)
+    with card("The concept in code", "Python SDK"):
+        ui.code(item.concept_code, language="python").classes("w-full")
+        ui.markdown(item.code_focus)
+
+
 def learn_panel(lesson_id: int, tutorial: str, open_run: Any) -> None:
     item = guide(lesson_id)
     with card("Prepare this lesson", "Before you begin"):
@@ -212,7 +224,10 @@ def learn_panel(lesson_id: int, tutorial: str, open_run: Any) -> None:
         ui.markdown(item.concept_brief)
         ui.markdown(f"**In this lab:** {item.lab_brief}")
         ui.button("Open exercise", icon="play_arrow", on_click=open_run)
+    concept_code_card(lesson_id)
     if tutorial:
+        # The concept code card above already shows this section; the file keeps it for readers.
+        tutorial = re.sub(r"## The concept in code\n.*?(?=\n## )", "", tutorial, flags=re.S)
         with card("Lesson tutorial", "Read"):
             with ui.expansion("Read the full Python tutorial", value=True).classes("w-full"):
                 ui.markdown(tutorial).classes("nicegui-markdown")
@@ -327,8 +342,46 @@ def walkthrough_panel(lesson_id: int) -> None:
             ui.markdown(f"- {line}")
 
 
+def infographic(lesson_id: int) -> None:
+    """A per-lesson Python infographic built from the lesson's own content."""
+    lesson, item = LESSONS[lesson_id], guide(lesson_id)
+    with ui.element("div").classes("infographic w-full"):
+        with ui.element("div").classes("ig-header"):
+            ui.label(f"LESSON {lesson_id:02}").classes("ig-badge")
+            with ui.column().classes("gap-0 min-w-0"):
+                ui.label(lesson.title).classes("ig-title")
+                ui.label(lesson.objective).classes("ig-objective")
+        with ui.element("div").classes("ig-grid ig-three"):
+            for number, point in enumerate(item.concept_points, 1):
+                with ui.element("div").classes("ig-panel"):
+                    ui.label(f"{number}. {point.title}").classes("ig-panel-title")
+                    ui.label(point.text).classes("ig-panel-text")
+        with ui.element("div").classes("ig-grid ig-two"):
+            with ui.element("div").classes("ig-panel ig-code"):
+                ui.label("The concept in Python").classes("ig-panel-title")
+                ui.code(item.concept_code, language="python").classes("w-full")
+                ui.markdown(item.code_focus).classes("ig-panel-text")
+            with ui.column().classes("gap-3"):
+                with ui.element("div").classes("ig-panel"):
+                    ui.label("Evidence in this lesson").classes("ig-panel-title")
+                    ui.markdown(item.evidence_criterion).classes("ig-panel-text")
+                    for check in item.evidence_checks:
+                        ui.label(f"\u2713 {check.key}").classes("ig-check")
+                with ui.element("div").classes("ig-panel ig-myth"):
+                    ui.label("Common misconception").classes("ig-panel-title")
+                    ui.markdown(f"*{item.misconception.claim}*").classes("ig-panel-text")
+                    ui.label("Not true.").classes("ig-not-true")
+                    ui.markdown(item.misconception.correction).classes("ig-panel-text")
+        ui.label(
+            f"Lesson {lesson_id:02} \u00b7 {lesson.topic} \u00b7 Python edition, "
+            "generated from the lesson content"
+        ).classes("ig-footer")
+
+
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    with card("Lesson infographic", "Python"):
+        infographic(lesson_id)
     with card("How this exercise is built", "Generated from the code"):
         ui.label(
             "This diagram is drawn from the exercise's own source, so it always matches what "
@@ -347,6 +400,22 @@ def visual_panel(lesson_id: int) -> None:
             ).classes("text-slate-500")
     for item in related or course().visual_guides:
         visual_guide_card(item, compact=not related)
+
+
+def run_summary(state: Any, check: CheckResult) -> str:
+    """What the tutor may see of the latest run: short and redacted, never raw traces."""
+    parts = [
+        f"Mode: {state.mode}. Status: {state.status}.",
+        f"Automatic check: {check.status} ({check.detail})",
+    ]
+    if state.error:
+        parts.append(f"Error: {state.error[:400]}")
+    if state.response_texts:
+        parts.append("Claude's answer: " + state.response_texts[-1][:1500])
+    if state.evidence is not None:
+        evidence = json.dumps(redact(state.evidence), default=str, ensure_ascii=False)
+        parts.append("Local evidence: " + evidence[:3000])
+    return "\n".join(parts)[:6000]
 
 
 def check_card(lesson_id: int, result: CheckResult | None) -> None:
@@ -375,8 +444,9 @@ def tutor_panel(lesson_id: int, tutor: TutorService, source: str) -> None:
             "Prepared answers are written from this lesson's content and cost nothing. "
             "Live answers send this lesson's context and your question to Claude."
         ).classes("text-slate-600")
-        modes = {"prepared": "Prepared answer"} | ({"live": "Live Claude answer"} if live else {})
-        mode = ui.toggle(modes, value="prepared")
+        mode = ui.toggle(
+            {"prepared": "Prepared answer", "live": "Live Claude answer"}, value="prepared"
+        )
         intent = ui.select(TUTOR_INTENTS, value="explain", label="What do you need?").classes(
             "w-72"
         )
@@ -397,10 +467,19 @@ def tutor_panel(lesson_id: int, tutor: TutorService, source: str) -> None:
             f"I authorize one paid request (budget threshold {TUTOR_BUDGET_USD:.2f} USD, one turn, no tools)."
         ).bind_visibility_from(mode, "value", lambda value: value == "live")
         if not live:
+            # The option stays visible so students can find it; it explains how to turn it on.
             ui.label(
-                "Live answers are disabled. Set LAB_ENABLE_LIVE=true in .env and restart to enable them."
-            ).classes("text-sm text-slate-500")
-        ask = ui.button("Ask the tutor", icon="school")
+                "Live answers are turned off. Set ANTHROPIC_API_KEY and LAB_ENABLE_LIVE=true in "
+                ".env, then restart the app."
+            ).classes("text-sm text-amber-700").bind_visibility_from(
+                mode, "value", lambda value: value == "live"
+            )
+        latest = record(lesson_id)["last_run"]
+        include_run = ui.checkbox("Include my latest run of this lesson", value=bool(latest))
+        include_run.set_visibility(bool(latest))
+        ask = ui.button("Ask the tutor", icon="school").bind_enabled_from(
+            mode, "value", lambda value: value == "prepared" or live
+        )
         status = ui.label("")
 
     with card("Answer"):
@@ -445,6 +524,7 @@ def tutor_panel(lesson_id: int, tutor: TutorService, source: str) -> None:
             question=question.value or "",
             model=model.value,
             consent=bool(consent.value),
+            latest_run=record(lesson_id)["last_run"] if include_run.value else "",
         )
         ask.disable()
         status.set_text("Asking Claude…" if request.mode == "live" else "")
@@ -647,6 +727,30 @@ APPEARANCE_CSS = """
     .response-prose h3 { font-size: 1.2em; line-height: 1.3; }
     .feedback { padding: 8px 12px; border-radius: 8px; }
     .exercise-diagram { min-width: 640px; }
+    .infographic { border: 1px solid #c9d8f0; border-radius: 16px; padding: 18px; background: #f6f9fe; display: flex; flex-direction: column; gap: 14px; }
+    .ig-header { display: flex; gap: 16px; align-items: center; }
+    .ig-badge { background: #1e3a6e; color: #fff; font-weight: 800; letter-spacing: .04em; padding: 10px 16px; border-radius: 10px; white-space: nowrap; font-size: 20px !important; }
+    .ig-title { font-size: 28px !important; font-weight: 800; color: #12264d; line-height: 1.2; }
+    .ig-objective { font-size: 17px !important; color: #3a4a66; font-style: italic; }
+    .ig-grid { display: grid; gap: 12px; }
+    .ig-three { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .ig-two { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+    @media (max-width: 900px) { .ig-two { grid-template-columns: minmax(0, 1fr); } .ig-header { flex-direction: column; align-items: flex-start; } }
+    .ig-panel { background: #fff; border: 1px solid #c9d8f0; border-radius: 12px; padding: 12px 14px; min-width: 0; }
+    .ig-panel-title { font-weight: 800; color: #12264d; font-size: 18px !important; margin-bottom: 4px; }
+    .ig-panel-text, .ig-panel-text p { font-size: 16px !important; line-height: 1.5; color: #2b3a55; }
+    .ig-check { font-size: 15px !important; color: #146c43; font-weight: 600; }
+    .ig-code pre, .ig-code code { white-space: pre-wrap !important; overflow-wrap: anywhere; font-size: 14px !important; }
+    .ig-myth { border-color: #f5b38a; background: #fff7f1; }
+    .ig-not-true { color: #c2410c; font-weight: 800; font-size: 16px !important; }
+    .ig-footer { font-size: 13px !important; color: #6b7a96; }
+    body.body--dark .infographic { background: #161a2b; border-color: #2d3a5c; }
+    body.body--dark .ig-panel { background: #1b1f33; border-color: #2d3a5c; }
+    body.body--dark .ig-title, body.body--dark .ig-panel-title { color: #dbe6ff; }
+    body.body--dark .ig-objective, body.body--dark .ig-panel-text, body.body--dark .ig-panel-text p { color: #b9c3dd; }
+    body.body--dark .ig-myth { background: #2a1d17; border-color: #8a4b2a; }
+    body.body--dark .ig-check { color: #6ee7b7; }
+    body.body--dark .text-amber-700 { color: #fbbf24 !important; }
     body.body--dark .exercise-diagram .flowchart-link { stroke: #c4c1d9 !important; }
     body.body--dark .exercise-diagram marker path { fill: #c4c1d9 !important; stroke: #c4c1d9 !important; }
     .legend-chip { font-size: 14px !important; padding: 2px 10px; border-radius: 999px; border: 1px solid; color: #1f1d2e; }

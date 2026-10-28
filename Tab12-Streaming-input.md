@@ -20,48 +20,45 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 12](http://127.0.0.1:8080/?lesson=12).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `streaming`, line 821). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("streaming")
-async def streaming(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Stream an async iterable of user messages through query() and get one reply per message."""
-    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, query
+from collections.abc import AsyncIterator
+from typing import Any
 
-    from agent_lab.scripted_cli import ScriptedCLI
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
 
-    texts = [request.prompt or lesson.prompt, request.follow_up]
-    cli = ScriptedCLI([["Async iterators yield values over time."], ["They produce items lazily."]])
-    replies: list[str] = []
-    results = 0
-    async with asyncio.timeout(20):
-        async for message in query(
-            prompt=user_messages(*texts), options=ClaudeAgentOptions(), transport=cli
-        ):
-            if isinstance(message, AssistantMessage):
-                replies += [getattr(block, "text", "") for block in message.content]
-            elif isinstance(message, ResultMessage):
-                results += 1
-    received = [m for m in cli.received if m["type"] == "user"]
-    return {
-        "input_messages": [message async for message in user_messages(*texts)],
-        "messages_the_cli_received": [m["message"]["content"] for m in received],
-        "replies": replies,
-        "turns_completed": results,
-        "lifecycle": cli.lifecycle,
-        "note": "Token output streaming is the separate include_partial_messages option.",
-        "source": "real query() streaming to a scripted CLI fixture",
-    }
+
+async def user_messages(prompts: list[str]) -> AsyncIterator[dict[str, Any]]:
+    for text in prompts:
+        # Produced lazily: each dict is built only when the SDK pulls the next item.
+        yield {
+            "type": "user",
+            "message": {"role": "user", "content": text},
+            "parent_tool_use_id": None,
+            "session_id": "default",
+        }
+
+
+async def main() -> None:
+    prompts = ["Explain an async iterator.", "Now give a one-line example."]
+    options = ClaudeAgentOptions(tools=[], max_turns=4)
+    async for message in query(prompt=user_messages(prompts), options=options):
+        if isinstance(message, ResultMessage):
+            print(message.num_turns, message.result)
 ```
+
+`user_messages()` is an async generator yielding user-message dicts, and `query(prompt=user_messages(prompts), ...)` consumes it as a series of queued turns.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `streaming` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 821); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

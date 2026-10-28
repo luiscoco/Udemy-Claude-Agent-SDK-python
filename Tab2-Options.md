@@ -20,68 +20,48 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 2](http://127.0.0.1:8080/?lesson=2).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `options`, line 538). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("options")
-def options(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Validate requests first, then build ClaudeAgentOptions only from accepted values."""
-    from claude_agent_sdk import ClaudeAgentOptions
+from claude_agent_sdk import ClaudeAgentOptions
+from pydantic import BaseModel, ConfigDict, Field
 
-    from agent_lab.config import Settings
 
-    valid = {"omitted values": {}, "explicit values": {"max_turns": 2, "max_budget_usd": 0.05}}
-    invalid = {
-        "zero turns": {"max_turns": 0},
-        "budget is not a number": {"max_budget_usd": float("nan")},
-        "budget above the lab limit": {"max_budget_usd": 5},
-        "unknown option": {"cwd": "C:/"},
-    }
-    accepted = []
-    for label, body in valid.items():
-        parsed = RunRequest.model_validate(body)
-        accepted.append(
-            {
-                "case": label,
-                "set_by_student": sorted(parsed.model_fields_set) or ["(none)"],
-                "max_turns": parsed.max_turns,
-                "max_budget_usd": parsed.max_budget_usd,
-            }
-        )
-    rejected = []
-    for label, bad in invalid.items():
-        try:
-            RunRequest.model_validate(bad)
-        except ValidationError as exc:
-            error = exc.errors()[0]
-            rejected.append({"case": label, "field": str(error["loc"][0]), "problem": error["msg"]})
-    chosen = RunRequest.model_validate(valid["explicit values"])
-    built = ClaudeAgentOptions(
-        model=Settings().model,
-        max_turns=chosen.max_turns,
-        max_budget_usd=chosen.max_budget_usd,
-        tools=[],
+class RunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    max_turns: int | None = Field(default=None, ge=1, le=20)
+    max_budget_usd: float | None = Field(default=None, gt=0, le=1.0)
+    model: str | None = None
+
+
+def build_options(raw: dict[str, object]) -> ClaudeAgentOptions:
+    request = RunRequest.model_validate(raw)
+    print("set by the user:", sorted(request.model_fields_set))
+    # A field left as None is not sent, so the CLI default applies.
+    return ClaudeAgentOptions(
+        max_turns=request.max_turns,
+        max_budget_usd=request.max_budget_usd,
+        model=request.model,
         setting_sources=[],
     )
-    fields = ("model", "max_turns", "max_budget_usd", "tools", "setting_sources")
-    return {
-        "accepted": accepted,
-        "rejected": rejected,
-        "built_options": {name: getattr(built, name) for name in fields},
-        "sdk_defaults": {name: getattr(ClaudeAgentOptions(), name) for name in fields},
-        "note": "None in sdk_defaults means the option is not sent and the CLI decides. "
-        "The lab always sends explicit limits.",
-    }
+
+
+def main() -> None:
+    options = build_options({"max_turns": 3, "max_budget_usd": 0.05})
+    print(options.max_turns, options.max_budget_usd, options.model)
 ```
+
+`RunRequest.model_validate(raw)` rejects bad input, `model_fields_set` shows what the user chose, and only accepted values reach `ClaudeAgentOptions(...)`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `options` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 538); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

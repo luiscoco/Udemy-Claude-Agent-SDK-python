@@ -20,37 +20,50 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 36](http://127.0.0.1:8080/?lesson=36).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `spawn`, line 1340). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("spawn")
-async def spawn(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+import asyncio
+import shutil
+import sys
+
+from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+
+
+async def run_child(*args: str, seconds: float = 10) -> str:
     process = await asyncio.create_subprocess_exec(
-        sys.executable,
-        "-c",
-        "print('Python child process')",
-        cwd=root,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
     try:
-        async with asyncio.timeout(10):
+        async with asyncio.timeout(seconds):
             stdout, _ = await process.communicate()
     finally:
         if process.returncode is None:
             process.kill()
             await process.wait()
-    return {"stdout": stdout.decode().strip(), "exit_code": process.returncode, "shell": False}
+    return stdout.decode()
+
+
+async def main() -> None:
+    print(await run_child(sys.executable, "-c", "print('Python child process')"))
+    # The SDK itself spawns the Claude Code CLI as a child; cli_path pins which binary.
+    options = ClaudeAgentOptions(cli_path=shutil.which("claude"), max_turns=1)
+    async for message in query(prompt="Say hello in five words.", options=options):
+        if isinstance(message, ResultMessage):
+            print(message.result)
 ```
+
+asyncio.create_subprocess_exec(*args) with asyncio.timeout and process.kill() is the host pattern, and ClaudeAgentOptions(cli_path=...) chooses the CLI the SDK itself spawns.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `spawn` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1340); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

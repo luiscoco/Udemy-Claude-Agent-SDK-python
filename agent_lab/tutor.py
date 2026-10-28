@@ -31,6 +31,8 @@ class TutorRequest(BaseModel):
     model: str | None = Field(default=None, max_length=120)
     # A live answer may cost money; the browser must send explicit consent for each request.
     consent: bool = False
+    # A short summary of the student's latest run of this lesson, so answers can refer to it.
+    latest_run: str = Field(default="", max_length=6000)
 
 
 class TutorAnswer(BaseModel):
@@ -81,7 +83,7 @@ class TutorService:
                 mode="prepared",
                 intent=request.intent,
                 question=question,
-                text=prepared_answer(lesson_id, request.intent, source),
+                text=prepared_answer(lesson_id, request.intent, request.latest_run),
             )
         require_live_access(self.settings)
         if not request.consent:
@@ -94,15 +96,23 @@ class TutorService:
         if self._busy.locked():
             raise LessonError("Another tutor answer is in progress. Wait for it to finish.")
         async with self._busy:
-            return await self._live(lesson_id, request.intent, question, model, source)
+            return await self._live(
+                lesson_id, request.intent, question, model, source, request.latest_run
+            )
 
     async def _live(
-        self, lesson_id: int, intent: str, question: str, model: str, source: str
+        self,
+        lesson_id: int,
+        intent: str,
+        question: str,
+        model: str,
+        source: str,
+        latest_run: str = "",
     ) -> TutorAnswer:
         root = self.settings.data_dir / "tutor" / uuid.uuid4().hex
         work, config = root / "work", root / "config"
         await asyncio.to_thread(work.mkdir, parents=True, exist_ok=True)
-        context = tutor_context(lesson_id)
+        context = tutor_context(lesson_id) | {"latest_run": latest_run or "not run yet"}
         options = ClaudeAgentOptions(
             model=model,
             cli_path=resolve_cli_path(self.settings),

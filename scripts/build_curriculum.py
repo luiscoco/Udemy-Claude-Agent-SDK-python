@@ -6,6 +6,7 @@ import json
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS
 from agent_lab.exercises import EXERCISES
+from agent_lab.learning import guide
 
 
 def main() -> None:
@@ -36,7 +37,8 @@ def main() -> None:
         filename = documents[number]
         function = EXERCISES[lesson.exercise]
         line = inspect.getsourcelines(function)[1]
-        notes = f"\n## Python edition adaptation\n\n{lesson.notes}\n" if lesson.notes else ""
+        concept = guide(number)
+        notes =f"\n## Python edition adaptation\n\n{lesson.notes}\n" if lesson.notes else ""
         markdown = f"""# Lesson {number}: {lesson.title}
 
 {lesson.objective}
@@ -59,20 +61,23 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson {number}](http://127.0.0.1:8080/?lesson={number}).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `{function.__name__}`, line {line}). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-{inspect.getsource(function).rstrip()}
+{concept.concept_code.rstrip()}
 ```
+
+{concept.code_focus}
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `{function.__name__}` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line {line}); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

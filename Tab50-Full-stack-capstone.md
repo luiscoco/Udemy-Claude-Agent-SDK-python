@@ -20,56 +20,76 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 50](http://127.0.0.1:8080/?lesson=50).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `support`, line 1761). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("support")
-def support(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Bind tools to the signed-in customer and require an exact approval before a refund."""
-    customer = "alice"  # chosen by the host session, never by tool arguments
-    orders = Orders(root / "orders.sqlite")
-    try:
-        visible = orders.list(customer)
-    finally:
-        orders.close()
-    proposal = Refund(order_id="A-001", amount_cents=4200, reason="Damaged on arrival")
-    steps: list[dict[str, Any]] = []
-    approval = Approval(proposal)
-    try:
-        approval.consume(proposal)
-    except ValueError as exc:
-        steps.append({"step": "refund before approval", "outcome": str(exc)})
-    try:
-        approval.decide("guessed-token", True)
-    except PermissionError as exc:
-        steps.append({"step": "approve with a wrong credential", "outcome": str(exc)})
-    approval.decide(approval.token, True)
-    steps.append({"step": "staff approves", "outcome": approval.state})
-    larger = proposal.model_copy(update={"amount_cents": 9000})
-    try:
-        approval.consume(larger)
-    except ValueError as exc:
-        steps.append({"step": "refund a different amount", "outcome": str(exc)})
-    approval.consume(proposal)
-    steps.append({"step": "refund the approved action", "outcome": approval.state})
-    return {
-        "customer": customer,
-        "visible_orders": visible,
-        "proposal": proposal.model_dump(),
-        "approval_steps": steps,
-        "refunds_executed": 1,
-        "final_state": approval.state,
-    }
+import time
+from dataclasses import dataclass
+from typing import Any
+
+from claude_agent_sdk import McpSdkServerConfig, create_sdk_mcp_server, tool
+
+
+@dataclass
+class Approval:
+    customer_id: str
+    amount: float
+    expires_at: float
+
+
+def support_server(
+    customer_id: str, approvals: dict[str, Approval]
+) -> McpSdkServerConfig:
+    @tool(
+        "list_orders", "List the orders of the customer signed in to this session.", {}
+    )
+    async def list_orders(args: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "content": [{"type": "text", "text": f"Orders for {customer_id}: A1 40.00"}]
+        }
+
+    @tool(
+        "refund",
+        "Refund an order that staff approved.",
+        {"order_id": str, "amount": float},
+    )
+    async def refund(args: dict[str, Any]) -> dict[str, Any]:
+        a = approvals.get(args["order_id"])
+        if (
+            a is None
+            or time.time() > a.expires_at
+            or (a.customer_id, a.amount) != (customer_id, args["amount"])
+        ):
+            return {
+                "content": [
+                    {"type": "text", "text": "No valid approval for this exact refund."}
+                ],
+                "is_error": True,
+            }
+        del approvals[args["order_id"]]  # single use: the approval is consumed
+        return {
+            "content": [
+                {
+                    "type": "text",
+                    "text": f"Refunded {a.amount:.2f} on {args['order_id']}.",
+                }
+            ]
+        }
+
+    return create_sdk_mcp_server("support", tools=[list_orders, refund])
 ```
+
+support_server closes over the host's customer_id, so list_orders takes no customer argument, and refund only runs, and then deletes the approval, when an unexpired Approval for that order matches the customer and amount.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `support` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1761); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

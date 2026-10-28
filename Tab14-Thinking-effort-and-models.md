@@ -20,64 +20,47 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 14](http://127.0.0.1:8080/?lesson=14).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `thinking`, line 124). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("thinking")
-def thinking(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Build every thinking configuration the installed SDK accepts, and reject foreign names."""
-    import typing
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    TextBlock,
+    ThinkingBlock,
+    ThinkingConfigAdaptive,
+    ThinkingConfigEnabled,
+    query,
+)
 
-    from claude_agent_sdk import ClaudeAgentOptions
-    from claude_agent_sdk.types import (
-        ThinkingConfigAdaptive,
-        ThinkingConfigDisabled,
-        ThinkingConfigEnabled,
-    )
+adaptive: ThinkingConfigAdaptive = {"type": "adaptive"}
+fixed_budget: ThinkingConfigEnabled = {"type": "enabled", "budget_tokens": 4000}
 
-    from agent_lab.sdk import THINKING_PROFILE
 
-    hints = typing.get_type_hints(ClaudeAgentOptions)
-    effort_values = list(typing.get_args(typing.get_args(hints["effort"])[0]))
-    configs: dict[str, Any] = {
-        "adaptive": ThinkingConfigAdaptive(type="adaptive"),
-        "fixed budget": ThinkingConfigEnabled(type="enabled", budget_tokens=4000),
-        "off": ThinkingConfigDisabled(type="disabled"),
-    }
-    built = [
-        {
-            "choice": label,
-            "thinking": ClaudeAgentOptions(thinking=config, effort="medium").thinking,
-            "keys": sorted(config),
-        }
-        for label, config in configs.items()
-    ]
-    foreign = []
-    for name in ("maxThinkingTokens", "thinkingBudget", "reasoningEffort"):
-        foreign_option: dict[str, Any] = {name: 4000}  # deliberately not a Python option
-        try:
-            ClaudeAgentOptions(**foreign_option)
-            foreign.append({"option": name, "accepted": True})
-        except TypeError:
-            foreign.append({"option": name, "accepted": False})
-    return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "thinking_type": str(hints["thinking"]),
-        "effort_values": effort_values,
-        "configs": built,
-        "foreign_option_names": foreign,
-        "live_profile": THINKING_PROFILE,
-    }
+async def main(model: str) -> None:
+    options = ClaudeAgentOptions(model=model, thinking=adaptive, effort="medium")
+    async for message in query(
+        prompt="When is more reasoning effort useful?", options=options
+    ):
+        if isinstance(message, AssistantMessage):
+            for block in message.content:
+                if isinstance(block, ThinkingBlock):
+                    print("thinking:", len(block.thinking), "chars")
+                elif isinstance(block, TextBlock):
+                    print(block.text)
 ```
+
+`thinking=adaptive` with `effort="medium"` configures reasoning, `ThinkingConfigEnabled` shows the fixed `budget_tokens` alternative, and `ThinkingBlock` is how reasoning arrives.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `thinking` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 124); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

@@ -20,59 +20,53 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 59](http://127.0.0.1:8080/?lesson=59).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `routing`, line 1617). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("routing")
-def routing(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Route each task to a model and limits with explicit, testable host rules."""
-    from agent_lab.config import Settings
+from dataclasses import dataclass
 
-    settings = Settings()
-    tiers = {
-        "fast": {"model": settings.model, "max_turns": 2, "max_budget_usd": 0.05},
-        "capable": {"model": settings.route_model, "max_turns": 6, "max_budget_usd": 0.25},
-    }
-    signals = ("refactor", "design", "debug", "architecture", "migrate", "security")
-    tasks = [
-        "Summarize notes.txt in one sentence.",
-        "Debug why the retry loop repeats the refund write.",
-        "Design the architecture for a multi-tenant agent service.",
-    ]
-    if request.prompt:
-        tasks.append(request.prompt)
-    routes = []
-    for task in tasks:
-        matched = [word for word in signals if word in task.lower()]
-        tier = "capable" if matched or len(task) > 400 else "fast"
-        routes.append(
-            {
-                "task": task[:120],
-                "tier": tier,
-                **tiers[tier],
-                "reason": f"matched {', '.join(matched)}"
-                if matched
-                else "long input"
-                if tier == "capable"
-                else "short task with no complexity signal",
-            }
-        )
-    return {
-        "tiers": tiers,
-        "routes": routes,
-        "decision_owner": "host policy",
-        "fallback": "No automatic repeated paid calls after failure.",
-    }
+from claude_agent_sdk import ClaudeAgentOptions
+
+SIGNALS = ("refactor", "design", "debug", "architecture", "migrate", "security")
+
+
+@dataclass(frozen=True)
+class Route:
+    model: str
+    max_turns: int
+    max_budget_usd: float
+    reason: str
+
+
+def route(task: str) -> Route:
+    matched = [word for word in SIGNALS if word in task.lower()]
+    if matched or len(task) > 400:
+        reason = f"complex: {', '.join(matched) or 'long input'}"
+        return Route("sonnet", max_turns=6, max_budget_usd=0.25, reason=reason)
+    return Route("haiku", max_turns=2, max_budget_usd=0.05, reason="simple task")
+
+
+def options_for(task: str) -> ClaudeAgentOptions:
+    chosen = route(task)
+    print(f"routing to {chosen.model}: {chosen.reason}")
+    return ClaudeAgentOptions(
+        model=chosen.model,
+        max_turns=chosen.max_turns,
+        max_budget_usd=chosen.max_budget_usd,
+    )
 ```
+
+route() applies explicit keyword and length rules and returns a Route whose model, max_turns and max_budget_usd are passed straight into ClaudeAgentOptions, with the reason logged.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `routing` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1617); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

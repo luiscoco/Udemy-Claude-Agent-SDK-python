@@ -20,86 +20,52 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 33](http://127.0.0.1:8080/?lesson=33).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `elicitation`, line 2049). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("elicitation")
-async def elicitation(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """An MCP tool asks the user for structured input; each response type changes the outcome."""
-    import claude_agent_sdk as sdk
-    from mcp import types
-    from mcp.server.fastmcp import Context, FastMCP
-    from mcp.shared.memory import create_connected_server_and_client_session
-    from pydantic import BaseModel
+from typing import Any
 
-    class Confirmation(BaseModel):
-        confirm: bool
-        reason: str = ""
+from mcp import ClientSession, StdioServerParameters, types
+from mcp.client.stdio import stdio_client
+from mcp.shared.context import RequestContext
 
-    def build() -> FastMCP:
-        server = FastMCP("drafts")
 
-        @server.tool()
-        async def delete_draft(name: str, ctx: Context) -> str:
-            """Delete a draft after the user confirms."""
-            answer = await ctx.elicit(f"Delete the draft {name}?", schema=Confirmation)
-            if answer.action == "accept":
-                return f"Deleted {name}." if answer.data.confirm else "Kept: not confirmed."
-            return f"Not deleted: the user chose {answer.action}."
+async def on_elicit(
+    context: RequestContext[ClientSession, Any], params: types.ElicitRequestParams
+) -> types.ElicitResult:
+    if not isinstance(params, types.ElicitRequestFormParams):
+        return types.ElicitResult(action="decline")
+    choice = input(f"{params.message} [y]es / [n]o / [c]ancel: ").strip().lower()
+    if choice == "c":
+        return types.ElicitResult(action="cancel")
+    if choice != "y":
+        return types.ElicitResult(action="decline")
+    return types.ElicitResult(action="accept", content={"confirm": True})
 
-        return server
 
-    responses: dict[str, types.ElicitResult] = {
-        "accept": types.ElicitResult(action="accept", content={"confirm": True}),
-        "decline": types.ElicitResult(action="decline"),
-        "cancel": types.ElicitResult(action="cancel"),
-        "accept with invalid data": types.ElicitResult(
-            action="accept", content={"confirm": "maybe"}
-        ),
-    }
-    outcomes = []
-    for label, response in responses.items():
-        prompts: list[str] = []
-
-        async def answer(
-            context: Any,
-            params: Any,
-            response: types.ElicitResult = response,
-            prompts: list[str] = prompts,
-        ) -> types.ElicitResult:
-            prompts.append(params.message)
-            return response
-
-        async with asyncio.timeout(20):
-            async with create_connected_server_and_client_session(
-                build(), elicitation_callback=answer
-            ) as session:
-                result = await session.call_tool("delete_draft", {"name": "q3-plan"})
-        outcomes.append(
-            {
-                "response": label,
-                "asked": prompts[0] if prompts else "",
-                "is_error": result.isError,
-                "tool_result": tool_text(result)[:160],
-            }
-        )
-    return {
-        "outcomes": outcomes,
-        "python_sdk_on_elicitation": "on_elicitation"
-        in {field.name for field in dataclasses.fields(sdk.ClaudeAgentOptions)},
-        "note": "MCP elicitation runs between an MCP client and server. This installed Python "
-        "Agent SDK does not expose an on_elicitation option, so the lab uses the MCP client.",
-    }
+async def main() -> None:
+    # The installed Agent SDK has no on_elicitation option, so the MCP client answers.
+    server = StdioServerParameters(command="python", args=["drafts_server.py"])
+    async with stdio_client(server) as (read, write):
+        async with ClientSession(
+            read, write, elicitation_callback=on_elicit
+        ) as session:
+            await session.initialize()
+            result = await session.call_tool("delete_draft", {"name": "q3-plan"})
+            print(result.content)
 ```
+
+on_elicit, passed as ClientSession(..., elicitation_callback=on_elicit), turns the server's ElicitRequestParams into an ElicitResult with action accept, decline or cancel.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `elicitation` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 2049); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 

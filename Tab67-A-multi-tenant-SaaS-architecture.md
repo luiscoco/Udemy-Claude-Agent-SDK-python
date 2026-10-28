@@ -20,67 +20,60 @@ and recorded examples are labelled as fixtures rather than live SDK messages.
 For the browser lab, run `uv run agent-lab serve`, then open
 [lesson 67](http://127.0.0.1:8080/?lesson=67).
 
-## What to inspect
-
-Read the exercise, predict its evidence, then run it. Inspect input validation,
-state ownership and the condition that allows the next step. A model's description
-of an action is not evidence that the action happened.
-
-The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `tenancy`, line 1800). Host contracts are in
-[agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
+## The concept in code
 
 ```python
-@exercise("tenancy")
-def tenancy(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    """Every query runs with the tenant from host state; tool arguments cannot change it."""
-    orders = Orders(root / "orders.sqlite")
-    try:
-        sessions = {"session-alice": "alice", "session-bob": "bob"}
+import json
+import sqlite3
+from contextlib import closing
+from typing import Any
 
-        def list_orders(session_id: str, arguments: dict[str, Any]) -> list[dict[str, Any]]:
-            # A model-supplied tenant is ignored: the tool schema has no tenant field.
-            return orders.list(sessions[session_id], arguments.get("status", "all"))
+from claude_agent_sdk import (
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    create_sdk_mcp_server,
+    tool,
+)
 
-        checks: list[dict[str, Any]] = [
-            {
-                "check": "alice sees her orders",
-                "result": [r["id"] for r in list_orders("session-alice", {})],
-            },
-            {
-                "check": "bob sees his orders",
-                "result": [r["id"] for r in list_orders("session-bob", {})],
-            },
-            {
-                "check": "alice passes tenant=bob",
-                "result": [r["id"] for r in list_orders("session-alice", {"tenant": "bob"})],
-            },
-            {"check": "injection in tenant", "result": orders.list("alice' OR 1=1 --")},
-            {
-                "check": "bob cancels alice's order",
-                "result": orders.cancel("bob", "A-001", 1, approved=True),
-            },
-            {
-                "check": "alice cancels with a stale version",
-                "result": orders.cancel("alice", "A-001", 7, approved=True),
-            },
-            {
-                "check": "alice cancels her current order",
-                "result": orders.cancel("alice", "A-001", 1, approved=True),
-            },
-        ]
-    finally:
-        orders.close()
-    return {
-        "tenant_source": "host session table",
-        "checks": checks,
-        "cross_tenant_rows": 0
-        if checks[2]["result"] == ["A-001"] and not checks[3]["result"]
-        else 1,
-        "cross_tenant_update": checks[4]["result"],
-    }
+SESSIONS = {"session-a": "alice", "session-b": "bob"}  # written by the login flow
+
+
+def options_for(tenant: str, db_path: str) -> ClaudeAgentOptions:
+    @tool("list_orders", "List your orders. Takes no arguments.", {})
+    async def list_orders(args: dict[str, Any]) -> dict[str, Any]:
+        with closing(sqlite3.connect(db_path)) as db:
+            rows = db.execute(
+                "SELECT id, status FROM orders WHERE tenant = ?", (tenant,)
+            ).fetchall()
+        return {"content": [{"type": "text", "text": json.dumps(rows)}]}
+
+    server = create_sdk_mcp_server(name="shop", tools=[list_orders])
+    return ClaudeAgentOptions(
+        tools=[], mcp_servers={"shop": server}, allowed_tools=["mcp__shop__list_orders"]
+    )
+
+
+async def handle(session_id: str, prompt: str) -> None:
+    tenant = SESSIONS.get(session_id)
+    if tenant is None:
+        raise PermissionError("Unauthenticated session.")
+    async with ClaudeSDKClient(options=options_for(tenant, "orders.sqlite")) as client:
+        await client.query(prompt)
+        async for message in client.receive_response():
+            print(type(message).__name__)
 ```
+
+`SESSIONS.get(session_id)` picks the tenant, and `options_for(tenant, ...)` closes over it so `list_orders` has an empty schema and always filters by `tenant = ?`.
+
+## How the offline lab checks it
+
+Predict the evidence, then run the exercise. A model's description of an action is
+not evidence that the action happened.
+
+The lab is `tenancy` in [agent_lab/exercises.py](agent_lab/exercises.py)
+(line 1800); the Python source tab shows it below the concept code. Host contracts
+are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
+[agent_lab/policy.py](agent_lab/policy.py).
 
 ## Live Agent SDK exercise
 
