@@ -27,22 +27,36 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `mcp`, line 719). Host contracts are in
+(function `browser`, line 1878). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("browser")
-def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from agent_lab.config import ROOT
+async def browser(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Inspect the browser MCP service's single tool and the origin rule it enforces."""
+    from agent_lab.integrations import browser_mcp
 
+    tools = await browser_mcp.mcp.list_tools()
+    origin = browser_mcp.teaching_origin()
+    candidates = [
+        origin + "/?lesson=1",
+        origin.replace("127.0.0.1", "localhost"),
+        "http://127.0.0.1:9999/",
+        "http://127.0.0.1.evil.example/",
+        "file:///C:/Windows/win.ini",
+    ]
     return {
-        "mcp_version": importlib.metadata.version("mcp"),
-        "transport": "stdio",
-        "server_command": [sys.executable, "-m", "agent_lab.integrations.notes_mcp"],
-        "resource_uri": "notes://welcome",
-        "integration_source": str(ROOT / "agent_lab" / "integrations"),
-        "notes": lesson.notes,
+        "server": browser_mcp.mcp.name,
+        "tools": [{"name": item.name, "input_schema": item.inputSchema} for item in tools],
+        "teaching_origin": origin,
+        "origin_checks": [
+            {"url": url, "allowed": browser_mcp.same_origin(url, origin)} for url in candidates
+        ],
+        "versus_shell": "The agent can only ask for a page at one origin; it cannot run "
+        "commands, read files or reach other hosts. A shell tool would allow all of that.",
+        "browser_launched": False,
+        "start_service": "uv sync --locked --extra browser && uv run playwright install chromium",
     }
 ```
 

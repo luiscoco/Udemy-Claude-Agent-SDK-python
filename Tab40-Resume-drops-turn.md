@@ -27,50 +27,45 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `resume`, line 1724). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "thinking",
-    "settings",
-    "session_management",
-    "resume",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("resume")
+async def resume(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Resume needs the SDK's own transcript in the same config dir; host files do not count."""
+    from claude_agent_sdk import ClaudeAgentOptions
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    config = root / "isolated-config"
+    session_id = write_fixture_session(config)
+    # A host transcript is application data: the SDK neither lists nor resumes it.
+    (root / "host-transcript.json").write_text(
+        json.dumps([{"role": "user", "content": "Remember HOST-ONLY."}]), encoding="utf-8"
+    )
+    same_dir = await probe_sessions(config, session_id)
+    other_dir = await probe_sessions(root / "empty-config", session_id)
+    variants = {
+        "continue this session": ClaudeAgentOptions(resume=session_id),
+        "branch into a new session": ClaudeAgentOptions(resume=session_id, fork_session=True),
+        "most recent session": ClaudeAgentOptions(continue_conversation=True),
+    }
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
+        "resume_options": [
+            {
+                "goal": goal,
+                "resume": options.resume,
+                "fork_session": options.fork_session,
+                "continue_conversation": options.continue_conversation,
+            }
+            for goal, options in variants.items()
         ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "sdk_sessions_in_run_config": [row["session_id"] for row in same_dir["sessions"]],
+        "host_transcript_listed": any(
+            "HOST-ONLY" in (row.get("first_prompt") or "") for row in same_dir["sessions"]
+        ),
+        "sessions_in_another_config_dir": len(other_dir["sessions"]),
+        "rule": "Resume with the same CLAUDE_CONFIG_DIR that recorded the session.",
     }
 ```
 

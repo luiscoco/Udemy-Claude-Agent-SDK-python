@@ -139,7 +139,7 @@
     "title": "Settings and environment",
     "document": "Tab16-Settings-and-env.md",
     "module": "agent_lab.lessons.lesson_16",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "settings_isolation",
     "live_profile": "read",
     "adaptation": ""
   },
@@ -166,7 +166,7 @@
     "title": "Session management",
     "document": "Tab19-Session-management.md",
     "module": "agent_lab.lessons.lesson_19",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "session_management",
     "live_profile": "conversation",
     "adaptation": ""
   },
@@ -292,7 +292,7 @@
     "title": "MCP elicitation",
     "document": "Tab33-MCP-elicitation.md",
     "module": "agent_lab.lessons.lesson_33",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "elicitation",
     "live_profile": "query",
     "adaptation": "This lesson inspects elicitation support in the pinned Python SDK and validates responses locally."
   },
@@ -355,7 +355,7 @@
     "title": "Resume and conversation history",
     "document": "Tab40-Resume-drops-turn.md",
     "module": "agent_lab.lessons.lesson_40",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "resume",
     "live_profile": "conversation",
     "adaptation": "The interactive lab preserves context within one run. Cross-run SDK resume requires a persistent configuration directory and a saved session id."
   },
@@ -490,7 +490,7 @@
     "title": "Upgrading the SDK safely",
     "document": "Tab55-Upgrading-the-SDK-safely.md",
     "module": "agent_lab.lessons.lesson_55",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "upgrade",
     "live_profile": "exercise",
     "adaptation": ""
   },
@@ -571,7 +571,7 @@
     "title": "Browser automation with Playwright MCP",
     "document": "Tab64-Browser-automation-with-Playwright-MCP.md",
     "module": "agent_lab.lessons.lesson_64",
-    "exercise_function": "mcp",
+    "exercise_function": "browser",
     "live_profile": "query",
     "adaptation": "An external browser MCP integration is provided separately; it needs its own browser installation and service startup."
   },

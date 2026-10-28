@@ -23,16 +23,25 @@ async def lifespan(server: FastMCP):
 mcp = FastMCP("python-browser", lifespan=lifespan)
 
 
+def teaching_origin() -> str:
+    return os.getenv("LAB_BROWSER_ORIGIN", "http://127.0.0.1:8080")
+
+
+def same_origin(url: str, origin: str) -> bool:
+    """Scheme, host and port must all match: a lookalike host or other port is refused."""
+    target, allowed = urlparse(url), urlparse(origin)
+    return (target.scheme, target.hostname, target.port) == (
+        allowed.scheme,
+        allowed.hostname,
+        allowed.port,
+    )
+
+
 @mcp.tool()
 async def inspect_page(url: str, ctx: Context) -> dict:
     """Read a page's title and text at the configured LAB_BROWSER_ORIGIN only."""
-    target = urlparse(url)
-    origin = urlparse(os.getenv("LAB_BROWSER_ORIGIN", "http://127.0.0.1:8080"))
-    if (target.scheme, target.hostname, target.port) != (
-        origin.scheme,
-        origin.hostname,
-        origin.port,
-    ):
+    origin = teaching_origin()
+    if not same_origin(url, origin):
         raise ValueError("URL is outside the configured teaching origin.")
     state = ctx.request_context.lifespan_context
     async with state["lock"]:
@@ -40,12 +49,7 @@ async def inspect_page(url: str, ctx: Context) -> dict:
         try:
             # Block all off-origin requests, including redirects and subresources.
             async def route(request):
-                parsed = urlparse(request.request.url)
-                if (parsed.scheme, parsed.hostname, parsed.port) == (
-                    origin.scheme,
-                    origin.hostname,
-                    origin.port,
-                ):
+                if same_origin(request.request.url, origin):
                     await request.continue_()
                 else:
                     await request.abort()

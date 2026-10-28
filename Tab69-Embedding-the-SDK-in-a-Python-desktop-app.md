@@ -27,18 +27,31 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `desktop`, line 1625). Host contracts are in
+(function `desktop`, line 1906). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("desktop")
 def desktop(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """The native window and the browser use the same FastAPI app and lesson service."""
+    from importlib.util import find_spec
+
+    from agent_lab.api import create_app
+    from agent_lab.config import Settings
+    from agent_lab.runtime import RunService
+
+    service = RunService(Settings(enable_live=False, data_dir=root / "desktop-runs"))
+    app = create_app(service, with_ui=False)
+    paths = {str(getattr(route, "path", "")) for route in app.routes}
+    routes = sorted(path for path in paths if path.startswith("/api"))
     return {
-        "browser": "uv run agent-lab serve",
-        "native": "uv run agent-lab serve --native",
-        "native_dependency": "Install the optional pywebview package for a native window.",
-        "same_service": "agent_lab.runtime.RunService",
+        "browser_command": "uv run agent-lab serve",
+        "native_command": "uv run agent-lab serve --native",
+        "native_window_available": find_spec("webview") is not None,
+        "install_native": "uv sync --locked --extra desktop",
+        "shared_service": type(app.state.runner).__name__,
+        "shared_api_routes": routes,
         "notes": lesson.notes,
     }
 ```

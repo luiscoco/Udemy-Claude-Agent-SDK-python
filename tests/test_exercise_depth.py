@@ -242,3 +242,72 @@ async def test_path_policy_does_not_confine_child_processes(work):
     assert evidence["read_tool_through_policy"]["allowed"] is False
     assert evidence["child_process_read_outside"] is True
     assert not (work.parent / "outside-secret.txt").exists()  # the fixture cleans up
+
+
+def test_only_project_file_lessons_opt_in_to_settings(work):
+    from agent_lab.exercises import settings_isolation
+
+    evidence = settings_isolation(work, RunRequest(), LESSONS[16])
+    assert evidence["this_lesson"]["setting_sources"] == []
+    opted_in = {row["profile"] for row in evidence["profiles"] if row["setting_sources"]}
+    assert opted_in == {"skills", "commands", "memory", "styles"}
+    assert evidence["config_dirs_differ"] and not evidence["user_settings_ever_loaded"]
+
+
+async def test_session_api_reads_only_the_isolated_config_dir(work, monkeypatch):
+    from agent_lab.exercises import FIXTURE_SESSION_ID, resume, session_management
+
+    # A host transcript directory that must never be read by the exercises.
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(work / "must-not-be-read"))
+    sessions = await session_management(work, RunRequest(), LESSONS[19])
+    assert [row["session_id"] for row in sessions["sessions"]] == [FIXTURE_SESSION_ID]
+    assert [row["type"] for row in sessions["messages"]] == ["user", "assistant"]
+    resumed = await resume(work, RunRequest(), LESSONS[40])
+    assert not resumed["host_transcript_listed"]
+    assert resumed["sessions_in_another_config_dir"] == 0
+    assert not (work / "must-not-be-read").exists()
+
+
+async def test_elicitation_handles_accept_decline_cancel_and_invalid_data(work):
+    from agent_lab.exercises import elicitation
+
+    outcomes = {
+        row["response"]: row
+        for row in (await elicitation(work, RunRequest(), LESSONS[33]))["outcomes"]
+    }
+    assert outcomes["accept"]["tool_result"] == "Deleted q3-plan."
+    assert outcomes["decline"]["tool_result"] == "Not deleted: the user chose decline."
+    assert outcomes["cancel"]["tool_result"] == "Not deleted: the user chose cancel."
+    assert outcomes["accept with invalid data"]["is_error"] is True
+
+
+def test_upgrade_gate_checks_pin_lock_install_and_interfaces(work):
+    from agent_lab.exercises import upgrade
+
+    evidence = upgrade(work, RunRequest(), LESSONS[55])
+    assert evidence["pin_lock_install_match"] and evidence["current_gate"] == "pass"
+    assert evidence["simulated_candidate"]["gate"] == "blocked"
+
+
+async def test_browser_origin_rule_is_exact(work, monkeypatch):
+    from agent_lab.exercises import browser
+    from agent_lab.integrations.browser_mcp import same_origin
+
+    monkeypatch.delenv("LAB_BROWSER_ORIGIN", raising=False)
+    evidence = await browser(work, RunRequest(), LESSONS[64])
+    assert [row["allowed"] for row in evidence["origin_checks"]] == [
+        True,
+        False,
+        False,
+        False,
+        False,
+    ]
+    assert not same_origin("https://127.0.0.1:8080/", "http://127.0.0.1:8080")
+
+
+def test_desktop_and_browser_share_one_service(work):
+    from agent_lab.exercises import desktop
+
+    evidence = desktop(work, RunRequest(), LESSONS[69])
+    assert evidence["shared_service"] == "RunService"
+    assert "/api/lessons/{lesson_id}/ws" in evidence["shared_api_routes"]

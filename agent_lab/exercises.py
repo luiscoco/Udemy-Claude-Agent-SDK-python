@@ -56,7 +56,9 @@ def seed_workspace(root: Path, lesson: Lesson) -> None:
     (root / "sales.csv").write_text(
         "region,amount\nnorth,120\nsouth,80\nnorth,40\n", encoding="utf-8"
     )
-    if lesson.live_profile in {"skills", "commands", "memory", "styles"}:
+    from agent_lab.sdk import PROJECT_SETTING_PROFILES
+
+    if lesson.live_profile in PROJECT_SETTING_PROFILES:
         (root / ".claude").mkdir(exist_ok=True)
     if lesson.live_profile == "skills":
         folder = root / ".claude" / "skills" / "lesson-summary"
@@ -119,15 +121,7 @@ async def message_exercise(root: Path, request: RunRequest, lesson: Lesson) -> d
     }
 
 
-@exercise(
-    "thinking",
-    "settings",
-    "session_management",
-    "resume",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
+@exercise("thinking", "python_sdk")
 def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     import claude_agent_sdk as sdk
 
@@ -713,20 +707,6 @@ async def streaming(root: Path, request: RunRequest, lesson: Lesson) -> dict[str
     return {
         "input_messages": [message async for message in inputs()],
         "note": "Token output streaming is a separate include_partial_messages option.",
-    }
-
-
-@exercise("browser")
-def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from agent_lab.config import ROOT
-
-    return {
-        "mcp_version": importlib.metadata.version("mcp"),
-        "transport": "stdio",
-        "server_command": [sys.executable, "-m", "agent_lab.integrations.notes_mcp"],
-        "resource_uri": "notes://welcome",
-        "integration_source": str(ROOT / "agent_lab" / "integrations"),
-        "notes": lesson.notes,
     }
 
 
@@ -1622,13 +1602,327 @@ async def scheduled(root: Path, request: RunRequest, lesson: Lesson) -> dict[str
     }
 
 
+@exercise("settings")
+def settings_isolation(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Show which runs load project settings and that every run gets its own CLI config."""
+    from agent_lab.sdk import isolated_env, setting_sources_for
+
+    hostile = root / ".claude" / "settings.json"
+    hostile.parent.mkdir(parents=True, exist_ok=True)
+    hostile.write_text(json.dumps({"permissions": {"allow": ["Bash(*)"]}}), encoding="utf-8")
+    profiles = ["read", "hooks", "calculator", "skills", "commands", "memory", "styles"]
+    run_a = isolated_env(root.parent / "config")
+    run_b = isolated_env(root.parent.parent / "another-run" / "config")
+    return {
+        "workspace_settings_file": {"path": ".claude/settings.json", "content": "allows Bash(*)"},
+        "this_lesson": {
+            "profile": lesson.live_profile,
+            "setting_sources": setting_sources_for(lesson.live_profile),
+        },
+        "profiles": [
+            {"profile": name, "setting_sources": setting_sources_for(name)} for name in profiles
+        ],
+        "user_settings_ever_loaded": any("user" in setting_sources_for(name) for name in profiles),
+        "run_env": run_a,
+        "config_dirs_differ": run_a["CLAUDE_CONFIG_DIR"] != run_b["CLAUDE_CONFIG_DIR"],
+    }
+
+
+FIXTURE_SESSION_ID = "00000000-0000-4000-8000-000000000019"
+
+
+def write_fixture_session(config: Path) -> str:
+    """One transcript in the CLI's JSONL format, inside an isolated config directory."""
+    folder = config / "projects" / "lesson-workspace"
+    folder.mkdir(parents=True, exist_ok=True)
+    common = {"sessionId": FIXTURE_SESSION_ID, "cwd": "lesson-workspace"}
+    rows = [
+        {
+            "type": "user",
+            "uuid": "00000000-0000-4000-8000-000000000001",
+            "parentUuid": None,
+            "timestamp": "2026-10-28T10:00:00.000Z",
+            "message": {"role": "user", "content": "Remember PYTHON-SESSION."},
+            **common,
+        },
+        {
+            "type": "assistant",
+            "uuid": "00000000-0000-4000-8000-000000000002",
+            "parentUuid": "00000000-0000-4000-8000-000000000001",
+            "timestamp": "2026-10-28T10:00:01.000Z",
+            "message": {
+                "role": "assistant",
+                "model": "claude-haiku-4-5",
+                "content": [{"type": "text", "text": "Remembered: PYTHON-SESSION."}],
+            },
+            **common,
+        },
+    ]
+    path = folder / f"{FIXTURE_SESSION_ID}.jsonl"
+    path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+    return FIXTURE_SESSION_ID
+
+
+SESSION_PROBE = """
+import dataclasses, json, sys
+from claude_agent_sdk import get_session_info, get_session_messages, list_sessions
+sessions = list_sessions()
+messages = get_session_messages(sys.argv[1]) if sessions else []
+info = get_session_info(sys.argv[1])
+print(json.dumps({
+    "sessions": [dataclasses.asdict(item) for item in sessions],
+    "messages": [dataclasses.asdict(item) for item in messages],
+    "info_found": info is not None,
+}, default=str))
+"""
+
+
+async def probe_sessions(config: Path, session_id: str) -> dict[str, Any]:
+    """The session API reads CLAUDE_CONFIG_DIR from the environment, so probe in a child."""
+    process = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-I",
+        "-c",
+        SESSION_PROBE,
+        session_id,
+        env=os.environ | {"CLAUDE_CONFIG_DIR": str(config)},
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    async with asyncio.timeout(30):
+        stdout, stderr = await process.communicate()
+    if process.returncode:
+        raise LessonError("The session probe failed: " + stderr.decode()[-300:])
+    return json.loads(stdout)
+
+
+def message_text(message: dict[str, Any]) -> str:
+    content = message["message"]["content"]
+    if isinstance(content, str):
+        return content
+    return " ".join(block.get("text", "") for block in content if isinstance(block, dict))
+
+
+@exercise("session_management")
+async def session_management(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Call list_sessions and get_session_messages against an isolated config directory."""
+    config = root / "isolated-config"
+    session_id = write_fixture_session(config)
+    probe = await probe_sessions(config, session_id)
+    return {
+        "config_dir": "isolated-config (this run only; your own transcripts are never read)",
+        "sessions": [
+            {key: row[key] for key in ("session_id", "summary", "first_prompt", "cwd")}
+            for row in probe["sessions"]
+        ],
+        "messages": [{"type": row["type"], "text": message_text(row)} for row in probe["messages"]],
+        "info_found": probe["info_found"],
+        "source": "official session functions reading a fixture transcript",
+    }
+
+
+@exercise("resume")
+async def resume(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Resume needs the SDK's own transcript in the same config dir; host files do not count."""
+    from claude_agent_sdk import ClaudeAgentOptions
+
+    config = root / "isolated-config"
+    session_id = write_fixture_session(config)
+    # A host transcript is application data: the SDK neither lists nor resumes it.
+    (root / "host-transcript.json").write_text(
+        json.dumps([{"role": "user", "content": "Remember HOST-ONLY."}]), encoding="utf-8"
+    )
+    same_dir = await probe_sessions(config, session_id)
+    other_dir = await probe_sessions(root / "empty-config", session_id)
+    variants = {
+        "continue this session": ClaudeAgentOptions(resume=session_id),
+        "branch into a new session": ClaudeAgentOptions(resume=session_id, fork_session=True),
+        "most recent session": ClaudeAgentOptions(continue_conversation=True),
+    }
+    return {
+        "resume_options": [
+            {
+                "goal": goal,
+                "resume": options.resume,
+                "fork_session": options.fork_session,
+                "continue_conversation": options.continue_conversation,
+            }
+            for goal, options in variants.items()
+        ],
+        "sdk_sessions_in_run_config": [row["session_id"] for row in same_dir["sessions"]],
+        "host_transcript_listed": any(
+            "HOST-ONLY" in (row.get("first_prompt") or "") for row in same_dir["sessions"]
+        ),
+        "sessions_in_another_config_dir": len(other_dir["sessions"]),
+        "rule": "Resume with the same CLAUDE_CONFIG_DIR that recorded the session.",
+    }
+
+
+@exercise("elicitation")
+async def elicitation(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """An MCP tool asks the user for structured input; each response type changes the outcome."""
+    import claude_agent_sdk as sdk
+    from mcp import types
+    from mcp.server.fastmcp import Context, FastMCP
+    from mcp.shared.memory import create_connected_server_and_client_session
+    from pydantic import BaseModel
+
+    class Confirmation(BaseModel):
+        confirm: bool
+        reason: str = ""
+
+    def build() -> FastMCP:
+        server = FastMCP("drafts")
+
+        @server.tool()
+        async def delete_draft(name: str, ctx: Context) -> str:
+            """Delete a draft after the user confirms."""
+            answer = await ctx.elicit(f"Delete the draft {name}?", schema=Confirmation)
+            if answer.action == "accept":
+                return f"Deleted {name}." if answer.data.confirm else "Kept: not confirmed."
+            return f"Not deleted: the user chose {answer.action}."
+
+        return server
+
+    responses: dict[str, types.ElicitResult] = {
+        "accept": types.ElicitResult(action="accept", content={"confirm": True}),
+        "decline": types.ElicitResult(action="decline"),
+        "cancel": types.ElicitResult(action="cancel"),
+        "accept with invalid data": types.ElicitResult(
+            action="accept", content={"confirm": "maybe"}
+        ),
+    }
+    outcomes = []
+    for label, response in responses.items():
+        prompts: list[str] = []
+
+        async def answer(
+            context: Any,
+            params: Any,
+            response: types.ElicitResult = response,
+            prompts: list[str] = prompts,
+        ) -> types.ElicitResult:
+            prompts.append(params.message)
+            return response
+
+        async with asyncio.timeout(20):
+            async with create_connected_server_and_client_session(
+                build(), elicitation_callback=answer
+            ) as session:
+                result = await session.call_tool("delete_draft", {"name": "q3-plan"})
+        outcomes.append(
+            {
+                "response": label,
+                "asked": prompts[0] if prompts else "",
+                "is_error": result.isError,
+                "tool_result": tool_text(result)[:160],
+            }
+        )
+    return {
+        "outcomes": outcomes,
+        "python_sdk_on_elicitation": "on_elicitation"
+        in {field.name for field in dataclasses.fields(sdk.ClaudeAgentOptions)},
+        "note": "MCP elicitation runs between an MCP client and server. This installed Python "
+        "Agent SDK does not expose an on_elicitation option, so the lab uses the MCP client.",
+    }
+
+
+@exercise("upgrade")
+def upgrade(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Compare the declared pin, the lockfile and the installed SDK, then gate on interfaces."""
+    import tomllib
+
+    import claude_agent_sdk as sdk
+
+    from agent_lab.config import ROOT
+
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    pin = next(
+        item for item in project["project"]["dependencies"] if item.startswith("claude-agent-sdk")
+    )
+    lock = tomllib.loads((ROOT / "uv.lock").read_text(encoding="utf-8"))
+    locked = next(item["version"] for item in lock["package"] if item["name"] == "claude-agent-sdk")
+    installed = importlib.metadata.version("claude-agent-sdk")
+    required = [
+        "query",
+        "tool",
+        "create_sdk_mcp_server",
+        "ClaudeAgentOptions",
+        "ClaudeSDKClient",
+        "HookMatcher",
+        "PermissionResultAllow",
+        "PermissionResultDeny",
+        "Transport",
+        "list_sessions",
+    ]
+    methods = ["connect", "query", "receive_response", "interrupt", "set_model", "disconnect"]
+    missing = [name for name in required if not hasattr(sdk, name)]
+    missing += [
+        f"ClaudeSDKClient.{name}" for name in methods if not hasattr(sdk.ClaudeSDKClient, name)
+    ]
+    # A candidate release that dropped one method the app uses must be blocked.
+    candidate_missing = ["ClaudeSDKClient.interrupt"]
+    return {
+        "declared_pin": pin,
+        "locked_version": locked,
+        "installed_version": installed,
+        "pin_lock_install_match": pin.endswith(f"=={locked}") and locked == installed,
+        "required_interfaces": len(required) + len(methods),
+        "missing_interfaces": missing,
+        "current_gate": "pass" if not missing else "blocked",
+        "simulated_candidate": {"missing": candidate_missing, "gate": "blocked"},
+        "reproducible_install": "uv sync --locked",
+    }
+
+
+@exercise("browser")
+async def browser(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Inspect the browser MCP service's single tool and the origin rule it enforces."""
+    from agent_lab.integrations import browser_mcp
+
+    tools = await browser_mcp.mcp.list_tools()
+    origin = browser_mcp.teaching_origin()
+    candidates = [
+        origin + "/?lesson=1",
+        origin.replace("127.0.0.1", "localhost"),
+        "http://127.0.0.1:9999/",
+        "http://127.0.0.1.evil.example/",
+        "file:///C:/Windows/win.ini",
+    ]
+    return {
+        "server": browser_mcp.mcp.name,
+        "tools": [{"name": item.name, "input_schema": item.inputSchema} for item in tools],
+        "teaching_origin": origin,
+        "origin_checks": [
+            {"url": url, "allowed": browser_mcp.same_origin(url, origin)} for url in candidates
+        ],
+        "versus_shell": "The agent can only ask for a page at one origin; it cannot run "
+        "commands, read files or reach other hosts. A shell tool would allow all of that.",
+        "browser_launched": False,
+        "start_service": "uv sync --locked --extra browser && uv run playwright install chromium",
+    }
+
+
 @exercise("desktop")
 def desktop(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """The native window and the browser use the same FastAPI app and lesson service."""
+    from importlib.util import find_spec
+
+    from agent_lab.api import create_app
+    from agent_lab.config import Settings
+    from agent_lab.runtime import RunService
+
+    service = RunService(Settings(enable_live=False, data_dir=root / "desktop-runs"))
+    app = create_app(service, with_ui=False)
+    paths = {str(getattr(route, "path", "")) for route in app.routes}
+    routes = sorted(path for path in paths if path.startswith("/api"))
     return {
-        "browser": "uv run agent-lab serve",
-        "native": "uv run agent-lab serve --native",
-        "native_dependency": "Install the optional pywebview package for a native window.",
-        "same_service": "agent_lab.runtime.RunService",
+        "browser_command": "uv run agent-lab serve",
+        "native_command": "uv run agent-lab serve --native",
+        "native_window_available": find_spec("webview") is not None,
+        "install_native": "uv sync --locked --extra desktop",
+        "shared_service": type(app.state.runner).__name__,
+        "shared_api_routes": routes,
         "notes": lesson.notes,
     }
 

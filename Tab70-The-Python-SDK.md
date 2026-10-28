@@ -27,20 +27,12 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `sdk_contract`, line 124). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "thinking",
-    "settings",
-    "session_management",
-    "resume",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
+@exercise("thinking", "python_sdk")
 def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     import claude_agent_sdk as sdk
 

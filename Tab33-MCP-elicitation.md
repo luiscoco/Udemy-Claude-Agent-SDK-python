@@ -27,50 +27,77 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `elicitation`, line 1761). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "thinking",
-    "settings",
-    "session_management",
-    "resume",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+@exercise("elicitation")
+async def elicitation(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """An MCP tool asks the user for structured input; each response type changes the outcome."""
     import claude_agent_sdk as sdk
+    from mcp import types
+    from mcp.server.fastmcp import Context, FastMCP
+    from mcp.shared.memory import create_connected_server_and_client_session
+    from pydantic import BaseModel
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    class Confirmation(BaseModel):
+        confirm: bool
+        reason: str = ""
+
+    def build() -> FastMCP:
+        server = FastMCP("drafts")
+
+        @server.tool()
+        async def delete_draft(name: str, ctx: Context) -> str:
+            """Delete a draft after the user confirms."""
+            answer = await ctx.elicit(f"Delete the draft {name}?", schema=Confirmation)
+            if answer.action == "accept":
+                return f"Deleted {name}." if answer.data.confirm else "Kept: not confirmed."
+            return f"Not deleted: the user chose {answer.action}."
+
+        return server
+
+    responses: dict[str, types.ElicitResult] = {
+        "accept": types.ElicitResult(action="accept", content={"confirm": True}),
+        "decline": types.ElicitResult(action="decline"),
+        "cancel": types.ElicitResult(action="cancel"),
+        "accept with invalid data": types.ElicitResult(
+            action="accept", content={"confirm": "maybe"}
+        ),
+    }
+    outcomes = []
+    for label, response in responses.items():
+        prompts: list[str] = []
+
+        async def answer(
+            context: Any,
+            params: Any,
+            response: types.ElicitResult = response,
+            prompts: list[str] = prompts,
+        ) -> types.ElicitResult:
+            prompts.append(params.message)
+            return response
+
+        async with asyncio.timeout(20):
+            async with create_connected_server_and_client_session(
+                build(), elicitation_callback=answer
+            ) as session:
+                result = await session.call_tool("delete_draft", {"name": "q3-plan"})
+        outcomes.append(
+            {
+                "response": label,
+                "asked": prompts[0] if prompts else "",
+                "is_error": result.isError,
+                "tool_result": tool_text(result)[:160],
+            }
+        )
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "outcomes": outcomes,
+        "python_sdk_on_elicitation": "on_elicitation"
+        in {field.name for field in dataclasses.fields(sdk.ClaudeAgentOptions)},
+        "note": "MCP elicitation runs between an MCP client and server. This installed Python "
+        "Agent SDK does not expose an on_elicitation option, so the lab uses the MCP client.",
     }
 ```
 

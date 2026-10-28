@@ -1542,97 +1542,97 @@
   "id": 16,
   "prerequisites": [
    2,
-   3,
-   11
+   4
   ],
-  "concept_brief": "`ClaudeAgentOptions.setting_sources` decides which filesystem settings the CLI loads; the lab passes `setting_sources=[]` by default and an isolated `CLAUDE_CONFIG_DIR` through `env`, with `cwd` pinned to the lesson workspace.",
-  "lab_brief": "The offline `sdk_contract` exercise reads the installed `ClaudeAgentOptions` dataclass and reports the types of `setting_sources`, `env` and `cwd`, so you see the real Python option surface before trusting any settings file.",
+  "concept_brief": "`setting_sources` decides which settings files the CLI loads: `user`, `project` or `local`. An empty list loads none. `env` with its own `CLAUDE_CONFIG_DIR` gives each run a private CLI configuration, so a personal login, memory or permissions never leak in.",
+  "lab_brief": "The `settings_isolation` exercise plants a hostile `.claude/settings.json` that allows `Bash(*)`, then reports which profiles would load project settings (from `setting_sources_for` in `agent_lab/sdk.py`) and the isolated environment each run receives.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Open `agent_lab/sdk.py` and find where `run_sdk` builds `ClaudeAgentOptions` with `setting_sources=[]` and the `env` dictionary."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 16 (or run `uv run agent-lab lesson 16`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn why settings are opt-in: with `setting_sources=[]` no user, project or local settings are loaded, and `CLAUDE_CONFIG_DIR` keeps each run's CLI state separate from your own Claude configuration."
+    "text": "Make settings opt-in and isolate each run's CLI configuration."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `sdk_contract` in `agent_lab/exercises.py`; for the `settings` exercise its focus list is `setting_sources`, `env` and `cwd`."
+    "text": "Read `PROJECT_SETTING_PROFILES`, `setting_sources_for` and `isolated_env` in `agent_lab/sdk.py`."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 16 in Offline mode with the default request."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `options` in the result: `setting_sources` is typed `list[Literal['user', 'project', 'local']] | None`, `env` is `dict[str, str]` and `cwd` accepts `str | Path | None`."
+    "text": "Check this lesson's `setting_sources`, the `profiles` table, `user_settings_ever_loaded` and `config_dirs_differ`."
    },
    {
     "title": "Try the challenge",
-    "text": "Find the `env` dictionary in `run_sdk` and list each variable it sets, then explain what would leak into the run if `CLAUDE_CONFIG_DIR` were removed."
+    "text": "Opt one more profile in and see the risk."
    }
   ],
-  "inspect": "Look at `options` (the three focused field types), `installed_version`, `session_functions` and `request` (mode, `max_turns` and `max_budget_usd` that you submitted).",
-  "expected": "`options.setting_sources` shows `list[typing.Literal['user', 'project', 'local']] | None`, `options.env` shows `dict[str, str]`, `request.mode` is `offline` and `installed_version` shows the pinned SDK (0.2.163 at the time of writing).",
-  "evidence_criterion": "The check confirms the result lists the installed SDK version and the focused ClaudeAgentOptions fields.",
+  "inspect": "`workspace_settings_file`, `this_lesson`, the `profiles` table, `user_settings_ever_loaded`, `run_env` and `config_dirs_differ`.",
+  "expected": "This lesson's `read` profile loads nothing (`[]`), so the hostile settings file is ignored. Only skills, commands, memory and styles load `[\"project\"]`. `user_settings_ever_loaded` is false and `config_dirs_differ` is true.",
+  "evidence_criterion": "The check confirms user settings are never loaded and each run has its own configuration directory.",
   "evidence_checks": [
    {
-    "key": "installed_version",
-    "rule": "present"
+    "key": "user_settings_ever_loaded",
+    "rule": "equals",
+    "value": false
    },
    {
-    "key": "options",
-    "rule": "truthy"
+    "key": "config_dirs_differ",
+    "rule": "equals",
+    "value": true
    }
   ],
-  "challenge": "Change Maximum turns to 8 in the run form and run offline again; `request.max_turns` should show 8 while `options` stays the same, proving the request is validated separately from the SDK's option types.",
+  "challenge": "Add `\"read\"` to `PROJECT_SETTING_PROFILES`, run again and see `this_lesson.setting_sources` become `[\"project\"]`: a live run would now load the hostile file. Then revert the change.",
   "hints": [
-   "The offline exercise reads types; it does not load any settings file.",
-   "In `sdk.py`, compare the default `setting_sources=[]` with the `['project']` value set only for the skills, commands, memory and styles profiles."
+   "Opting in is a single list entry, which is why it must be deliberate.",
+   "With `read` opted in, the CLI would read `.claude/settings.json` from the workspace, including its `Bash(*)` permission, so only lessons that need project files opt in."
   ],
-  "reference": "The result is read from the installed `claude_agent_sdk` package, not from a model. It shows that `setting_sources` is an explicit list of allowed sources, so an empty list means the CLI ignores user, project and local settings. Together with `cwd` and a per-run `CLAUDE_CONFIG_DIR` in `env`, each teaching run is isolated from the host's own Claude configuration.",
+  "reference": "Loading settings is a trust decision. The lab loads none by default, opts in project files only where a lesson needs them, never loads user settings, and gives every run a fresh `CLAUDE_CONFIG_DIR` with auto memory disabled.",
   "recovery": [
-   "If the offline run fails, run `uv sync --locked` again so the pinned `claude-agent-sdk` is installed, then restart `uv run agent-lab serve`.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does `setting_sources=[]` do in this lab's live runs?",
+    "prompt": "What does setting_sources=[] mean?",
     "options": [
      {
-      "text": "It loads every settings file the CLI can find.",
-      "explanation": "An empty list is an explicit opt-out; loading everything would need the sources to be listed."
+      "text": "No settings files are loaded for the run.",
+      "explanation": "Correct. Configuration comes only from the options you pass."
      },
      {
-      "text": "It loads no user, project or local settings files.",
-      "explanation": "Correct. The host opts in only when a lesson needs project settings, such as skills or commands."
+      "text": "All settings files are loaded.",
+      "explanation": "That would be the opposite."
      },
      {
-      "text": "It deletes the user's settings.",
-      "explanation": "The option controls loading only; it never modifies files."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Why does `run_sdk` set `CLAUDE_CONFIG_DIR` in `env`?",
-    "options": [
-     {
-      "text": "To give each run its own CLI configuration directory instead of your personal one.",
-      "explanation": "Correct. Isolation keeps sessions, memory and settings from one run separate from the host user's configuration."
-     },
-     {
-      "text": "To store the API key.",
-      "explanation": "The key comes from `ANTHROPIC_API_KEY`; the config directory is not a credential."
-     },
-     {
-      "text": "To choose the model.",
-      "explanation": "The model is set with the `model` option, not the config directory."
+      "text": "Only the user's settings are loaded.",
+      "explanation": "An empty list loads none."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Why give each run its own CLAUDE_CONFIG_DIR?",
+    "options": [
+     {
+      "text": "To make runs faster.",
+      "explanation": "Isolation is the purpose, not speed."
+     },
+     {
+      "text": "So no personal login, memory or permissions leak into the run.",
+      "explanation": "Correct. Each run starts from a known configuration."
+     },
+     {
+      "text": "Because the SDK cannot share directories.",
+      "explanation": "It can; the lab chooses not to."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -1838,97 +1838,100 @@
  {
   "id": 19,
   "prerequisites": [
-   6,
-   16
+   6
   ],
-  "concept_brief": "Python session helpers `list_sessions()` and `get_session_messages(session_id)` read saved transcripts, while `ClaudeAgentOptions.resume`, `continue_conversation` and `fork_session` choose which session a new run continues.",
-  "lab_brief": "The offline `sdk_contract` exercise checks which session functions the installed SDK exports and reports the types of `resume`, `continue_conversation` and `fork_session`, without reading any of your real host transcripts.",
+  "concept_brief": "`list_sessions`, `get_session_info` and `get_session_messages` read the CLI's transcripts from the config directory in `CLAUDE_CONFIG_DIR`. Point them at a run's own directory so they can never read a person's other conversations.",
+  "lab_brief": "The `session_management` exercise writes one fixture transcript into an isolated config directory and calls the official session functions in a child process whose `CLAUDE_CONFIG_DIR` points there.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Live mode uses the `conversation` profile: two turns on one `ClaudeSDKClient` in an isolated config directory."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 19 (or run `uv run agent-lab lesson 19`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn the difference between reading a session (list and fetch messages) and continuing one (`resume`, `continue_conversation`, `fork_session`)."
+    "text": "Inspect SDK sessions without exposing anyone's transcripts."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `sdk_contract`; `session_functions` uses `hasattr` so it only lists functions the installed package really has."
+    "text": "Read `write_fixture_session`, `SESSION_PROBE` and `probe_sessions` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 19 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `session_functions` contains `list_sessions`, `get_session_messages` and `get_session_info`, and that `options` shows `resume` as `str | None`."
+    "text": "Check `sessions`, `messages` and `info_found`."
    },
    {
     "title": "Try the challenge",
-    "text": "In live mode, ask the agent to remember a name and check that the follow-up turn on the same client still knows it."
+    "text": "Change the fixture and watch the summary follow."
    }
   ],
-  "inspect": "Look at `session_functions`, `options` (`resume`, `continue_conversation`, `fork_session`) and `note`.",
-  "expected": "`session_functions` is `[\"list_sessions\", \"get_session_messages\", \"get_session_info\"]`, `options.resume` is `str | None` and the two boolean options show `<class 'bool'>`.",
-  "evidence_criterion": "The check confirms the installed SDK exports session helper functions and the session options.",
+  "inspect": "`config_dir`, the `sessions` table (`session_id`, `summary`, `first_prompt`), the `messages` and `info_found`.",
+  "expected": "One session `00000000-0000-4000-8000-000000000019` with summary `Remember PYTHON-SESSION.`; two messages (user, then assistant `Remembered: PYTHON-SESSION.`); `info_found` true.",
+  "evidence_criterion": "The check confirms the session functions found the fixture session in the isolated directory.",
   "evidence_checks": [
    {
-    "key": "session_functions",
+    "key": "sessions",
     "rule": "truthy"
    },
    {
-    "key": "options",
+    "key": "messages",
     "rule": "truthy"
+   },
+   {
+    "key": "info_found",
+    "rule": "equals",
+    "value": true
    }
   ],
-  "challenge": "Run `uv run python -c \"import inspect, claude_agent_sdk as s; print(inspect.signature(s.list_sessions))\"` and explain why the lab passes its isolated directory rather than your home folder when listing sessions.",
+  "challenge": "Change the first user message in `write_fixture_session` to `Summarize notes.txt.`, run again and confirm `summary` and `first_prompt` follow it.",
   "hints": [
-   "`list_sessions` accepts `directory`, `limit` and `offset`.",
-   "Listing sessions in your own home configuration would expose host transcripts; the lab keeps a per-run `CLAUDE_CONFIG_DIR` instead."
+   "The summary is derived from the transcript, not stored separately.",
+   "With no custom title, `list_sessions` uses the first prompt as the summary, so both fields show `Summarize notes.txt.`"
   ],
-  "reference": "The result is introspection of the installed package, so it is accurate for your version. Reading helpers return saved transcript data, while `resume` and `fork_session` steer a new run onto an existing session. Because each lab run uses its own config directory, nothing from your personal Claude sessions is listed or exposed.",
+  "reference": "The session functions are file readers scoped by `CLAUDE_CONFIG_DIR`. Probing in a child process with an isolated directory keeps the server's environment untouched and makes it impossible to list a person's real conversations.",
   "recovery": [
-   "If `session_functions` is empty, your installed SDK is older than the pinned one; run `uv sync --locked`.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Which option starts a new branch from an existing session instead of appending to it?",
+    "prompt": "Where do list_sessions results come from?",
     "options": [
      {
-      "text": "`continue_conversation`",
-      "explanation": "This continues the most recent conversation rather than branching."
+      "text": "Transcripts in the CLAUDE_CONFIG_DIR projects folder.",
+      "explanation": "Correct. Scope that directory to scope what is listed."
      },
      {
-      "text": "`max_turns`",
-      "explanation": "This limits turns; it has nothing to do with sessions."
+      "text": "Anthropic's servers.",
+      "explanation": "Transcripts are local files."
      },
      {
-      "text": "`fork_session`",
-      "explanation": "Correct. Used with `resume`, it creates a new session from the old one's history."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "What does the offline lesson 19 run do with your real session transcripts?",
-    "options": [
-     {
-      "text": "Nothing; it only inspects which SDK functions and options exist.",
-      "explanation": "Correct. The exercise uses `hasattr` and dataclass fields, never reading transcripts."
-     },
-     {
-      "text": "It lists them all.",
-      "explanation": "Listing host transcripts would leak private data, which the lab avoids."
-     },
-     {
-      "text": "It deletes old sessions.",
-      "explanation": "No session data is modified."
+      "text": "The app's own database.",
+      "explanation": "Host databases are separate from SDK sessions."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Why run the probe in a child process?",
+    "options": [
+     {
+      "text": "Child processes are faster.",
+      "explanation": "Speed is not the reason."
+     },
+     {
+      "text": "The functions read CLAUDE_CONFIG_DIR from the environment, which is shared by the whole server.",
+      "explanation": "Correct. A child gets its own environment."
+     },
+     {
+      "text": "The SDK forbids calling them in-process.",
+      "explanation": "It allows it; the environment is the issue."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -3260,118 +3263,95 @@
  {
   "id": 33,
   "prerequisites": [
-   2,
    13
   ],
-  "concept_brief": "MCP elicitation is a request from an MCP server asking the client for missing information; the client answers with an action of accept (with content), decline or cancel. The pinned Python SDK has no `on_elicitation` field on `ClaudeAgentOptions`, and its in-process SDK MCP bridge does not forward elicitation requests yet.",
-  "lab_brief": "The offline exercise inspects `dataclasses.fields(ClaudeAgentOptions)` of the installed claude-agent-sdk and reports whether `on_elicitation` and `hooks` exist, plus the public `ClaudeSDKClient` methods. It teaches you to check the installed Python package instead of assuming an option from another language exists.",
+  "concept_brief": "MCP elicitation lets a tool pause and ask the user for structured input. The client answers `accept` (with data), `decline` or `cancel`, and the server validates accepted data against its schema before acting.",
+  "lab_brief": "The `elicitation` exercise runs an MCP tool that asks to confirm deleting a draft, answers it four ways through the MCP client's `elicitation_callback`, and also reports whether the installed Agent SDK exposes `on_elicitation`.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live profile is a plain `query()` call with no tools; the model only explains the concept."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 33 (or run `uv run agent-lab lesson 33`).",
+   "Elicitation here runs between the official MCP client and server; no model or live SDK call is involved."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Find out what elicitation support the installed Python SDK really offers before designing around it."
+    "text": "Handle every elicitation response type correctly."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `sdk_contract` in `agent_lab`/exercises.py and note the `elicitation` focus list: `on_elicitation` and `hooks`."
+    "text": "Read `elicitation`: the `Confirmation` schema, `delete_draft` and the `responses`."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Read `installed_version`, the two entries in `options` and the hook event names inside `options.hooks`."
+    "text": "Compare each row in `outcomes`."
    },
    {
     "title": "Try the challenge",
-    "text": "Validate accept, decline and cancel responses with the MCP package's `ElicitResult` model."
+    "text": "Add a fifth response."
    }
   ],
-  "inspect": "Look at `installed_version`, `options.on_elicitation`, `options.hooks`, `public_client_methods`, `session_functions` and `note`.",
-  "expected": "`installed_version` is \"0.2.163\"; `options.on_elicitation` is \"Not available in this installed Python SDK\"; `options.hooks` lists events such as PreToolUse, PostToolUse, Stop and PermissionRequest but no elicitation event; `request` shows mode \"offline\", `max_turns` 4 and `max_budget_usd` 0.1.",
-  "evidence_criterion": "The check verifies that the installed SDK version, the inspected option fields and the lesson note are reported.",
+  "inspect": "The `outcomes` table (`response`, `asked`, `is_error`, `tool_result`), `python_sdk_on_elicitation` and the `note`.",
+  "expected": "accept deletes the draft; decline and cancel keep it with their own message; accept with `confirm: \"maybe\"` is a tool error from schema validation. `python_sdk_on_elicitation` is false for this SDK version.",
+  "evidence_criterion": "The check confirms all response types were handled and invalid accepted data was rejected.",
   "evidence_checks": [
    {
-    "key": "installed_version",
-    "rule": "present"
-   },
-   {
-    "key": "options",
+    "key": "outcomes",
     "rule": "truthy"
    },
    {
-    "key": "note",
+    "key": "python_sdk_on_elicitation",
     "rule": "present"
    }
   ],
-  "challenge": "Run `uv run python -c \"from mcp.types import ElicitResult; print(ElicitResult(action='accept', content={'room': 'A'})); print(ElicitResult(action='decline'))\"`, then try `action='maybe'` and verify a `ValidationError`. Explain which action should carry `content`.",
+  "challenge": "Add `\"accept without confirming\": types.ElicitResult(action=\"accept\", content={\"confirm\": False})` to `responses` and predict the tool result (`Kept: not confirmed.`).",
   "hints": [
-   "\"Not available in this installed Python SDK\" is the exercise's fallback text when a field name is missing from the dataclass.",
-   "`ElicitResult` has `action` (accept, decline or cancel) and optional `content`; only accept should come with user-supplied content, and the server must treat that content as untrusted input."
+   "Accept means the user answered, not that they agreed.",
+   "The data validates, but `confirm` is false, so the tool keeps the draft and returns `Kept: not confirmed.`"
   ],
-  "reference": "The exercise reads the real dataclass fields, so it reports `on_elicitation` as unavailable in 0.2.163 rather than inventing it. Elicitation lets a server pause and ask for data, and a client must answer with accept, decline or cancel. In this Python edition you study that contract with the `mcp` package types and validate responses locally.",
+  "reference": "Decline and cancel are normal answers, not errors, and must never be treated as consent. Accepted data is untrusted input until it passes the schema. The installed Python Agent SDK has no `on_elicitation` option yet, so this lesson uses the MCP client directly.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 33` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What are the three response actions a client can return to an elicitation request?",
+    "prompt": "The user declines an elicitation. What should the tool do?",
     "options": [
      {
-      "text": "allow, deny and ask",
-      "explanation": "No. Those are permission decisions for tool calls, not elicitation responses."
+      "text": "Proceed, because the user saw the question.",
+      "explanation": "Seeing the question is not consent."
      },
      {
-      "text": "accept, decline and cancel",
-      "explanation": "Correct. Accept carries the requested content; decline and cancel do not."
+      "text": "Not perform the action, and report that the user declined.",
+      "explanation": "Correct. Decline is a normal outcome."
      },
      {
-      "text": "success, error and retry",
-      "explanation": "No. Those describe results or transport outcomes, not the elicitation contract."
+      "text": "Ask again until the user accepts.",
+      "explanation": "Repeated prompting pressures the user."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "Why does the evidence show `on_elicitation` as \"Not available in this installed Python SDK\"?",
+    "prompt": "Why validate accepted elicitation data?",
     "options": [
      {
-      "text": "Because the exercise read `dataclasses.fields(ClaudeAgentOptions)` and found no field with that name.",
-      "explanation": "Correct. The exercise reports what the installed package defines instead of copying an option from another SDK."
+      "text": "It comes from outside the server and may not match the schema.",
+      "explanation": "Correct. Validate before acting on it."
      },
      {
-      "text": "Because offline mode hides all callback options.",
-      "explanation": "No. Other callback fields such as `hooks` are reported normally."
+      "text": "Validation makes the dialog prettier.",
+      "explanation": "Presentation is not the reason."
      },
      {
-      "text": "Because elicitation requires an API key.",
-      "explanation": "No. The check is a local introspection of the installed package and needs no credentials."
+      "text": "Accepted data is always valid.",
+      "explanation": "The exercise shows an invalid accepted answer."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "An MCP server receives accepted elicitation content. How should it treat it?",
-    "options": [
-     {
-      "text": "As trusted configuration that can skip validation.",
-      "explanation": "No. Anything a user or client types is input that must be validated."
-     },
-     {
-      "text": "As instructions for the model to follow.",
-      "explanation": "No. User-provided values are data, never instructions."
-     },
-     {
-      "text": "As untrusted input to validate against the requested schema.",
-      "explanation": "Correct. The server asked for specific fields and must validate what comes back before using it."
-     }
-    ],
-    "correct": 2
    }
   ]
  },
@@ -4054,117 +4034,101 @@
   "id": 40,
   "prerequisites": [
    6,
-   35
+   19
   ],
-  "concept_brief": "The Python SDK resumes conversations with `ClaudeAgentOptions(resume=session_id)`, can branch with `fork_session=True` or resume at a given message with `resume_session_at`, and `continue_conversation` picks the latest session. Session data lives in the CLI's configuration, readable with `list_sessions`, `get_session_messages` and `get_session_info`.",
-  "lab_brief": "The offline exercise introspects the installed `ClaudeAgentOptions` and reports the types of `resume`, `resume_session_at` and `fork_session`, plus the available session functions. The live `conversation` profile keeps context by sending two turns on one `ClaudeSDKClient` in a single run.",
+  "concept_brief": "`ClaudeAgentOptions(resume=session_id)` continues a recorded session, `fork_session=True` branches it into a new one, and `continue_conversation=True` picks the most recent. All of them read the CLI's own transcript from the same `CLAUDE_CONFIG_DIR`; your application's transcript files are not SDK state.",
+  "lab_brief": "The `resume` exercise writes an SDK fixture session and a separate host transcript, builds the three resume variants, and lists sessions in the run's config directory and in an empty one.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live run sends your prompt and then the follow-up on the same client; cross-run resume would also need a persistent config directory and a saved session id."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 40 (or run `uv run agent-lab lesson 40`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn which Python options resume or fork SDK sessions and why a host transcript is not one of them."
+    "text": "Choose the right resume option and keep SDK state separate from host data."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `sdk_contract` in `agent_lab`/exercises.py (the `resume` focus list) and the conversation branch at the end of `agent_lab`/sdk.py."
+    "text": "Read `resume`, `write_fixture_session` and `probe_sessions` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Read the three entries in `options`, `session_functions` and `note`."
+    "text": "Compare `resume_options`, `host_transcript_listed` and `sessions_in_another_config_dir`."
    },
    {
     "title": "Try the challenge",
-    "text": "Inspect two more resume-related fields of the installed SDK."
+    "text": "Probe the right directory."
    }
   ],
-  "inspect": "Look at `options.resume`, `options.resume_session_at`, `options.fork_session`, `session_functions` and `note`.",
-  "expected": "`installed_version` is \"0.2.163\"; `options` shows `resume` \"str | None\", `resume_session_at` \"str | None\" and `fork_session` \"<class 'bool'>\"; `session_functions` is [\"`list_sessions`\", \"`get_session_messages`\", \"`get_session_info`\"]; `note` explains that cross-run resume needs a persistent configuration directory and a saved session id.",
-  "evidence_criterion": "The check verifies that the resume options and the SDK session functions of the installed package are reported.",
+  "inspect": "The `resume_options` table, `sdk_sessions_in_run_config`, `host_transcript_listed`, `sessions_in_another_config_dir` and the `rule`.",
+  "expected": "The three variants set `resume`, `resume` plus `fork_session` true, and `continue_conversation` true. The run's config lists the fixture session; `host_transcript_listed` is false and another config directory has 0 sessions.",
+  "evidence_criterion": "The check confirms the host transcript is not SDK state and a different config directory cannot see the session.",
   "evidence_checks": [
    {
-    "key": "options",
-    "rule": "truthy"
+    "key": "host_transcript_listed",
+    "rule": "equals",
+    "value": false
    },
    {
-    "key": "session_functions",
-    "rule": "truthy"
+    "key": "sessions_in_another_config_dir",
+    "rule": "equals",
+    "value": 0
    },
    {
-    "key": "note",
-    "rule": "present"
+    "key": "resume_options",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"import dataclasses, claude_agent_sdk as s; f={x.name: x.type for x in dataclasses.fields(s.ClaudeAgentOptions)}; print(f['continue_conversation'], f['resume_drops_turn'], f['session_store'])\"` and verify the types. Explain when you would choose `fork_session=True` over plain `resume`.",
+  "challenge": "Change the second probe from `root / \"empty-config\"` to `config`, run again and confirm `sessions_in_another_config_dir` becomes 1.",
   "hints": [
-   "`resume` takes a session id string; `fork_session` is a bool that makes the resumed run continue under a new session id.",
-   "Because each lab run uses a fresh `CLAUDE_CONFIG_DIR`, a session id from one run cannot be resumed in the next; context is kept only across the two turns of one client."
+   "Sessions live under the config directory that recorded them.",
+   "Probing the same directory finds the fixture session, which is why a resumed run must reuse the original `CLAUDE_CONFIG_DIR`."
   ],
-  "reference": "The evidence shows the real option names and types in the pinned SDK, so you resume with a session id rather than replaying a host transcript. `fork_session` keeps the original session unchanged while you branch from it. Inside one run, the live profile keeps context simply by reusing the same `ClaudeSDKClient` for both turns.",
+  "reference": "Resuming is about the CLI's transcript, not your app's copy of the chat. Keep the session id and the config directory together, choose fork when you need a branch, and treat host transcripts as application data only.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 40` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Which option resumes a specific earlier SDK session?",
+    "prompt": "You want to explore an alternative without changing the original session. Which options?",
     "options": [
      {
-      "text": "`continue_conversation=True` with a transcript path",
-      "explanation": "No. `continue_conversation` picks the most recent session; it does not take a transcript file."
+      "text": "resume=session_id, fork_session=True",
+      "explanation": "Correct. The fork gets a new session id."
      },
      {
-      "text": "`resume=session_id`",
-      "explanation": "Correct. `resume` takes the session id reported by the SDK."
+      "text": "resume=session_id only",
+      "explanation": "That continues the original session."
      },
      {
-      "text": "`setting_sources=[\"project\"]`",
-      "explanation": "No. That loads project settings and has nothing to do with sessions."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "What does `fork_session=True` add when resuming?",
-    "options": [
-     {
-      "text": "It continues from the earlier session under a new session id, leaving the original intact.",
-      "explanation": "Correct. Forking branches the conversation instead of extending it."
-     },
-     {
-      "text": "It runs two agents in parallel.",
-      "explanation": "No. Parallel agents are a different topic."
-     },
-     {
-      "text": "It deletes the original session.",
-      "explanation": "No. The point of forking is to keep the original unchanged."
+      "text": "continue_conversation=True",
+      "explanation": "That continues the most recent session."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "Why can't this lab resume a session from a previous run?",
+    "prompt": "Can the SDK resume from a JSON transcript your app saved?",
     "options": [
      {
-      "text": "The Python SDK does not support resume.",
-      "explanation": "No. The evidence shows `resume`, `resume_session_at` and `fork_session` exist."
+      "text": "Yes, any transcript file works.",
+      "explanation": "Host files are application data, not SDK state."
      },
      {
-      "text": "Resume works only offline.",
-      "explanation": "No. Offline mode starts no SDK session at all."
+      "text": "No. Resume reads the CLI's own transcript from its config directory.",
+      "explanation": "Correct."
      },
      {
-      "text": "Each run uses a fresh CLI config directory and the session id is not saved.",
-      "explanation": "Correct. Cross-run resume needs a persistent config directory and the saved id, as the `note` says."
+      "text": "Only if it is named session.json.",
+      "explanation": "File names do not make it SDK state."
      }
     ],
-    "correct": 2
+    "correct": 1
    }
   ]
  },
@@ -5664,98 +5628,94 @@
  {
   "id": 55,
   "prerequisites": [
-   2,
-   41
+   51
   ],
-  "concept_brief": "Upgrade safely by pinning the SDK (pyproject.toml pins `claude-agent-sdk==0.2.163` and uv.lock fixes the full dependency tree), installing with `uv sync --locked`, and checking the installed public interface, such as `ClaudeAgentOptions` fields, `ClaudeSDKClient` methods and session helpers, before relying on it.",
-  "lab_brief": "The `upgrade` exercise (the shared `sdk_contract` function) reads the installed version with `importlib.metadata`, the declared types of five `ClaudeAgentOptions` fields (model, tools, hooks, `can_use_tool`, `mcp_servers`), the public `ClaudeSDKClient` methods and which of `list_sessions`, `get_session_messages` and `get_session_info` exist.",
+  "concept_brief": "Upgrade safely by pinning the SDK exactly, locking the full dependency tree (`uv.lock`), installing with `uv sync --locked`, and gating on the public interfaces your code uses before accepting a new version.",
+  "lab_brief": "The `upgrade` exercise reads the pin from `pyproject.toml`, the locked version from `uv.lock` and the installed version, checks 16 interfaces the app relies on, and shows a candidate missing `ClaudeSDKClient.interrupt` being blocked.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 55 (or run `uv run agent-lab lesson 55` in a terminal).",
-   "Optional: open pyproject.toml and uv.lock to see the pinned `claude-agent-sdk` version.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 55 (or run `uv run agent-lab lesson 55`).",
+   "No network access or upgrade happens; the exercise only reads files and the installed package."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn to verify the installed SDK's interface and keep dependencies reproducible before and after an upgrade."
+    "text": "Verify pins and interfaces before changing the SDK."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `sdk_contract` in `agent_lab`/exercises.py and find the `claude-agent-sdk` pin in pyproject.toml."
+    "text": "Read `upgrade` in the source, then the pin in `pyproject.toml`."
    },
    {
     "title": "Run one example",
-    "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare `installed_version` with the pin and scan `options`, `public_client_methods` and `session_functions` for the names your code uses."
+    "text": "Check `pin_lock_install_match`, `missing_interfaces` and both gates."
    },
    {
     "title": "Try the challenge",
-    "text": "Probe one more `ClaudeAgentOptions` field and re-run the offline tests to show the environment matches the lock."
+    "text": "Require an interface that does not exist."
    }
   ],
-  "inspect": "`installed_version`, the `options` group, `public_client_methods`, `session_functions` and `request`.",
-  "expected": "`installed_version` is 0.2.163 (the pinned version). `public_client_methods` includes connect, disconnect, interrupt, query, `receive_response`, `set_model`, `set_permission_mode` and `rewind_files`. `session_functions` lists all three helpers, and `request` shows offline, `max_turns` 4, `max_budget_usd` 0.1.",
-  "evidence_criterion": "The check confirms that the installed SDK version, its public client methods and its session helpers were read from the environment.",
+  "inspect": "`declared_pin`, `locked_version`, `installed_version`, `pin_lock_install_match`, `required_interfaces`, `missing_interfaces`, `current_gate` and `simulated_candidate`.",
+  "expected": "Pin `claude-agent-sdk==0.2.163`, lock and install all 0.2.163 (`pin_lock_install_match` true). No interfaces are missing, so `current_gate` is `pass`, while the simulated candidate is `blocked`.",
+  "evidence_criterion": "The check confirms the pin, lockfile and installation agree and the interface gate passes.",
   "evidence_checks": [
    {
-    "key": "installed_version",
-    "rule": "truthy"
+    "key": "pin_lock_install_match",
+    "rule": "equals",
+    "value": true
    },
    {
-    "key": "public_client_methods",
-    "rule": "truthy"
-   },
-   {
-    "key": "session_functions",
-    "rule": "truthy"
+    "key": "current_gate",
+    "rule": "equals",
+    "value": "pass"
    }
   ],
-  "challenge": "Run `uv run python -c \"import dataclasses, claude_agent_sdk as s; print([f.name for f in dataclasses.fields(s.ClaudeAgentOptions) if f.name in ('fallback_model', 'max_budget_usd')])\"` to confirm two fields exist, then run `uv sync --locked` and `uv run pytest`. After any real upgrade, repeat both and compare this lesson's evidence before and after.",
+  "challenge": "Add `\"stream_everything\"` to the `methods` list in `upgrade`, run again and confirm `missing_interfaces` names it and `current_gate` becomes `blocked`.",
   "hints": [
-   "Check the installed package, not documentation for a different version.",
-   "`dataclasses.fields(ClaudeAgentOptions)` and `inspect.getmembers(ClaudeSDKClient)` describe what is actually installed. Change the pin in pyproject.toml, run `uv lock`, and commit both files so every machine and CI job installs the same version."
+   "The gate is an explicit list of what your code depends on.",
+   "`ClaudeSDKClient.stream_everything` does not exist, so it is reported missing and the gate blocks, exactly as a real breaking release would be caught."
   ],
-  "reference": "The evidence is read from the installed package, so it shows the real interface your code runs against. The pin and lock file make that interface reproducible, and the offline tests catch breaking changes before any paid call. Note that the exercise reports the version but does not itself verify the pin; you compare it with pyproject.toml.",
+  "reference": "Reproducible installs come from an exact pin plus a lockfile installed with `--locked`. Before upgrading, run the interface gate and the offline tests against the candidate; anything missing blocks the upgrade instead of breaking students at runtime.",
   "recovery": [
-   "If `installed_version` differs from the pin, run `uv sync --locked` and restart the app; if that fails, uv.lock no longer matches pyproject.toml and must be regenerated deliberately with `uv lock`.",
-   "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Where does `installed_version` come from?",
+    "prompt": "What does uv sync --locked guarantee?",
     "options": [
      {
-      "text": "From the version written in the lesson tutorial.",
-      "explanation": "Documents can drift; the exercise reads the environment."
+      "text": "The newest versions of every package.",
+      "explanation": "It installs the locked versions, not the newest."
      },
      {
-      "text": "From `importlib.metadata.version('claude-agent-sdk')` on the installed package.",
-      "explanation": "Correct. It reports what is actually installed in the project environment."
+      "text": "Exactly the versions recorded in uv.lock, or a failure.",
+      "explanation": "Correct. No silent drift."
      },
      {
-      "text": "From a call to the Anthropic API.",
-      "explanation": "No network call is made offline."
+      "text": "That the SDK has no bugs.",
+      "explanation": "Locking controls versions, not quality."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "What makes the SDK version reproducible across machines in this repo?",
+    "prompt": "A candidate SDK version removes a method your app calls. What should happen?",
     "options": [
      {
-      "text": "An exact pin in pyproject.toml plus uv.lock, installed with `uv sync --locked`.",
-      "explanation": "Correct. The locked install fails instead of silently resolving different versions."
+      "text": "Block the upgrade until the code is adapted.",
+      "explanation": "Correct. The gate exists for this."
      },
      {
-      "text": "Running `pip install claude-agent-sdk` on each machine.",
-      "explanation": "That installs whatever is newest, which is the opposite of reproducible."
+      "text": "Upgrade and fix errors as students report them.",
+      "explanation": "That ships a break to students."
      },
      {
-      "text": "Setting `LAB_ENABLE_LIVE`=true.",
-      "explanation": "That flag enables paid calls; it does not affect dependency versions."
+      "text": "Remove the method from your gate list.",
+      "explanation": "That hides the incompatibility."
      }
     ],
     "correct": 0
@@ -6564,99 +6524,100 @@
   "id": 64,
   "prerequisites": [
    13,
-   43,
    48
   ],
-  "concept_brief": "Give an agent a browser as a narrow MCP tool, not a shell. `agent_lab/integrations/browser_mcp.py` is a `FastMCP` server with one tool, `inspect_page(url)`, that only accepts `LAB_BROWSER_ORIGIN`, aborts off-origin requests with Playwright's `page.route` and returns the page title, up to 10,000 characters of text and the source URL; you would attach it through `mcp_servers` in `ClaudeAgentOptions`.",
-  "lab_brief": "Offline this lesson runs the same `mcp` exercise as lesson 61: it reports the `mcp` version, stdio transport and the notes server launch command, plus a note that the browser integration is separate. It does not launch Chromium, so you can study the boundary without installing a browser.",
+  "concept_brief": "A browser MCP service gives an agent one narrow capability, reading pages at an allowed origin, instead of a shell. The service enforces the origin itself: scheme, host and port must all match, for the URL and every request the page makes.",
+  "lab_brief": "The `browser` exercise lists the tools of `agent_lab/integrations/browser_mcp.py` without launching a browser and runs its `same_origin` rule against five URLs, including a lookalike host and a local file.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=64. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK.",
-   "For the real browser server: `uv sync --locked --extra browser`, `uv run playwright install chromium`, then `uv run python -m agent_lab.integrations.browser_mcp`."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 64 (or run `uv run agent-lab lesson 64`).",
+   "To run the real service: `uv sync --locked --extra browser`, `uv run playwright install chromium`, then `uv run python -m agent_lab.integrations.browser_mcp`."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Compare an explicit, origin-limited browser tool with giving the model arbitrary shell access."
+    "text": "Prefer a narrow, origin-locked browser tool over shell access."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `inspect_page` in `agent_lab`/integrations/browser_mcp.py, especially the origin comparison and the `route` handler."
+    "text": "Read `same_origin` and `inspect_page` in `agent_lab/integrations/browser_mcp.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `transport` is stdio and `notes` says the browser MCP integration needs its own browser install and startup."
+    "text": "Check the single tool and each row of `origin_checks`."
    },
    {
     "title": "Try the challenge",
-    "text": "Call `inspect_page` with an off-origin URL and watch the host reject it before any browser work."
+    "text": "Change the teaching origin."
    }
   ],
-  "inspect": "Look at `mcp_version`, `transport`, `server_command`, `resource_uri` and especially `notes`.",
-  "expected": "`mcp_version` 1.30.0, `transport` stdio, `server_command` pointing to `agent_lab.integrations.notes_mcp`, `resource_uri` notes://welcome and the note: \"An external browser MCP integration is provided separately; it needs its own browser installation and service startup.\"",
-  "evidence_criterion": "The check confirms the run reported the stdio transport and the note that the browser integration runs separately.",
+  "inspect": "`server`, the `tools` list, `teaching_origin`, the `origin_checks` table, `versus_shell` and `browser_launched`.",
+  "expected": "One tool, `inspect_page`, taking a `url`. Only `http://127.0.0.1:8080/?lesson=1` is allowed; `localhost`, another port, the lookalike `127.0.0.1.evil.example` and the `file://` URL are refused.",
+  "evidence_criterion": "The check confirms the service exposes one tool and the origin rule was evaluated.",
   "evidence_checks": [
    {
-    "key": "transport",
-    "rule": "equals",
-    "value": "stdio"
+    "key": "tools",
+    "rule": "truthy"
    },
    {
-    "key": "notes",
+    "key": "origin_checks",
+    "rule": "truthy"
+   },
+   {
+    "key": "browser_launched",
     "rule": "equals",
-    "value": "An external browser MCP integration is provided separately; it needs its own browser installation and service startup."
+    "value": false
    }
   ],
-  "challenge": "In a scratch script import `mcp` from `agent_lab.integrations.browser_mcp`, print `await mcp.list_tools()`, then run `await mcp.call_tool(\"inspect_page\", {\"url\": \"https://example.com\"})`. You should see one tool requiring `url`, and the call fails with \"URL is outside the configured teaching origin.\" without launching a browser.",
+  "challenge": "Run `LAB_BROWSER_ORIGIN=http://localhost:8080 uv run agent-lab lesson 64` (in PowerShell set `$env:LAB_BROWSER_ORIGIN` first) and predict which checks pass now (the first two).",
   "hints": [
-   "The origin rule compares scheme, host and port before any page is opened.",
-   "The URL check runs at the top of `inspect_page`; Chromium is only launched in the server's `lifespan`, which runs when you start the server with `-m agent_lab.integrations.browser_mcp`, not when you import it."
+   "The candidate list is built from the configured origin.",
+   "With a `localhost` origin, the lesson URL and the localhost URL match exactly, while the 127.0.0.1 port 9999, lookalike and file URLs are still refused."
   ],
-  "reference": "The offline evidence describes the MCP transport the course uses, and the note tells you the browser server is a separate service. In `browser_mcp`.py the model can only ask for a URL at one configured origin and gets back page text; it cannot run commands, read files or reach other sites. A shell would give it all of those, which is why the tool boundary matters.",
+  "reference": "Narrow tools shrink what an agent can do to what the task needs. Exact origin matching also blocks lookalike hosts, other ports and local files, and the running service applies the same rule to redirects and subresources.",
   "recovery": [
-   "If `playwright install chromium` or the browser server fails, keep using the offline exercise and read `browser_mcp`.py; the lesson's evidence does not depend on a browser.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What stops `inspect_page` from loading scripts or redirects from another site?",
+    "prompt": "Why is http://localhost:8080 refused when the origin is http://127.0.0.1:8080?",
     "options": [
      {
-      "text": "Claude is told not to visit other sites.",
-      "explanation": "No. Instructions to the model are not a boundary; the host enforces the rule in code."
+      "text": "The host names differ, and the rule compares them exactly.",
+      "explanation": "Correct. Exact matching avoids ambiguity."
      },
      {
-      "text": "A `page.route(\"**/*\", ...)` handler that aborts every request outside `LAB_BROWSER_ORIGIN`.",
-      "explanation": "Correct. The route handler checks scheme, host and port of each request, including subresources and redirects."
+      "text": "localhost is always dangerous.",
+      "explanation": "It is refused only because it is not the configured origin."
      },
      {
-      "text": "The stdio transport cannot carry other URLs.",
-      "explanation": "No. The transport carries tool calls; it has nothing to do with which pages the browser loads."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Does the offline lesson 64 run start Chromium?",
-    "options": [
-     {
-      "text": "No. It only reports MCP metadata; the browser server needs the browser extra and its own startup.",
-      "explanation": "Correct. The evidence `notes` says so, and Chromium launches only in the browser server's lifespan."
-     },
-     {
-      "text": "Yes, in headless mode.",
-      "explanation": "No. Nothing in the offline exercise imports Playwright or opens a page."
-     },
-     {
-      "text": "Yes, but only if `LAB_ENABLE_LIVE`=true.",
-      "explanation": "No. Live mode for this lesson uses the plain `query` profile with no tools; it does not start the browser server either."
+      "text": "The port is different.",
+      "explanation": "The port is the same."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What does a browser MCP tool prevent that a shell tool would allow?",
+    "options": [
+     {
+      "text": "Reading web pages.",
+      "explanation": "That is exactly what it allows."
+     },
+     {
+      "text": "Running commands, reading local files and reaching other hosts.",
+      "explanation": "Correct. The capability is narrow by design."
+     },
+     {
+      "text": "Nothing; they are equivalent.",
+      "explanation": "A shell is far broader."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -7067,99 +7028,96 @@
  {
   "id": 69,
   "prerequisites": [
-   41,
    66
   ],
-  "concept_brief": "A desktop app should reuse the same Python service rather than embed a second agent stack. `uv run agent-lab serve --native` calls NiceGUI's `native_mode.activate` (backed by pywebview) and then serves the same FastAPI app, so the window, browser UI, CLI and API all run lessons through `agent_lab.runtime.RunService`, which owns the SDK connection.",
-  "lab_brief": "The offline `desktop` exercise returns the browser and native launch commands, the optional pywebview dependency and the shared service name. It shows that switching to a native window changes only the shell around the UI, not how agents are run.",
+  "concept_brief": "A desktop window can host the same Python service as the browser. NiceGUI's native mode (pywebview) opens a window around the same FastAPI app, so lessons, runs and the API behave identically in both.",
+  "lab_brief": "The `desktop` exercise builds the app with `create_app`, lists the API routes both modes share, reports which `RunService` backs them, and checks whether the optional `pywebview` package is installed.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=69. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK.",
-   "For a native window: `uv sync --locked --extra desktop`, then `uv run agent-lab serve --native` (your platform may need extra pywebview dependencies)."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 69 (or run `uv run agent-lab lesson 69`).",
+   "For a native window: `uv sync --locked --extra desktop`, then `uv run agent-lab serve --native`."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Run the same lesson service from a native window instead of a browser tab."
+    "text": "Reuse one service for browser and desktop."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `--native` branch in `agent_lab`/cli.py and the `desktop` function in `agent_lab`/exercises.py."
+    "text": "Read `desktop` in the source and the `serve` command in `agent_lab/cli.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `browser` and `native` are the two commands and `same_service` is `agent_lab`.runtime.RunService."
+    "text": "Check `shared_service`, `shared_api_routes` and `native_window_available`."
    },
    {
     "title": "Try the challenge",
-    "text": "Open the lab in native mode and compare its evidence with the browser run."
+    "text": "Install the desktop extra and run again."
    }
   ],
-  "inspect": "Look at `browser`, `native`, `native_dependency`, `same_service` and `notes`.",
-  "expected": "`browser` \"uv run agent-lab serve\", `native` \"uv run agent-lab serve --native\", `native_dependency` says to install the optional pywebview package, `same_service` \"`agent_lab`.runtime.RunService\", and the NiceGUI native mode note.",
-  "evidence_criterion": "The check confirms the run named the native launch command and the shared RunService.",
+  "inspect": "`browser_command`, `native_command`, `native_window_available`, `install_native`, `shared_service` and `shared_api_routes`.",
+  "expected": "`shared_service` is `RunService` and `shared_api_routes` lists the 12 `/api` routes, including the lesson WebSocket. `native_window_available` is false until the desktop extra is installed.",
+  "evidence_criterion": "The check confirms both modes are served by the same RunService and API routes.",
   "evidence_checks": [
    {
-    "key": "same_service",
+    "key": "shared_service",
     "rule": "equals",
-    "value": "agent_lab.runtime.RunService"
+    "value": "RunService"
    },
    {
-    "key": "native",
-    "rule": "equals",
-    "value": "uv run agent-lab serve --native"
+    "key": "shared_api_routes",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Stop the browser server, run `uv sync --locked --extra desktop` and `uv run agent-lab serve --native`, then run lesson 69 (or lesson 71) in the window. The evidence should be identical to the browser run, because both go through RunService.",
+  "challenge": "Run `uv sync --locked --extra desktop`, then run the lesson again and confirm `native_window_available` is true. Start `uv run agent-lab serve --native` to see the window.",
   "hints": [
-   "Native mode wraps the same web app; it does not change the backend.",
-   "In cli.py, `--native` only calls `native_mode.activate(...)` before `uvicorn.run(app, ...)`; the `app` comes from `create_app(RunService(settings))` in both modes."
+   "Native mode depends on an optional package, not on different app code.",
+   "Installing the extra adds `pywebview`, so `find_spec(\"webview\")` succeeds; the routes and service do not change."
   ],
-  "reference": "The evidence names one service for both entry points. Because the native window just hosts the same NiceGUI and FastAPI app, run limits, permissions, cancellation and SDK cleanup behave exactly as in the browser. Keeping the SDK in the Python service also keeps the API key out of window code.",
+  "reference": "Keeping one service behind both front ends means one set of tests, one permission model and one lifecycle. The desktop shell is a presentation choice, not a second implementation.",
   "recovery": [
-   "If the native window fails to open, pywebview or its platform libraries are missing; install the desktop extra or simply use `uv run agent-lab serve` in the browser, which runs the same service.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What changes when you start the lab with `--native`?",
+    "prompt": "What changes between browser mode and native mode here?",
     "options": [
      {
-      "text": "Agents run through a separate desktop SDK client.",
-      "explanation": "No. There is only one service; the window displays the same app."
+      "text": "Only the window that hosts the same app.",
+      "explanation": "Correct. Service and routes are shared."
      },
      {
-      "text": "Live mode is enabled automatically.",
-      "explanation": "No. Live mode still needs `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env."
+      "text": "The lesson exercises are reimplemented.",
+      "explanation": "They are the same code."
      },
      {
-      "text": "The same app opens in a pywebview window instead of a browser tab.",
-      "explanation": "Correct. `native_mode.activate` only changes how the UI is shown; RunService is unchanged."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "Why should the desktop UI call the shared RunService instead of the SDK directly?",
-    "options": [
-     {
-      "text": "So limits, cancellation and SDK cleanup behave the same in every UI.",
-      "explanation": "Correct. One owning service means one set of rules, whatever the front end."
-     },
-     {
-      "text": "Because pywebview cannot import Python packages.",
-      "explanation": "No. The window is driven by Python; the reason is consistency, not a technical block."
-     },
-     {
-      "text": "Because RunService makes runs free.",
-      "explanation": "No. Live runs cost the same; RunService manages them, it does not change billing."
+      "text": "Native mode skips permissions.",
+      "explanation": "Permissions are part of the shared service."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Why keep a single service for both front ends?",
+    "options": [
+     {
+      "text": "It looks better in screenshots.",
+      "explanation": "Appearance is not the reason."
+     },
+     {
+      "text": "One implementation to test, secure and maintain.",
+      "explanation": "Correct."
+     },
+     {
+      "text": "Desktop apps cannot have their own code.",
+      "explanation": "They can; sharing is a design choice."
+     }
+    ],
+    "correct": 1
    }
   ]
  },

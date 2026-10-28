@@ -84,6 +84,14 @@ def require_live_access(settings: Settings) -> None:
         raise PermissionError("This isolated lab needs an API key or a configured cloud provider.")
 
 
+# Only these lessons opt in to project files (.claude/, CLAUDE.md); user settings never load.
+PROJECT_SETTING_PROFILES = frozenset({"skills", "commands", "memory", "styles"})
+
+
+def setting_sources_for(profile: str) -> list[Any]:
+    return ["project"] if profile in PROJECT_SETTING_PROFILES else []
+
+
 def isolated_env(config: Path) -> dict[str, str]:
     """Each run gets its own CLI configuration; personal settings and memory are never loaded."""
     return {
@@ -229,8 +237,8 @@ async def run_sdk(
     options.tools = sorted(builtins)
     # AskUserQuestion is deliberately not pre-approved: can_use_tool must obtain the answer.
     options.allowed_tools += sorted(builtins - {"AskUserQuestion"})
-    if profile in {"skills", "commands", "memory", "styles"}:
-        options.setting_sources = ["project"]
+    if profile in PROJECT_SETTING_PROFILES:
+        options.setting_sources = setting_sources_for(profile)
         options.system_prompt = {
             "type": "preset",
             "preset": "claude_code",

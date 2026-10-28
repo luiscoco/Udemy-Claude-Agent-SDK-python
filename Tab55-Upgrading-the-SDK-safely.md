@@ -27,50 +27,56 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `upgrade`, line 1830). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "thinking",
-    "settings",
-    "session_management",
-    "resume",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+@exercise("upgrade")
+def upgrade(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Compare the declared pin, the lockfile and the installed SDK, then gate on interfaces."""
+    import tomllib
+
     import claude_agent_sdk as sdk
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from agent_lab.config import ROOT
+
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    pin = next(
+        item for item in project["project"]["dependencies"] if item.startswith("claude-agent-sdk")
+    )
+    lock = tomllib.loads((ROOT / "uv.lock").read_text(encoding="utf-8"))
+    locked = next(item["version"] for item in lock["package"] if item["name"] == "claude-agent-sdk")
+    installed = importlib.metadata.version("claude-agent-sdk")
+    required = [
+        "query",
+        "tool",
+        "create_sdk_mcp_server",
+        "ClaudeAgentOptions",
+        "ClaudeSDKClient",
+        "HookMatcher",
+        "PermissionResultAllow",
+        "PermissionResultDeny",
+        "Transport",
+        "list_sessions",
+    ]
+    methods = ["connect", "query", "receive_response", "interrupt", "set_model", "disconnect"]
+    missing = [name for name in required if not hasattr(sdk, name)]
+    missing += [
+        f"ClaudeSDKClient.{name}" for name in methods if not hasattr(sdk.ClaudeSDKClient, name)
+    ]
+    # A candidate release that dropped one method the app uses must be blocked.
+    candidate_missing = ["ClaudeSDKClient.interrupt"]
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "declared_pin": pin,
+        "locked_version": locked,
+        "installed_version": installed,
+        "pin_lock_install_match": pin.endswith(f"=={locked}") and locked == installed,
+        "required_interfaces": len(required) + len(methods),
+        "missing_interfaces": missing,
+        "current_gate": "pass" if not missing else "blocked",
+        "simulated_candidate": {"missing": candidate_missing, "gate": "blocked"},
+        "reproducible_install": "uv sync --locked",
     }
 ```
 
