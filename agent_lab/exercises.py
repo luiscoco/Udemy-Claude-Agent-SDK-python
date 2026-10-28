@@ -1944,33 +1944,42 @@ def write_fixture_session(config: Path) -> str:
 
 
 SESSION_PROBE = """
-import dataclasses, json, sys
+import dataclasses, json, os, sys
 from claude_agent_sdk import get_session_info, get_session_messages, list_sessions
-sessions = list_sessions()
-messages = get_session_messages(sys.argv[1]) if sessions else []
-info = get_session_info(sys.argv[1])
-print(json.dumps({
-    "sessions": [dataclasses.asdict(item) for item in sessions],
-    "messages": [dataclasses.asdict(item) for item in messages],
-    "info_found": info is not None,
-}, default=str))
+session_id, results = sys.argv[1], []
+for config in sys.argv[2:]:
+    # Safe here: this child process is isolated from the server's environment.
+    os.environ["CLAUDE_CONFIG_DIR"] = config
+    sessions = list_sessions()
+    messages = get_session_messages(session_id) if sessions else []
+    results.append({
+        "sessions": [dataclasses.asdict(item) for item in sessions],
+        "messages": [dataclasses.asdict(item) for item in messages],
+        "info_found": get_session_info(session_id) is not None,
+    })
+print(json.dumps(results, default=str))
 """
 
 
-async def probe_sessions(config: Path, session_id: str) -> dict[str, Any]:
-    """The session API reads CLAUDE_CONFIG_DIR from the environment, so probe in a child."""
+async def probe_sessions(configs: list[Path], session_id: str) -> list[dict[str, Any]]:
+    """The session API reads CLAUDE_CONFIG_DIR from the environment, so probe in one child."""
     process = await asyncio.create_subprocess_exec(
         sys.executable,
         "-I",
         "-c",
         SESSION_PROBE,
         session_id,
-        env=os.environ | {"CLAUDE_CONFIG_DIR": str(config)},
+        *map(str, configs),
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    async with asyncio.timeout(30):
-        stdout, stderr = await process.communicate()
+    try:
+        async with asyncio.timeout(60):
+            stdout, stderr = await process.communicate()
+    except TimeoutError as exc:
+        process.kill()
+        await process.wait()
+        raise LessonError("The session probe did not finish within 60 seconds.") from exc
     if process.returncode:
         raise LessonError("The session probe failed: " + stderr.decode()[-300:])
     return json.loads(stdout)
@@ -1988,7 +1997,7 @@ async def session_management(root: Path, request: RunRequest, lesson: Lesson) ->
     """Call list_sessions and get_session_messages against an isolated config directory."""
     config = root / "isolated-config"
     session_id = write_fixture_session(config)
-    probe = await probe_sessions(config, session_id)
+    (probe,) = await probe_sessions([config], session_id)
     return {
         "config_dir": "isolated-config (this run only; your own transcripts are never read)",
         "sessions": [
@@ -2012,8 +2021,7 @@ async def resume(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, A
     (root / "host-transcript.json").write_text(
         json.dumps([{"role": "user", "content": "Remember HOST-ONLY."}]), encoding="utf-8"
     )
-    same_dir = await probe_sessions(config, session_id)
-    other_dir = await probe_sessions(root / "empty-config", session_id)
+    same_dir, other_dir = await probe_sessions([config, root / "empty-config"], session_id)
     variants = {
         "continue this session": ClaudeAgentOptions(resume=session_id),
         "branch into a new session": ClaudeAgentOptions(resume=session_id, fork_session=True),

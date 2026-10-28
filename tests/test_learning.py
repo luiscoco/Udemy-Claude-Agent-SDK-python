@@ -1,4 +1,5 @@
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -54,7 +55,9 @@ def test_course_paths_sections_and_visual_guides_reference_real_content():
 async def test_automatic_check_passes_on_actual_offline_evidence(lesson_id, tmp_path):
     service = RunService(Settings(data_dir=tmp_path))
     events = [event async for event in service.events(service.start(lesson_id, RunRequest()))]
-    evidence = next(event.data["result"] for event in events if event.kind == "evidence")
+    errors = [event.data["message"] for event in events if event.kind == "error"]
+    evidence = next((event.data["result"] for event in events if event.kind == "evidence"), None)
+    assert evidence is not None, errors
     result = check_evidence(lesson_id, evidence, status=events[-1].data["status"])
     assert result.status == "passed", result.detail
 
@@ -212,9 +215,16 @@ def server(tmp_path_factory):
             process.terminate()
             process.wait(timeout=30)
     output = log_path.read_text(errors="replace")
-    # Windows reports a browser closing its socket as a callback traceback; that is not ours.
-    unexpected = output.count("Traceback") - output.count("_call_connection_lost()>")
-    assert unexpected == 0, output[-3000:]
+    # Each error chain ends in one "Name: message" line. Two are known and harmless: Windows
+    # reporting a browser closing its socket, and NiceGUI's drawer asking the browser for its
+    # state when a test leaves a page within a second of loading it.
+    benign = (
+        "ConnectionResetError: [WinError 10054]",
+        "TimeoutError: JavaScript did not respond within",
+    )
+    final_errors = re.findall(r"^[A-Za-z_.]*(?:Error|Exception): .*$", output, re.MULTILINE)
+    unexpected = [line for line in final_errors if not line.startswith(benign)]
+    assert not unexpected, unexpected
 
 
 def test_browser_pages_render_every_learning_tab(server):
@@ -373,4 +383,20 @@ def test_browser_exports_progress_and_imports_it_into_another_browser(server, tm
         second.wait_for_load_state()
         second.goto(base + "/?lesson=5")
         assert second.get_by_label("Private notes").input_value() == "moved between browsers"
+        browser.close()
+
+
+def test_browser_renders_the_generated_exercise_diagram(server):
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page()
+        page.goto(base + "/?lesson=26")
+        page.get_by_role("tab", name="Visual guide").click()
+        diagram = page.locator(".exercise-diagram svg").first
+        diagram.wait_for(timeout=15000)
+        assert "Scripted CLI fixture" in (diagram.text_content() or "")
+        assert page.get_by_text("Syntax error").count() == 0
         browser.close()

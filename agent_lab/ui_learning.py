@@ -10,6 +10,7 @@ from typing import Any
 from nicegui import app, ui
 
 from agent_lab.curriculum import LESSONS, TOPICS
+from agent_lab.diagrams import exercise_diagram, legend
 from agent_lab.learning import (
     TUTOR_INTENTS,
     CheckResult,
@@ -328,6 +329,16 @@ def walkthrough_panel(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    with card("How this exercise is built", "Generated from the code"):
+        ui.label(
+            "This diagram is drawn from the exercise's own source, so it always matches what "
+            "Run the exercise executes."
+        ).classes("text-sm text-slate-600")
+        with ui.element("div").classes("w-full overflow-x-auto"):
+            ui.mermaid(exercise_diagram(lesson_id)).classes("exercise-diagram")
+        with ui.row().classes("gap-2"):
+            for kind, label in legend(lesson_id).items():
+                ui.label(label).classes(f"legend-chip legend-{kind}")
     with card("Concept summary", "Visual guide"):
         ui.markdown(guide(lesson_id).concept_brief)
         if not related:
@@ -635,6 +646,16 @@ APPEARANCE_CSS = """
     .response-prose h2 { font-size: 1.45em; line-height: 1.3; }
     .response-prose h3 { font-size: 1.2em; line-height: 1.3; }
     .feedback { padding: 8px 12px; border-radius: 8px; }
+    .exercise-diagram { min-width: 640px; }
+    body.body--dark .exercise-diagram .flowchart-link { stroke: #c4c1d9 !important; }
+    body.body--dark .exercise-diagram marker path { fill: #c4c1d9 !important; stroke: #c4c1d9 !important; }
+    .legend-chip { font-size: 14px !important; padding: 2px 10px; border-radius: 999px; border: 1px solid; color: #1f1d2e; }
+    .legend-sdk { background: #ede9fe; border-color: #7c3aed; }
+    .legend-fixture { background: #fef3c7; border-color: #d97706; }
+    .legend-host { background: #e0f2fe; border-color: #0284c7; }
+    .legend-process { background: #fce7f3; border-color: #db2777; }
+    .legend-external { background: #dcfce7; border-color: #16a34a; }
+    .legend-data { background: #f1f5f9; border-color: #64748b; }
     .feedback-ok { background: #ecfdf5; color: #065f46; }
     .feedback-bad { background: #fff7ed; color: #9a3412; }
     body.lab-text-small .q-page-container { zoom: .9; }

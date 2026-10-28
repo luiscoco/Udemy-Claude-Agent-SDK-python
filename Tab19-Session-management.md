@@ -27,7 +27,7 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `session_management`, line 1986). Host contracts are in
+(function `session_management`, line 1995). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -37,7 +37,7 @@ async def session_management(root: Path, request: RunRequest, lesson: Lesson) ->
     """Call list_sessions and get_session_messages against an isolated config directory."""
     config = root / "isolated-config"
     session_id = write_fixture_session(config)
-    probe = await probe_sessions(config, session_id)
+    (probe,) = await probe_sessions([config], session_id)
     return {
         "config_dir": "isolated-config (this run only; your own transcripts are never read)",
         "sessions": [

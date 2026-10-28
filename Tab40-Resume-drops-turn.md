@@ -27,7 +27,7 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `resume`, line 2004). Host contracts are in
+(function `resume`, line 2013). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -43,8 +43,7 @@ async def resume(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, A
     (root / "host-transcript.json").write_text(
         json.dumps([{"role": "user", "content": "Remember HOST-ONLY."}]), encoding="utf-8"
     )
-    same_dir = await probe_sessions(config, session_id)
-    other_dir = await probe_sessions(root / "empty-config", session_id)
+    same_dir, other_dir = await probe_sessions([config, root / "empty-config"], session_id)
     variants = {
         "continue this session": ClaudeAgentOptions(resume=session_id),
         "branch into a new session": ClaudeAgentOptions(resume=session_id, fork_session=True),
