@@ -8,6 +8,7 @@ fixture, so evidence from it is labelled as such.
 """
 
 import asyncio
+import contextlib
 import json
 from collections.abc import AsyncIterator
 from typing import Any
@@ -100,7 +101,10 @@ class ScriptedCLI(Transport):
                 }
             )
             sent += 1
-            await asyncio.sleep(self.chunk_delay)
+            # Pause between chunks, but stop as soon as an interrupt arrives, so the result
+            # does not depend on how fast a loaded machine delivers the control request.
+            with contextlib.suppress(TimeoutError):
+                await asyncio.wait_for(self._interrupted.wait(), self.chunk_delay)
         interrupted = sent < len(chunks)
         await self._outbox.put(
             {

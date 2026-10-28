@@ -559,7 +559,7 @@ async def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[st
         invalid = "accepted"
     except ValidationError as exc:
         invalid = f"rejected: {exc.error_count()} validation errors"
-    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=0.05)
+    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=1.0)
     received, subtype = 0, None
     async with asyncio.timeout(20):
         async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
