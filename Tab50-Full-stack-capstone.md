@@ -27,26 +27,48 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `database`, line 875). Host contracts are in
+(function `support`, line 1304). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("support", "database", "tenancy")
-def database(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+@exercise("support")
+def support(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Bind tools to the signed-in customer and require an exact approval before a refund."""
+    customer = "alice"  # chosen by the host session, never by tool arguments
     orders = Orders(root / "orders.sqlite")
     try:
-        alice = orders.list("alice")
-        injected = orders.list("alice' OR 1=1 --")
-        protected = orders.cancel("bob", "A-001", 1, approved=True)
-        return {
-            "alice": alice,
-            "sql_injection_result": injected,
-            "cross_tenant_update": protected,
-            "mutations": "Only host-approved, version-checked updates are allowed.",
-        }
+        visible = orders.list(customer)
     finally:
         orders.close()
+    proposal = Refund(order_id="A-001", amount_cents=4200, reason="Damaged on arrival")
+    steps: list[dict[str, Any]] = []
+    approval = Approval(proposal)
+    try:
+        approval.consume(proposal)
+    except ValueError as exc:
+        steps.append({"step": "refund before approval", "outcome": str(exc)})
+    try:
+        approval.decide("guessed-token", True)
+    except PermissionError as exc:
+        steps.append({"step": "approve with a wrong credential", "outcome": str(exc)})
+    approval.decide(approval.token, True)
+    steps.append({"step": "staff approves", "outcome": approval.state})
+    larger = proposal.model_copy(update={"amount_cents": 9000})
+    try:
+        approval.consume(larger)
+    except ValueError as exc:
+        steps.append({"step": "refund a different amount", "outcome": str(exc)})
+    approval.consume(proposal)
+    steps.append({"step": "refund the approved action", "outcome": approval.state})
+    return {
+        "customer": customer,
+        "visible_orders": visible,
+        "proposal": proposal.model_dump(),
+        "approval_steps": steps,
+        "refunds_executed": 1,
+        "final_state": approval.state,
+    }
 ```
 
 ## Live Agent SDK exercise

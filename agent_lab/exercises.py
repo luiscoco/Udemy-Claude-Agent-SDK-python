@@ -2,6 +2,7 @@
 
 import asyncio
 import base64
+import contextlib
 import csv
 import dataclasses
 import importlib.metadata
@@ -10,7 +11,7 @@ import io
 import json
 import os
 import sys
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from pathlib import Path
 from typing import Any
 
@@ -518,18 +519,9 @@ async def streaming(root: Path, request: RunRequest, lesson: Lesson) -> dict[str
     }
 
 
-@exercise("mcp", "remote_mcp", "agent_mcp", "browser")
+@exercise("browser")
 def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from mcp.server.fastmcp import FastMCP
-
     from agent_lab.config import ROOT
-
-    server = FastMCP("python-notes")
-
-    @server.tool()
-    def welcome() -> str:
-        """Read the welcome note."""
-        return "Welcome to the Python SDK lab."
 
     return {
         "mcp_version": importlib.metadata.version("mcp"),
@@ -538,6 +530,132 @@ def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
         "resource_uri": "notes://welcome",
         "integration_source": str(ROOT / "agent_lab" / "integrations"),
         "notes": lesson.notes,
+    }
+
+
+def tool_text(result: Any) -> str:
+    return "\n".join(getattr(block, "text", "") for block in result.content)
+
+
+@exercise("mcp")
+async def mcp_stdio(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Launch the notes server as a subprocess and talk to it over stdio, as the SDK does."""
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
+    command = [sys.executable, "-m", "agent_lab.integrations.notes_mcp"]
+    parameters = StdioServerParameters(command=command[0], args=command[1:])
+    async with asyncio.timeout(30):
+        async with stdio_client(parameters) as (reader, writer):
+            async with ClientSession(reader, writer) as session:
+                initialized = await session.initialize()
+                tools = await session.list_tools()
+                valid = await session.call_tool("read_note", {"name": "refunds"})
+                invalid = await session.call_tool("read_note", {"name": "salaries"})
+    return {
+        "transport": "stdio",
+        "server_command": command,
+        "server": initialized.serverInfo.name,
+        "tools": [
+            {"name": item.name, "description": item.description, "input_schema": item.inputSchema}
+            for item in tools.tools
+        ],
+        "valid_call": {
+            "arguments": {"name": "refunds"},
+            "is_error": valid.isError,
+            "text": tool_text(valid),
+        },
+        "invalid_call": {
+            "arguments": {"name": "salaries"},
+            "is_error": invalid.isError,
+            "text": tool_text(invalid),
+        },
+        "sdk_config": {"notes": {"type": "stdio", "command": command[0], "args": command[1:]}},
+    }
+
+
+class EmbeddedServer:
+    """Uvicorn inside the running app; it must not take over the app's signal handlers."""
+
+    def __init__(self, app: Any) -> None:
+        import uvicorn
+
+        class Quiet(uvicorn.Server):
+            @contextlib.contextmanager
+            def capture_signals(self) -> Any:
+                yield
+
+        self.server = Quiet(uvicorn.Config(app, log_level="warning", lifespan="on"))
+
+    @contextlib.asynccontextmanager
+    async def running(self) -> AsyncIterator[str]:
+        import socket
+
+        listener = socket.socket()
+        listener.bind(("127.0.0.1", 0))
+        port = listener.getsockname()[1]
+        task = asyncio.create_task(self.server.serve(sockets=[listener]))
+        try:
+            async with asyncio.timeout(10):
+                while not self.server.started:
+                    if task.done():
+                        task.result()
+                    await asyncio.sleep(0.02)
+            yield f"http://127.0.0.1:{port}"
+        finally:
+            self.server.should_exit = True
+            await task
+            listener.close()
+
+
+@exercise("remote_mcp")
+async def remote_mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Serve MCP over streamable HTTP on loopback and inspect it with the remote client."""
+    from agent_lab.integrations.notes_mcp import build_server
+    from agent_lab.integrations.remote_mcp import inspect_remote
+
+    async with EmbeddedServer(build_server().streamable_http_app()).running() as base:
+        url = f"{base}/mcp"
+        inspected = await inspect_remote(url)
+    try:
+        await inspect_remote("http://example.com/mcp")
+        insecure = "accepted"
+    except ValueError as exc:
+        insecure = str(exc)
+    return {
+        "transport": "streamable HTTP",
+        "url": url,
+        "server": inspected["server"]["name"],
+        "tools": [item["name"] for item in inspected["tools"]],
+        "resources": [item["uri"] for item in inspected["resources"]],
+        "difference": "Tools are actions the model calls with arguments; resources are "
+        "addressable data the client reads by URI.",
+        "insecure_url": insecure,
+    }
+
+
+@exercise("agent_mcp")
+async def agent_mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Call the agent-backed MCP tool end to end with live access forced off."""
+    from mcp.shared.memory import create_connected_server_and_client_session
+
+    from agent_lab.config import Settings
+    from agent_lab.integrations.agent_mcp import build_server
+
+    # Forced offline: this exercise must never start a paid run, whatever .env says.
+    server = build_server(Settings(enable_live=False, data_dir=root / "agent-mcp"))
+    async with asyncio.timeout(30):
+        async with create_connected_server_and_client_session(server) as session:
+            tools = await session.list_tools()
+            result = await session.call_tool("explain_python_agent", {"prompt": "What is MCP?"})
+    tool = tools.tools[0]
+    return {
+        "outer_client": "MCP ClientSession (in-memory transport)",
+        "tool": {"name": tool.name, "input_schema": tool.inputSchema},
+        "inner_agent": "RunService -> claude-agent-sdk live run of lesson 1",
+        "call_is_error": result.isError,
+        "call_result": tool_text(result),
+        "live_gate": "The inner run refused to start because live access is disabled.",
     }
 
 
@@ -863,16 +981,52 @@ def cache(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
 
 
 @exercise("ci")
-def ci(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def ci(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Run the real CLI headlessly, as a CI job would, and record its exit codes."""
+    env = os.environ | {
+        "LAB_ENABLE_LIVE": "false",
+        "ANTHROPIC_API_KEY": "",
+        "LAB_DATA_DIR": str(root / "ci-data"),
+    }
+    runs = []
+    for label, arguments in (
+        ("passing lesson", ["lesson", "5"]),
+        ("unknown lesson", ["lesson", "99"]),
+    ):
+        command = [sys.executable, "-m", "agent_lab", *arguments]
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            env=env,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            async with asyncio.timeout(60):
+                stdout, stderr = await process.communicate()
+        except TimeoutError:
+            process.kill()
+            await process.wait()
+            raise
+        lines = [json.loads(line) for line in stdout.decode().splitlines() if line.startswith("{")]
+        runs.append(
+            {
+                "case": label,
+                "command": "agent-lab " + " ".join(arguments),
+                "exit_code": process.returncode,
+                "json_events": len(lines),
+                "final_status": lines[-1]["data"].get("status") if lines else None,
+                "stderr_first_line": (stderr.decode().strip().splitlines() or [""])[-1][:160],
+            }
+        )
     return {
-        "install": "uv sync --locked",
+        "runs": runs,
+        "ci_gate": "A job fails on any nonzero exit code.",
         "checks": ["uv run ruff check agent_lab tests", "uv run mypy agent_lab", "uv run pytest"],
-        "offline_worker": "uv run agent-lab lesson 49",
         "network_api_needed": False,
     }
 
 
-@exercise("support", "database", "tenancy")
+@exercise("database")
 def database(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     orders = Orders(root / "orders.sqlite")
     try:
@@ -1045,7 +1199,7 @@ def routing(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     }
 
 
-@exercise("durable", "scheduled")
+@exercise("durable")
 def durable(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     journal = Journal(root / "journal.jsonl")
     side_effects = []
@@ -1099,12 +1253,175 @@ def approval(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
 
 
 @exercise("websocket")
-def websocket(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def websocket(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Serve the real WebSocket endpoint on loopback and drive it as a browser would."""
+    from websockets.asyncio.client import connect
+    from websockets.exceptions import ConnectionClosed
+
+    from agent_lab.api import create_app
+    from agent_lab.config import Settings
+    from agent_lab.runtime import RunService
+
+    inner = RunService(Settings(enable_live=False, data_dir=root / "ws-runs"))
+    app = create_app(inner, with_ui=False)
+    async with EmbeddedServer(app).running() as base:
+        endpoint = base.replace("http", "ws") + "/api/lessons/5/ws"
+        async with asyncio.timeout(30):
+            async with connect(endpoint) as socket:
+                await socket.send(json.dumps({"mode": "offline"}))
+                kinds = []
+                async for raw in socket:
+                    event = json.loads(raw)
+                    kinds.append(event["kind"])
+                    if event["kind"] == "done":
+                        final_status = event["data"]["status"]
+                        break
+            async with connect(endpoint) as socket:
+                await socket.send(json.dumps({"mode": "offline", "cwd": "outside"}))
+                try:
+                    await socket.recv()
+                    invalid_close = None
+                except ConnectionClosed as exc:
+                    invalid_close = exc.rcvd.code if exc.rcvd else None
+            async with connect(base.replace("http", "ws") + "/api/lessons/57/ws") as socket:
+                await socket.send(json.dumps({"mode": "offline"}))
+                await socket.recv()  # started, then the browser goes away mid-run
+            for _ in range(250):
+                if not inner.active:
+                    break
+                await asyncio.sleep(0.02)
+    await inner.close()
     return {
-        "endpoint": f"/api/lessons/{lesson.id}/ws",
-        "client_request": RunRequest().model_dump(),
-        "server_events": ["started", "evidence", "message", "result", "done"],
-        "disconnect": "Cancel and await the owned runner task.",
+        "endpoint": "/api/lessons/{lesson_id}/ws",
+        "server_events": kinds,
+        "final_status": final_status,
+        "invalid_request_close_code": invalid_close,
+        "owned_runs_after_disconnect": len(inner.active),
+        "disconnect": "Closing the socket cancels and awaits the owned run.",
+    }
+
+
+@exercise("support")
+def support(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Bind tools to the signed-in customer and require an exact approval before a refund."""
+    customer = "alice"  # chosen by the host session, never by tool arguments
+    orders = Orders(root / "orders.sqlite")
+    try:
+        visible = orders.list(customer)
+    finally:
+        orders.close()
+    proposal = Refund(order_id="A-001", amount_cents=4200, reason="Damaged on arrival")
+    steps: list[dict[str, Any]] = []
+    approval = Approval(proposal)
+    try:
+        approval.consume(proposal)
+    except ValueError as exc:
+        steps.append({"step": "refund before approval", "outcome": str(exc)})
+    try:
+        approval.decide("guessed-token", True)
+    except PermissionError as exc:
+        steps.append({"step": "approve with a wrong credential", "outcome": str(exc)})
+    approval.decide(approval.token, True)
+    steps.append({"step": "staff approves", "outcome": approval.state})
+    larger = proposal.model_copy(update={"amount_cents": 9000})
+    try:
+        approval.consume(larger)
+    except ValueError as exc:
+        steps.append({"step": "refund a different amount", "outcome": str(exc)})
+    approval.consume(proposal)
+    steps.append({"step": "refund the approved action", "outcome": approval.state})
+    return {
+        "customer": customer,
+        "visible_orders": visible,
+        "proposal": proposal.model_dump(),
+        "approval_steps": steps,
+        "refunds_executed": 1,
+        "final_state": approval.state,
+    }
+
+
+@exercise("tenancy")
+def tenancy(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Every query runs with the tenant from host state; tool arguments cannot change it."""
+    orders = Orders(root / "orders.sqlite")
+    try:
+        sessions = {"session-alice": "alice", "session-bob": "bob"}
+
+        def list_orders(session_id: str, arguments: dict[str, Any]) -> list[dict[str, Any]]:
+            # A model-supplied tenant is ignored: the tool schema has no tenant field.
+            return orders.list(sessions[session_id], arguments.get("status", "all"))
+
+        checks: list[dict[str, Any]] = [
+            {
+                "check": "alice sees her orders",
+                "result": [r["id"] for r in list_orders("session-alice", {})],
+            },
+            {
+                "check": "bob sees his orders",
+                "result": [r["id"] for r in list_orders("session-bob", {})],
+            },
+            {
+                "check": "alice passes tenant=bob",
+                "result": [r["id"] for r in list_orders("session-alice", {"tenant": "bob"})],
+            },
+            {"check": "injection in tenant", "result": orders.list("alice' OR 1=1 --")},
+            {
+                "check": "bob cancels alice's order",
+                "result": orders.cancel("bob", "A-001", 1, approved=True),
+            },
+            {
+                "check": "alice cancels with a stale version",
+                "result": orders.cancel("alice", "A-001", 7, approved=True),
+            },
+            {
+                "check": "alice cancels her current order",
+                "result": orders.cancel("alice", "A-001", 1, approved=True),
+            },
+        ]
+    finally:
+        orders.close()
+    return {
+        "tenant_source": "host session table",
+        "checks": checks,
+        "cross_tenant_rows": 0
+        if checks[2]["result"] == ["A-001"] and not checks[3]["result"]
+        else 1,
+        "cross_tenant_update": checks[4]["result"],
+    }
+
+
+@exercise("scheduled")
+async def scheduled(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Process each trigger id once and await in-flight jobs before shutting down."""
+    journal = Journal(root / "triggers.jsonl")
+    deliveries = ["evt-1", "evt-2", "evt-1", "evt-3", "evt-2"]  # at-least-once delivery
+    accepted, duplicates = [], []
+    tasks: set[asyncio.Task[str]] = set()
+
+    async def job(trigger: str) -> str:
+        await asyncio.sleep(0.05)
+        journal.append({"event": "completed", "step": trigger})
+        return trigger
+
+    for trigger in deliveries:
+        seen = {row["step"] for row in journal.replay() if row.get("event") == "received"}
+        if trigger in seen:
+            duplicates.append(trigger)
+            continue
+        journal.append({"event": "received", "step": trigger})
+        accepted.append(trigger)
+        tasks.add(asyncio.create_task(job(trigger)))
+    in_flight = sum(not task.done() for task in tasks)
+    # Graceful shutdown: stop accepting work, then await owned tasks within a deadline.
+    async with asyncio.timeout(5):
+        finished = await asyncio.gather(*tasks)
+    return {
+        "deliveries": deliveries,
+        "accepted": accepted,
+        "duplicates_ignored": duplicates,
+        "in_flight_at_shutdown": in_flight,
+        "completed_before_exit": sorted(finished),
+        "journal": journal.replay(),
     }
 
 
@@ -1161,30 +1478,67 @@ def document(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
 
 
 @exercise("review")
-def review(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def review(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Accept only in-scope findings, apply the approved patch and prove it with a test."""
+    source = root / "src" / "tags.py"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("def normalize(tag: str) -> str:\n    return tag.lower()\n", encoding="utf-8")
+    workflow = root / ".github" / "workflows" / "ci.yml"
+    workflow.parent.mkdir(parents=True, exist_ok=True)
+    workflow.write_text("name: CI\n", encoding="utf-8")
     changed_lines = {"src/tags.py": {1, 2}}
     findings: list[dict[str, Any]] = [
         {
             "file": "src/tags.py",
             "line": 2,
             "severity": "medium",
-            "confidence": "high",
             "message": "Strip whitespace before normalizing case.",
+            "patch": {"old": "    return tag.lower()", "new": "    return tag.strip().lower()"},
         },
         {
             "file": ".github/workflows/ci.yml",
             "line": 1,
             "severity": "high",
-            "confidence": "high",
             "message": "Untrusted fixture asks to disable CI.",
+            "patch": {"old": "name: CI", "new": "name: CI (disabled)"},
         },
     ]
     accepted = [row for row in findings if row["line"] in changed_lines.get(row["file"], set())]
+
+    async def run_test() -> str:
+        check = "from tags import normalize; assert normalize('  Python ') == 'python'"
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-I",
+            "-c",
+            f"import sys; sys.path.insert(0, 'src'); {check}",
+            cwd=root,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        async with asyncio.timeout(30):
+            return "passed" if await process.wait() == 0 else "failed"
+
+    before = await run_test()
+    for row in accepted:
+        target = inside(root, row["file"])
+        text = target.read_text(encoding="utf-8")
+        if row["patch"]["old"] not in text:
+            raise LessonError(f"Patch for {row['file']} no longer applies.")
+        target.write_text(text.replace(row["patch"]["old"], row["patch"]["new"]), encoding="utf-8")
+    after = await run_test()
     return {
-        "accepted": accepted,
-        "rejected": [row for row in findings if row not in accepted],
+        "accepted": [{k: v for k, v in row.items() if k != "patch"} for row in accepted],
+        "rejected": [
+            {k: v for k, v in row.items() if k != "patch"}
+            for row in findings
+            if row not in accepted
+        ],
+        "test_before_patch": before,
+        "test_after_patch": after,
+        "out_of_scope_file_unchanged": workflow.read_text(encoding="utf-8") == "name: CI\n",
         "gate": "Changed lines and host-approved file scope",
-        "source": "recorded reviewer fixture",
+        "publication": "Local fixture only; no pull request is published.",
     }
 
 

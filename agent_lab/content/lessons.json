@@ -1255,38 +1255,37 @@
   "prerequisites": [
    5
   ],
-  "concept_brief": "External MCP servers are added through `ClaudeAgentOptions(mcp_servers={\"notes\": {\"type\": \"stdio\", \"command\": ..., \"args\": [...]}})`; the SDK starts the process and exposes its tools as `mcp__notes__<tool>`, which you still allow explicitly.",
-  "lab_brief": "The offline exercise `mcp` reports the installed MCP package version, the stdio transport, and the command that launches `agent_lab.integrations.notes_mcp`, a FastMCP server with a typed `read_note(name: str)` tool and a `notes://welcome` resource. It shows how a live run would start the server without starting it.",
+  "concept_brief": "An MCP server exposes typed tools over a transport. With stdio, the client starts the server as a subprocess and exchanges JSON-RPC messages on its stdin and stdout; `ClaudeAgentOptions.mcp_servers` takes the same command for live runs.",
+  "lab_brief": "The `mcp_stdio` exercise launches `agent_lab.integrations.notes_mcp` as a real subprocess, initializes an MCP `ClientSession` over stdio, lists its tools and calls `read_note` once with a valid and once with an invalid name.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears.",
-   "The notes server is plain Python in `agent_lab/integrations/notes_mcp.py`; no extra install is needed beyond `uv sync --locked`."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 13 (or run `uv run agent-lab lesson 13`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. Live runs pass the same command in `mcp_servers` and allow `mcp__notes__read_note`."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Expose typed tools over the official MCP Python SDK's stdio transport and connect them to an agent."
+    "text": "Talk to an MCP server over the stdio transport the SDK uses."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open `agent_lab/integrations/notes_mcp.py` and read `read_note(name: str)` and the `notes://welcome` resource."
+    "text": "Read `mcp_stdio` and `build_server` in `agent_lab/integrations/notes_mcp.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the offline exercise; it starts and stops a real server process."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `transport` is \"stdio\", `server_command` ends with `-m agent_lab.integrations.notes_mcp`, and `resource_uri` is \"notes://welcome\"."
+    "text": "Compare `valid_call` and `invalid_call`, and read the tool's `input_schema`."
    },
    {
     "title": "Try the challenge",
-    "text": "Call the server's tool function directly and test a valid and an invalid note name."
+    "text": "Change the invalid call and watch `is_error` change."
    }
   ],
-  "inspect": "Look at `mcp_version`, `transport`, `server_command`, `resource_uri` and `integration_source`.",
-  "expected": "`mcp_version` is the installed `mcp` package (1.30.0 here), `transport` is \"stdio\", `server_command` is [your .venv python, \"-m\", \"`agent_lab`.integrations.notes_mcp\"], `resource_uri` is \"notes://welcome\" and `integration_source` points to `agent_lab/integrations`.",
-  "evidence_criterion": "The check confirms the evidence describes a stdio MCP server, its launch command and its welcome resource.",
+  "inspect": "`transport`, `server_command`, the `tools` list with its `input_schema`, `valid_call`, `invalid_call` and the `sdk_config` you would pass to `mcp_servers`.",
+  "expected": "`server` is `python-notes`, the only tool is `read_note`, `valid_call` returns the refunds note with `is_error` false, and `invalid_call` returns `is_error` true with the message `Unknown note. Choose welcome or refunds.`",
+  "evidence_criterion": "The check confirms a real stdio session: the valid call succeeded and the invalid call was reported as a tool error.",
   "evidence_checks": [
    {
     "key": "transport",
@@ -1294,61 +1293,60 @@
     "value": "stdio"
    },
    {
-    "key": "resource_uri",
-    "rule": "equals",
-    "value": "notes://welcome"
+    "key": "tools",
+    "rule": "truthy"
    },
    {
-    "key": "server_command",
+    "key": "valid_call",
     "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"from agent_lab.integrations.notes_mcp import read_note; print(read_note('refunds'))\"` and verify it prints the refunds note; then try `read_note('missing')` and confirm it raises `ValueError: Unknown note. Choose welcome or refunds.`. With live mode, run the lesson and check Diagnostics for a call to `mcp__notes__read_note`.",
+  "challenge": "Change the invalid call's name from `salaries` to `welcome` in `mcp_stdio`, run again and confirm `invalid_call.is_error` becomes false with the welcome note as text.",
   "hints": [
-   "FastMCP's `@mcp.tool()` keeps the original function callable, so you can test it without a transport.",
-   "Running `uv run python -m agent_lab.integrations.notes_mcp` starts the stdio server and waits for a client on stdin; stop it with Ctrl+C. In live mode the SDK starts it for you from `mcp_servers`."
+   "The server validates the name itself and raises for unknown notes.",
+   "A raised error in an MCP tool becomes a result with `isError` true, so the client and the model see the message instead of a crash."
   ],
-  "reference": "The evidence is the recipe the live run uses: a stdio server launched with the current Python and the module path, registered under the name `notes`. The SDK prefixes its tool as `mcp__notes__read_note`, and the host adds exactly that name to `allowed_tools`. The type hint `name: str` gives the tool its input schema, while the function still rejects unknown names itself.",
+  "reference": "stdio keeps the server in its own process: the client owns its lifetime and talks to it with JSON-RPC over pipes. Tool errors are part of the protocol, so a bad argument produces an error result the model can read, not a broken session.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`. If the server command fails, run the module directly to see its import error.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "How does the live run connect to the notes server?",
+    "prompt": "Who starts the server process with the stdio transport?",
     "options": [
      {
-      "text": "It imports `read_note` into the agent's prompt.",
-      "explanation": "The model never receives Python functions; the SDK talks to the server process."
+      "text": "The client, which launches the configured command.",
+      "explanation": "Correct. The client owns the subprocess and its pipes."
      },
      {
-      "text": "It sends HTTP requests to a public URL.",
-      "explanation": "This server uses the stdio transport, not HTTP."
+      "text": "The model, when it decides to use a tool.",
+      "explanation": "The model only requests tool calls; the host starts servers."
      },
      {
-      "text": "Through `mcp_servers` with a stdio config whose `command` and `args` start the module.",
-      "explanation": "Correct. The SDK launches the process and talks to it over standard input and output."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "What tool name must be allowed for the notes server's `read_note` tool?",
-    "options": [
-     {
-      "text": "`mcp__notes__read_note`",
-      "explanation": "Correct. MCP tools are prefixed with `mcp__`, the server name and the tool name."
-     },
-     {
-      "text": "`read_note`",
-      "explanation": "The bare function name is not how the SDK exposes MCP tools."
-     },
-     {
-      "text": "`notes://welcome`",
-      "explanation": "That is a resource URI, not a tool name."
+      "text": "A separate web server you must deploy.",
+      "explanation": "That describes HTTP transports, not stdio."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What happens when an MCP tool raises an error?",
+    "options": [
+     {
+      "text": "The session crashes and must be restarted.",
+      "explanation": "Tool errors are reported inside the protocol."
+     },
+     {
+      "text": "The client receives a result with isError true and the message.",
+      "explanation": "Correct. The model can read the message and adjust."
+     },
+     {
+      "text": "The error is silently ignored.",
+      "explanation": "Errors are explicit so they can be handled."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -4446,118 +4444,98 @@
   "prerequisites": [
    13
   ],
-  "concept_brief": "`ClaudeAgentOptions.mcp_servers` accepts stdio, SSE, HTTP and in-process SDK server configs (`McpStdioServerConfig`, `McpSSEServerConfig`, `McpHttpServerConfig`, `McpSdkServerConfig`). MCP tools are actions called with arguments, while resources are read-only data addressed by a URI such as `notes://welcome`.",
-  "lab_brief": "The offline exercise reports the local notes MCP server's stdio launch command, the installed `mcp` version and the resource URI `notes://welcome`. The standalone client in `agent_lab`/integrations/remote_mcp.py connects to a trusted streamable HTTP endpoint with `streamablehttp_client` and lists its tools and resources separately.",
+  "concept_brief": "Remote MCP servers use the streamable HTTP transport: the client POSTs JSON-RPC to one URL and keeps a session id. Tools are actions called with arguments; resources are addressable data read by URI.",
+  "lab_brief": "The `remote_mcp` exercise serves the notes server over streamable HTTP on a temporary loopback port, inspects it with `agent_lab/integrations/remote_mcp.py`, and shows that the inspector refuses plain HTTP to a non-local host.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live profile is a plain `query()` with no tools; the model only explains resources versus tools.",
-   "The remote client needs a separately running MCP endpoint on HTTPS or local HTTP (127.0.0.1 or localhost)."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 43 (or run `uv run agent-lab lesson 43`).",
+   "To inspect your own server: `uv run python -m agent_lab.integrations.remote_mcp https://your-trusted-server/mcp`."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Tell MCP resources from tools and see how a client reaches a server over streamable HTTP."
+    "text": "Connect to an MCP server over HTTP and separate tools from resources."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `mcp` exercise in `agent_lab`/exercises.py, `agent_lab`/integrations/notes_mcp.py and `agent_lab`/integrations/remote_mcp.py."
+    "text": "Read `EmbeddedServer`, `remote_mcp` and `inspect_remote` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise; it starts and stops a local HTTP server."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `transport`, `server_command` and `resource_uri`; note the offline exercise inspects the stdio notes server locally."
+    "text": "Compare `tools` and `resources`, and read `insecure_url`."
    },
    {
     "title": "Try the challenge",
-    "text": "Serve the notes server over streamable HTTP and inspect it with the remote client."
+    "text": "Add a resource and confirm the client lists it."
    }
   ],
-  "inspect": "Look at `mcp_version`, `transport`, `server_command`, `resource_uri`, `integration_source` and `notes`.",
-  "expected": "`mcp_version` is \"1.30.0\"; `transport` is \"stdio\"; `server_command` runs the venv Python with `-m agent_lab.integrations.notes_mcp`; `resource_uri` is \"notes://welcome\"; `notes` says the remote client needs a separately running trusted endpoint.",
-  "evidence_criterion": "The check verifies that the MCP package version, the local transport and the welcome resource URI are reported.",
+  "inspect": "`transport`, `url`, `server`, the `tools` and `resources` lists, the `difference` explanation and the `insecure_url` refusal.",
+  "expected": "`transport` is `streamable HTTP`, `tools` is `[\"read_note\"]`, `resources` is `[\"notes://welcome\"]`, and `insecure_url` is `Use HTTPS or a local HTTP MCP endpoint.`",
+  "evidence_criterion": "The check confirms a streamable HTTP session that listed both tools and resources.",
   "evidence_checks": [
-   {
-    "key": "resource_uri",
-    "rule": "equals",
-    "value": "notes://welcome"
-   },
    {
     "key": "transport",
     "rule": "equals",
-    "value": "stdio"
+    "value": "streamable HTTP"
    },
    {
-    "key": "mcp_version",
-    "rule": "present"
+    "key": "tools",
+    "rule": "truthy"
+   },
+   {
+    "key": "resources",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Create a scratch file with `from agent_lab.integrations.notes_mcp import mcp; mcp.run(transport=\"streamable-http\")` and run it with `uv run python`. In another terminal run `uv run python -c \"import asyncio; from agent_lab.integrations.remote_mcp import inspect_remote; r=asyncio.run(inspect_remote('http://127.0.0.1:8000/mcp')); print([t['name'] for t in r['tools']], [str(x['uri']) for x in r['resources']])\"` and verify it prints ['`read_note`'] and ['notes://welcome'].",
+  "challenge": "In `build_server` add `@server.resource(\"notes://refunds\")` returning `NOTES[\"refunds\"]`, run again and confirm `resources` lists two URIs while `tools` is unchanged.",
   "hints": [
-   "FastMCP serves streamable HTTP on port 8000 at `/mcp` by default; stop the server with Ctrl+C when you are done.",
-   "`inspect_remote` calls `session.list_tools()` and `session.list_resources()` separately; convert resource URIs with `str()` because they are URL objects, which `json.dumps` cannot serialise."
+   "Resources and tools are registered with different decorators.",
+   "Adding a resource changes only `list_resources`; the model still has one callable tool."
   ],
-  "reference": "The notes server exposes one tool, `read_note(name)`, and one resource, `notes://welcome`; the tool is called with arguments, the resource is read by URI. The offline evidence describes the local stdio launch, while `remote_mcp`.py shows the same MCP session over streamable HTTP and refuses non-HTTPS remote URLs.",
+  "reference": "Streamable HTTP lets one server serve many clients over a URL. The inspector only accepts HTTPS or loopback HTTP, so credentials and results are never sent in clear text to a remote host. Tools change the world through arguments; resources are read by URI.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 43` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt. For the remote client, start the HTTP server first and use an https URL or a localhost http URL."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What distinguishes an MCP resource from an MCP tool?",
+    "prompt": "What distinguishes an MCP resource from a tool?",
     "options": [
      {
-      "text": "A resource is read-only data addressed by a URI; a tool is an action called with arguments.",
-      "explanation": "Correct. `notes://welcome` is read, while `read_note(name)` is invoked."
+      "text": "Resources are faster tools.",
+      "explanation": "They are a different concept, not a faster variant."
+     },
+     {
+      "text": "Resources are data read by URI; tools are actions called with arguments.",
+      "explanation": "Correct. That is the core distinction."
      },
      {
       "text": "Resources only work over stdio.",
-      "explanation": "No. Resources are listed and read over any transport, including streamable HTTP."
-     },
-     {
-      "text": "Tools cannot return text.",
-      "explanation": "No. `read_note` returns a string."
-     }
-    ],
-    "correct": 0
-   },
-   {
-    "prompt": "Which URLs does `inspect_remote` accept?",
-    "options": [
-     {
-      "text": "Any URL, including plain http on public hosts.",
-      "explanation": "No. Plain http is allowed only for 127.0.0.1 and localhost."
-     },
-     {
-      "text": "HTTPS URLs, or http only for 127.0.0.1 or localhost.",
-      "explanation": "Correct. Remote endpoints must use TLS; local testing may use http."
-     },
-     {
-      "text": "Only stdio commands.",
-      "explanation": "No. The remote client uses `streamablehttp_client`, not stdio."
+      "explanation": "Resources work over every transport."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "Why does the offline evidence report `transport` \"stdio\" in a remote MCP lesson?",
+    "prompt": "Why refuse plain HTTP to a remote host?",
     "options": [
      {
-      "text": "Because streamable HTTP is unsupported by the mcp package.",
-      "explanation": "No. `remote_mcp`.py imports `streamablehttp_client` from it."
+      "text": "Traffic, including credentials and results, would travel unencrypted.",
+      "explanation": "Correct. Use HTTPS, or HTTP only on loopback."
      },
      {
-      "text": "Because the model chose stdio.",
-      "explanation": "No. Offline mode calls no model."
+      "text": "MCP cannot run over HTTP.",
+      "explanation": "Streamable HTTP is a standard MCP transport."
      },
      {
-      "text": "Because it inspects the local notes server, which runs over stdio; a remote endpoint must be started separately.",
-      "explanation": "Correct. The `notes` field says the remote client needs its own running trusted endpoint."
+      "text": "It is slower than HTTPS.",
+      "explanation": "Security, not speed, is the reason."
      }
     ],
-    "correct": 2
+    "correct": 0
    }
   ]
  },
@@ -5143,100 +5121,93 @@
  {
   "id": 49,
   "prerequisites": [
-   1,
-   28
+   36
   ],
-  "concept_brief": "A headless agent job is a command whose exit code CI can trust. In this repo `uv run agent-lab lesson N` prints JSON events and returns exit code 1 when the final `done` event is not `completed`, and it only calls Claude with `--live` and `LAB_ENABLE_LIVE`=true.",
-  "lab_brief": "The `ci` exercise returns the CI recipe this repo uses: install with `uv sync --locked`, run ruff, mypy and pytest, and use `uv run agent-lab lesson 49` as an offline worker, with `network_api_needed` false. It shows that the whole pipeline can be tested without an API key.",
+  "concept_brief": "Headless agents run in CI as commands. A CI job trusts exit codes: 0 means success, anything else fails the job, so a lesson CLI must exit nonzero when its run fails and must not need an API key for offline checks.",
+  "lab_brief": "The `ci` exercise runs the real `agent-lab` CLI twice in subprocesses with live access forced off: a passing lesson exits 0 with JSON event lines, and an unknown lesson exits 2 with a usage error.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 49 (or run `uv run agent-lab lesson 49` in a terminal).",
-   "Use a terminal for this lesson: the exit-code part is visible only in the shell (`$LASTEXITCODE` in PowerShell, `echo $?` in bash).",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 49 (or run `uv run agent-lab lesson 49`).",
+   "The CI workflow for this repository is in `.github/workflows/ci.yml`."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn what a CI job needs from an agent command: a locked install, offline checks and a meaningful exit code."
+    "text": "Turn agent runs into CI-friendly commands with meaningful exit codes."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `run_lesson` and `main` in `agent_lab`/cli.py and see where the exit code is set."
+    "text": "Read the `ci` exercise and `run_lesson` in `agent_lab/cli.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+    "text": "Run the offline exercise; it spawns the CLI twice."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `install`, the three `checks` and `offline_worker`, and that `network_api_needed` is No."
+    "text": "Check each `exit_code`, `json_events` and `final_status`."
    },
    {
     "title": "Try the challenge",
-    "text": "Run the worker command in a terminal and read its exit code for a valid and an invalid lesson number."
+    "text": "Make a run fail and observe its exit code yourself."
    }
   ],
-  "inspect": "`install`, `checks` (three commands), `offline_worker` and `network_api_needed`.",
-  "expected": "`install` is `uv sync --locked`; `checks` lists `uv run ruff check agent_lab tests`, `uv run mypy agent_lab` and `uv run pytest`; `offline_worker` is `uv run agent-lab lesson 49`; `network_api_needed` is No.",
-  "evidence_criterion": "The check confirms that the CI recipe uses a locked install, lists its checks and needs no network API.",
+  "inspect": "The `runs` table (`command`, `exit_code`, `json_events`, `final_status`, `stderr_first_line`), `ci_gate` and the `checks` CI runs.",
+  "expected": "`agent-lab lesson 5` exits 0 with 3 JSON events ending `completed`; `agent-lab lesson 99` exits 2 with an `invalid choice` usage error and no events.",
+  "evidence_criterion": "The check confirms both CLI runs executed and reported their exit codes.",
   "evidence_checks": [
+   {
+    "key": "runs",
+    "rule": "truthy"
+   },
    {
     "key": "network_api_needed",
     "rule": "equals",
     "value": false
-   },
-   {
-    "key": "install",
-    "rule": "equals",
-    "value": "uv sync --locked"
-   },
-   {
-    "key": "checks",
-    "rule": "truthy"
    }
   ],
-  "challenge": "In PowerShell run `uv run agent-lab lesson 49; $LASTEXITCODE` and confirm 0. Then run `uv run agent-lab lesson 99; $LASTEXITCODE`: argparse rejects the id and the exit code is 2, so CI would fail the job.",
+  "challenge": "With `LAB_ENABLE_LIVE=false`, run `uv run agent-lab lesson 5 --live` and print the exit code (`echo $?` in Bash, `$LASTEXITCODE` in PowerShell). Explain why it is 1.",
   "hints": [
-   "CI trusts exit codes, not log text.",
-   "`run_lesson` sets the exit code to 1 when the `done` event status is not `completed`; argparse exits with 2 for an invalid lesson id. `uv sync --locked` fails if uv.lock does not match pyproject.toml."
+   "Live mode is refused before any SDK process starts.",
+   "The refusal raises `PermissionError: Enable LAB_ENABLE_LIVE=true before making paid SDK calls.`, which ends the process with exit code 1, so a CI job would fail as it should."
   ],
-  "reference": "The recipe installs exactly the locked dependencies, runs lint, type and test checks, and uses an offline lesson as a smoke test, so no API key or network model call is needed. The exercise only returns this recipe as data; the exit-code behaviour comes from cli.py and is checked by running the command. Paid live checks stay a separate, opt-in step.",
+  "reference": "CI cannot read a UI, only exit codes and output. Machine-readable JSON lines plus a nonzero exit on failure make an agent run a normal CI step, and offline mode keeps those checks free and deterministic.",
   "recovery": [
-   "If a CI command fails locally, run it alone (for example `uv run pytest -x`) and fix the first failure; if `uv sync --locked` fails, the lock file is out of date and must be updated deliberately with `uv lock`.",
-   "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does `uv run agent-lab lesson 49` return when the run finishes with status `completed`?",
+    "prompt": "How does a CI job decide whether a step failed?",
     "options": [
      {
-      "text": "Exit code 1, because no model was called.",
-      "explanation": "An offline run that completes is a success; 1 is reserved for runs that did not complete."
+      "text": "By reading the model's final message.",
+      "explanation": "CI does not interpret messages."
      },
      {
-      "text": "Exit code 2, because CI needs a warning.",
-      "explanation": "Exit code 2 comes from argparse when the arguments are invalid."
+      "text": "By the process exit code: nonzero fails the job.",
+      "explanation": "Correct. Exit codes are the CI contract."
      },
      {
-      "text": "Exit code 0.",
-      "explanation": "Correct. `run_lesson` returns 0 unless the `done` event reports a status other than `completed`."
+      "text": "By the number of output lines.",
+      "explanation": "Line count says nothing about success."
      }
     ],
-    "correct": 2
+    "correct": 1
    },
    {
-    "prompt": "Why does the CI recipe use `uv sync --locked`?",
+    "prompt": "Why run offline checks in CI?",
     "options": [
      {
-      "text": "It installs exactly what uv.lock records and fails if the lock is out of date.",
-      "explanation": "Correct. A locked install makes CI reproducible and catches unreviewed dependency changes."
+      "text": "They are deterministic and need no API key or spend.",
+      "explanation": "Correct. Paid live checks stay opt-in."
      },
      {
-      "text": "It upgrades every dependency to the newest version.",
-      "explanation": "That is the opposite; upgrades must be made deliberately with `uv lock`."
+      "text": "Offline runs test the model's quality.",
+      "explanation": "Offline runs test host code, not the model."
      },
      {
-      "text": "It enables live Claude calls in CI.",
-      "explanation": "Live calls need `--live`, `LAB_ENABLE_LIVE`=true and a key; the install step has nothing to do with them."
+      "text": "CI cannot run Python.",
+      "explanation": "CI runs Python fine; cost and determinism are the reasons."
      }
     ],
     "correct": 0
@@ -5246,120 +5217,102 @@
  {
   "id": 50,
   "prerequisites": [
-   5,
-   37,
-   48
+   4,
+   5
   ],
-  "concept_brief": "A support agent's tools must be scoped by the host, not by model arguments. In live mode sdk.py registers `list_orders` with `@tool` and `create_sdk_mcp_server`; it takes no tenant argument and always reads the host-selected customer Alice, and any change to data needs explicit host approval.",
-  "lab_brief": "The `support` exercise opens a SQLite `Orders` store, lists Alice's orders, tries a SQL-injection tenant string and attempts an approved cancel of Alice's order while acting as Bob. Parameterized queries and the tenant and version check in `cancel` block both attacks.",
+  "concept_brief": "A support agent's tools act for the signed-in customer chosen by the host session, never for a customer named in tool arguments. Money-moving actions need an approval bound to the exact action, single use and time limited.",
+  "lab_brief": "The `support` exercise lists orders for the host-selected customer, proposes a refund and drives an `Approval` through refusal without approval, a wrong credential, staff approval, a mismatched amount and finally the single approved refund.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 50 (or run `uv run agent-lab lesson 50` in a terminal).",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `support` profile gives Claude one tool, `list_orders`, that always reads the host-selected customer Alice."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 50 (or run `uv run agent-lab lesson 50`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live support profile proposes refunds without executing them."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "See how a support tool is bound to one host-selected customer and why approval alone does not let one tenant change another's data."
+    "text": "Gate a refund behind an approval tied to the exact action."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `Orders` class in `agent_lab`/services.py, especially `list` and `cancel`, and the `support` branch in `agent_lab`/sdk.py."
+    "text": "Read `support` and the `Approval` class in `agent_lab/services.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm that `alice` has one order, `sql_injection_result` is empty and `cross_tenant_update` is No."
+    "text": "Follow `approval_steps` from refusal to the consumed approval."
    },
    {
     "title": "Try the challenge",
-    "text": "Call `Orders.cancel` yourself without approval, then with approval twice, and explain each result."
+    "text": "Expire the approval and see the refund refused."
    }
   ],
-  "inspect": "`alice` (the order table), `sql_injection_result`, `cross_tenant_update` and `mutations`.",
-  "expected": "`alice` shows one row: A-001, status pending, `total_cents` 4200, version 1. `sql_injection_result` is empty (None), `cross_tenant_update` is No and `mutations` reads 'Only host-approved, version-checked updates are allowed.'.",
-  "evidence_criterion": "The check confirms that Alice's orders were listed, the injection attempt was recorded and the cross-tenant update was refused.",
+  "inspect": "`customer`, `visible_orders`, the `proposal`, each row of `approval_steps`, `refunds_executed` and `final_state`.",
+  "expected": "Only alice's order A-001 is visible. The steps read: `Approval is not usable.`, `Invalid approval credential.`, `approved`, `Approval belongs to a different action.`, `consumed`. `refunds_executed` is 1.",
+  "evidence_criterion": "The check confirms exactly one refund ran, after approval, and the approval was consumed.",
   "evidence_checks": [
    {
-    "key": "alice",
-    "rule": "truthy"
-   },
-   {
-    "key": "cross_tenant_update",
+    "key": "final_state",
     "rule": "equals",
-    "value": false
+    "value": "consumed"
    },
    {
-    "key": "sql_injection_result",
-    "rule": "present"
+    "key": "refunds_executed",
+    "rule": "equals",
+    "value": 1
+   },
+   {
+    "key": "approval_steps",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"import tempfile; from pathlib import Path; from agent_lab.services import Orders; o=Orders(Path(tempfile.mkdtemp())/'o.sqlite'); print(o.cancel('alice','A-001',1,approved=True), o.cancel('alice','A-001',1,approved=True))\"`. Expect True then False: the second call uses a stale version. With `approved=False` you get PermissionError 'Host approval required.'.",
+  "challenge": "Create the approval with `Approval(proposal, ttl=0)` and run again: the staff step now fails with `Approval is expired.` Restore the default afterwards.",
   "hints": [
-   "The tenant always comes from the host's code, never from a tool argument.",
-   "`list` passes the tenant as a `?` parameter, so `alice' OR 1=1 --` is just a tenant name that matches nothing. `cancel` updates only rows where tenant, id, version and status 'pending' all match, so Bob cannot cancel Alice's order even with `approved=True`."
+   "`decide` checks the clock against `created + ttl` before approving.",
+   "With ttl 0 the approval is already expired when staff decide, so `decide` raises `ValueError: Approval is expired.` and no refund can run."
   ],
-  "reference": "Alice sees only her own order because the tenant is fixed by the host and passed as a SQL parameter. The injection string is treated as data and returns no rows. The cross-tenant cancel returns False because the update is scoped to the caller's tenant and the current version, so approval is required but is not enough on its own.",
+  "reference": "The host binds identity and authority: the customer comes from the session, the refund needs a secret approval token, and the approval's fingerprint matches only the exact proposed action. Consuming it makes it single use.",
   "recovery": [
-   "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 50` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
-   "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why does `sql_injection_result` come back empty?",
+    "prompt": "Where should a support tool get the customer identity?",
     "options": [
      {
-      "text": "Because the database blocks the word OR.",
-      "explanation": "SQLite has no such filter; the protection is the parameterized query."
+      "text": "From the host session, never from tool arguments.",
+      "explanation": "Correct. The model must not choose whose data it acts on."
      },
      {
-      "text": "Because the tenant is passed as a `?` parameter, so the string is compared as a literal tenant name.",
-      "explanation": "Correct. Parameters keep data out of the SQL text, so the injected clause never runs."
+      "text": "From the customer name the model writes.",
+      "explanation": "Model text can be wrong or manipulated."
      },
      {
-      "text": "Because Claude refused the request.",
-      "explanation": "No model is involved offline; the host query handles it."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Why is `cross_tenant_update` false even though `approved=True` was passed?",
-    "options": [
-     {
-      "text": "The UPDATE also requires the caller's tenant, the order id, the current version and a pending status, and A-001 belongs to Alice.",
-      "explanation": "Correct. Approval is necessary but not sufficient; the update is scoped to the caller's tenant."
-     },
-     {
-      "text": "Approval tokens expire after 120 seconds.",
-      "explanation": "That is the `Approval` class used in another lesson; `cancel` takes a simple boolean here."
-     },
-     {
-      "text": "Orders can never be cancelled in this lab.",
-      "explanation": "Alice can cancel her own pending order with approval; try it in the challenge."
+      "text": "From the most recent order in the database.",
+      "explanation": "That would act for an arbitrary customer."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "How does the live `list_orders` tool decide which customer to read?",
+    "prompt": "Why bind an approval to a fingerprint of the action?",
     "options": [
      {
-      "text": "From a `tenant` argument the model supplies.",
-      "explanation": "The tool's input schema is empty, so the model cannot choose a tenant."
+      "text": "To make approvals faster.",
+      "explanation": "Speed is not the purpose."
      },
      {
-      "text": "From the customer's name in the prompt.",
-      "explanation": "Prompt text grants no authority; the host chooses the customer."
+      "text": "So it cannot authorize a different amount or order.",
+      "explanation": "Correct. Approval of one refund is not approval of another."
      },
      {
-      "text": "The host code always calls `Orders.list('alice')`.",
-      "explanation": "Correct. The tool takes no arguments, so the model cannot widen its scope."
+      "text": "Because the SDK requires it.",
+      "explanation": "This is host design, not an SDK requirement."
      }
     ],
-    "correct": 2
+    "correct": 1
    }
   ]
  },
@@ -6359,103 +6312,97 @@
  {
   "id": 61,
   "prerequisites": [
-   1,
-   13
+   13,
+   43
   ],
-  "concept_brief": "An MCP server built with `FastMCP` from the `mcp` package can expose a typed tool whose async handler runs an agent inside it. In `agent_lab/integrations/agent_mcp.py`, the `explain_python_agent(prompt)` tool starts a bounded live run through `RunService` (`max_turns`=1, `max_budget_usd`=0.05), so the outer MCP client never sees the inner agent's options.",
-  "lab_brief": "The offline `mcp` exercise builds a `FastMCP` object and reports the installed `mcp` version, the stdio transport and the command that launches the course's notes MCP server. It starts no server and calls no model, so you can study the wiring before you pay for a live run.",
+  "concept_brief": "You can expose an agent as an MCP tool: the outer MCP client calls a typed tool whose async handler starts an inner Agent SDK run. The inner run keeps its own limits and gates, whatever the outer client asks.",
+  "lab_brief": "The `agent_mcp` exercise connects an MCP client to `build_server` in `agent_lab/integrations/agent_mcp.py` with live access forced off, lists the typed tool and calls it. The call travels through MCP into `RunService`, which refuses the paid run.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=61. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK.",
-   "The standalone agent server (`uv run python -m agent_lab.integrations.agent_mcp`) only runs the SDK when live access is enabled."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 61 (or run `uv run agent-lab lesson 61`).",
+   "To serve it for real: `uv run python -m agent_lab.integrations.agent_mcp` with live access enabled (paid)."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "See where the MCP boundary sits: the outer client only calls a tool, and the host decides how the inner agent runs."
+    "text": "See the boundary between an outer MCP client and an inner agent."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open the `mcp` function in `agent_lab`/exercises.py and `agent_lab/integrations/agent_mcp.py` side by side."
+    "text": "Read `build_server` in `agent_lab/integrations/agent_mcp.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that `transport` is stdio, `server_command` launches `agent_lab.integrations.notes_mcp` and `resource_uri` is notes://welcome."
+    "text": "Check the tool schema and the error returned through MCP."
    },
    {
     "title": "Try the challenge",
-    "text": "List the tools of the agent MCP server from a scratch script and confirm its typed input."
+    "text": "Trace where the refusal happens."
    }
   ],
-  "inspect": "Look at `mcp_version`, `transport`, `server_command` (shown as Server command), `resource_uri` and `notes` in the Response and results panel.",
-  "expected": "`mcp_version` 1.30.0, `transport` stdio, `server_command` of your .venv Python with `-m agent_lab.integrations.notes_mcp`, `resource_uri` notes://welcome and the note that the standalone agent MCP server invokes the SDK only when started with live access enabled.",
-  "evidence_criterion": "The check confirms the run reported the stdio transport, the notes://welcome resource and a server launch command.",
+  "inspect": "`outer_client`, the `tool` with its `input_schema`, `inner_agent`, `call_is_error`, `call_result` and `live_gate`.",
+  "expected": "The tool is `explain_python_agent` with a required `prompt` string. `call_is_error` is true and `call_result` ends with `Enable LAB_ENABLE_LIVE=true before making paid SDK calls.`",
+  "evidence_criterion": "The check confirms the call crossed the MCP boundary and the inner run was refused by the live gate.",
   "evidence_checks": [
    {
-    "key": "transport",
+    "key": "call_is_error",
     "rule": "equals",
-    "value": "stdio"
+    "value": true
    },
    {
-    "key": "resource_uri",
-    "rule": "equals",
-    "value": "notes://welcome"
-   },
-   {
-    "key": "server_command",
+    "key": "tool",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch script run `from agent_lab.integrations.agent_mcp import mcp` and `print(await mcp.list_tools())` inside `asyncio.run`. You should see one tool, `explain_python_agent`, whose input schema requires only `prompt`; listing tools does not call Claude.",
+  "challenge": "Find the exact line that raised the refusal (hint: `RunService.start` in `agent_lab/runtime.py`) and explain why the outer client cannot bypass it by changing its arguments.",
   "hints": [
-   "The MCP client controls only the tool arguments; everything else is fixed in the handler.",
-   "In `agent_mcp`.py the handler builds `RunRequest(mode=\"live\", prompt=prompt, max_turns=1, max_budget_usd=0.05)`, so a caller cannot raise the turn or budget limits."
+   "The tool accepts only `prompt`; budget, turns and mode are fixed by the handler.",
+   "The settings are injected when the server is built, so no tool argument can turn live access on or raise the budget."
   ],
-  "reference": "The evidence shows the transport and launch command an MCP client would use, not an agent answer. In the real agent server, the outer client sends a `prompt` string and gets back events; turn limits, budget and tool access stay inside the Python handler. That is the boundary: the outer client chooses the request, the host owns the inner agent's authority.",
+  "reference": "Wrapping an agent in an MCP tool creates two trust boundaries. The outer client controls only the typed arguments; the handler fixes the inner limits, and the inner run applies its own gates before any paid call.",
   "recovery": [
-   "If the offline run shows an error, read it in the panel and in Diagnostics, then run `uv run agent-lab lesson 61` in a terminal to see the same exercise without the browser.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does the offline lesson 61 run actually do?",
+    "prompt": "Who controls the inner agent's budget in this design?",
     "options": [
      {
-      "text": "It starts the agent MCP server and asks Claude a question.",
-      "explanation": "No. The offline exercise starts no server and calls no model; it only reports metadata."
+      "text": "The outer MCP client, through tool arguments.",
+      "explanation": "The schema exposes only prompt; limits are not arguments."
      },
      {
-      "text": "It builds a FastMCP object and reports the mcp version, stdio transport and server launch command.",
-      "explanation": "Correct. The `mcp` exercise collects local facts about the MCP setup; the live agent server is a separate, opt-in integration."
+      "text": "The tool handler on the server side.",
+      "explanation": "Correct. The server fixes limits the client cannot change."
      },
      {
-      "text": "It connects to a remote HTTP MCP endpoint.",
-      "explanation": "No. The reported transport is stdio, and remote endpoints are lesson 43's separate inspector."
+      "text": "The model inside the inner run.",
+      "explanation": "Models never set their own budgets."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "In `explain_python_agent`, who decides `max_turns` and `max_budget_usd` for the inner agent?",
+    "prompt": "How does the outer client learn that the inner run was refused?",
     "options": [
      {
-      "text": "The outer MCP client, through extra tool arguments.",
-      "explanation": "No. The tool only accepts `prompt`; the limits are not part of its input schema."
+      "text": "Through an MCP tool result with isError true and the message.",
+      "explanation": "Correct. The error crosses the boundary as data."
      },
      {
-      "text": "Claude, based on how hard the prompt looks.",
-      "explanation": "No. The model never sets its own limits here; they are fixed in Python before the run starts."
+      "text": "The connection drops without explanation.",
+      "explanation": "Errors are reported inside the protocol."
      },
      {
-      "text": "The Python handler, which fixes them at 1 turn and 0.05 USD.",
-      "explanation": "Correct. The host hard-codes the bounds in the RunRequest, so the outer caller cannot widen them."
+      "text": "It cannot find out.",
+      "explanation": "The result carries the refusal message."
      }
     ],
-    "correct": 2
+    "correct": 0
    }
   ]
  },
@@ -6871,197 +6818,196 @@
  {
   "id": 66,
   "prerequisites": [
-   26,
-   41
+   12
   ],
-  "concept_brief": "A real-time frontend talks to the agent over a typed WebSocket. In `agent_lab`/api.py, `/api/lessons/{lesson_id}/ws` validates the first JSON message as a `RunRequest`, streams `Event` objects, and runs send and receive tasks with `asyncio.wait`; a `{\"action\": \"cancel\"}` message or a disconnect cancels and awaits both tasks and calls `runner.cancel(handle)` so the SDK connection closes in the task that opened it.",
-  "lab_brief": "The offline `websocket` exercise describes the protocol: the endpoint path, a default `RunRequest`, the event kinds the server can send and the disconnect rule. It opens no socket, but it gives you the exact contract to test against the running server.",
+  "concept_brief": "A WebSocket gives a browser a typed, two-way channel to an agent run: the client sends a validated request, the server streams events, and closing the socket must cancel and await the run it owns.",
+  "lab_brief": "The `websocket` exercise serves this app's real `/api/lessons/{id}/ws` endpoint on a temporary port, runs lesson 5 through it, sends an invalid request, and disconnects mid-run to confirm no run is left behind.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=66. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK.",
-   "For the challenge, keep `uv run agent-lab serve` running; the `websockets` package is already installed with uvicorn[standard]."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 66 (or run `uv run agent-lab lesson 66`).",
+   "The endpoint itself is in `agent_lab/api.py`; FastAPI documents it at http://127.0.0.1:8080/docs."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Stream agent events to a browser and stop paying for a run nobody is watching."
+    "text": "Stream an agent run over WebSocket and clean up on disconnect."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `websocket` function in `agent_lab`/api.py: the RunRequest validation, the send and receive tasks and the finally block."
+    "text": "Read the `websocket` route in `agent_lab/api.py` and the exercise."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise; it opens three real connections."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm the `endpoint`, the `client_request` defaults and the `disconnect` rule."
+    "text": "Check `server_events`, the close code and `owned_runs_after_disconnect`."
    },
    {
     "title": "Try the challenge",
-    "text": "Connect to the endpoint from a Python client and record which events arrive."
+    "text": "Send a request the server must refuse."
    }
   ],
-  "inspect": "Look at `endpoint`, the `client_request` fields (mode, prompt, `follow_up`, `max_turns`, `max_budget_usd`), the `server_events` list and `disconnect`.",
-  "expected": "`endpoint` /api/lessons/66/ws; `client_request` mode offline, empty prompt, the default follow-up, `max_turns` 4, `max_budget_usd` 0.1; `server_events` started, evidence, message, result, done; `disconnect` \"Cancel and await the owned runner task.\"",
-  "evidence_criterion": "The check confirms the run reported the lesson's WebSocket endpoint and the cancel-on-disconnect rule.",
+  "inspect": "`server_events`, `final_status`, `invalid_request_close_code` and `owned_runs_after_disconnect`.",
+  "expected": "`server_events` is `started`, `evidence`, `done` with `final_status` `completed`; the invalid request closes with code 1008; `owned_runs_after_disconnect` is 0.",
+  "evidence_criterion": "The check confirms the invalid request was closed with policy code 1008 and no run outlived its connection.",
   "evidence_checks": [
    {
-    "key": "endpoint",
+    "key": "invalid_request_close_code",
     "rule": "equals",
-    "value": "/api/lessons/66/ws"
+    "value": 1008
    },
    {
-    "key": "disconnect",
+    "key": "owned_runs_after_disconnect",
     "rule": "equals",
-    "value": "Cancel and await the owned runner task."
+    "value": 0
    },
    {
-    "key": "server_events",
-    "rule": "truthy"
+    "key": "final_status",
+    "rule": "equals",
+    "value": "completed"
    }
   ],
-  "challenge": "With the server running, write a scratch script using `websockets.connect(\"ws://127.0.0.1:8080/api/lessons/66/ws\")`: send `{\"mode\": \"offline\"}` and print each event's `kind` until `done`. You should see started, evidence, done (message and result only appear in live runs). Then send `{\"mode\": \"offline\", \"max_turns\": 99}` and confirm the server closes with code 1008.",
+  "challenge": "Change the first request to `{\"mode\": \"live\"}` with live access off and predict the result: the server refuses to start the run and closes with 1008 instead of streaming events.",
   "hints": [
-   "The first message must be a valid RunRequest; invalid input closes the socket with policy code 1008.",
-   "The `finally` block cancels any unfinished task, awaits them with `asyncio.gather(..., return_exceptions=True)` and then calls `runner.cancel(handle)`, so a closed tab never leaves an SDK run behind."
+   "The handler validates the request, then asks `RunService.start` to begin the run.",
+   "`start` raises `PermissionError` when live mode is off; the route catches it and closes the socket with 1008, the policy-violation code."
   ],
-  "reference": "The evidence is the protocol contract: one endpoint per lesson, a validated request and a fixed set of event kinds ending in done. When the browser disconnects, the server cancels and awaits its own tasks instead of letting the agent keep running and spending budget. Validation errors close the connection with code 1008 before any run starts.",
+  "reference": "The server owns the run, not the browser. Validating the first message rejects bad requests with a clear close code, and cancelling in `finally` guarantees a closed tab never leaves a paid run going.",
   "recovery": [
-   "If your WebSocket client cannot connect, make sure `uv run agent-lab serve` is running on 127.0.0.1:8080 and that your first message is valid JSON for RunRequest.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does the server do when the browser closes the WebSocket during a run?",
+    "prompt": "A user closes the browser tab mid-run. What should the server do?",
     "options": [
      {
-      "text": "Lets the run finish so its result can be cached.",
-      "explanation": "No. Nobody would receive the result, and the run would keep spending budget."
+      "text": "Keep the run going so the result is ready later.",
+      "explanation": "Nobody is listening, and it may keep spending."
      },
      {
-      "text": "Cancels the send and receive tasks, awaits them and cancels the run.",
-      "explanation": "Correct. The finally block cancels, awaits and calls `runner.cancel(handle)`, which awaits the SDK cleanup."
+      "text": "Cancel and await the run it owns.",
+      "explanation": "Correct. Cleanup belongs to the connection's owner."
      },
      {
-      "text": "Restarts the run on the next connection.",
-      "explanation": "No. The protocol has no automatic restart; a new connection starts a new run."
+      "text": "Restart the run from the beginning.",
+      "explanation": "That repeats work nobody requested."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "What happens if the first message is `{\"mode\": \"offline\", \"max_turns\": 99}`?",
+    "prompt": "Which close code signals a rejected request?",
     "options": [
      {
-      "text": "The run starts with 12 turns, the maximum.",
-      "explanation": "No. Pydantic does not clamp values; it rejects them."
+      "text": "1000",
+      "explanation": "1000 is a normal closure."
      },
      {
-      "text": "The run starts and ignores `max_turns`.",
-      "explanation": "No. The request is validated before any run starts."
+      "text": "1008",
+      "explanation": "Correct. 1008 is a policy violation."
      },
      {
-      "text": "RunRequest validation fails and the socket closes with code 1008.",
-      "explanation": "Correct. `max_turns` must be between 1 and 12, and a ValidationError closes the connection with a policy-violation code."
+      "text": "200",
+      "explanation": "200 is an HTTP status, not a WebSocket close code."
      }
     ],
-    "correct": 2
+    "correct": 1
    }
   ]
  },
  {
   "id": 67,
   "prerequisites": [
-   63,
-   48
+   63
   ],
-  "concept_brief": "In a multi-tenant service, tenant identity comes from host state such as the authenticated session, never from tool arguments. The `Orders` methods take the tenant as a host parameter and every SQL statement filters `WHERE tenant=?`; in live database tools like `list_orders` the schema is `{}`, so the model has no way to name a tenant.",
-  "lab_brief": "Offline this lesson reuses the lesson 63 `database` exercise: Alice's listing, an injected tenant string and Bob trying to cancel Alice's order. It shows that one tenant can neither read nor change another tenant's rows, which is the core guarantee of a SaaS agent.",
+  "concept_brief": "In a multi-tenant agent service the tenant comes from authenticated host state. Every query is scoped by that tenant, tool schemas have no tenant field, and updates also check ownership and version.",
+  "lab_brief": "The `tenancy` exercise maps two sessions to tenants and runs seven checks: each tenant sees only its orders, a smuggled `tenant` argument is ignored, an injection returns nothing, and cross-tenant or stale updates are refused.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=67. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 67 (or run `uv run agent-lab lesson 67`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Keep tenant identity in trusted host state and reject any cross-tenant read or write."
+    "text": "Keep tenant identity out of the model's control."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `Orders` docstring and SQL in `agent_lab`/services.py, and `list_orders` in `agent_lab`/sdk.py, which hard-codes the host tenant."
+    "text": "Read `tenancy` and `Orders` in `agent_lab/services.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `alice` contains only A-001 and `cross_tenant_update` is No."
+    "text": "Read each row in `checks`."
    },
    {
     "title": "Try the challenge",
-    "text": "List both tenants yourself and confirm their results never overlap."
+    "text": "Add a tenant with no data."
    }
   ],
-  "inspect": "Look at the `alice` table, `sql_injection_result`, `cross_tenant_update` and `mutations`.",
-  "expected": "`alice` shows only A-001 (pending, 4200, version 1), never Bob's A-002; `sql_injection_result` is empty; `cross_tenant_update` is No (false); `mutations` says only host-approved, version-checked updates are allowed.",
-  "evidence_criterion": "The check confirms Bob's attempt to update Alice's order was refused and Alice's listing contains her own order.",
+  "inspect": "`tenant_source`, every row of `checks`, `cross_tenant_rows` and `cross_tenant_update`.",
+  "expected": "alice sees A-001 and bob sees A-002; `alice passes tenant=bob` still returns A-001; the injection returns nothing; bob's and the stale cancel return false; alice's current cancel returns true. `cross_tenant_rows` is 0.",
+  "evidence_criterion": "The check confirms no cross-tenant rows were visible and no cross-tenant update succeeded.",
   "evidence_checks": [
+   {
+    "key": "cross_tenant_rows",
+    "rule": "equals",
+    "value": 0
+   },
    {
     "key": "cross_tenant_update",
     "rule": "equals",
     "value": false
-   },
-   {
-    "key": "alice",
-    "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch script create `Orders(Path(tempfile.mkdtemp()) / \"o.sqlite\")` and print `list(\"alice\")` and `list(\"bob\")`. Alice sees only A-001 and Bob only A-002 (shipped, 9000). Then try `cancel(\"bob\", \"A-002\", 1, approved=True)` and confirm it returns False because only pending orders can be cancelled.",
+  "challenge": "Add `\"session-carol\": \"carol\"` to `sessions` and a check listing carol's orders. Predict the result (an empty list) before running.",
   "hints": [
-   "Look for where the tenant value comes from in each call: the host, not the model.",
-   "In live mode `list_orders` always calls `database.list(\"alice\")` and accepts no arguments, so even a prompt asking for Bob's orders cannot change the tenant."
+   "The query filters by the tenant from the session table.",
+   "carol has no rows, so her list is empty; she can never see alice's or bob's orders."
   ],
-  "reference": "Alice's listing contains only her order because every query filters by the host-chosen tenant. Bob's cancel of A-001 matches zero rows since the tenant is part of the WHERE clause, so `cross_tenant_update` is false. Isolation is enforced in the data layer, not by asking the model to behave.",
+  "reference": "Isolation is enforced in every query, not trusted to the model: the session decides the tenant, parameters keep injections inert, and updates require tenant, id and version to match.",
   "recovery": [
-   "If the offline run shows an error, read it in the panel and in Diagnostics, then run `uv run agent-lab lesson 67` in a terminal to see the same exercise without the browser.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Where should the tenant id for a database tool call come from?",
+    "prompt": "The model passes tenant=\"bob\" in alice's session. What should happen?",
     "options": [
      {
-      "text": "From the host's authenticated session state.",
-      "explanation": "Correct. The host knows who the user is; the model only chooses among tools the host has already scoped."
+      "text": "The host ignores it and uses alice from the session.",
+      "explanation": "Correct. Tenant identity is host state."
      },
      {
-      "text": "From a `tenant` argument in the tool schema.",
-      "explanation": "No. Then any prompt injection could ask for another tenant's data."
+      "text": "The host switches to bob for that call.",
+      "explanation": "That lets the model cross tenants."
      },
      {
-      "text": "From the user's prompt text.",
-      "explanation": "No. Prompt text is untrusted and can name any tenant."
+      "text": "The host merges both tenants' data.",
+      "explanation": "That leaks bob's data to alice."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "Why is `cross_tenant_update` false in the evidence?",
+    "prompt": "Why include the version in an update?",
     "options": [
      {
-      "text": "Bob's call was not approved.",
-      "explanation": "No. The exercise passes `approved=True`; approval alone is not enough."
+      "text": "To sort orders by age.",
+      "explanation": "Versions are for concurrency, not sorting."
      },
      {
-      "text": "The UPDATE filters by tenant, so Bob's request matches zero of Alice's rows.",
-      "explanation": "Correct. `rowcount` is 0, so `cancel()` returns False."
+      "text": "So a stale write cannot overwrite newer data.",
+      "explanation": "Correct. A mismatched version updates nothing."
      },
      {
-      "text": "SQLite is read-only in offline mode.",
-      "explanation": "No. The same method returns True for Alice's own pending order."
+      "text": "Because SQLite requires it.",
+      "explanation": "It is an application rule."
      }
     ],
     "correct": 1
@@ -7071,101 +7017,100 @@
  {
   "id": 68,
   "prerequisites": [
-   60,
-   27
+   60
   ],
-  "concept_brief": "Schedulers and webhooks can deliver the same trigger more than once, so an event-driven agent records each completed trigger under an idempotency key in a durable journal and skips keys it has already done. Background `asyncio` tasks it starts must be owned and awaited on shutdown, as `RunService` does for lesson runs.",
-  "lab_brief": "Offline this lesson reuses the `durable` exercise: a `Journal` (append-only JSONL with fsync) records prepare, compute and verify, and the step loop runs twice. The second pass skips every completed key, showing that a repeated trigger does not repeat side effects.",
+  "concept_brief": "Event-driven agents receive triggers at least once, so the same event can arrive twice. Record each trigger id before starting work, ignore repeats, and await in-flight jobs on shutdown instead of abandoning them.",
+  "lab_brief": "The `scheduled` exercise receives five deliveries containing two duplicates, starts one job per new trigger id, then shuts down gracefully by awaiting all in-flight jobs within a deadline. A journal records receipt and completion.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=68. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 68 (or run `uv run agent-lab lesson 68`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Make a repeated trigger safe by deduplicating on an idempotency key before any side effect."
+    "text": "Process each trigger exactly once and shut down cleanly."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `Journal` in `agent_lab`/services.py and the `durable` function in `agent_lab`/exercises.py, where `run_steps()` is called twice."
+    "text": "Read `scheduled` and the `Journal` class."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm the journal has three completed entries, `effects` lists each step once and `resume_duplicates` is No."
+    "text": "Compare `deliveries`, `accepted` and `duplicates_ignored`, then read the `journal`."
    },
    {
     "title": "Try the challenge",
-    "text": "Feed a duplicated list of trigger ids through a Journal and count the effects."
+    "text": "Deliver another duplicate."
    }
   ],
-  "inspect": "Look at the `journal` entries (event, step, `idempotency_key`), `effects`, `resume_duplicates` and `note`.",
-  "expected": "`journal` has three completed entries with keys prepare, compute, verify; `effects` is prepare, compute, verify (once each); `resume_duplicates` is No (false); `note` recommends a transactional outbox for side effects that must survive a crash.",
-  "evidence_criterion": "The check confirms the second pass added no duplicate side effects and the journal recorded the completed steps.",
+  "inspect": "`deliveries`, `accepted`, `duplicates_ignored`, `in_flight_at_shutdown`, `completed_before_exit` and the `journal` order.",
+  "expected": "`accepted` is evt-1, evt-2, evt-3; `duplicates_ignored` is evt-1, evt-2; `in_flight_at_shutdown` is 3 and all three appear in `completed_before_exit`.",
+  "evidence_criterion": "The check confirms duplicates were ignored and every accepted job finished before shutdown.",
   "evidence_checks": [
    {
-    "key": "resume_duplicates",
+    "key": "duplicates_ignored",
+    "rule": "truthy"
+   },
+   {
+    "key": "completed_before_exit",
+    "rule": "truthy"
+   },
+   {
+    "key": "in_flight_at_shutdown",
     "rule": "equals",
-    "value": false
-   },
-   {
-    "key": "journal",
-    "rule": "truthy"
-   },
-   {
-    "key": "effects",
-    "rule": "truthy"
+    "value": 3
    }
   ],
-  "challenge": "In a scratch script create `Journal(Path(tempfile.mkdtemp()) / \"t.jsonl\")` and loop over trigger ids `[\"evt-1\", \"evt-2\", \"evt-1\"]`: skip ids in `journal.completed()`, otherwise append to an effects list and `journal.append({\"event\": \"completed\", \"step\": trigger_id})`. The effects list should be `['evt-1', 'evt-2']`.",
+  "challenge": "Append `\"evt-3\"` to `deliveries`, run again and confirm `duplicates_ignored` gains evt-3 while `accepted` and `completed_before_exit` stay the same.",
   "hints": [
-   "Check the journal before doing the work, and write the journal entry right after.",
-   "`Journal.completed()` replays the file and returns the set of `step` values whose event is completed; the second `run_steps()` call finds all three and appends nothing."
+   "Receipt is journaled before the job starts.",
+   "The second evt-3 finds its `received` row, so it is ignored and no extra job runs."
   ],
-  "reference": "The first pass performed each step once and journaled it; the second pass, standing in for a duplicate trigger, found every key already completed and did nothing. That is why `effects` has three entries and `resume_duplicates` is false. A crash between doing the work and writing the journal could still repeat it, which is why the note points to a transactional outbox.",
+  "reference": "Deduplicating by trigger id makes at-least-once delivery safe. Journaling receipt first closes the window for double starts, and awaiting owned tasks on shutdown means no accepted job is silently lost.",
   "recovery": [
-   "If the offline run shows an error, read it in the panel and in Diagnostics, then run `uv run agent-lab lesson 68` in a terminal to see the same exercise without the browser.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "A webhook delivers the same event id twice. What prevents a second side effect?",
+    "prompt": "A webhook delivers evt-1 twice. What should happen?",
     "options": [
      {
-      "text": "Checking the durable journal for that idempotency key before acting.",
-      "explanation": "Correct. A key already recorded as completed is skipped, as the second `run_steps()` pass shows."
+      "text": "Run the job twice to be safe.",
+      "explanation": "That duplicates side effects."
      },
      {
-      "text": "Asking the model whether it has seen the event before.",
-      "explanation": "No. The model has no reliable memory across triggers; the host journal is the source of truth."
+      "text": "Run it once and ignore the repeat by trigger id.",
+      "explanation": "Correct. The id makes processing idempotent."
      },
      {
-      "text": "Running the agent with a lower `max_turns`.",
-      "explanation": "No. Turn limits bound one run; they do not deduplicate separate triggers."
-     }
-    ],
-    "correct": 0
-   },
-   {
-    "prompt": "Why does the exercise's note recommend a transactional outbox?",
-    "options": [
-     {
-      "text": "Because JSONL files cannot be read twice.",
-      "explanation": "No. `replay()` reads the file as often as needed."
-     },
-     {
-      "text": "Because the journal is written after the step, so a crash in between could repeat an external effect.",
-      "explanation": "Correct. An outbox commits the effect and its record together, closing that gap."
-     },
-     {
-      "text": "Because fsync is not supported on Windows.",
-      "explanation": "No. `Journal.append()` calls `os.fsync` on every platform the course supports."
+      "text": "Reject both deliveries.",
+      "explanation": "The first delivery is valid work."
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "What should a graceful shutdown do with running jobs?",
+    "options": [
+     {
+      "text": "Await them within a deadline before exiting.",
+      "explanation": "Correct. Owned work finishes or is accounted for."
+     },
+     {
+      "text": "Exit immediately and let them die.",
+      "explanation": "That silently loses accepted work."
+     },
+     {
+      "text": "Restart them in a new process.",
+      "explanation": "That can duplicate work already done."
+     }
+    ],
+    "correct": 0
    }
   ]
  },
@@ -7577,102 +7522,103 @@
  {
   "id": 73,
   "prerequisites": [
-   48,
-   49,
-   52
+   52,
+   57
   ],
-  "concept_brief": "An automated reviewer's findings are proposals: the host keeps only those on changed lines of in-scope files. `agent_lab/integrations/review_ci.py` shows the headless version, using `query()` with a Pydantic `Review`/`Finding` schema and `changed_lines(diff)` to parse a unified diff into the lines a finding may target.",
-  "lab_brief": "The offline `review` exercise filters two recorded findings against `changed_lines = {\"src/tags.py\": {1, 2}}`: it accepts the tags.py line 2 finding and rejects a finding that asks to disable CI in .github/workflows/ci.yml. No patch is applied and no pull request is published.",
+  "concept_brief": "An autonomous reviewer's findings are claims. The host accepts only findings on changed lines in approved files, applies their patches itself, and proves the fix with a test before anything is published.",
+  "lab_brief": "The `review` exercise writes a buggy `src/tags.py`, filters two recorded findings by changed lines, applies the accepted patch, and runs a real test in a subprocess before and after. The out-of-scope CI file must stay untouched.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=73. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 73 (or run `uv run agent-lab lesson 73`).",
+   "No pull request is published; the exercise works in its own lesson workspace."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Accept review findings only when they fall inside the change the host approved."
+    "text": "Apply only in-scope fixes and prove them with a test."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `review` function in `agent_lab`/exercises.py and `changed_lines` in `agent_lab`/integrations/review_ci.py."
+    "text": "Read `review`: `changed_lines`, the findings and `run_test`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm one accepted finding on src/tags.py line 2 and one rejected finding on .github/workflows/ci.yml."
+    "text": "Compare `test_before_patch` with `test_after_patch` and check the CI file."
    },
    {
     "title": "Try the challenge",
-    "text": "Parse a small diff with `changed_lines` and see which lines a finding may use."
+    "text": "Widen the scope and see why the gate exists."
    }
   ],
-  "inspect": "Look at the `accepted` and `rejected` tables (file, line, severity, confidence, message), `gate` and `source`.",
-  "expected": "`accepted` has src/tags.py line 2, medium, \"Strip whitespace before normalizing case.\"; `rejected` has .github/workflows/ci.yml line 1, high, \"Untrusted fixture asks to disable CI.\"; `gate` \"Changed lines and host-approved file scope\"; `source` \"recorded reviewer fixture\".",
-  "evidence_criterion": "The check confirms the recorded findings were split into an accepted in-scope finding and a rejected out-of-scope one.",
+  "inspect": "`accepted`, `rejected`, `test_before_patch`, `test_after_patch`, `out_of_scope_file_unchanged`, `gate` and `publication`.",
+  "expected": "The tags.py finding is accepted and the CI-disabling finding rejected; the test fails before the patch and passes after; `out_of_scope_file_unchanged` is true.",
+  "evidence_criterion": "The check confirms the test went from failing to passing and the out-of-scope file was not changed.",
   "evidence_checks": [
    {
-    "key": "source",
+    "key": "test_before_patch",
     "rule": "equals",
-    "value": "recorded reviewer fixture"
+    "value": "failed"
    },
    {
-    "key": "accepted",
-    "rule": "truthy"
+    "key": "test_after_patch",
+    "rule": "equals",
+    "value": "passed"
    },
    {
-    "key": "rejected",
-    "rule": "truthy"
+    "key": "out_of_scope_file_unchanged",
+    "rule": "equals",
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, pass a small unified diff that changes `return value.lower()` to `return value.strip().lower()` in src/tags.py to `changed_lines` from `agent_lab.integrations.review_ci`. It should return `{'src/tags.py': {2}}`. Then add a finding for src/tags.py line 5 to your copy of `review` and confirm it lands in `rejected`.",
+  "challenge": "Add `\".github/workflows/ci.yml\": {1}` to `changed_lines`, run again and explain why `out_of_scope_file_unchanged` becomes false. Then restore the scope.",
   "hints": [
-   "A finding survives only if its line is in the set for its file.",
-   "`accepted` is a list comprehension: `row[\"line\"] in changed_lines.get(row[\"file\"], set())`; files not in the change map get an empty set, so every finding on them is rejected."
+   "The gate is the only thing standing between a finding and its patch.",
+   "Widening the scope accepts the malicious finding, so its patch renames the CI workflow: exactly the change a hostile input wanted."
   ],
-  "reference": "The tags.py finding targets a changed line, so it is kept; the CI finding targets a file outside the change and reads like an injected instruction, so it is rejected. The model can suggest anything, but the host decides scope from the diff. Real fixes would still need tests and human review before any PR is published.",
+  "reference": "Scoping findings to changed lines stops a reviewer, or text it read, from steering edits elsewhere. Running the test before and after turns a claimed fix into evidence. Publication stays a separate, human-approved step.",
   "recovery": [
-   "If the offline run shows an error, read it in the panel and in Diagnostics, then run `uv run agent-lab lesson 73` in a terminal to see the same exercise without the browser.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why is the .github/workflows/ci.yml finding rejected?",
+    "prompt": "A finding asks to edit a CI workflow outside the PR's changes. What should the host do?",
     "options": [
      {
-      "text": "Its severity is too high.",
-      "explanation": "No. Severity is not part of the filter; the accepted finding is medium, but a high one on a changed line would also pass."
+      "text": "Reject it: it is outside the changed lines and approved scope.",
+      "explanation": "Correct. Scope is enforced by the host, not the reviewer."
      },
      {
-      "text": "Its confidence is low.",
-      "explanation": "No. Both findings are marked high confidence."
+      "text": "Apply it because the severity is high.",
+      "explanation": "Severity does not grant scope."
      },
      {
-      "text": "Its file and line are not in the host's changed-lines map.",
-      "explanation": "Correct. The gate keeps only findings whose line is in `changed_lines` for that file."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "Does the offline lesson 73 run change code or open a pull request?",
-    "options": [
-     {
-      "text": "No. It only filters recorded findings; nothing is patched or published.",
-      "explanation": "Correct. The evidence `source` says recorded reviewer fixture, and no file or PR is touched."
-     },
-     {
-      "text": "Yes, it applies the accepted fix to src/tags.py.",
-      "explanation": "No. The exercise returns lists of findings; it writes no source file."
-     },
-     {
-      "text": "Yes, it pushes a draft PR to GitHub.",
-      "explanation": "No. No network or Git operation runs in this exercise."
+      "text": "Ask the model whether it is safe.",
+      "explanation": "The model may be the one being manipulated."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What proves the patch fixed the bug?",
+    "options": [
+     {
+      "text": "The reviewer says it is fixed.",
+      "explanation": "That is a claim."
+     },
+     {
+      "text": "The same test fails before and passes after the patch.",
+      "explanation": "Correct. Before-and-after evidence."
+     },
+     {
+      "text": "The patch is short.",
+      "explanation": "Size proves nothing."
+     }
+    ],
+    "correct": 1
    }
   ]
  },

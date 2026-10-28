@@ -117,3 +117,89 @@ def test_redaction_keeps_usage_counts_but_masks_credentials():
         "access_token": "[REDACTED]",
         "has_token": "[REDACTED]",
     }
+
+
+async def test_mcp_lessons_use_real_transports(work):
+    from agent_lab.exercises import mcp_stdio, remote_mcp
+
+    stdio = await mcp_stdio(work, RunRequest(), LESSONS[13])
+    assert stdio["valid_call"]["is_error"] is False
+    assert stdio["invalid_call"]["is_error"] is True
+    http = await remote_mcp(work, RunRequest(), LESSONS[43])
+    assert (http["tools"], http["resources"]) == (["read_note"], ["notes://welcome"])
+    assert http["insecure_url"] == "Use HTTPS or a local HTTP MCP endpoint."
+
+
+async def test_agent_mcp_exercise_never_starts_a_paid_run(work, monkeypatch):
+    import agent_lab.sdk
+    from agent_lab.exercises import agent_mcp
+
+    # Even with live access configured in the environment, the exercise forces it off.
+    monkeypatch.setenv("LAB_ENABLE_LIVE", "true")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "fixture-not-a-real-key")
+
+    async def forbidden(*args, **kwargs):
+        raise AssertionError("The offline exercise must not start the SDK")
+
+    monkeypatch.setattr(agent_lab.sdk, "run_sdk", forbidden)
+    evidence = await agent_mcp(work, RunRequest(), LESSONS[61])
+    assert evidence["call_is_error"] is True
+    assert "LAB_ENABLE_LIVE" in evidence["call_result"]
+
+
+async def test_ci_exercise_reports_real_exit_codes(work):
+    from agent_lab.exercises import ci
+
+    evidence = await ci(work, RunRequest(), LESSONS[49])
+    codes = {row["case"]: row["exit_code"] for row in evidence["runs"]}
+    assert codes == {"passing lesson": 0, "unknown lesson": 2}
+
+
+async def test_websocket_rejects_bad_requests_and_leaves_no_run_behind(work):
+    from agent_lab.exercises import websocket
+
+    evidence = await websocket(work, RunRequest(), LESSONS[66])
+    assert evidence["server_events"] == ["started", "evidence", "done"]
+    assert evidence["invalid_request_close_code"] == 1008
+    assert evidence["owned_runs_after_disconnect"] == 0
+
+
+def test_support_refund_requires_the_exact_approval(work):
+    from agent_lab.exercises import support
+
+    evidence = support(work, RunRequest(), LESSONS[50])
+    assert [row["outcome"] for row in evidence["approval_steps"]] == [
+        "Approval is not usable.",
+        "Invalid approval credential.",
+        "approved",
+        "Approval belongs to a different action.",
+        "consumed",
+    ]
+
+
+def test_tenant_comes_from_the_session_not_tool_arguments(work):
+    from agent_lab.exercises import tenancy
+
+    checks = {
+        row["check"]: row["result"] for row in tenancy(work, RunRequest(), LESSONS[67])["checks"]
+    }
+    assert checks["alice passes tenant=bob"] == ["A-001"]
+    assert checks["bob cancels alice's order"] is False
+    assert checks["alice cancels her current order"] is True
+
+
+async def test_scheduled_triggers_deduplicate_and_finish_before_shutdown(work):
+    from agent_lab.exercises import scheduled
+
+    evidence = await scheduled(work, RunRequest(), LESSONS[68])
+    assert evidence["accepted"] == ["evt-1", "evt-2", "evt-3"]
+    assert evidence["completed_before_exit"] == ["evt-1", "evt-2", "evt-3"]
+
+
+async def test_review_applies_only_the_in_scope_patch_and_proves_it(work):
+    from agent_lab.exercises import review
+
+    evidence = await review(work, RunRequest(), LESSONS[73])
+    assert (evidence["test_before_patch"], evidence["test_after_patch"]) == ("failed", "passed")
+    assert evidence["out_of_scope_file_unchanged"]
+    assert (work / ".github" / "workflows" / "ci.yml").read_text() == "name: CI\n"

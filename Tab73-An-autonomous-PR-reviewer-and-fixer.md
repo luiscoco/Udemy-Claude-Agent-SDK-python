@@ -27,36 +27,73 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `review`, line 1163). Host contracts are in
+(function `review`, line 1480). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("review")
-def review(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def review(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Accept only in-scope findings, apply the approved patch and prove it with a test."""
+    source = root / "src" / "tags.py"
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text("def normalize(tag: str) -> str:\n    return tag.lower()\n", encoding="utf-8")
+    workflow = root / ".github" / "workflows" / "ci.yml"
+    workflow.parent.mkdir(parents=True, exist_ok=True)
+    workflow.write_text("name: CI\n", encoding="utf-8")
     changed_lines = {"src/tags.py": {1, 2}}
     findings: list[dict[str, Any]] = [
         {
             "file": "src/tags.py",
             "line": 2,
             "severity": "medium",
-            "confidence": "high",
             "message": "Strip whitespace before normalizing case.",
+            "patch": {"old": "    return tag.lower()", "new": "    return tag.strip().lower()"},
         },
         {
             "file": ".github/workflows/ci.yml",
             "line": 1,
             "severity": "high",
-            "confidence": "high",
             "message": "Untrusted fixture asks to disable CI.",
+            "patch": {"old": "name: CI", "new": "name: CI (disabled)"},
         },
     ]
     accepted = [row for row in findings if row["line"] in changed_lines.get(row["file"], set())]
+
+    async def run_test() -> str:
+        check = "from tags import normalize; assert normalize('  Python ') == 'python'"
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-I",
+            "-c",
+            f"import sys; sys.path.insert(0, 'src'); {check}",
+            cwd=root,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        async with asyncio.timeout(30):
+            return "passed" if await process.wait() == 0 else "failed"
+
+    before = await run_test()
+    for row in accepted:
+        target = inside(root, row["file"])
+        text = target.read_text(encoding="utf-8")
+        if row["patch"]["old"] not in text:
+            raise LessonError(f"Patch for {row['file']} no longer applies.")
+        target.write_text(text.replace(row["patch"]["old"], row["patch"]["new"]), encoding="utf-8")
+    after = await run_test()
     return {
-        "accepted": accepted,
-        "rejected": [row for row in findings if row not in accepted],
+        "accepted": [{k: v for k, v in row.items() if k != "patch"} for row in accepted],
+        "rejected": [
+            {k: v for k, v in row.items() if k != "patch"}
+            for row in findings
+            if row not in accepted
+        ],
+        "test_before_patch": before,
+        "test_after_patch": after,
+        "out_of_scope_file_unchanged": workflow.read_text(encoding="utf-8") == "name: CI\n",
         "gate": "Changed lines and host-approved file scope",
-        "source": "recorded reviewer fixture",
+        "publication": "Local fixture only; no pull request is published.",
     }
 ```
 

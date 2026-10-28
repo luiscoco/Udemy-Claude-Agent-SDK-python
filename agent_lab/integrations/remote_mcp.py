@@ -6,7 +6,7 @@ import json
 from urllib.parse import urlparse
 
 from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from mcp.client.streamable_http import streamable_http_client
 
 
 async def inspect_remote(url: str) -> dict:
@@ -16,7 +16,7 @@ async def inspect_remote(url: str) -> dict:
     ):
         raise ValueError("Use HTTPS or a local HTTP MCP endpoint.")
     async with asyncio.timeout(30):
-        async with streamablehttp_client(url) as (reader, writer, _):
+        async with streamable_http_client(url) as (reader, writer, _):
             async with ClientSession(reader, writer) as session:
                 initialized = await session.initialize()
                 tools = await session.list_tools()

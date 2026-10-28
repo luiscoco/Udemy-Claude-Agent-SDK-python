@@ -27,31 +27,34 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `mcp`, line 521). Host contracts are in
+(function `remote_mcp`, line 611). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("mcp", "remote_mcp", "agent_mcp", "browser")
-def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from mcp.server.fastmcp import FastMCP
+@exercise("remote_mcp")
+async def remote_mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Serve MCP over streamable HTTP on loopback and inspect it with the remote client."""
+    from agent_lab.integrations.notes_mcp import build_server
+    from agent_lab.integrations.remote_mcp import inspect_remote
 
-    from agent_lab.config import ROOT
-
-    server = FastMCP("python-notes")
-
-    @server.tool()
-    def welcome() -> str:
-        """Read the welcome note."""
-        return "Welcome to the Python SDK lab."
-
+    async with EmbeddedServer(build_server().streamable_http_app()).running() as base:
+        url = f"{base}/mcp"
+        inspected = await inspect_remote(url)
+    try:
+        await inspect_remote("http://example.com/mcp")
+        insecure = "accepted"
+    except ValueError as exc:
+        insecure = str(exc)
     return {
-        "mcp_version": importlib.metadata.version("mcp"),
-        "transport": "stdio",
-        "server_command": [sys.executable, "-m", "agent_lab.integrations.notes_mcp"],
-        "resource_uri": "notes://welcome",
-        "integration_source": str(ROOT / "agent_lab" / "integrations"),
-        "notes": lesson.notes,
+        "transport": "streamable HTTP",
+        "url": url,
+        "server": inspected["server"]["name"],
+        "tools": [item["name"] for item in inspected["tools"]],
+        "resources": [item["uri"] for item in inspected["resources"]],
+        "difference": "Tools are actions the model calls with arguments; resources are "
+        "addressable data the client reads by URI.",
+        "insecure_url": insecure,
     }
 ```
 

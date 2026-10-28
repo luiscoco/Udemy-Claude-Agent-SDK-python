@@ -27,12 +27,12 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `database`, line 875). Host contracts are in
+(function `database`, line 1029). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("support", "database", "tenancy")
+@exercise("database")
 def database(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     orders = Orders(root / "orders.sqlite")
     try:

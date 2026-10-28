@@ -27,31 +27,33 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `mcp`, line 521). Host contracts are in
+(function `agent_mcp`, line 637). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("mcp", "remote_mcp", "agent_mcp", "browser")
-def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from mcp.server.fastmcp import FastMCP
+@exercise("agent_mcp")
+async def agent_mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Call the agent-backed MCP tool end to end with live access forced off."""
+    from mcp.shared.memory import create_connected_server_and_client_session
 
-    from agent_lab.config import ROOT
+    from agent_lab.config import Settings
+    from agent_lab.integrations.agent_mcp import build_server
 
-    server = FastMCP("python-notes")
-
-    @server.tool()
-    def welcome() -> str:
-        """Read the welcome note."""
-        return "Welcome to the Python SDK lab."
-
+    # Forced offline: this exercise must never start a paid run, whatever .env says.
+    server = build_server(Settings(enable_live=False, data_dir=root / "agent-mcp"))
+    async with asyncio.timeout(30):
+        async with create_connected_server_and_client_session(server) as session:
+            tools = await session.list_tools()
+            result = await session.call_tool("explain_python_agent", {"prompt": "What is MCP?"})
+    tool = tools.tools[0]
     return {
-        "mcp_version": importlib.metadata.version("mcp"),
-        "transport": "stdio",
-        "server_command": [sys.executable, "-m", "agent_lab.integrations.notes_mcp"],
-        "resource_uri": "notes://welcome",
-        "integration_source": str(ROOT / "agent_lab" / "integrations"),
-        "notes": lesson.notes,
+        "outer_client": "MCP ClientSession (in-memory transport)",
+        "tool": {"name": tool.name, "input_schema": tool.inputSchema},
+        "inner_agent": "RunService -> claude-agent-sdk live run of lesson 1",
+        "call_is_error": result.isError,
+        "call_result": tool_text(result),
+        "live_gate": "The inner run refused to start because live access is disabled.",
     }
 ```
 

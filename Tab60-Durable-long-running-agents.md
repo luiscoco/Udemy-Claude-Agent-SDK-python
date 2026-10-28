@@ -27,12 +27,12 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `durable`, line 1048). Host contracts are in
+(function `durable`, line 1202). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("durable", "scheduled")
+@exercise("durable")
 def durable(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     journal = Journal(root / "journal.jsonl")
     side_effects = []

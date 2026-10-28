@@ -27,23 +27,14 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `mcp`, line 521). Host contracts are in
+(function `mcp`, line 522). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("mcp", "remote_mcp", "agent_mcp", "browser")
+@exercise("browser")
 def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from mcp.server.fastmcp import FastMCP
-
     from agent_lab.config import ROOT
-
-    server = FastMCP("python-notes")
-
-    @server.tool()
-    def welcome() -> str:
-        """Read the welcome note."""
-        return "Welcome to the Python SDK lab."
 
     return {
         "mcp_version": importlib.metadata.version("mcp"),

@@ -27,17 +27,53 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `ci`, line 865). Host contracts are in
+(function `ci`, line 983). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("ci")
-def ci(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def ci(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Run the real CLI headlessly, as a CI job would, and record its exit codes."""
+    env = os.environ | {
+        "LAB_ENABLE_LIVE": "false",
+        "ANTHROPIC_API_KEY": "",
+        "LAB_DATA_DIR": str(root / "ci-data"),
+    }
+    runs = []
+    for label, arguments in (
+        ("passing lesson", ["lesson", "5"]),
+        ("unknown lesson", ["lesson", "99"]),
+    ):
+        command = [sys.executable, "-m", "agent_lab", *arguments]
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            env=env,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            async with asyncio.timeout(60):
+                stdout, stderr = await process.communicate()
+        except TimeoutError:
+            process.kill()
+            await process.wait()
+            raise
+        lines = [json.loads(line) for line in stdout.decode().splitlines() if line.startswith("{")]
+        runs.append(
+            {
+                "case": label,
+                "command": "agent-lab " + " ".join(arguments),
+                "exit_code": process.returncode,
+                "json_events": len(lines),
+                "final_status": lines[-1]["data"].get("status") if lines else None,
+                "stderr_first_line": (stderr.decode().strip().splitlines() or [""])[-1][:160],
+            }
+        )
     return {
-        "install": "uv sync --locked",
+        "runs": runs,
+        "ci_gate": "A job fails on any nonzero exit code.",
         "checks": ["uv run ruff check agent_lab tests", "uv run mypy agent_lab", "uv run pytest"],
-        "offline_worker": "uv run agent-lab lesson 49",
         "network_api_needed": False,
     }
 ```

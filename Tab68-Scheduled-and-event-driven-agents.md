@@ -27,30 +27,43 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `durable`, line 1048). Host contracts are in
+(function `scheduled`, line 1393). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("durable", "scheduled")
-def durable(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    journal = Journal(root / "journal.jsonl")
-    side_effects = []
+@exercise("scheduled")
+async def scheduled(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Process each trigger id once and await in-flight jobs before shutting down."""
+    journal = Journal(root / "triggers.jsonl")
+    deliveries = ["evt-1", "evt-2", "evt-1", "evt-3", "evt-2"]  # at-least-once delivery
+    accepted, duplicates = [], []
+    tasks: set[asyncio.Task[str]] = set()
 
-    def run_steps():
-        for step in ("prepare", "compute", "verify"):
-            if step in journal.completed():
-                continue
-            side_effects.append(step)
-            journal.append({"event": "completed", "step": step, "idempotency_key": step})
+    async def job(trigger: str) -> str:
+        await asyncio.sleep(0.05)
+        journal.append({"event": "completed", "step": trigger})
+        return trigger
 
-    run_steps()
-    run_steps()
+    for trigger in deliveries:
+        seen = {row["step"] for row in journal.replay() if row.get("event") == "received"}
+        if trigger in seen:
+            duplicates.append(trigger)
+            continue
+        journal.append({"event": "received", "step": trigger})
+        accepted.append(trigger)
+        tasks.add(asyncio.create_task(job(trigger)))
+    in_flight = sum(not task.done() for task in tasks)
+    # Graceful shutdown: stop accepting work, then await owned tasks within a deadline.
+    async with asyncio.timeout(5):
+        finished = await asyncio.gather(*tasks)
     return {
+        "deliveries": deliveries,
+        "accepted": accepted,
+        "duplicates_ignored": duplicates,
+        "in_flight_at_shutdown": in_flight,
+        "completed_before_exit": sorted(finished),
         "journal": journal.replay(),
-        "effects": side_effects,
-        "resume_duplicates": len(side_effects) != len(set(side_effects)),
-        "note": "Use an external transactional outbox for side effects that must survive a crash between execution and journaling.",
     }
 ```
 

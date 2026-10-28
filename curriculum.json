@@ -112,7 +112,7 @@
     "title": "MCP servers",
     "document": "Tab13-MCP-servers.md",
     "module": "agent_lab.lessons.lesson_13",
-    "exercise_function": "mcp",
+    "exercise_function": "mcp_stdio",
     "live_profile": "mcp",
     "adaptation": ""
   },
@@ -382,7 +382,7 @@
     "title": "Remote MCP and resources",
     "document": "Tab43-Remote-MCP-and-resources.md",
     "module": "agent_lab.lessons.lesson_43",
-    "exercise_function": "mcp",
+    "exercise_function": "remote_mcp",
     "live_profile": "query",
     "adaptation": "The standalone remote MCP client requires a separately running trusted MCP endpoint. The browser exercise inspects transport types locally."
   },
@@ -445,7 +445,7 @@
     "title": "Full-stack support capstone",
     "document": "Tab50-Full-stack-capstone.md",
     "module": "agent_lab.lessons.lesson_50",
-    "exercise_function": "database",
+    "exercise_function": "support",
     "live_profile": "support",
     "adaptation": ""
   },
@@ -544,7 +544,7 @@
     "title": "Exposing an agent as an MCP server",
     "document": "Tab61-Exposing-your-agent-as-an-MCP-server.md",
     "module": "agent_lab.lessons.lesson_61",
-    "exercise_function": "mcp",
+    "exercise_function": "agent_mcp",
     "live_profile": "query",
     "adaptation": "The standalone agent MCP server invokes the SDK only when explicitly started with live access enabled."
   },
@@ -598,7 +598,7 @@
     "title": "Multi-tenant SaaS architecture",
     "document": "Tab67-A-multi-tenant-SaaS-architecture.md",
     "module": "agent_lab.lessons.lesson_67",
-    "exercise_function": "database",
+    "exercise_function": "tenancy",
     "live_profile": "exercise",
     "adaptation": ""
   },
@@ -607,7 +607,7 @@
     "title": "Scheduled and event-driven agents",
     "document": "Tab68-Scheduled-and-event-driven-agents.md",
     "module": "agent_lab.lessons.lesson_68",
-    "exercise_function": "durable",
+    "exercise_function": "scheduled",
     "live_profile": "exercise",
     "adaptation": ""
   },

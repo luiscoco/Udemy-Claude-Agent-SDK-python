@@ -27,18 +27,57 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `websocket`, line 1101). Host contracts are in
+(function `websocket`, line 1255). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("websocket")
-def websocket(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def websocket(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Serve the real WebSocket endpoint on loopback and drive it as a browser would."""
+    from websockets.asyncio.client import connect
+    from websockets.exceptions import ConnectionClosed
+
+    from agent_lab.api import create_app
+    from agent_lab.config import Settings
+    from agent_lab.runtime import RunService
+
+    inner = RunService(Settings(enable_live=False, data_dir=root / "ws-runs"))
+    app = create_app(inner, with_ui=False)
+    async with EmbeddedServer(app).running() as base:
+        endpoint = base.replace("http", "ws") + "/api/lessons/5/ws"
+        async with asyncio.timeout(30):
+            async with connect(endpoint) as socket:
+                await socket.send(json.dumps({"mode": "offline"}))
+                kinds = []
+                async for raw in socket:
+                    event = json.loads(raw)
+                    kinds.append(event["kind"])
+                    if event["kind"] == "done":
+                        final_status = event["data"]["status"]
+                        break
+            async with connect(endpoint) as socket:
+                await socket.send(json.dumps({"mode": "offline", "cwd": "outside"}))
+                try:
+                    await socket.recv()
+                    invalid_close = None
+                except ConnectionClosed as exc:
+                    invalid_close = exc.rcvd.code if exc.rcvd else None
+            async with connect(base.replace("http", "ws") + "/api/lessons/57/ws") as socket:
+                await socket.send(json.dumps({"mode": "offline"}))
+                await socket.recv()  # started, then the browser goes away mid-run
+            for _ in range(250):
+                if not inner.active:
+                    break
+                await asyncio.sleep(0.02)
+    await inner.close()
     return {
-        "endpoint": f"/api/lessons/{lesson.id}/ws",
-        "client_request": RunRequest().model_dump(),
-        "server_events": ["started", "evidence", "message", "result", "done"],
-        "disconnect": "Cancel and await the owned runner task.",
+        "endpoint": "/api/lessons/{lesson_id}/ws",
+        "server_events": kinds,
+        "final_status": final_status,
+        "invalid_request_close_code": invalid_close,
+        "owned_runs_after_disconnect": len(inner.active),
+        "disconnect": "Closing the socket cancels and awaits the owned run.",
     }
 ```
 

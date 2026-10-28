@@ -27,26 +27,59 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `database`, line 875). Host contracts are in
+(function `tenancy`, line 1343). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("support", "database", "tenancy")
-def database(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+@exercise("tenancy")
+def tenancy(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Every query runs with the tenant from host state; tool arguments cannot change it."""
     orders = Orders(root / "orders.sqlite")
     try:
-        alice = orders.list("alice")
-        injected = orders.list("alice' OR 1=1 --")
-        protected = orders.cancel("bob", "A-001", 1, approved=True)
-        return {
-            "alice": alice,
-            "sql_injection_result": injected,
-            "cross_tenant_update": protected,
-            "mutations": "Only host-approved, version-checked updates are allowed.",
-        }
+        sessions = {"session-alice": "alice", "session-bob": "bob"}
+
+        def list_orders(session_id: str, arguments: dict[str, Any]) -> list[dict[str, Any]]:
+            # A model-supplied tenant is ignored: the tool schema has no tenant field.
+            return orders.list(sessions[session_id], arguments.get("status", "all"))
+
+        checks: list[dict[str, Any]] = [
+            {
+                "check": "alice sees her orders",
+                "result": [r["id"] for r in list_orders("session-alice", {})],
+            },
+            {
+                "check": "bob sees his orders",
+                "result": [r["id"] for r in list_orders("session-bob", {})],
+            },
+            {
+                "check": "alice passes tenant=bob",
+                "result": [r["id"] for r in list_orders("session-alice", {"tenant": "bob"})],
+            },
+            {"check": "injection in tenant", "result": orders.list("alice' OR 1=1 --")},
+            {
+                "check": "bob cancels alice's order",
+                "result": orders.cancel("bob", "A-001", 1, approved=True),
+            },
+            {
+                "check": "alice cancels with a stale version",
+                "result": orders.cancel("alice", "A-001", 7, approved=True),
+            },
+            {
+                "check": "alice cancels her current order",
+                "result": orders.cancel("alice", "A-001", 1, approved=True),
+            },
+        ]
     finally:
         orders.close()
+    return {
+        "tenant_source": "host session table",
+        "checks": checks,
+        "cross_tenant_rows": 0
+        if checks[2]["result"] == ["A-001"] and not checks[3]["result"]
+        else 1,
+        "cross_tenant_update": checks[4]["result"],
+    }
 ```
 
 ## Live Agent SDK exercise

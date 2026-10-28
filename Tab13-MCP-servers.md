@@ -27,31 +27,45 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `mcp`, line 521). Host contracts are in
+(function `mcp_stdio`, line 540). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("mcp", "remote_mcp", "agent_mcp", "browser")
-def mcp(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from mcp.server.fastmcp import FastMCP
+@exercise("mcp")
+async def mcp_stdio(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Launch the notes server as a subprocess and talk to it over stdio, as the SDK does."""
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
 
-    from agent_lab.config import ROOT
-
-    server = FastMCP("python-notes")
-
-    @server.tool()
-    def welcome() -> str:
-        """Read the welcome note."""
-        return "Welcome to the Python SDK lab."
-
+    command = [sys.executable, "-m", "agent_lab.integrations.notes_mcp"]
+    parameters = StdioServerParameters(command=command[0], args=command[1:])
+    async with asyncio.timeout(30):
+        async with stdio_client(parameters) as (reader, writer):
+            async with ClientSession(reader, writer) as session:
+                initialized = await session.initialize()
+                tools = await session.list_tools()
+                valid = await session.call_tool("read_note", {"name": "refunds"})
+                invalid = await session.call_tool("read_note", {"name": "salaries"})
     return {
-        "mcp_version": importlib.metadata.version("mcp"),
         "transport": "stdio",
-        "server_command": [sys.executable, "-m", "agent_lab.integrations.notes_mcp"],
-        "resource_uri": "notes://welcome",
-        "integration_source": str(ROOT / "agent_lab" / "integrations"),
-        "notes": lesson.notes,
+        "server_command": command,
+        "server": initialized.serverInfo.name,
+        "tools": [
+            {"name": item.name, "description": item.description, "input_schema": item.inputSchema}
+            for item in tools.tools
+        ],
+        "valid_call": {
+            "arguments": {"name": "refunds"},
+            "is_error": valid.isError,
+            "text": tool_text(valid),
+        },
+        "invalid_call": {
+            "arguments": {"name": "salaries"},
+            "is_error": invalid.isError,
+            "text": tool_text(invalid),
+        },
+        "sdk_config": {"notes": {"type": "stdio", "command": command[0], "args": command[1:]}},
     }
 ```
 
