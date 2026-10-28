@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 from pydantic import ValidationError
 
@@ -16,7 +18,15 @@ from agent_lab.services import (
 
 
 @pytest.mark.parametrize(
-    "path", ["../outside", ".env", ".git/config", "src/../../outside", "C:/Windows/system.ini"]
+    "path",
+    [
+        "../outside",
+        ".env",
+        ".git/config",
+        "src/../../outside",
+        # An absolute path on this platform: on Linux "C:/..." is just a relative folder name.
+        "C:/Windows/system.ini" if sys.platform == "win32" else "/etc/passwd",
+    ],
 )
 def test_path_boundary_rejects_traversal_and_protected_files(tmp_path, path):
     with pytest.raises(ValueError):

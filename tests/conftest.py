@@ -1,6 +1,12 @@
 import pytest
 
 
+def pytest_configure(config):
+    """pyproject sets --basetemp=.lab-data/pytest; pytest creates that folder but not its
+    git-ignored parent, so a fresh checkout (and CI) needs the parent made first."""
+    (config.rootpath / ".lab-data").mkdir(exist_ok=True)
+
+
 @pytest.fixture(autouse=True)
 def isolate_live_configuration(monkeypatch):
     """Local .env credentials must never enable paid calls during the test suite."""
