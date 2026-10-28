@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.12", "3.13"]
+    # Paid model calls are never made in CI: no API key is configured and live mode is off.
+    env:
+      LAB_ENABLE_LIVE: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: Install Chromium for the browser tests
+        run: uv run playwright install ${{ runner.os == 'Linux' && '--with-deps' || '' }} chromium
+      - name: Lint
+        run: uv run ruff check agent_lab tests scripts
+      - name: Type-check
+        run: uv run mypy agent_lab
+      - name: Check generated lessons are up to date
+        run: |
+          uv run python scripts/build_curriculum.py
+          git diff --exit-code -- agent_lab/lessons 'Tab*.md' curriculum.json
+      - name: Test
+        run: uv run pytest -q
