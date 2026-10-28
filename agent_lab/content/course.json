@@ -1,0 +1,809 @@
+{
+ "source": "Adapted from luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild @ 539c7dffe97fe196166d36594ad7bad71bbd6b71",
+ "paths": [
+  {
+   "id": "beginner",
+   "title": "Beginner",
+   "description": "Start with queries, tools, permissions, sessions, and the first offline tests.",
+   "outcome": "Build confidence with the SDK's core concepts and inspect a complete test result.",
+   "lessons": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    14,
+    15,
+    51
+   ]
+  },
+  {
+   "id": "application-developer",
+   "title": "Application Developer",
+   "description": "Build a usable agent application with tools, streaming, approvals, safety, and integrations.",
+   "outcome": "Connect an agent to a browser and server, then examine application checks and deployment patterns.",
+   "lessons": [
+    1,
+    3,
+    4,
+    5,
+    6,
+    7,
+    10,
+    12,
+    13,
+    28,
+    31,
+    47,
+    48,
+    50,
+    51,
+    54,
+    61,
+    62,
+    63,
+    64,
+    66,
+    67,
+    71,
+    72
+   ]
+  },
+  {
+   "id": "advanced-harness",
+   "title": "Advanced Harness",
+   "description": "Study orchestration, durable sessions, evaluation, security, and verified team handoffs.",
+   "outcome": "Design and evaluate a production-style agent harness before tackling the final team capstone.",
+   "lessons": [
+    1,
+    3,
+    4,
+    5,
+    7,
+    8,
+    10,
+    15,
+    19,
+    28,
+    35,
+    47,
+    48,
+    51,
+    52,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    73,
+    74,
+    75
+   ]
+  }
+ ],
+ "section_quizzes": [
+  {
+   "id": "fundamentals",
+   "topic": "SDK fundamentals",
+   "questions": [
+    {
+     "prompt": "What does query() return while an agent runs?",
+     "lesson": 1,
+     "correct": 1,
+     "options": [
+      {
+       "text": "Only one final answer string",
+       "explanation": "Lesson 1 shows intermediate system and assistant messages before the final result."
+      },
+      {
+       "text": "An async stream of SDK messages",
+       "explanation": "Correct. Iterate the stream and inspect each message type."
+      },
+      {
+       "text": "A browser DOM element",
+       "explanation": "The SDK produces messages; your application decides how to render them."
+      }
+     ]
+    },
+    {
+     "prompt": "Which message tells you the run has finished?",
+     "lesson": 1,
+     "correct": 2,
+     "options": [
+      {
+       "text": "The system/init message",
+       "explanation": "Initialization marks the start of a session, not completion."
+      },
+      {
+       "text": "The first assistant text chunk",
+       "explanation": "Assistant text may be partial. Keep reading until the terminal result."
+      },
+      {
+       "text": "The final result message",
+       "explanation": "Correct. Check the terminal result and its success or error fields."
+      }
+     ]
+    },
+    {
+     "prompt": "Where do you set which tools the agent may use?",
+     "lesson": 3,
+     "correct": 0,
+     "options": [
+      {
+       "text": "In the query options",
+       "explanation": "Correct. Configure the allowed tools in the options supplied to the run."
+      },
+      {
+       "text": "By editing the assistant's final text",
+       "explanation": "Final text reports output; it cannot retroactively configure tool access."
+      },
+      {
+       "text": "Only in the browser CSS",
+       "explanation": "CSS changes presentation, not the SDK's tool configuration."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sessions",
+   "topic": "Sessions and context",
+   "questions": [
+    {
+     "prompt": "Why retain a session identifier?",
+     "lesson": 6,
+     "correct": 1,
+     "options": [
+      {
+       "text": "It guarantees every future answer is correct",
+       "explanation": "A session identifier preserves continuity, but it does not validate answer quality."
+      },
+      {
+       "text": "It lets a later turn continue the same conversation",
+       "explanation": "Correct. Use the session information when resuming a conversation."
+      },
+      {
+       "text": "It replaces all tool permissions",
+       "explanation": "Session continuity and permissions are separate concerns."
+      }
+     ]
+    },
+    {
+     "prompt": "What should you check before saying a background task finished?",
+     "lesson": 27,
+     "correct": 2,
+     "options": [
+      {
+       "text": "That the foreground turn ended",
+       "explanation": "The foreground turn can end while the background task keeps running."
+      },
+      {
+       "text": "That you saved a task ID",
+       "explanation": "A task ID helps track work, but it is not completion evidence."
+      },
+      {
+       "text": "The matching terminal notification or task state",
+       "explanation": "Correct. Match the task identity to its final state."
+      }
+     ]
+    },
+    {
+     "prompt": "What does context compaction aim to preserve?",
+     "lesson": 25,
+     "correct": 0,
+     "options": [
+      {
+       "text": "The information needed for subsequent turns",
+       "explanation": "Correct. Compare what was retained with what the next turn needs."
+      },
+      {
+       "text": "Every prior token unchanged",
+       "explanation": "Compaction reduces context; it does not keep every token verbatim."
+      },
+      {
+       "text": "Only the latest UI colors",
+       "explanation": "Context is about conversation and task information, not visual styling."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "configuration",
+   "topic": "Configuration and hooks",
+   "questions": [
+    {
+     "prompt": "When does a hook affect an agent run?",
+     "lesson": 7,
+     "correct": 0,
+     "options": [
+      {
+       "text": "At its configured lifecycle event",
+       "explanation": "Correct. Inspect which event invokes the hook and what it returns."
+      },
+      {
+       "text": "Only after the browser closes",
+       "explanation": "Hooks are tied to configured agent lifecycle events."
+      },
+      {
+       "text": "Only when CSS changes",
+       "explanation": "UI styling has no bearing on hook invocation."
+      }
+     ]
+    },
+    {
+     "prompt": "What belongs in project configuration rather than a one-off prompt?",
+     "lesson": 39,
+     "correct": 1,
+     "options": [
+      {
+       "text": "A student's single question",
+       "explanation": "A one-off question is input for a run, not persistent project configuration."
+      },
+      {
+       "text": "Settings intended to apply across project runs",
+       "explanation": "Correct. Use project-level configuration for shared behavior."
+      },
+      {
+       "text": "The final text of a completed answer",
+       "explanation": "An answer is an output, not a reusable setting."
+      }
+     ]
+    },
+    {
+     "prompt": "How should you confirm a hook did what you intended?",
+     "lesson": 20,
+     "correct": 2,
+     "options": [
+      {
+       "text": "Assume registration proves behavior",
+       "explanation": "Registration alone does not show the event fired or the return was handled."
+      },
+      {
+       "text": "Count the number of browser tabs",
+       "explanation": "Browser tabs do not establish hook behavior."
+      },
+      {
+       "text": "Inspect the triggering event and observed outcome",
+       "explanation": "Correct. Match the hook event to the effect in the run."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "extensions",
+   "topic": "Tools and extensions",
+   "questions": [
+    {
+     "prompt": "What makes an MCP tool call trustworthy as completed work?",
+     "lesson": 13,
+     "correct": 2,
+     "options": [
+      {
+       "text": "The tool name appears in a prompt",
+       "explanation": "Mentioning a tool is not evidence that it ran."
+      },
+      {
+       "text": "The model says it probably worked",
+       "explanation": "A model claim alone cannot establish the tool's result."
+      },
+      {
+       "text": "The tool response and resulting state support the claim",
+       "explanation": "Correct. Inspect the actual response and relevant state."
+      }
+     ]
+    },
+    {
+     "prompt": "What should happen to invalid tool input?",
+     "lesson": 5,
+     "correct": 0,
+     "options": [
+      {
+       "text": "Reject it at the appropriate validation boundary",
+       "explanation": "Correct. Check which layer rejected the input: the tool's schema or the handler's own validation."
+      },
+      {
+       "text": "Report it as accepted server content",
+       "explanation": "Invalid input must not be represented as accepted work."
+      },
+      {
+       "text": "Silently change it into a successful result",
+       "explanation": "Silent success hides the validation problem from the student."
+      }
+     ]
+    },
+    {
+     "prompt": "Why inspect a tool's schema before calling it?",
+     "lesson": 54,
+     "correct": 1,
+     "options": [
+      {
+       "text": "To avoid ever reading the result",
+       "explanation": "The result still needs inspection after a call."
+      },
+      {
+       "text": "To supply the expected arguments and interpret the output",
+       "explanation": "Correct. A schema defines the call contract."
+      },
+      {
+       "text": "To replace tool permissions",
+       "explanation": "A schema describes inputs; it does not grant access."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "workflows",
+   "topic": "Agent workflows",
+   "questions": [
+    {
+     "prompt": "After a retry event, what proves the run eventually succeeded?",
+     "lesson": 28,
+     "correct": 2,
+     "options": [
+      {
+       "text": "The retry event itself",
+       "explanation": "A retry only records another attempt; it is not a terminal success."
+      },
+      {
+       "text": "The first partial assistant response",
+       "explanation": "Partial output can precede a failure or another retry."
+      },
+      {
+       "text": "A final successful result after the retry",
+       "explanation": "Correct. Follow the event sequence through its terminal result."
+      }
+     ]
+    },
+    {
+     "prompt": "What should a plan or task list describe?",
+     "lesson": 30,
+     "correct": 0,
+     "options": [
+      {
+       "text": "The work and its actual progress",
+       "explanation": "Correct. Update status from observed work rather than guesses."
+      },
+      {
+       "text": "Only completed work before it starts",
+       "explanation": "Premature completion hides unfinished steps."
+      },
+      {
+       "text": "An unrelated sample answer",
+       "explanation": "A plan should track this task's steps."
+      }
+     ]
+    },
+    {
+     "prompt": "When should a workflow ask the user a question?",
+     "lesson": 31,
+     "correct": 1,
+     "options": [
+      {
+       "text": "For every routine implementation choice",
+       "explanation": "Routine choices can usually be resolved from context."
+      },
+      {
+       "text": "When a missing decision materially changes the next step",
+       "explanation": "Correct. Ask a focused question for the information the workflow needs."
+      },
+      {
+       "text": "Only after claiming the work is complete",
+       "explanation": "A blocking clarification belongs before dependent work."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "agents",
+   "topic": "Multi-agent systems",
+   "questions": [
+    {
+     "prompt": "What is good evidence that a delegated task is complete?",
+     "lesson": 56,
+     "correct": 1,
+     "options": [
+      {
+       "text": "A message saying a task was assigned",
+       "explanation": "Assignment proves delegation, not completion."
+      },
+      {
+       "text": "The expected output and a verified final task state",
+       "explanation": "Correct. Match the output and status to the delegated task."
+      },
+      {
+       "text": "An unrelated agent's answer",
+       "explanation": "Evidence must refer to the same task and agent work."
+      }
+     ]
+    },
+    {
+     "prompt": "Why identify ownership before handing off work?",
+     "lesson": 57,
+     "correct": 2,
+     "options": [
+      {
+       "text": "To avoid inspecting the result",
+       "explanation": "Ownership improves coordination, but verification remains necessary."
+      },
+      {
+       "text": "To make every agent edit the same file at once",
+       "explanation": "Uncoordinated overlapping edits invite conflicts."
+      },
+      {
+       "text": "To clarify who produces and checks each deliverable",
+       "explanation": "Correct. Clear ownership supports a reliable handoff."
+      }
+     ]
+    },
+    {
+     "prompt": "How should you judge the final team capstone?",
+     "lesson": 75,
+     "correct": 0,
+     "options": [
+      {
+       "text": "Compare deliverables and verified team state with the goal",
+       "explanation": "Correct. Review the actual artifacts and completion evidence."
+      },
+      {
+       "text": "Count only the number of spawned agents",
+       "explanation": "Agent count does not show whether the goal was met."
+      },
+      {
+       "text": "Assume a handoff message is the finished product",
+       "explanation": "A handoff can precede unfinished work."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "security",
+   "topic": "Permissions and security",
+   "questions": [
+    {
+     "prompt": "What controls whether an agent can perform a sensitive action?",
+     "lesson": 4,
+     "correct": 1,
+     "options": [
+      {
+       "text": "The color of the action button",
+       "explanation": "UI color does not grant or restrict agent permissions."
+      },
+      {
+       "text": "The configured permission and approval boundary",
+       "explanation": "Correct. Inspect the policy and any required approval step."
+      },
+      {
+       "text": "The length of the prompt",
+       "explanation": "Prompt length is unrelated to authorization."
+      }
+     ]
+    },
+    {
+     "prompt": "How should external text be treated when it tries to change the agent's instructions?",
+     "lesson": 74,
+     "correct": 0,
+     "options": [
+      {
+       "text": "As untrusted content, not a new authority",
+       "explanation": "Correct. Keep source content separate from governing instructions."
+      },
+      {
+       "text": "As an automatic override of the system prompt",
+       "explanation": "A retrieved page cannot promote itself into higher-priority instructions."
+      },
+      {
+       "text": "As proof that the user approved the change",
+       "explanation": "Untrusted text cannot establish user approval."
+      }
+     ]
+    },
+    {
+     "prompt": "What should a sandbox restriction be checked against?",
+     "lesson": 18,
+     "correct": 2,
+     "options": [
+      {
+       "text": "Only the agent's confidence",
+       "explanation": "Confidence is not evidence of an allowed operation."
+      },
+      {
+       "text": "The lesson title alone",
+       "explanation": "A title cannot establish an execution boundary."
+      },
+      {
+       "text": "The actual operation and its configured boundary",
+       "explanation": "Correct. Evaluate the action against the sandbox configuration."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "production",
+   "topic": "Production and deployment",
+   "questions": [
+    {
+     "prompt": "What makes an automated test a useful deployment signal?",
+     "lesson": 51,
+     "correct": 2,
+     "options": [
+      {
+       "text": "It was launched, regardless of its result",
+       "explanation": "A started test says nothing about pass or failure."
+      },
+      {
+       "text": "A checklist box was ticked",
+       "explanation": "Self-assessment is not an automated test result."
+      },
+      {
+       "text": "The complete test run passed its defined checks",
+       "explanation": "Correct. Inspect the terminal test result and scope of checks."
+      }
+     ]
+    },
+    {
+     "prompt": "What should you do when an SDK upgrade compatibility gate fails?",
+     "lesson": 55,
+     "correct": 1,
+     "options": [
+      {
+       "text": "Ignore the failure and deploy",
+       "explanation": "A failed gate needs investigation before relying on the candidate."
+      },
+      {
+       "text": "Inspect the failing gate and block or fix the incompatible change",
+       "explanation": "Correct. Follow the gate evidence; the lesson's simulation is not a real deployment."
+      },
+      {
+       "text": "Report every gate as passed",
+       "explanation": "Misreporting the result hides the incompatibility."
+      }
+     ]
+    },
+    {
+     "prompt": "What evidence distinguishes an observed deployment from a deployment plan?",
+     "lesson": 49,
+     "correct": 0,
+     "options": [
+      {
+       "text": "A running target and successful check against it",
+       "explanation": "Correct. Verify the actual target and behavior before claiming a live deployment."
+      },
+      {
+       "text": "A written command that nobody ran",
+       "explanation": "A command in documentation is a plan, not observed deployment."
+      },
+      {
+       "text": "An unchecked architecture diagram",
+       "explanation": "A diagram illustrates design, not runtime success."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "visual_guides": [
+  {
+   "id": "c01",
+   "title": "Foundations",
+   "eyebrow": "Start with the building blocks",
+   "description": "Meet the agent, model, tools and context before your first query.",
+   "image": "/assets/visual-guides/c01-foundations.png",
+   "lessons": [
+    1,
+    3,
+    5,
+    6
+   ],
+   "question": "Which part executes a tool, and which part decides whether it is allowed?",
+   "answer": "The host executes the tool under its permission policy. The model can request a tool call; that request does not authorize its effect.",
+   "note": "Runner is a conceptual execution role in this map. In this app, trace agent_lab/runtime.py (host) and agent_lab/sdk.py (SDK options and query).",
+   "takeaway": "Connect the user request, host orchestration, model, context and tools before inspecting the output.",
+   "points": [
+    {
+     "title": "Agent",
+     "text": "Instructions, behavior and goals define the task."
+    },
+    {
+     "title": "User input",
+     "text": "The user supplies messages or tasks."
+    },
+    {
+     "title": "Tools",
+     "text": "Host functions expose capabilities the agent can request."
+    },
+    {
+     "title": "Model",
+     "text": "Claude generates responses and can propose tool calls."
+    },
+    {
+     "title": "Context",
+     "text": "Conversation state and relevant information inform the run."
+    },
+    {
+     "title": "Runner",
+     "text": "The host and SDK orchestrate execution."
+    },
+    {
+     "title": "Output",
+     "text": "Inspect the final response or structured result."
+    },
+    {
+     "title": "Why it matters",
+     "text": "These parts form a reusable structure for agent applications."
+    }
+   ]
+  },
+  {
+   "id": "c02",
+   "title": "Execution flow",
+   "eyebrow": "Follow one request",
+   "description": "Trace the journey from a user request to tool results and final evidence.",
+   "image": "/assets/visual-guides/c02-execution-flow.png",
+   "lessons": [
+    1,
+    3,
+    4,
+    12,
+    66
+   ],
+   "question": "Does receiving an assistant answer prove that the exercise completed successfully?",
+   "answer": "No. Inspect the terminal result, normal stream closure and the lesson-specific host evidence. Partial text or a fluent answer can accompany a failed or interrupted run.",
+   "note": "This is a lifecycle overview, not a strict timeline of every SDK event. Tool use may repeat or be skipped. Logs expose observable events, not private internal reasoning.",
+   "takeaway": "Compare the map with actual messages, tool results and terminal evidence after running the exercise.",
+   "points": [
+    {
+     "title": "User request",
+     "text": "A message or task enters the application."
+    },
+    {
+     "title": "Runner starts",
+     "text": "The host starts SDK execution."
+    },
+    {
+     "title": "Agent reasoning",
+     "text": "The model interprets the task; private reasoning is not a required visible application event."
+    },
+    {
+     "title": "Tool calls",
+     "text": "The model can request tools when needed, subject to host permissions."
+    },
+    {
+     "title": "Tool results",
+     "text": "Host results return to the conversation."
+    },
+    {
+     "title": "State update",
+     "text": "The application updates observed context and progress."
+    },
+    {
+     "title": "Final response",
+     "text": "A final answer must be distinguished from successful terminal completion."
+    },
+    {
+     "title": "Observability",
+     "text": "Logs and traces help inspect what actually happened."
+    }
+   ]
+  },
+  {
+   "id": "c03",
+   "title": "Multi-agent patterns",
+   "eyebrow": "Coordinate specialists",
+   "description": "Explore delegation, explicit context and verified handoffs across agents.",
+   "image": "/assets/visual-guides/c03-multi-agent-patterns.png",
+   "lessons": [
+    8,
+    47,
+    56,
+    57,
+    75
+   ],
+   "question": "Do specialist agents automatically share all context and trusted results?",
+   "answer": "No. The application must explicitly pass context, define permissions and validate handoffs. An agent report is a claim until the host verifies its evidence.",
+   "note": "Shared context requires explicit implementation. Delegation, tool access and result aggregation are application design choices; they are not automatically trusted shared memory.",
+   "takeaway": "Break a larger goal into bounded roles, with explicit handoffs and a clear integration owner.",
+   "points": [
+    {
+     "title": "Coordinator agent",
+     "text": "Receives the goal and manages the workflow."
+    },
+    {
+     "title": "Specialist agents",
+     "text": "Each agent handles a narrow task."
+    },
+    {
+     "title": "Handoffs",
+     "text": "Pass work and the evidence needed by the next role."
+    },
+    {
+     "title": "Shared context",
+     "text": "Pass the information each role needs explicitly."
+    },
+    {
+     "title": "Tool access",
+     "text": "Give each role the tools and permissions it needs."
+    },
+    {
+     "title": "Result aggregation",
+     "text": "Combine outputs with validation and conflict handling."
+    },
+    {
+     "title": "Structured output",
+     "text": "Use explicit contracts for role results."
+    },
+    {
+     "title": "Human review",
+     "text": "Keep an appropriate review gate for critical steps."
+    }
+   ]
+  },
+  {
+   "id": "c04",
+   "title": "Best practices",
+   "eyebrow": "Review your agent",
+   "description": "A practical design-review reference for safer, observable and testable agents.",
+   "image": "/assets/visual-guides/c04-best-practices.png",
+   "lessons": [
+    4,
+    15,
+    28,
+    44,
+    48,
+    51,
+    52,
+    54,
+    74,
+    75
+   ],
+   "question": "What evidence would you request before calling an agent ready for production?",
+   "answer": "Look for clear acceptance criteria, tested host effects and permissions, recovery behavior, useful logs, known limits and evaluation results. A diagram or checklist alone cannot establish production readiness.",
+   "note": "Use this as a review reference. Completing a review does not certify production readiness or automatically complete a lesson.",
+   "takeaway": "Combine clear goals, predictable tools, guarded effects, observability and ongoing evaluation.",
+   "points": [
+    {
+     "title": "Clear instructions",
+     "text": "Define goals, boundaries and success criteria."
+    },
+    {
+     "title": "Tool design",
+     "text": "Use predictable, validated inputs and outputs."
+    },
+    {
+     "title": "Guardrails",
+     "text": "Validate risky or invalid actions at the host boundary."
+    },
+    {
+     "title": "Error handling",
+     "text": "Recover deliberately when a tool or run fails."
+    },
+    {
+     "title": "Testing",
+     "text": "Evaluate prompts, tools, workflows and effects."
+    },
+    {
+     "title": "Observability",
+     "text": "Track events, logs and outcomes."
+    },
+    {
+     "title": "Cost awareness",
+     "text": "Bound and inspect quality, latency and usage."
+    },
+    {
+     "title": "User experience",
+     "text": "Return useful progress and honest final results."
+    }
+   ]
+  }
+ ]
+}

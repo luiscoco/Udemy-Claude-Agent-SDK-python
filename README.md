@@ -14,8 +14,23 @@ uv sync --locked
 uv run agent-lab serve
 ```
 
-Open **http://127.0.0.1:8080**. Select a lesson by number or topic. Each screen
-offers teaching notes, executable Python source and an offline or live run.
+Open **http://127.0.0.1:8080**. The home page shows three learning paths
+(Beginner, Application Developer, Advanced Harness), the eight course sections
+with their quizzes, your progress and the visual guides. Each lesson has six tabs:
+
+| Tab | What you do there |
+|---|---|
+| **Learn** | Prepare the lesson, read the concept and Python tutorial, complete the workbook (review checklist, private notes, challenge with small and detailed hints, reference explanation, saved attempts) and answer the knowledge check. |
+| **Lab walkthrough** | Follow five steps, see what evidence to inspect, the expected result and recovery tips. |
+| **Visual guide** | Study the related course infographic with zoom, fit and scroll-to-pan. |
+| **Run the exercise** | Run offline or live; the **Automatic check** compares the local evidence with the lesson criterion. |
+| **Python source** | Read the host exercise used by the UI, CLI and API. |
+| **AI Tutor** | Get a free prepared answer grounded in the lesson, or explicitly authorize one live answer (one turn, no tools, 0.05 USD budget threshold) and save it. |
+
+Workbook entries, quiz answers, check results, saved tutor answers and appearance
+(Light/Dark/System theme, text size) are stored per browser in `.nicegui/` on
+this machine. They are never sent to Claude and do not sync between browsers.
+The automatic check covers local evidence only; your self-review stays separate.
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**
@@ -103,6 +118,10 @@ before exposing these teaching endpoints to other users.
 | `agent_lab/runtime.py` | Task ownership, deadlines and cancellation |
 | `agent_lab/api.py` | JSON, SSE and WebSocket routes |
 | `agent_lab/ui.py` | NiceGUI navigation and exercise controls |
+| `agent_lab/ui_learning.py` | Lesson tabs, workbook, quizzes, visual guides, tutor, home and appearance |
+| `agent_lab/learning.py` | Validated lesson guides, course paths and quizzes, automatic evidence checks |
+| `agent_lab/tutor.py` | Prepared tutor answers and the bounded, consented live tutor call |
+| `agent_lab/content/` | `lessons.json` (per-lesson Python guides and quizzes) and `course.json` (paths, section quizzes, visual guides) |
 | `agent_lab/integrations/` | Explicitly started MCP and notification adapters |
 | `Tab*.md` | Python lesson tutorials |
 | `curriculum.json` | Machine-readable lesson, document and source index |
@@ -171,6 +190,16 @@ The original code and documents are preserved in
 `.migration/original-typescript.zip` with a SHA-256 manifest; secrets are excluded.
 Keep the snapshot until migration parity has been reviewed. It is recovery data
 and is not used by the app, tests or documentation builder.
+
+### Learning features ported from the Student Rebuild
+
+The lesson workspace, workbook, quizzes, learning paths, AI Tutor, automatic checks,
+appearance controls and the four visual guides (`public/visual-guides/`) follow
+[Udemy-Claude-Agent-SDK-Student-Rebuild](https://github.com/luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild).
+Lesson guides and quizzes were rewritten for the Python exercises in this
+repository; every automatic check is tested against the actual offline evidence.
+The Rebuild's per-lesson infographics, narrated audio and TypeScript code tours
+are not included because they describe its TypeScript implementation.
 
 ## References
 

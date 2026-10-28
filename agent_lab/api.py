@@ -11,8 +11,11 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, get_lesson
-from agent_lab.models import RunRequest
+from agent_lab.exercises import exercise_source
+from agent_lab.learning import course, guide
+from agent_lab.models import LessonError, RunRequest
 from agent_lab.runtime import BusyError, RunService
+from agent_lab.tutor import TutorAnswer, TutorRequest, TutorService
 
 
 class AnswerRequest(BaseModel):
@@ -32,6 +35,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
 
     app = FastAPI(title="Python Claude Agent SDK Lab", lifespan=lifespan)
     app.state.runner = runner
+    tutor = app.state.tutor = TutorService(runner.settings)
 
     @app.get("/api/health")
     async def health() -> dict[str, Any]:
@@ -94,6 +98,36 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
+
+    @app.get("/api/course")
+    async def course_data() -> dict[str, Any]:
+        return course().model_dump()
+
+    @app.get("/api/lessons/{lesson_id}/guide")
+    async def lesson_guide(lesson_id: int) -> dict[str, Any]:
+        try:
+            return guide(lesson_id).model_dump()
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from exc
+
+    @app.get("/api/tutor/models")
+    async def tutor_models() -> dict[str, Any]:
+        return {"live_enabled": runner.settings.enable_live, "models": await tutor.models()}
+
+    @app.post("/api/lessons/{lesson_id}/tutor")
+    async def ask_tutor(lesson_id: int, body: TutorRequest) -> TutorAnswer:
+        try:
+            lesson = get_lesson(lesson_id)
+        except ValueError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        try:
+            return await tutor.answer(lesson_id, body, exercise_source(lesson.exercise))
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        except LessonError as exc:
+            raise HTTPException(409, str(exc)) from exc
 
     @app.post("/api/runs/{run_id}/answer")
     async def answer(run_id: str, body: AnswerRequest) -> dict[str, str]:
@@ -158,5 +192,5 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     if with_ui:
         from agent_lab.ui import install_ui
 
-        install_ui(app, runner)
+        install_ui(app, runner, tutor)
     return app

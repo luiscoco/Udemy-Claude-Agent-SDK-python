@@ -967,6 +967,11 @@ async def team(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any
     }
 
 
+def exercise_source(name: str) -> str:
+    """The host exercise shown in the Python source tab and quoted by the tutor."""
+    return inspect.getsource(EXERCISES[name])
+
+
 async def run_exercise(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     function = EXERCISES[lesson.exercise]
     result = function(root, request, lesson)

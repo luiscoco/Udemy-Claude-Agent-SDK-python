@@ -1,8 +1,8 @@
 """NiceGUI browser UI. Students author application code entirely in Python."""
 
 import asyncio
-import inspect
 import json
+import secrets
 from typing import Any
 
 from fastapi import FastAPI
@@ -11,14 +11,40 @@ from nicegui import ui
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
-from agent_lab.exercises import EXERCISES
+from agent_lab.exercises import exercise_source
+from agent_lab.learning import CheckResult, check_evidence
 from agent_lab.models import Event, RunRequest
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
 from agent_lab.runtime import RunHandle, RunService
+from agent_lab.tutor import TutorService
+from agent_lab.ui_learning import (
+    APPEARANCE_CSS,
+    appearance_controls,
+    check_card,
+    completed,
+    home_page,
+    learn_panel,
+    lesson_header,
+    record,
+    set_preference,
+    tutor_panel,
+    update,
+    visual_panel,
+    walkthrough_panel,
+)
 
 
-def install_ui(application: FastAPI, runner: RunService) -> None:
+def storage_secret(runner: RunService) -> str:
+    """Signs the browser id cookie for per-browser progress; created once per installation."""
+    path = runner.settings.data_dir / "storage-secret"
+    if not path.is_file():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(secrets.token_urlsafe(32), encoding="utf-8")
+    return path.read_text(encoding="utf-8").strip()
+
+
+def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) -> None:
     if (ROOT / "public").is_dir():
         nice_app.add_static_files("/assets", str(ROOT / "public"))
 
@@ -51,19 +77,19 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
             .response-prose pre { overflow-x: auto; max-width: 100%; padding: 16px; border-radius: 10px; }
             .response-prose table { display: block; overflow-x: auto; max-width: 100%; }
             .response-prose h1, .response-prose h2, .response-prose h3 { margin-top: 1em; font-weight: 700; }
-        """)
+        """ + APPEARANCE_CSS)
         client = ui.context.client
         handle: RunHandle | None = None
         consumer: asyncio.Task[Any] | None = None
         drawer: Any
 
-        with ui.header().classes("bg-white text-slate-900 border-b items-center"):
+        with ui.header().classes("lab-header border-b items-center"):
             ui.button(icon="menu", on_click=lambda: drawer.toggle()).props("flat color=primary")
             ui.link("Claude Agent SDK Lab", "/").classes(
                 "text-xl font-bold no-underline text-slate-900 min-w-0 flex-1"
             )
-            ui.space()
-            ui.badge("PYTHON EDITION", color="secondary")
+            ui.badge("PYTHON EDITION", color="secondary").classes("gt-xs")
+            appearance_controls()
         with (
             ui.left_drawer(value=None)
             .props("width=320 breakpoint=1000")
@@ -90,7 +116,8 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                         continue
                     with ui.expansion(topic, value=bool(term) or lesson in ids).classes("w-full"):
                         for item in matches:
-                            ui.link(f"{item.id}. {item.title}", f"/?lesson={item.id}").classes(
+                            mark = " ✓" if completed(item.id) else ""
+                            ui.link(f"{item.id}. {item.title}{mark}", f"/?lesson={item.id}").classes(
                                 "text-sm"
                                 + (" font-bold text-purple-700" if item.id == lesson else "")
                             )
@@ -106,43 +133,40 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                     "rounded-2xl w-full max-w-2xl mx-auto"
                 ).props("fit=contain")
             if lesson not in LESSONS:
-                with ui.card().classes("course-card w-full p-8"):
-                    ui.label("Build agents with Python").classes("course-title")
-                    ui.label(
-                        "Learn the official Claude Agent SDK through runnable Python exercises, then connect your agents to FastAPI and NiceGUI."
-                    ).classes("text-lg text-slate-600")
-                    ui.label(
-                        "Offline exercises run local Python code without API costs. Live mode starts the real SDK and reports its messages and usage."
-                    )
-                    ui.button("Start lesson 1", on_click=lambda: ui.navigate.to("/?lesson=1"))
+                home_page()
                 return
             current = LESSONS[lesson]
-            ui.label(f"{current.topic} / Lesson {lesson}").classes("text-sm text-slate-500")
-            ui.label(f"{lesson}. {current.title}").classes("course-title")
-            ui.label(current.objective).classes("text-lg text-slate-600")
+            set_preference("last_lesson", lesson)
+            source = exercise_source(current.exercise)
+            lesson_header(lesson, runner.settings.enable_live)
             if current.notes:
                 with ui.card().classes("course-card w-full bg-amber-50"):
                     ui.label(current.notes)
-            with ui.tabs().classes("w-full") as tabs:
-                learn_tab = ui.tab("Learn")
-                run_tab = ui.tab("Run the exercise")
-                source_tab = ui.tab("Python source")
-            with ui.tab_panels(tabs, value=run_tab).classes("w-full bg-transparent"):
-                with ui.tab_panel(learn_tab).classes("p-0"):
+            with ui.tabs().props("mobile-arrows outside-arrows").classes("w-full") as tabs:
+                learn_tab = ui.tab("Learn", icon="menu_book")
+                walkthrough_tab = ui.tab("Lab walkthrough", icon="route")
+                visual_tab = ui.tab("Visual guide", icon="image")
+                run_tab = ui.tab("Run the exercise", icon="play_circle")
+                source_tab = ui.tab("Python source", icon="code")
+                tutor_tab = ui.tab("AI Tutor", icon="school")
+            with ui.tab_panels(tabs, value=learn_tab).classes("w-full bg-transparent"):
+                with ui.tab_panel(learn_tab).classes("p-0 flex flex-col gap-5"):
                     documents = list(ROOT.glob(f"Tab{lesson}-*.md"))
-                    if documents:
-                        ui.markdown(documents[0].read_text(encoding="utf-8")).classes(
-                            "bg-white p-6 rounded-xl"
-                        )
+                    tutorial = documents[0].read_text(encoding="utf-8") if documents else ""
+                    learn_panel(lesson, tutorial, lambda: tabs.set_value(run_tab))
+                with ui.tab_panel(walkthrough_tab).classes("p-0 flex flex-col gap-5"):
+                    walkthrough_panel(lesson)
+                with ui.tab_panel(visual_tab).classes("p-0 flex flex-col gap-5"):
+                    visual_panel(lesson)
                 with ui.tab_panel(source_tab).classes("p-0"):
                     ui.label("This is the host exercise used by the UI, CLI, and API.")
-                    ui.code(
-                        inspect.getsource(EXERCISES[current.exercise]), language="python"
-                    ).classes("w-full")
+                    ui.code(source, language="python").classes("w-full")
                     ui.label(
                         "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
                     )
-                with ui.tab_panel(run_tab).classes("p-0"):
+                with ui.tab_panel(tutor_tab).classes("p-0 flex flex-col gap-5"):
+                    tutor_panel(lesson, tutor, source)
+                with ui.tab_panel(run_tab).classes("p-0 flex flex-col gap-5"):
                     with ui.card().classes("course-card w-full p-6"):
                         modes = {"offline": "Offline Python exercise"}
                         if runner.settings.enable_live:
@@ -204,7 +228,6 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                             log = ui.log(max_lines=500).classes(
                                 "w-full h-64 bg-slate-950 text-slate-100 rounded-xl"
                             )
-
                         async def show_question(data: dict[str, Any]) -> None:
                             if handle is None:
                                 return
@@ -263,6 +286,7 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                                         output.refresh()
                                     if event.kind == "done":
                                         status.set_text(event.data["status"].capitalize())
+                                        record_check(event.data["status"])
                             finally:
                                 run_button.enable()
                                 cancel_button.disable()
@@ -303,6 +327,27 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
                         run_button.on_click(run)
                         cancel_button.on_click(cancel)
                         client.on_disconnect(cancel)
+
+                    saved_check = record(lesson)["check"]
+                    check_result = CheckResult(**saved_check) if saved_check else None
+
+                    @ui.refreshable
+                    def checks() -> None:
+                        check_card(lesson, check_result)
+
+                    checks()
+
+                    def record_check(status_value: str) -> None:
+                        nonlocal check_result
+                        check_result = check_evidence(
+                            lesson,
+                            output_state.evidence,
+                            status=status_value,
+                            mode=output_state.mode,
+                            responded=bool(output_state.response_texts or output_state.results),
+                        )
+                        update(lesson, check=check_result.model_dump())
+                        checks.refresh()
             with ui.row().classes("w-full justify-between"):
                 if lesson > 1:
                     ui.link("← Previous lesson", f"/?lesson={lesson - 1}")
@@ -313,6 +358,7 @@ def install_ui(application: FastAPI, runner: RunService) -> None:
         application,
         title="Python Claude Agent SDK Lab",
         favicon="🐍",
-        dark=False,
+        dark=None,
         show_welcome_message=False,
+        storage_secret=storage_secret(runner),
     )
