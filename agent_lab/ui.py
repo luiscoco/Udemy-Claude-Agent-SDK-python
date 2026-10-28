@@ -11,7 +11,7 @@ from nicegui import ui
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
-from agent_lab.exercises import exercise_source
+from agent_lab.exercises import exercise_context, exercise_source
 from agent_lab.learning import CheckResult, check_evidence
 from agent_lab.models import Event, RunRequest
 from agent_lab.output import OutputState, render_output
@@ -165,7 +165,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
                     )
                 with ui.tab_panel(tutor_tab).classes("p-0 flex flex-col gap-5"):
-                    tutor_panel(lesson, tutor, source)
+                    tutor_panel(lesson, tutor, exercise_context(current.exercise))
                 with ui.tab_panel(run_tab).classes("p-0 flex flex-col gap-5"):
                     with ui.card().classes("course-card w-full p-6"):
                         modes = {"offline": "Offline Python exercise"}

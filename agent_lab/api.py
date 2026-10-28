@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, get_lesson
-from agent_lab.exercises import exercise_source
+from agent_lab.exercises import exercise_context
 from agent_lab.learning import course, guide
 from agent_lab.models import LessonError, RunRequest
 from agent_lab.runtime import BusyError, RunService
@@ -121,7 +121,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from exc
         try:
-            return await tutor.answer(lesson_id, body, exercise_source(lesson.exercise))
+            return await tutor.answer(lesson_id, body, exercise_context(lesson.exercise))
         except PermissionError as exc:
             raise HTTPException(403, str(exc)) from exc
         except ValueError as exc:

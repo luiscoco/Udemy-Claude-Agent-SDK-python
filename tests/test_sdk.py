@@ -96,6 +96,8 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     assert options.env["CLAUDE_CONFIG_DIR"] == str(tmp_path / "config")
     # The shared policy and audit hooks that the offline hook lessons exercise.
     assert set(options.hooks) == {"PreToolUse", "PostToolUse"}
+    # Pre-approving tools would skip can_use_tool; the PreToolUse hook decides instead.
+    assert options.allowed_tools == []
     assert events[-1].kind == "result"
 
 

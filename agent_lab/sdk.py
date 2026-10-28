@@ -214,7 +214,6 @@ async def run_sdk(
             "lesson": create_sdk_mcp_server(name="lesson", tools=tools_to_expose)
         }
         allowed_custom = {f"mcp__lesson__{item.name}" for item in tools_to_expose}
-        options.allowed_tools = sorted(allowed_custom)
 
     builtins: set[str] = set()
     if profile in {"read", "hooks", "skills", "commands", "memory", "styles", "subagents", "plan"}:
@@ -235,8 +234,8 @@ async def run_sdk(
     if profile == "questions":
         builtins = {"AskUserQuestion"}
     options.tools = sorted(builtins)
-    # AskUserQuestion is deliberately not pre-approved: can_use_tool must obtain the answer.
-    options.allowed_tools += sorted(builtins - {"AskUserQuestion"})
+    # Nothing is pre-approved in allowed_tools: an allow rule would skip can_use_tool.
+    # The PreToolUse hook decides every call; can_use_tool handles AskUserQuestion.
     if profile in PROJECT_SETTING_PROFILES:
         options.setting_sources = setting_sources_for(profile)
         options.system_prompt = {
@@ -273,7 +272,6 @@ async def run_sdk(
             }
         }
         allowed_custom.add("mcp__notes__read_note")
-        options.allowed_tools.append("mcp__notes__read_note")
     options.include_partial_messages = profile in {"options", "streaming"}
 
     def permitted(name: str, arguments: dict[str, Any]) -> tuple[bool, str]:

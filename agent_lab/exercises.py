@@ -2093,8 +2093,27 @@ async def team(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any
 
 
 def exercise_source(name: str) -> str:
-    """The host exercise shown in the Python source tab and quoted by the tutor."""
+    """The host exercise shown in the Python source tab."""
     return inspect.getsource(EXERCISES[name])
+
+
+def exercise_context(name: str) -> str:
+    """The exercise plus the host classes it names, so the tutor never has to guess them."""
+    import re
+
+    import agent_lab.models as models
+    import agent_lab.services as services
+
+    source = exercise_source(name)
+    body = source[source.index(") -> ") :]  # every signature names Lesson and RunRequest
+    blocks = []
+    for identifier in sorted(set(re.findall(r"\b[A-Z][A-Za-z]+\b", body))):
+        for module in (services, models):
+            value = getattr(module, identifier, None)
+            if inspect.isclass(value) and value.__module__ == module.__name__:
+                path = module.__name__.replace(".", "/")
+                blocks.append(f"\n\n# {path}.py\n{inspect.getsource(value)}")
+    return source + "".join(blocks)
 
 
 async def run_exercise(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:

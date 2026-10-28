@@ -274,3 +274,51 @@ def test_browser_run_check_workbook_and_tutor_persist(server):
         assert not mobile.evaluate("document.documentElement.scrollWidth > innerWidth")
         browser.close()
     assert errors == []
+
+
+def test_tutor_context_includes_the_classes_an_exercise_uses():
+    from agent_lab.exercises import exercise_context
+
+    calculator = exercise_context("calculator")
+    assert "class Calculation(BaseModel):" in calculator
+    assert "allow_inf_nan=False" in calculator
+    assert "class Lesson(" not in calculator  # signature types are not context
+    support = exercise_context("support")
+    assert "class Approval:" in support and "class Refund(BaseModel):" in support
+
+
+async def test_live_tutor_api_sends_the_model_source_to_claude(tmp_path, monkeypatch):
+    from claude_agent_sdk import AssistantMessage, ResultMessage, TextBlock
+
+    import agent_lab.tutor
+
+    prompts = []
+
+    async def fake_query(prompt, options):
+        prompts.append(prompt)
+        yield AssistantMessage(content=[TextBlock(text="Grounded answer.")], model="m")
+        yield ResultMessage(
+            subtype="success",
+            duration_ms=1,
+            duration_api_ms=1,
+            is_error=False,
+            num_turns=1,
+            session_id="s",
+            total_cost_usd=0.001,
+        )
+
+    monkeypatch.setattr(agent_lab.tutor, "query", fake_query)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "fixture-not-a-real-key")
+    app = create_app(RunService(Settings(data_dir=tmp_path, enable_live=True)), with_ui=False)
+    app.state.tutor._models = (time.monotonic() + 60, ["claude-haiku-4-5"])
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app), base_url="http://test"
+    ) as client:
+        response = await client.post(
+            "/api/lessons/5/tutor",
+            json={"mode": "live", "question": "Why validate twice?", "consent": True},
+        )
+    assert response.status_code == 200 and response.json()["text"] == "Grounded answer."
+    assert "class Calculation(BaseModel):" in prompts[0]
+    # Source is sent verbatim, not JSON-escaped, so quoted code keeps its quotes.
+    assert 'ConfigDict(extra="forbid", strict=True)' in prompts[0]
