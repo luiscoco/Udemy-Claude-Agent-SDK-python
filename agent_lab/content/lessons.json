@@ -566,7 +566,7 @@
     "value": "host conversation plan; no model response"
    }
   ],
-  "challenge": "Run `uv run agent-lab lesson 6 --prompt \"Remember this label: MY-LABEL.\"` and verify the evidence event shows your text as the first planned turn. With live mode enabled, set the follow-up to \"What label did I give you?\" and check that Claude response 2 names the label.",
+  "challenge": "Type `Remember this label: MY-LABEL.` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 6 --prompt \"Remember this label: MY-LABEL.\"`), then verify the evidence event shows your text as the first planned turn. With live mode enabled, set the follow-up to \"What label did I give you?\" and check that Claude response 2 names the label.",
   "hints": [
    "The first turn comes from `request.prompt`, falling back to the lesson prompt when it is empty.",
    "The CLI prints JSON events; look for the event whose `kind` is `evidence` and read `planned_turns[0].content`. In live mode both turns run on the same client, which is why turn two can recall the label."
@@ -1159,7 +1159,7 @@
     "value": "Token output streaming is a separate include_partial_messages option."
    }
   ],
-  "challenge": "Run `uv run agent-lab lesson 12 --prompt \"What is an async generator?\"` and verify the first input message carries your text. Then, in a scratch script, write an async generator that yields three user-message dicts, collect them with `[m async for m in gen()]` and check each has `type` \"user\" and a `message.role` of \"user\".",
+  "challenge": "Type `What is an async generator?` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 12 --prompt \"What is an async generator?\"`), then verify the first input message carries your text. Then, in a scratch script, write an async generator that yields three user-message dicts, collect them with `[m async for m in gen()]` and check each has `type` \"user\" and a `message.role` of \"user\".",
   "hints": [
    "An async generator is an `async def` function that uses `yield`; consume it with `async for` inside a coroutine.",
    "Copy the dict shape from the evidence exactly, run the coroutine with `asyncio.run`, and assert `len(messages) == 3`."
@@ -3527,7 +3527,7 @@
   ],
   "challenge": "In your local copy of `store`, append a second row `{\"role\": \"assistant\", \"text\": \"fixture reply\"}` before writing, rerun offline and verify `round_trip` has two rows in order.",
   "hints": [
-   "Offline mode uses the lesson prompt as the stored text because the prompt box is enabled only in live mode.",
+   "Leave the Prompt box empty and the lesson's example prompt is stored; type your own text and that text is stored instead.",
    "`Path.replace` swaps the finished file in one operation; if the process dies before it, transcript.json keeps its old content and only the .tmp file is incomplete."
   ],
   "reference": "The host serialised its rows, wrote them to a temporary file and replaced the target in one step, then proved the data survived a reload. This transcript is for the application (display, audit, export); resuming an SDK conversation needs the SDK's session id and configuration, not this file.",
@@ -5439,7 +5439,7 @@
    44
   ],
   "concept_brief": "Debugging an agent run means correlating its events by a run id and sharing diagnostics only after secrets are masked. This repo's `redact` masks keys matching token, secret, password, api key or authorization and strings like `sk-ant-...` or `Bearer ...`, and raw SDK payloads are never returned to the browser.",
-  "lab_brief": "The `debugging` exercise builds a small diagnostic trace with a `run_id`, a request containing an `api_key` and two events, then passes it through `redact`. It shows what a safe diagnostic bundle looks like before you attach it to a bug report.",
+  "lab_brief": "The `debugging` exercise builds a small diagnostic trace tagged with this run's id as `correlation_id`, including a request with an `api_key`, and passes it through `redact`. It shows what a safe, correlatable diagnostic bundle looks like before you attach it to a bug report.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 53 (or run `uv run agent-lab lesson 53` in a terminal).",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
@@ -5459,15 +5459,15 @@
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm that `trace` > `request` > `api_key` is [REDACTED], `events` lists started and verified, and `raw_sdk_logs` says they are never returned to the browser."
+    "text": "Confirm the api_key is [REDACTED] and that `correlation_id` matches the run_id in the Diagnostics STARTED event."
    },
    {
     "title": "Try the challenge",
     "text": "Pass your own fake diagnostic dict through `redact` and check what is masked."
    }
   ],
-  "inspect": "`trace` (its `request` and `events`), and `raw_sdk_logs`. The panel hides `run_id` fields, so use `uv run agent-lab lesson 53` to see `\"run_id\": \"work\"` in the trace and the real run id in the final `done` event.",
-  "expected": "`trace.request.api_key` is [REDACTED], `trace.events` is [{type: started}, {type: verified}], the trace's `run_id` is `work` in the raw output, and `raw_sdk_logs` is 'Never returned to the browser.'.",
+  "inspect": "`trace` (its `correlation_id`, `request` and `events`), `match_with` and `raw_sdk_logs`. Then open Diagnostics and compare `correlation_id` with the `run_id` of the STARTED and DONE events.",
+  "expected": "`trace.request.api_key` is [REDACTED], every event carries the same `correlation_id`, and it equals the `run_id` shown in the STARTED and DONE events under Diagnostics. `raw_sdk_logs` is 'Never returned to the browser.'.",
   "evidence_criterion": "The check confirms that a redacted trace was produced and that raw SDK logs are withheld from the browser.",
   "evidence_checks": [
    {
@@ -5485,7 +5485,7 @@
    "Redaction works on key names and on known secret patterns inside strings.",
    "`redact` recurses through dicts and lists: any key matching token, secret, password, api key or authorization is replaced, and string values have `sk-ant-...` and `Bearer ...` patterns replaced. Values under harmless keys stay readable."
   ],
-  "reference": "The trace keeps what you need to debug, namely the run id and the event sequence, while the credential is replaced by [REDACTED]. Raw SDK logs and request payloads can contain secrets, so the host never sends them to the browser. Correlating by run id lets you match this bundle with the `done` event of the same run.",
+  "reference": "The trace keeps what you need to debug, the correlation id and the event sequence, while the credential is replaced by [REDACTED]. Because the id is the real run id, this bundle can be matched with the run's own STARTED and DONE events. Raw SDK logs and request payloads can contain secrets, so the host never sends them to the browser.",
   "recovery": [
    "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 53` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
    "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
@@ -5922,11 +5922,11 @@
    13
   ],
   "concept_brief": "With a large tool catalog, give the model only a small, relevant subset per request, for example by setting `allowed_tools` or `tools` on `ClaudeAgentOptions`. This lab's host-side selection is separate from the SDK's native tool-search feature, which it does not use.",
-  "lab_brief": "The `tool_search` exercise scores a labelled catalog of three tools (orders.read, policy.search, sales.analyze) by the words their descriptions share with the request prompt and keeps the top 2. It shows how to cap what the model sees before the call.",
+  "lab_brief": "The `tool_search` exercise scores a catalog of three tools (orders.read, policy.search, sales.analyze) by the words their descriptions share with the request, and selects at most two tools with a score above zero. It shows how to cap what the model sees before the call.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 58 (or run `uv run agent-lab lesson 58` in a terminal).",
-   "The prompt box is disabled offline in the browser; use `uv run agent-lab lesson 58 --prompt \"...\"` to try your own search terms.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence.",
+   "Type search terms in the Prompt box to change the catalog query; leave it empty to search for `search refund policy`."
   ],
   "steps": [
    {
@@ -5950,8 +5950,8 @@
     "text": "Search with different words from the terminal and check that the ranking follows the overlap."
    }
   ],
-  "inspect": "`catalog_size`, the `selected` table (name, description) and `note`.",
-  "expected": "`catalog_size` is 3. `selected` contains policy.search ('search refund policy') followed by orders.read ('read customer orders'), and `note` says host catalog selection is distinct from the SDK's native tool-search protocol.",
+  "inspect": "`query`, `catalog_size`, the `scores` table (every tool with its `score`), the `selected` tools, `no_match` and `note`.",
+  "expected": "With the default query `search refund policy`, `scores` gives policy.search 3 and the others 0, so `selected` contains only policy.search. `no_match` is empty and `catalog_size` is 3.",
   "evidence_criterion": "The check confirms that a three-tool catalog was searched and a bounded selection was returned.",
   "evidence_checks": [
    {
@@ -5964,16 +5964,16 @@
     "rule": "truthy"
    },
    {
-    "key": "note",
-    "rule": "present"
+    "key": "scores",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run agent-lab lesson 58 --prompt \"compute sales totals\"` and confirm that `selected` now starts with sales.analyze. Then explain why orders.read is still second even though it shares no words with your prompt.",
+  "challenge": "Type `compute sales totals` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 58 --prompt \"compute sales totals\"`), then confirm that `selected` contains only sales.analyze. Then try `book a flight` and read `no_match`.",
   "hints": [
-   "Only the words 'search' or 'refund policy' match policy.search in the default case.",
-   "The score is the number of shared words; `sorted` is stable, so tied tools keep catalog order, and the slice `[:2]` always returns two tools, even one with a score of 0. A production selector would drop zero-score tools."
+   "The score is the number of description words shared with your query.",
+   "`compute sales totals` matches all three words of sales.analyze and nothing else, so it is the only tool selected. `book a flight` matches no tool, so `selected` is empty and `no_match` tells the agent to ask the user."
   ],
-  "reference": "The host scored each tool by overlap with the prompt and kept two, so the model would see two tools instead of the whole catalog. policy.search wins because it shares 'search' with the prompt; orders.read follows only because ties keep catalog order. This is a simple host filter, not the SDK's own tool-search mechanism.",
+  "reference": "The host scores each tool against the request and shows the model only tools that match, at most two. A zero-score tool is never included just to fill a slot, and when nothing matches the agent should ask rather than guess. This is a simple host filter, not the SDK's own tool-search mechanism.",
   "recovery": [
    "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 58` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
    "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
@@ -6048,7 +6048,7 @@
    },
    {
     "title": "Try the challenge",
-    "text": "Route your own task with `--prompt`."
+    "text": "Type your own task in the Prompt box and route it."
    }
   ],
   "inspect": "`tiers` (model, max_turns and max_budget_usd for fast and capable), the `routes` table with each `reason`, `decision_owner` and `fallback`.",
@@ -6069,7 +6069,7 @@
     "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run agent-lab lesson 59 --prompt \"Migrate the session store to SQLite\"` and confirm a fourth route with tier `capable` and reason `matched migrate`.",
+  "challenge": "Type `Migrate the session store to SQLite` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 59 --prompt \"Migrate the session store to SQLite\"`), then confirm a fourth route with tier `capable` and reason `matched migrate`.",
   "hints": [
    "The rule checks a fixed list of complexity words, then input length.",
    "`migrate` is in `signals`, so the task goes to the capable tier; a short task without signal words would stay fast."
@@ -7329,101 +7329,100 @@
  {
   "id": 72,
   "prerequisites": [
-   10,
-   11
+   11,
+   22
   ],
-  "concept_brief": "Document generation should validate a structured specification first and render it with deterministic code. Here the `Summary` Pydantic model (extra fields forbidden, 1 to 4 next steps) is rendered with python-docx `Document()`, `add_heading` and `add_paragraph(style=\"List Bullet\")`; Agent Skills (lesson 11) are how you would package such instructions for the model, while the live profile only lets Claude explain the result through `mcp__lesson__inspect_exercise`.",
-  "lab_brief": "The offline `document` exercise builds a real incident-report.docx in the run workspace from a validated specification and offers a download link. It shows that the file content comes from checked data, not free-form model text.",
+  "concept_brief": "An Agent Skill is a folder with a `SKILL.md` (name, description and workflow) plus reference files and scripts. Only the name and description are loaded up front; the agent reads the rest when the skill applies. Here the model writes content as a JSON spec and the skill's script owns the Word format.",
+  "lab_brief": "The `document` exercise installs the repository's `docgen-skills/atmira-docx` skill into `.claude/skills/`, then follows its workflow: write an incident spec, run the exact build command from `SKILL.md`, read the `SPEC ERROR` line, fix the spec and build again. A fixture stands in for the model's spec writing.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=72. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK.",
-   "Have Word, LibreOffice or another .docx viewer ready to open the downloaded file."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 72 (or run `uv run agent-lab lesson 72`).",
+   "Read `docgen-skills/atmira-docx/SKILL.md` and `reference/incident-report.md` before running."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Turn a validated specification into a real Word document with python-docx."
+    "text": "Use a skill's own workflow to turn validated content into a Word document."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `Summary` in `agent_lab`/services.py and the `document` function in `agent_lab`/exercises.py."
+    "text": "Read the skill's `SKILL.md`, then `INCIDENT_SPEC` and `document` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise; it runs the build script twice."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm the `specification`, a non-zero `bytes` value, then click Download incident report (.docx) and open it."
+    "text": "Read both `attempts`, then check the `document` headings and table count. Download the .docx below the results."
    },
    {
     "title": "Try the challenge",
-    "text": "Break the specification on purpose and watch validation stop the document."
+    "text": "Break the spec differently and read the new SPEC ERROR."
    }
   ],
-  "inspect": "Look at `document` (the file path), `bytes`, the `specification` fields (summary, `next_steps`) and `notes`, then use the Download incident report (.docx) link below the results.",
-  "expected": "`document` ends in incident-report.docx, `bytes` is about 36,700, `specification` has summary \"Checkout latency incident resolved\" and next steps \"Add a latency alert\" and \"Review the deployment checklist\", and `notes` says to review the output in Word before sharing. The file has an Incident report title, the summary, a Follow-up heading and two bullets.",
-  "evidence_criterion": "The check confirms a .docx file was written with a non-zero size from the validated specification.",
+  "inspect": "`skill` (name and description, the only parts loaded up front), `workflow_command`, both `attempts` with their `exit_code` and `output`, and `document` (`headings`, `tables`, `bytes`).",
+  "expected": "Attempt 1 exits 1 with `SPEC ERROR: spec: An incident report starts with an info callout stating severity and status.` Attempt 2 exits 0 with `Built`. The document has the headings Summary, Impact, Timeline, Root cause and Action items, and 2 tables.",
+  "evidence_criterion": "The check confirms the skill's script rejected the draft, accepted the fixed spec and produced a document with the required sections.",
   "evidence_checks": [
    {
-    "key": "bytes",
-    "rule": "truthy"
-   },
-   {
-    "key": "specification",
+    "key": "attempts",
     "rule": "truthy"
    },
    {
     "key": "document",
-    "rule": "present"
+    "rule": "truthy"
+   },
+   {
+    "key": "skill",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"from agent_lab.services import Summary; Summary(summary='x', next_steps=list('abcde'))\"` and confirm a ValidationError (more than 4 next steps). Then add a third next step in your copy of `document`, run again and check the new bullet in the downloaded file.",
+  "challenge": "In `INCIDENT_SPEC`, change the Action items table columns to `[\"Action\", \"Owner\"]` and drop the date from each row. Run again and read the SPEC ERROR from both attempts.",
   "hints": [
-   "Validation happens when `Summary(...)` is constructed, before python-docx writes anything.",
-   "`Summary` uses `ConfigDict(extra=\"forbid\")`, `max_length=500` for summary and `min_length=1, max_length=4` for `next_steps`; the document code then loops over `next_steps` with the List Bullet style."
+   "The incident rules live in the script's validation, not in the model's prompt.",
+   "Without a `Due` column the corrected spec fails too, so both attempts print a SPEC ERROR, `document` is null and the automatic check reports Needs review. Restore the column afterwards."
   ],
-  "reference": "The exercise validated a small incident specification and rendered it into a real Word file of about 36 KB with a heading, summary and bullet list. Because the layout is code and the content is validated, a model can only influence the fields the schema allows. The note is a reminder that a valid file is not the same as a visually checked one.",
+  "reference": "The skill separates content from format: the model only writes a spec, and the script validates it against the house rules and builds the file. Errors come back as one SPEC ERROR line per problem, so the agent can fix them and retry, and the format never depends on the model.",
   "recovery": [
-   "If the download link returns Not Found, run the exercise again in the same tab; the link points at the current run's workspace file.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If the build keeps failing, read each SPEC ERROR line; it names the field and the rule that failed."
   ],
   "quiz": [
    {
-    "prompt": "Where is the incident document's content checked before it is written?",
+    "prompt": "Which part of a skill is loaded before the skill is used?",
     "options": [
      {
-      "text": "In Word, when you open the file.",
-      "explanation": "No. Word only displays it; the exercise validates before saving."
+      "text": "Its name and description from SKILL.md.",
+      "explanation": "Correct. The body, references and scripts are read only when needed."
      },
      {
-      "text": "In the `Summary` Pydantic model, when the specification is constructed.",
-      "explanation": "Correct. Invalid or extra fields raise ValidationError before python-docx runs."
+      "text": "Every file in the skill folder.",
+      "explanation": "Loading everything up front would waste context."
      },
      {
-      "text": "In a PreToolUse hook.",
-      "explanation": "No. The offline exercise calls no tools; validation is plain Pydantic."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "What does the evidence `notes` warn about?",
-    "options": [
-     {
-      "text": "The exercise does not do visual QA, so review the document in Word before sharing.",
-      "explanation": "Correct. A non-zero byte count proves a file exists, not that it looks right."
-     },
-     {
-      "text": "The .docx is a fixture and was not really generated.",
-      "explanation": "No. The offline exercise writes a real .docx with python-docx."
-     },
-     {
-      "text": "The document was written by Claude.",
-      "explanation": "No. No model is called offline; the text comes from the specification."
+      "text": "Only the build script.",
+      "explanation": "Scripts run when the workflow calls them."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Why does this skill have the model write a JSON spec instead of the .docx?",
+    "options": [
+     {
+      "text": "JSON files are smaller.",
+      "explanation": "Size is not the reason."
+     },
+     {
+      "text": "The script owns format and validation, so documents stay consistent and checkable.",
+      "explanation": "Correct. The model writes content; the script enforces the rules."
+     },
+     {
+      "text": "Models cannot write files.",
+      "explanation": "They can; the design keeps format out of the model's hands."
+     }
+    ],
+    "correct": 1
    }
   ]
  },

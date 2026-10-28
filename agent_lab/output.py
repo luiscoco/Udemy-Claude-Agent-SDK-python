@@ -202,7 +202,7 @@ def render_output(state: OutputState, exercise: str, run_id: str | None) -> None
         with ui.card().classes("course-card w-full p-4"):
             render_value(value, title)
     if state.evidence is not None and run_id:
-        if exercise == "document":
+        if exercise == "document" and state.evidence.get("document"):
             ui.link(
                 "Download incident report (.docx)",
                 f"/api/runs/{run_id}/artifacts/incident-report.docx",

@@ -311,3 +311,73 @@ def test_desktop_and_browser_share_one_service(work):
     evidence = desktop(work, RunRequest(), LESSONS[69])
     assert evidence["shared_service"] == "RunService"
     assert "/api/lessons/{lesson_id}/ws" in evidence["shared_api_routes"]
+
+
+def test_offline_prompt_inputs_are_enabled_only_where_exercises_read_them():
+    from agent_lab.exercises import exercise_uses
+
+    using = {number for number, item in LESSONS.items() if exercise_uses(item.exercise, "prompt")}
+    assert using == {6, 12, 35, 58, 59}
+
+
+def test_tool_search_never_selects_a_zero_score_tool(work):
+    from agent_lab.exercises import tool_search
+
+    default = tool_search(work, RunRequest(), LESSONS[58])
+    assert [item["name"] for item in default["selected"]] == ["policy.search"]
+    nothing = tool_search(work, RunRequest(prompt="book a flight"), LESSONS[58])
+    assert nothing["selected"] == [] and nothing["no_match"]
+
+
+def test_debug_trace_correlates_by_the_real_run_id(tmp_path):
+    from agent_lab.exercises import debugging
+
+    work = tmp_path / "0123456789abcdef0123456789abcdef" / "work"
+    work.mkdir(parents=True)
+    trace = debugging(work, RunRequest(), LESSONS[53])["trace"]
+    assert trace["correlation_id"] == "0123456789abcdef0123456789abcdef"
+    assert {event["correlation_id"] for event in trace["events"]} == {trace["correlation_id"]}
+    assert trace["request"]["api_key"] == "[REDACTED]"
+
+
+async def test_document_lesson_follows_the_skill_workflow(work):
+    from agent_lab.exercises import document
+
+    evidence = await document(work, RunRequest(), LESSONS[72])
+    assert evidence["skill"]["name"] == "atmira-docx"
+    assert [row["exit_code"] for row in evidence["attempts"]] == [1, 0]
+    assert evidence["attempts"][0]["output"].startswith("SPEC ERROR: spec: An incident report")
+    assert evidence["document"]["headings"] == [
+        "Summary",
+        "Impact",
+        "Timeline",
+        "Root cause",
+        "Action items",
+    ]
+    assert (work / "incident-report.docx").is_file()
+
+
+def test_spec_errors_are_one_line_per_problem(tmp_path, monkeypatch, capsys):
+    import json
+    import sys
+
+    from agent_lab.document_builder import main
+
+    monkeypatch.chdir(tmp_path)
+    spec = {
+        "kind": "general",
+        "title": "",
+        "author": "x",
+        "date": "2026-10-28",
+        "classification": "Secret",
+        "blocks": [{"type": "heading", "level": 3, "text": "Summary"}],
+    }
+    (tmp_path / "bad.spec.json").write_text(json.dumps(spec), encoding="utf-8")
+    monkeypatch.setattr(sys, "argv", ["build_docx.py", "bad.spec.json", "out/x.docx"])
+    with pytest.raises(SystemExit):
+        main()
+    assert capsys.readouterr().out.splitlines() == [
+        "SPEC ERROR: title: String should have at least 1 character",
+        "SPEC ERROR: classification: Input should be 'Public', 'Internal' or 'Confidential'",
+        "SPEC ERROR: blocks.0.heading.level: Input should be 1 or 2",
+    ]

@@ -1243,14 +1243,20 @@ def evals(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
 
 @exercise("debugging")
 def debugging(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    # The workspace is <data_dir>/<run_id>/work, so its parent is named after the run.
+    run_id = root.parent.name
     return {
         "trace": redact(
             {
-                "run_id": root.name,
+                "correlation_id": run_id,
                 "request": {"api_key": "fixture-secret"},
-                "events": [{"type": "started"}, {"type": "verified"}],
+                "events": [
+                    {"type": "started", "correlation_id": run_id},
+                    {"type": "verified", "correlation_id": run_id},
+                ],
             }
         ),
+        "match_with": "The run_id of the STARTED and DONE events under Diagnostics.",
         "raw_sdk_logs": "Never returned to the browser.",
     }
 
@@ -1323,13 +1329,20 @@ def tool_search(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, An
         {"name": "policy.search", "description": "search refund policy"},
         {"name": "sales.analyze", "description": "compute sales totals"},
     ]
-    terms = set((request.prompt or "search refund policy").lower().split())
-    matches = sorted(
-        catalog, key=lambda item: len(terms & set(item["description"].split())), reverse=True
-    )[:2]
+    query = request.prompt or "search refund policy"
+    terms = set(query.lower().split())
+    scored: list[dict[str, Any]] = [
+        {**item, "score": len(terms & set(item["description"].split()))} for item in catalog
+    ]
+    ranked = sorted(scored, key=lambda item: item["score"], reverse=True)
+    # A tool that shares nothing with the request is never shown just to fill a slot.
+    selected = [item for item in ranked if item["score"] > 0][:2]
     return {
+        "query": query,
         "catalog_size": len(catalog),
-        "selected": matches,
+        "scores": ranked,
+        "selected": selected,
+        "no_match": "" if selected else "No tool matches; ask the user to clarify.",
         "note": "Host catalog selection is distinct from the SDK's native tool-search protocol.",
     }
 
@@ -1944,27 +1957,120 @@ def analysis(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     }
 
 
+INCIDENT_SPEC: dict[str, Any] = {
+    "kind": "incident-report",
+    "title": "Checkout latency incident",
+    "author": "Platform team",
+    "date": "2026-10-21",
+    "classification": "Internal",
+    "blocks": [
+        {"type": "callout", "tone": "info", "text": "Severity 2 · Resolved"},
+        {"type": "heading", "level": 1, "text": "Summary"},
+        {
+            "type": "paragraph",
+            "text": "Checkout slowed for 42 minutes after a cache change. About 8% of "
+            "checkout requests timed out.",
+        },
+        {"type": "heading", "level": 1, "text": "Impact"},
+        {
+            "type": "bullets",
+            "items": ["Duration: 42 minutes", "Peak error rate: **8.1%**", "1,240 orders delayed"],
+        },
+        {"type": "heading", "level": 1, "text": "Timeline"},
+        {
+            "type": "table",
+            "columns": ["Time (UTC)", "Event"],
+            "rows": [
+                ["14:02", "Cache TTL change deployed"],
+                ["14:09", "Latency alert fired"],
+                ["14:31", "Change rolled back"],
+                ["14:44", "Latency back to normal"],
+            ],
+        },
+        {"type": "heading", "level": 1, "text": "Root cause"},
+        {
+            "type": "paragraph",
+            "text": "The new TTL expired cached prices every few seconds, so checkout called "
+            "the pricing service on almost every request.",
+        },
+        {"type": "heading", "level": 1, "text": "Action items"},
+        {
+            "type": "table",
+            "columns": ["Action", "Owner", "Due"],
+            "rows": [
+                ["Alert on checkout latency per region", "Platform team", "2026-11-04"],
+                ["Load-test cache changes before release", "Release team", "2026-11-11"],
+            ],
+        },
+    ],
+}
+
+
 @exercise("document")
-def document(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def document(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Follow the atmira-docx Skill's workflow: write a spec, build, fix SPEC ERRORs, rebuild."""
+    import shutil
+
     from docx import Document
 
-    specification = Summary(
-        summary="Checkout latency incident resolved",
-        next_steps=["Add a latency alert", "Review the deployment checklist"],
+    from agent_lab.config import ROOT
+
+    skill = root / ".claude" / "skills" / "atmira-docx"
+    shutil.copytree(ROOT / "docgen-skills" / "atmira-docx", skill)
+    text = (skill / "SKILL.md").read_text(encoding="utf-8")
+    front = dict(
+        line.split(": ", 1) for line in text.split("---")[1].strip().splitlines() if ": " in line
     )
-    output = Document()
-    output.add_heading("Incident report", 0)
-    output.add_paragraph(specification.summary)
-    output.add_heading("Follow-up", 1)
-    for step in specification.next_steps:
-        output.add_paragraph(step, style="List Bullet")
-    path = root / "incident-report.docx"
-    output.save(str(path))
+    # The spec is what the model writes in a live run; here a fixture stands in for it.
+    # The first draft breaks the incident rules: no severity callout and sections out of order.
+    draft = {**INCIDENT_SPEC, "blocks": INCIDENT_SPEC["blocks"][1:]}
+    attempts = []
+    for number, spec in enumerate([draft, INCIDENT_SPEC], 1):
+        (root / "incident.spec.json").write_text(json.dumps(spec, indent=1), encoding="utf-8")
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            ".claude/skills/atmira-docx/scripts/build_docx.py",
+            "incident.spec.json",
+            "out/incident-report.docx",
+            cwd=root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        async with asyncio.timeout(60):
+            output, _ = await process.communicate()
+        attempts.append(
+            {
+                "attempt": number,
+                "exit_code": process.returncode,
+                "output": output.decode().strip().replace(str(root), ".")[-300:],
+            }
+        )
+        if process.returncode == 0:
+            break
+    built = root / "out" / "incident-report.docx"
+    result: dict[str, Any] | None = (
+        {"path": "out/incident-report.docx"} if built.is_file() else None
+    )
+    if result is not None:
+        shutil.copyfile(built, root / "incident-report.docx")  # served by the download link
+        word = Document(str(built))
+        result |= {
+            "bytes": built.stat().st_size,
+            "headings": [
+                p.text for p in word.paragraphs if p.style and p.style.name == "Heading 1"
+            ],
+            "tables": len(word.tables),
+        }
+    # A failed build is still evidence: the SPEC ERROR lines are what the student must read.
     return {
-        "document": str(path),
-        "bytes": path.stat().st_size,
-        "specification": specification.model_dump(),
-        "notes": lesson.notes,
+        "skill": {"name": front.get("name"), "description": front.get("description")},
+        "discovery": "Only the name and description are loaded up front; the body, reference "
+        "files and script are read when the skill is used.",
+        "workflow_command": "python .claude/skills/atmira-docx/scripts/build_docx.py "
+        "incident.spec.json out/incident-report.docx",
+        "attempts": attempts,
+        "document": result,
+        "spec_author": "fixture standing in for the model",
     }
 
 
@@ -2095,6 +2201,11 @@ async def team(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any
 def exercise_source(name: str) -> str:
     """The host exercise shown in the Python source tab."""
     return inspect.getsource(EXERCISES[name])
+
+
+def exercise_uses(name: str, field: str) -> bool:
+    """Whether an offline exercise reads a request field, so the UI can enable its input."""
+    return f"request.{field}" in exercise_source(name)
 
 
 def exercise_context(name: str) -> str:

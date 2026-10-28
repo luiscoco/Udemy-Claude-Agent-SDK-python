@@ -322,3 +322,24 @@ async def test_live_tutor_api_sends_the_model_source_to_claude(tmp_path, monkeyp
     assert "class Calculation(BaseModel):" in prompts[0]
     # Source is sent verbatim, not JSON-escaped, so quoted code keeps its quotes.
     assert 'ConfigDict(extra="forbid", strict=True)' in prompts[0]
+
+
+def test_browser_enables_the_prompt_only_for_offline_exercises_that_read_it(server):
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page()
+        page.goto(base + "/?lesson=58")
+        page.get_by_role("tab", name="Run the exercise").click()
+        prompt = page.get_by_label("Prompt (optional)")
+        assert prompt.is_enabled()
+        prompt.fill("compute sales totals")
+        page.get_by_role("button", name="Run exercise").click()
+        page.get_by_text("Check passed", exact=True).wait_for(timeout=15000)
+        assert page.get_by_text("sales.analyze").count() >= 1
+        page.goto(base + "/?lesson=5")
+        page.get_by_role("tab", name="Run the exercise").click()
+        assert page.get_by_label("Agent prompt (live mode)").is_disabled()
+        browser.close()

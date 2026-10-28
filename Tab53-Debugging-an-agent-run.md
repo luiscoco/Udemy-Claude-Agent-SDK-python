@@ -34,14 +34,20 @@ The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
 ```python
 @exercise("debugging")
 def debugging(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    # The workspace is <data_dir>/<run_id>/work, so its parent is named after the run.
+    run_id = root.parent.name
     return {
         "trace": redact(
             {
-                "run_id": root.name,
+                "correlation_id": run_id,
                 "request": {"api_key": "fixture-secret"},
-                "events": [{"type": "started"}, {"type": "verified"}],
+                "events": [
+                    {"type": "started", "correlation_id": run_id},
+                    {"type": "verified", "correlation_id": run_id},
+                ],
             }
         ),
+        "match_with": "The run_id of the STARTED and DONE events under Diagnostics.",
         "raw_sdk_logs": "Never returned to the browser.",
     }
 ```

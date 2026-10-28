@@ -11,7 +11,7 @@ from nicegui import ui
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
-from agent_lab.exercises import exercise_context, exercise_source
+from agent_lab.exercises import exercise_context, exercise_source, exercise_uses
 from agent_lab.learning import CheckResult, check_evidence
 from agent_lab.models import Event, RunRequest
 from agent_lab.output import OutputState, render_output
@@ -172,19 +172,34 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         if runner.settings.enable_live:
                             modes["live"] = "Live Agent SDK"
                         mode = ui.toggle(modes, value="offline")
+                        # Empty means "use the example": live runs fall back to the lesson
+                        # prompt, and offline exercises see only what the student typed.
+                        offline_prompt = exercise_uses(current.exercise, "prompt")
+                        offline_follow_up = exercise_uses(current.exercise, "follow_up")
                         prompt = (
-                            ui.textarea("Agent prompt (live mode only)", value=current.prompt)
-                            .props("outlined autogrow")
+                            ui.textarea(
+                                "Prompt (optional)" if offline_prompt else "Agent prompt (live mode)",
+                                placeholder=current.prompt,
+                            )
+                            .props("outlined autogrow clearable")
                             .classes("w-full")
-                            .bind_enabled_from(mode, "value", lambda value: value == "live")
+                            .bind_enabled_from(
+                                mode, "value", lambda value: value == "live" or offline_prompt
+                            )
                         )
+                        if offline_prompt:
+                            ui.label(
+                                "This offline exercise also uses your prompt. Leave it empty to use the example."
+                            ).classes("text-sm text-slate-500")
                         follow_up = (
                             ui.input(
                                 "Follow-up for conversation lessons", value=RunRequest().follow_up
                             )
                             .props("outlined")
                             .classes("w-full")
-                            .bind_enabled_from(mode, "value", lambda value: value == "live")
+                            .bind_enabled_from(
+                                mode, "value", lambda value: value == "live" or offline_follow_up
+                            )
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (

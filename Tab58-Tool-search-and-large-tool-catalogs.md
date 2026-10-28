@@ -27,7 +27,7 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `tool_search`, line 1319). Host contracts are in
+(function `tool_search`, line 1325). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -39,13 +39,20 @@ def tool_search(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, An
         {"name": "policy.search", "description": "search refund policy"},
         {"name": "sales.analyze", "description": "compute sales totals"},
     ]
-    terms = set((request.prompt or "search refund policy").lower().split())
-    matches = sorted(
-        catalog, key=lambda item: len(terms & set(item["description"].split())), reverse=True
-    )[:2]
+    query = request.prompt or "search refund policy"
+    terms = set(query.lower().split())
+    scored: list[dict[str, Any]] = [
+        {**item, "score": len(terms & set(item["description"].split()))} for item in catalog
+    ]
+    ranked = sorted(scored, key=lambda item: item["score"], reverse=True)
+    # A tool that shares nothing with the request is never shown just to fill a slot.
+    selected = [item for item in ranked if item["score"] > 0][:2]
     return {
+        "query": query,
         "catalog_size": len(catalog),
-        "selected": matches,
+        "scores": ranked,
+        "selected": selected,
+        "no_match": "" if selected else "No tool matches; ask the user to clarify.",
         "note": "Host catalog selection is distinct from the SDK's native tool-search protocol.",
     }
 ```

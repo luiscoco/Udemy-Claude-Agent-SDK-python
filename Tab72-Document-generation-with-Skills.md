@@ -27,32 +27,76 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `document`, line 1947). Host contracts are in
+(function `document`, line 2009). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("document")
-def document(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def document(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Follow the atmira-docx Skill's workflow: write a spec, build, fix SPEC ERRORs, rebuild."""
+    import shutil
+
     from docx import Document
 
-    specification = Summary(
-        summary="Checkout latency incident resolved",
-        next_steps=["Add a latency alert", "Review the deployment checklist"],
+    from agent_lab.config import ROOT
+
+    skill = root / ".claude" / "skills" / "atmira-docx"
+    shutil.copytree(ROOT / "docgen-skills" / "atmira-docx", skill)
+    text = (skill / "SKILL.md").read_text(encoding="utf-8")
+    front = dict(
+        line.split(": ", 1) for line in text.split("---")[1].strip().splitlines() if ": " in line
     )
-    output = Document()
-    output.add_heading("Incident report", 0)
-    output.add_paragraph(specification.summary)
-    output.add_heading("Follow-up", 1)
-    for step in specification.next_steps:
-        output.add_paragraph(step, style="List Bullet")
-    path = root / "incident-report.docx"
-    output.save(str(path))
+    # The spec is what the model writes in a live run; here a fixture stands in for it.
+    # The first draft breaks the incident rules: no severity callout and sections out of order.
+    draft = {**INCIDENT_SPEC, "blocks": INCIDENT_SPEC["blocks"][1:]}
+    attempts = []
+    for number, spec in enumerate([draft, INCIDENT_SPEC], 1):
+        (root / "incident.spec.json").write_text(json.dumps(spec, indent=1), encoding="utf-8")
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            ".claude/skills/atmira-docx/scripts/build_docx.py",
+            "incident.spec.json",
+            "out/incident-report.docx",
+            cwd=root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        async with asyncio.timeout(60):
+            output, _ = await process.communicate()
+        attempts.append(
+            {
+                "attempt": number,
+                "exit_code": process.returncode,
+                "output": output.decode().strip().replace(str(root), ".")[-300:],
+            }
+        )
+        if process.returncode == 0:
+            break
+    built = root / "out" / "incident-report.docx"
+    result: dict[str, Any] | None = (
+        {"path": "out/incident-report.docx"} if built.is_file() else None
+    )
+    if result is not None:
+        shutil.copyfile(built, root / "incident-report.docx")  # served by the download link
+        word = Document(str(built))
+        result |= {
+            "bytes": built.stat().st_size,
+            "headings": [
+                p.text for p in word.paragraphs if p.style and p.style.name == "Heading 1"
+            ],
+            "tables": len(word.tables),
+        }
+    # A failed build is still evidence: the SPEC ERROR lines are what the student must read.
     return {
-        "document": str(path),
-        "bytes": path.stat().st_size,
-        "specification": specification.model_dump(),
-        "notes": lesson.notes,
+        "skill": {"name": front.get("name"), "description": front.get("description")},
+        "discovery": "Only the name and description are loaded up front; the body, reference "
+        "files and script are read when the skill is used.",
+        "workflow_command": "python .claude/skills/atmira-docx/scripts/build_docx.py "
+        "incident.spec.json out/incident-report.docx",
+        "attempts": attempts,
+        "document": result,
+        "spec_author": "fixture standing in for the model",
     }
 ```
 

@@ -8,7 +8,7 @@ from typing import Annotated, Literal
 
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 
 class StrictModel(BaseModel):
@@ -170,6 +170,12 @@ def main() -> None:
         specification = DocumentSpec.model_validate(json.loads(source.read_text(encoding="utf-8")))
         build_document(specification, target)
         print(f"Built {target}")
+    except ValidationError as exc:
+        # One line per problem, naming where it is: the skill tells the model to fix each line.
+        for error in exc.errors():
+            where = ".".join(str(part) for part in error["loc"]) or "spec"
+            print(f"SPEC ERROR: {where}: {error['msg'].removeprefix('Value error, ')}")
+        raise SystemExit(1) from exc
     except (ValueError, OSError) as exc:
         print(f"SPEC ERROR: {exc}")
         raise SystemExit(1) from exc
