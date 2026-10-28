@@ -27,54 +27,46 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `control`, line 596). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "options",
-    "thinking",
-    "settings",
-    "sandbox",
-    "session_management",
-    "control",
-    "resume",
-    "client_lifecycle",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("control")
+async def control(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Call ClaudeSDKClient control methods and observe their effect on the next turn."""
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    cli = ScriptedCLI([["Before the switch."], ["After the switch."]])
+    owner = asyncio.current_task()
+    async with asyncio.timeout(20):
+        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
+            info = await client.get_server_info()
+            await client.query("First turn")
+            before = await scripted_turn(client)
+            await client.set_model("claude-sonnet-5-5")
+            await client.set_permission_mode("plan")
+            await client.query("Second turn")
+            after = await scripted_turn(client)
+            try:
+                await client.get_mcp_status()
+                unsupported = "accepted"
+            except Exception as exc:
+                unsupported = str(exc)
+            same_owner = asyncio.current_task() is owner
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
+        "server_info_keys": sorted(info or {}),
+        "before": {"models": before["models"], "text": before["text"]},
+        "after": {"models": after["models"], "text": after["text"]},
+        "cli_permission_mode": cli.permission_mode,
+        "control_requests": [
+            m["request"]["subtype"] for m in cli.received if m["type"] == "control_request"
         ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "unsupported_request": unsupported,
+        "context_owned_by_one_task": same_owner,
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
     }
 ```
 

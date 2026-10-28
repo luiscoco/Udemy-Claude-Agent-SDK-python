@@ -13,7 +13,7 @@
     "title": "Options",
     "document": "Tab2-Options.md",
     "module": "agent_lab.lessons.lesson_02",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "options",
     "live_profile": "options",
     "adaptation": ""
   },
@@ -157,7 +157,7 @@
     "title": "Sandbox",
     "document": "Tab18-Sandbox.md",
     "module": "agent_lab.lessons.lesson_18",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "sandbox",
     "live_profile": "query",
     "adaptation": "The local path policy is not OS sandboxing. Configure a supported OS sandbox independently before running untrusted shell code."
   },
@@ -229,7 +229,7 @@
     "title": "Query control methods",
     "document": "Tab26-Query-control-methods.md",
     "module": "agent_lab.lessons.lesson_26",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "control",
     "live_profile": "conversation",
     "adaptation": ""
   },
@@ -364,7 +364,7 @@
     "title": "Interactive Python client lifecycle",
     "document": "Tab41-Interactive-Python-client-lifecycle.md",
     "module": "agent_lab.lessons.lesson_41",
-    "exercise_function": "sdk_contract",
+    "exercise_function": "client_lifecycle",
     "live_profile": "conversation",
     "adaptation": "This lesson uses Python's public interactive client lifecycle."
   },

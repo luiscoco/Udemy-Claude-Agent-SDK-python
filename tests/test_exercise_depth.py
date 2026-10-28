@@ -203,3 +203,42 @@ async def test_review_applies_only_the_in_scope_patch_and_proves_it(work):
     assert (evidence["test_before_patch"], evidence["test_after_patch"]) == ("failed", "passed")
     assert evidence["out_of_scope_file_unchanged"]
     assert (work / ".github" / "workflows" / "ci.yml").read_text() == "name: CI\n"
+
+
+async def test_scripted_cli_drives_the_real_client_control_protocol(work):
+    from agent_lab.exercises import client_lifecycle, control, structured
+
+    interrupted = (await structured(work, RunRequest(), LESSONS[10]))["interrupt"]
+    assert interrupted["chunks_received"] == 2
+    assert interrupted["result_subtype"] == "error_during_execution"
+    assert interrupted["control_requests"] == ["initialize", "interrupt"]
+    controlled = await control(work, RunRequest(), LESSONS[26])
+    assert controlled["before"]["models"] == ["scripted-model"]
+    assert controlled["after"]["models"] == ["claude-sonnet-5-5"]
+    assert controlled["unsupported_request"] == "The scripted CLI does not support mcp_status."
+    lifecycle = await client_lifecycle(work, RunRequest(), LESSONS[41])
+    assert lifecycle["same_session"] and not lifecycle["transport_ready_after_exit"]
+    assert lifecycle["query_after_disconnect"].startswith("CLIConnectionError")
+
+
+def test_options_are_built_only_from_validated_requests(work):
+    from agent_lab.exercises import options
+
+    evidence = options(work, RunRequest(), LESSONS[2])
+    assert [row["field"] for row in evidence["rejected"]] == [
+        "max_turns",
+        "max_budget_usd",
+        "max_budget_usd",
+        "cwd",
+    ]
+    assert evidence["built_options"]["max_turns"] == 2
+    assert evidence["sdk_defaults"]["max_turns"] is None
+
+
+async def test_path_policy_does_not_confine_child_processes(work):
+    from agent_lab.exercises import sandbox
+
+    evidence = await sandbox(work, RunRequest(), LESSONS[18])
+    assert evidence["read_tool_through_policy"]["allowed"] is False
+    assert evidence["child_process_read_outside"] is True
+    assert not (work.parent / "outside-secret.txt").exists()  # the fixture cleans up

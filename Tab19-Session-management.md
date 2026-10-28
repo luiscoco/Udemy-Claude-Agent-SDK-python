@@ -33,14 +33,10 @@ The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
 
 ```python
 @exercise(
-    "options",
     "thinking",
     "settings",
-    "sandbox",
     "session_management",
-    "control",
     "resume",
-    "client_lifecycle",
     "elicitation",
     "upgrade",
     "python_sdk",

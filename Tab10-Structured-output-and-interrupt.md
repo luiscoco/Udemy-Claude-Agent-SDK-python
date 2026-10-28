@@ -27,21 +27,51 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `structured`, line 454). Host contracts are in
+(function `structured`, line 553). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("structured")
-def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Validate a structured answer, then interrupt a streaming turn with the real client."""
+    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ClaudeSDKClient
+
+    from agent_lab.scripted_cli import ScriptedCLI
+
     parsed = Summary.model_validate(
         {"summary": "Host-validated example", "next_steps": ["Run the Python lesson"]}
     )
+    try:
+        Summary.model_validate({"summary": "", "next_steps": []})
+        invalid = "accepted"
+    except ValidationError as exc:
+        invalid = f"rejected: {exc.error_count()} validation errors"
+    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=0.05)
+    received, subtype = 0, None
+    async with asyncio.timeout(20):
+        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
+            await client.query("Count to six slowly.")
+            async for message in client.receive_response():
+                if isinstance(message, AssistantMessage):
+                    received += 1
+                    if received == 2:
+                        await client.interrupt()
+                else:
+                    subtype = getattr(message, "subtype", None)
     return {
         "schema": Summary.model_json_schema(),
         "validated": parsed.model_dump(),
-        "live_interrupt": "ClaudeSDKClient.interrupt()",
-        "example_source": "local fixture",
+        "invalid_answer": invalid,
+        "interrupt": {
+            "chunks_planned": 6,
+            "chunks_received": received,
+            "result_subtype": subtype,
+            "control_requests": [
+                m["request"]["subtype"] for m in cli.received if m["type"] == "control_request"
+            ],
+        },
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
     }
 ```
 

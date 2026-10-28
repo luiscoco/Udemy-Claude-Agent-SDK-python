@@ -27,54 +27,59 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `options`, line 450). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "options",
-    "thinking",
-    "settings",
-    "sandbox",
-    "session_management",
-    "control",
-    "resume",
-    "client_lifecycle",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("options")
+def options(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Validate requests first, then build ClaudeAgentOptions only from accepted values."""
+    from claude_agent_sdk import ClaudeAgentOptions
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from agent_lab.config import Settings
+
+    valid = {"omitted values": {}, "explicit values": {"max_turns": 2, "max_budget_usd": 0.05}}
+    invalid = {
+        "zero turns": {"max_turns": 0},
+        "budget is not a number": {"max_budget_usd": float("nan")},
+        "budget above the lab limit": {"max_budget_usd": 5},
+        "unknown option": {"cwd": "C:/"},
+    }
+    accepted = []
+    for label, body in valid.items():
+        parsed = RunRequest.model_validate(body)
+        accepted.append(
+            {
+                "case": label,
+                "set_by_student": sorted(parsed.model_fields_set) or ["(none)"],
+                "max_turns": parsed.max_turns,
+                "max_budget_usd": parsed.max_budget_usd,
+            }
+        )
+    rejected = []
+    for label, bad in invalid.items():
+        try:
+            RunRequest.model_validate(bad)
+        except ValidationError as exc:
+            error = exc.errors()[0]
+            rejected.append({"case": label, "field": str(error["loc"][0]), "problem": error["msg"]})
+    chosen = RunRequest.model_validate(valid["explicit values"])
+    built = ClaudeAgentOptions(
+        model=Settings().model,
+        max_turns=chosen.max_turns,
+        max_budget_usd=chosen.max_budget_usd,
+        tools=[],
+        setting_sources=[],
+    )
+    fields = ("model", "max_turns", "max_budget_usd", "tools", "setting_sources")
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "accepted": accepted,
+        "rejected": rejected,
+        "built_options": {name: getattr(built, name) for name in fields},
+        "sdk_defaults": {name: getattr(ClaudeAgentOptions(), name) for name in fields},
+        "note": "None in sdk_defaults means the option is not sent and the CLI decides. "
+        "The lab always sends explicit limits.",
     }
 ```
 

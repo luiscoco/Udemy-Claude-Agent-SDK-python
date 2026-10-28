@@ -27,54 +27,38 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `client_lifecycle`, line 634). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "options",
-    "thinking",
-    "settings",
-    "sandbox",
-    "session_management",
-    "control",
-    "resume",
-    "client_lifecycle",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("client_lifecycle")
+async def client_lifecycle(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Connect, run two turns in one session, disconnect, and refuse use after close."""
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, CLIConnectionError
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    cli = ScriptedCLI([["Remembered: PYTHON-SESSION."], ["The label was PYTHON-SESSION."]])
+    client = ClaudeSDKClient(ClaudeAgentOptions(), transport=cli)
+    async with asyncio.timeout(20):
+        async with client:
+            await client.query("Remember PYTHON-SESSION.")
+            first = await scripted_turn(client)
+            await client.query("Which label?")
+            second = await scripted_turn(client)
+    try:
+        await client.query("After disconnect")
+        after_close = "accepted"
+    except CLIConnectionError as exc:
+        after_close = f"CLIConnectionError: {exc}"
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "turns": [first, second],
+        "same_session": first["session_id"] == second["session_id"],
+        "lifecycle": cli.lifecycle,
+        "transport_ready_after_exit": cli.is_ready(),
+        "query_after_disconnect": after_close,
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
     }
 ```
 

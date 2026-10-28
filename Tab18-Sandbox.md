@@ -27,54 +27,40 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 122). Host contracts are in
+(function `sandbox`, line 501). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise(
-    "options",
-    "thinking",
-    "settings",
-    "sandbox",
-    "session_management",
-    "control",
-    "resume",
-    "client_lifecycle",
-    "elicitation",
-    "upgrade",
-    "python_sdk",
-)
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("sandbox")
+async def sandbox(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Show that a path policy guards tool calls, not the processes they start."""
+    from claude_agent_sdk.types import SandboxSettings
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    outside = root.parent / "outside-secret.txt"
+    outside.write_text("host data outside the lesson workspace", encoding="utf-8")
+    try:
+        allowed, reason = decide(root, "Read", {"file_path": "../outside-secret.txt"})
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-I",
+            "-c",
+            "print(open('../outside-secret.txt').read())",
+            cwd=root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        async with asyncio.timeout(30):
+            stdout, _ = await process.communicate()
+    finally:
+        outside.unlink(missing_ok=True)
     return {
-        "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "read_tool_through_policy": {"allowed": allowed, "reason": reason},
+        "child_process_read_outside": process.returncode == 0 and bool(stdout.strip()),
+        "lesson": "The path policy stopped the Read tool, but a process it would have allowed "
+        "to run reads the same file. Only OS isolation confines processes.",
+        "sdk_sandbox_settings": sorted(SandboxSettings.__annotations__),
+        "lab_choice": "Bash is never enabled, so no model-started process exists to confine.",
     }
 ```
 

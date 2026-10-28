@@ -120,14 +120,10 @@ async def message_exercise(root: Path, request: RunRequest, lesson: Lesson) -> d
 
 
 @exercise(
-    "options",
     "thinking",
     "settings",
-    "sandbox",
     "session_management",
-    "control",
     "resume",
-    "client_lifecycle",
     "elicitation",
     "upgrade",
     "python_sdk",
@@ -451,16 +447,217 @@ def system_prompts(root: Path, request: RunRequest, lesson: Lesson) -> dict[str,
     }
 
 
+@exercise("options")
+def options(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Validate requests first, then build ClaudeAgentOptions only from accepted values."""
+    from claude_agent_sdk import ClaudeAgentOptions
+
+    from agent_lab.config import Settings
+
+    valid = {"omitted values": {}, "explicit values": {"max_turns": 2, "max_budget_usd": 0.05}}
+    invalid = {
+        "zero turns": {"max_turns": 0},
+        "budget is not a number": {"max_budget_usd": float("nan")},
+        "budget above the lab limit": {"max_budget_usd": 5},
+        "unknown option": {"cwd": "C:/"},
+    }
+    accepted = []
+    for label, body in valid.items():
+        parsed = RunRequest.model_validate(body)
+        accepted.append(
+            {
+                "case": label,
+                "set_by_student": sorted(parsed.model_fields_set) or ["(none)"],
+                "max_turns": parsed.max_turns,
+                "max_budget_usd": parsed.max_budget_usd,
+            }
+        )
+    rejected = []
+    for label, bad in invalid.items():
+        try:
+            RunRequest.model_validate(bad)
+        except ValidationError as exc:
+            error = exc.errors()[0]
+            rejected.append({"case": label, "field": str(error["loc"][0]), "problem": error["msg"]})
+    chosen = RunRequest.model_validate(valid["explicit values"])
+    built = ClaudeAgentOptions(
+        model=Settings().model,
+        max_turns=chosen.max_turns,
+        max_budget_usd=chosen.max_budget_usd,
+        tools=[],
+        setting_sources=[],
+    )
+    fields = ("model", "max_turns", "max_budget_usd", "tools", "setting_sources")
+    return {
+        "accepted": accepted,
+        "rejected": rejected,
+        "built_options": {name: getattr(built, name) for name in fields},
+        "sdk_defaults": {name: getattr(ClaudeAgentOptions(), name) for name in fields},
+        "note": "None in sdk_defaults means the option is not sent and the CLI decides. "
+        "The lab always sends explicit limits.",
+    }
+
+
+@exercise("sandbox")
+async def sandbox(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Show that a path policy guards tool calls, not the processes they start."""
+    from claude_agent_sdk.types import SandboxSettings
+
+    outside = root.parent / "outside-secret.txt"
+    outside.write_text("host data outside the lesson workspace", encoding="utf-8")
+    try:
+        allowed, reason = decide(root, "Read", {"file_path": "../outside-secret.txt"})
+        process = await asyncio.create_subprocess_exec(
+            sys.executable,
+            "-I",
+            "-c",
+            "print(open('../outside-secret.txt').read())",
+            cwd=root,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        async with asyncio.timeout(30):
+            stdout, _ = await process.communicate()
+    finally:
+        outside.unlink(missing_ok=True)
+    return {
+        "read_tool_through_policy": {"allowed": allowed, "reason": reason},
+        "child_process_read_outside": process.returncode == 0 and bool(stdout.strip()),
+        "lesson": "The path policy stopped the Read tool, but a process it would have allowed "
+        "to run reads the same file. Only OS isolation confines processes.",
+        "sdk_sandbox_settings": sorted(SandboxSettings.__annotations__),
+        "lab_choice": "Bash is never enabled, so no model-started process exists to confine.",
+    }
+
+
+async def scripted_turn(client: Any) -> dict[str, Any]:
+    from claude_agent_sdk import AssistantMessage, ResultMessage
+
+    chunks, models, result = [], set(), None
+    async for message in client.receive_response():
+        if isinstance(message, AssistantMessage):
+            chunks += [getattr(block, "text", "") for block in message.content]
+            models.add(message.model)
+        elif isinstance(message, ResultMessage):
+            result = message
+    assert result is not None
+    return {
+        "text": "".join(chunks),
+        "chunks": len(chunks),
+        "models": sorted(models),
+        "result_subtype": result.subtype,
+        "session_id": result.session_id,
+    }
+
+
 @exercise("structured")
-def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Validate a structured answer, then interrupt a streaming turn with the real client."""
+    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ClaudeSDKClient
+
+    from agent_lab.scripted_cli import ScriptedCLI
+
     parsed = Summary.model_validate(
         {"summary": "Host-validated example", "next_steps": ["Run the Python lesson"]}
     )
+    try:
+        Summary.model_validate({"summary": "", "next_steps": []})
+        invalid = "accepted"
+    except ValidationError as exc:
+        invalid = f"rejected: {exc.error_count()} validation errors"
+    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=0.05)
+    received, subtype = 0, None
+    async with asyncio.timeout(20):
+        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
+            await client.query("Count to six slowly.")
+            async for message in client.receive_response():
+                if isinstance(message, AssistantMessage):
+                    received += 1
+                    if received == 2:
+                        await client.interrupt()
+                else:
+                    subtype = getattr(message, "subtype", None)
     return {
         "schema": Summary.model_json_schema(),
         "validated": parsed.model_dump(),
-        "live_interrupt": "ClaudeSDKClient.interrupt()",
-        "example_source": "local fixture",
+        "invalid_answer": invalid,
+        "interrupt": {
+            "chunks_planned": 6,
+            "chunks_received": received,
+            "result_subtype": subtype,
+            "control_requests": [
+                m["request"]["subtype"] for m in cli.received if m["type"] == "control_request"
+            ],
+        },
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
+    }
+
+
+@exercise("control")
+async def control(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Call ClaudeSDKClient control methods and observe their effect on the next turn."""
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    cli = ScriptedCLI([["Before the switch."], ["After the switch."]])
+    owner = asyncio.current_task()
+    async with asyncio.timeout(20):
+        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
+            info = await client.get_server_info()
+            await client.query("First turn")
+            before = await scripted_turn(client)
+            await client.set_model("claude-sonnet-5-5")
+            await client.set_permission_mode("plan")
+            await client.query("Second turn")
+            after = await scripted_turn(client)
+            try:
+                await client.get_mcp_status()
+                unsupported = "accepted"
+            except Exception as exc:
+                unsupported = str(exc)
+            same_owner = asyncio.current_task() is owner
+    return {
+        "server_info_keys": sorted(info or {}),
+        "before": {"models": before["models"], "text": before["text"]},
+        "after": {"models": after["models"], "text": after["text"]},
+        "cli_permission_mode": cli.permission_mode,
+        "control_requests": [
+            m["request"]["subtype"] for m in cli.received if m["type"] == "control_request"
+        ],
+        "unsupported_request": unsupported,
+        "context_owned_by_one_task": same_owner,
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
+    }
+
+
+@exercise("client_lifecycle")
+async def client_lifecycle(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Connect, run two turns in one session, disconnect, and refuse use after close."""
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, CLIConnectionError
+
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    cli = ScriptedCLI([["Remembered: PYTHON-SESSION."], ["The label was PYTHON-SESSION."]])
+    client = ClaudeSDKClient(ClaudeAgentOptions(), transport=cli)
+    async with asyncio.timeout(20):
+        async with client:
+            await client.query("Remember PYTHON-SESSION.")
+            first = await scripted_turn(client)
+            await client.query("Which label?")
+            second = await scripted_turn(client)
+    try:
+        await client.query("After disconnect")
+        after_close = "accepted"
+    except CLIConnectionError as exc:
+        after_close = f"CLIConnectionError: {exc}"
+    return {
+        "turns": [first, second],
+        "same_session": first["session_id"] == second["session_id"],
+        "lifecycle": cli.lifecycle,
+        "transport_ready_after_exit": cli.is_ready(),
+        "query_after_disconnect": after_close,
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
     }
 
 

@@ -102,112 +102,94 @@
   "prerequisites": [
    1
   ],
-  "concept_brief": "`ClaudeAgentOptions` is a dataclass that configures a run with Python names such as `model`, `max_turns`, `max_budget_usd` and `include_partial_messages`; values you omit stay `None` (or their default) so the CLI default applies.",
-  "lab_brief": "The offline exercise `sdk_contract` introspects the installed `ClaudeAgentOptions` fields and `ClaudeSDKClient` methods and echoes the Pydantic-validated run request. It teaches you to trust the installed package rather than another language's option names.",
+  "concept_brief": "`ClaudeAgentOptions` configures a run: model, `max_turns`, `max_budget_usd`, tools and settings sources. Validate what users send first, then build options only from accepted values. An option left as `None` is not sent, so the CLI default applies.",
+  "lab_brief": "The `options` exercise validates six requests with the `RunRequest` Pydantic model, shows which fields the student actually set versus defaults, and builds a `ClaudeAgentOptions` next to the SDK's own defaults.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 2 (or run `uv run agent-lab lesson 2`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Read the real option types of the installed Python SDK and see which run options the host validates before building `ClaudeAgentOptions`."
+    "text": "Separate validation from option building, and omitted values from defaults."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Note the Maximum turns and Budget threshold (USD) fields on the Run the exercise tab; the `RunRequest` Pydantic model validates them."
+    "text": "Read `options` and the `RunRequest` model in `agent_lab/models.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare the types in `options` (for example `int | None` for `max_turns`) with the values in `request`, and note `installed_version`."
+    "text": "Compare `set_by_student` in `accepted`, read each `rejected` problem, then compare `built_options` with `sdk_defaults`."
    },
    {
     "title": "Try the challenge",
-    "text": "Change Maximum turns to 8 and run again; confirm `request.max_turns` is 8 while `options.max_turns` still shows the type."
+    "text": "Send a value just past a limit."
    }
   ],
-  "inspect": "Look at `installed_version`, `options` (model, `max_turns`, `max_budget_usd`, `include_partial_messages`), `public_client_methods`, `session_functions` and `request`.",
-  "expected": "`installed_version` is the installed SDK (0.2.163 in this repo), `options` shows `str | None`, `int | None`, `float | None` and `<class 'bool'>`, and `request` is {mode: offline, `max_turns`: 4, `max_budget_usd`: 0.1}.",
-  "evidence_criterion": "The check confirms the run reported the installed SDK version, the option types and the validated request.",
+  "inspect": "`accepted` (with `set_by_student`), `rejected` (`field` and `problem`), `built_options`, `sdk_defaults` and the `note`.",
+  "expected": "`omitted values` shows `(none)` set but still gets 4 turns and 0.1 USD; `explicit values` lists both fields. Four requests are rejected: zero turns, NaN budget, a budget above 1 and the unknown `cwd`. `sdk_defaults` are all null while `built_options` are explicit.",
+  "evidence_criterion": "The check confirms valid requests were accepted, invalid ones rejected, and options were built from validated values.",
   "evidence_checks": [
    {
-    "key": "installed_version",
-    "rule": "present"
-   },
-   {
-    "key": "options",
+    "key": "accepted",
     "rule": "truthy"
    },
    {
-    "key": "request",
+    "key": "rejected",
+    "rule": "truthy"
+   },
+   {
+    "key": "built_options",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch script, call `RunRequest(max_budget_usd=2)` and `RunRequest(max_turns=13)` from `agent_lab.models`. Verify both raise a Pydantic `ValidationError` before any `ClaudeAgentOptions` could be built, then print `ClaudeAgentOptions().max_turns` to see that an omitted value is `None`.",
+  "challenge": "Add `\"thirteen turns\": {\"max_turns\": 13}` to `invalid`, run again and read its problem (`Input should be less than or equal to 12`).",
   "hints": [
-   "The limits live in `agent_lab/models.py`: turns 1-12, and a budget above 0 and at most 1.",
-   "Wrap each `RunRequest(...)` call in `try/except pydantic.ValidationError as exc: print(exc)`; then `from claude_agent_sdk import ClaudeAgentOptions` and print the default fields."
+   "`RunRequest` declares `max_turns` with `ge=1, le=12`.",
+   "Pydantic rejects 13 before any option is built, so a bad request can never reach the SDK."
   ],
-  "reference": "The exercise reads `dataclasses.fields(ClaudeAgentOptions)`, so the types you see are exactly those of the installed package. `None` means the option was omitted and the CLI default applies, which differs from an explicit value. The host validates `max_turns` and `max_budget_usd` with Pydantic first, so bad input is rejected before an SDK process starts.",
+  "reference": "Validation is the gate and options are the result. `model_fields_set` tells you what the student chose, while defaults fill the rest. Leaving an SDK option as `None` delegates to the CLI, so the lab always sends explicit limits.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`. If the run will not start, check that Maximum turns is 1-12 and the budget is above 0 and at most 1.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does `None` mean for `max_turns` in `ClaudeAgentOptions`?",
+    "prompt": "What does None mean for a ClaudeAgentOptions field?",
     "options": [
      {
-      "text": "The run may not take any turns.",
-      "explanation": "Zero turns is not what `None` encodes; it means no value was supplied."
+      "text": "The option is not sent, so the CLI default applies.",
+      "explanation": "Correct. Send explicit values when you need a guarantee."
      },
      {
-      "text": "The SDK guarantees unlimited turns.",
-      "explanation": "The SDK does not promise anything for an omitted value; the CLI default applies."
+      "text": "The option is disabled entirely.",
+      "explanation": "None delegates to the default; it does not disable."
      },
      {
-      "text": "The option was omitted, so the default behaviour applies.",
-      "explanation": "Correct. Omitted values stay `None`, which is different from passing an explicit number."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "Why does the lab validate Maximum turns and the budget with `RunRequest` before building options?",
-    "options": [
-     {
-      "text": "So the host rejects invalid values before any SDK process starts.",
-      "explanation": "Correct. Pydantic raises a `ValidationError` for out-of-range values and the run never begins."
-     },
-     {
-      "text": "Because `ClaudeAgentOptions` cannot store numbers.",
-      "explanation": "It stores them fine (`int | None`, `float | None`); it simply does not enforce the lab's limits."
-     },
-     {
-      "text": "Because Claude ignores options that were not validated.",
-      "explanation": "Validation is a host safety rule, not something the model reads."
+      "text": "The value is zero.",
+      "explanation": "None is not zero."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "What is `max_budget_usd`?",
+    "prompt": "Where should a request with max_turns=0 be stopped?",
     "options": [
      {
-      "text": "An exact billing cap that guarantees the bill never exceeds it.",
-      "explanation": "The lab notes it is a threshold, not an exact billing guarantee."
+      "text": "Inside the model's reply.",
+      "explanation": "The model should never see an invalid configuration."
      },
      {
-      "text": "A spending threshold after which the SDK stops the run.",
-      "explanation": "Correct. A run that crosses it ends with an `error_max_budget_usd` result, and the final cost can slightly exceed it."
+      "text": "At request validation, before options are built.",
+      "explanation": "Correct. Reject it at the boundary."
      },
      {
-      "text": "The price per token for the chosen model.",
-      "explanation": "Pricing is set by the model; the option only limits the run."
+      "text": "After the first turn fails.",
+      "explanation": "That wastes a run."
      }
     ],
     "correct": 1
@@ -936,120 +918,96 @@
  {
   "id": 10,
   "prerequisites": [
-   2,
-   6
+   5,
+   9
   ],
-  "concept_brief": "Structured output is requested with `ClaudeAgentOptions(output_format={\"type\": \"json_schema\", \"schema\": ...})` and read from `ResultMessage.structured_output`; the host should still validate it, here with a Pydantic model. `ClaudeSDKClient.interrupt()` stops an in-progress response on an interactive client.",
-  "lab_brief": "The offline exercise `structured` produces the JSON schema of the `Summary` Pydantic model and validates a local fixture answer against it. It shows the contract the live run sends to the SDK and the validation the host applies to the reply.",
+  "concept_brief": "Structured output is validated against a Pydantic model before you trust it. `ClaudeSDKClient.interrupt()` sends a control request that stops the current turn; the turn then ends with an error result instead of the full reply.",
+  "lab_brief": "The `structured` exercise validates a good and a bad `Summary`, then streams a six-chunk reply through the real client and calls `interrupt()` after the second chunk. The offline run uses the real `ClaudeSDKClient` against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 10 (or run `uv run agent-lab lesson 10`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live `structured` profile requests JSON matching the `Summary` schema."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Validate structured answers with Pydantic and know which client method provides interrupt control."
+    "text": "Validate structured answers and stop a turn mid-stream."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open `Summary` in `agent_lab/services.py`: `summary` is 1-500 characters, `next_steps` has 1-4 items, and extra fields are forbidden."
+    "text": "Read `structured` and `ScriptedCLI` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `schema` lists `summary` and `next_steps` as required, `validated` holds the fixture answer, and `live_interrupt` names `ClaudeSDKClient.interrupt()`."
+    "text": "Check `invalid_answer` and the `interrupt` block."
    },
    {
     "title": "Try the challenge",
-    "text": "Try invalid answers against `Summary.model_validate` and see which rule rejects each."
+    "text": "Interrupt later and count the chunks."
    }
   ],
-  "inspect": "Look at `schema`, `validated` (summary, `next_steps`), `live_interrupt` and `example_source`.",
-  "expected": "`schema` requires `summary` and `next_steps` with `additionalProperties: false` and `maxItems` 4, `validated` is {\"summary\": \"Host-validated example\", \"`next_steps`\": [\"Run the Python lesson\"]}, `live_interrupt` is \"ClaudeSDKClient.interrupt()\" and `example_source` is \"local fixture\".",
-  "evidence_criterion": "The check confirms a fixture answer passed `Summary` validation and the evidence names the interrupt method.",
+  "inspect": "`validated`, `invalid_answer`, and in `interrupt`: `chunks_planned`, `chunks_received`, `result_subtype` and `control_requests`.",
+  "expected": "`invalid_answer` is `rejected: 2 validation errors`. The interrupt block shows 2 of 6 chunks, `result_subtype` `error_during_execution`, and control requests `initialize` then `interrupt`.",
+  "evidence_criterion": "The check confirms the structured answer validated and the interrupt stopped the turn early.",
   "evidence_checks": [
    {
     "key": "validated",
     "rule": "truthy"
    },
    {
-    "key": "live_interrupt",
-    "rule": "equals",
-    "value": "ClaudeSDKClient.interrupt()"
-   },
-   {
-    "key": "example_source",
-    "rule": "equals",
-    "value": "local fixture"
+    "key": "interrupt",
+    "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch script, call `Summary.model_validate` with an empty `next_steps`, with five steps, and with an extra field. Verify each raises `ValidationError` (`too_short`, `too_long` and `extra_forbidden`), then validate a correct answer of your own.",
+  "challenge": "Change `if received == 2` to `if received == 4` in `structured`, run again and confirm `chunks_received` becomes 4.",
   "hints": [
-   "`from agent_lab.services import Summary`; the limits are `min_length=1` and `max_length=4` on `next_steps`.",
-   "Print `exc.errors()[0][\"type\"]` inside `except pydantic.ValidationError as exc` to see which rule failed."
+   "The interrupt is a control request; the CLI stops sending chunks once it arrives.",
+   "Interrupting after the fourth chunk lets four through, and the result subtype is still `error_during_execution` because the turn did not finish."
   ],
-  "reference": "The schema sent in `output_format` asks the model for a shape, and `Summary.model_validate` decides whether the reply is acceptable. The offline fixture passes, so `validated` shows it unchanged. In live mode the host validates `ResultMessage.structured_output` the same way and emits a separate validated event; this lab names `interrupt()` but does not call it.",
+  "reference": "Validation turns model output into trusted data or a clear rejection. Interrupt is a control message on the same connection: the client keeps the session, and the turn ends with an explicit error result you must check before using any partial text.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. If a live reply fails validation, the error names the field; compare it with the `schema`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Where does a live run's structured answer appear?",
+    "prompt": "How does interrupt() stop a running turn?",
     "options": [
      {
-      "text": "In the first `TextBlock` of the first message.",
-      "explanation": "Text blocks hold prose; the structured result is a separate field."
+      "text": "It kills the Python process.",
+      "explanation": "The connection and session stay open."
      },
      {
-      "text": "In `ResultMessage.structured_output`.",
-      "explanation": "Correct. The live profile reads it there and validates it with `Summary`."
+      "text": "It sends a control request; the CLI stops the turn and sends a result.",
+      "explanation": "Correct. The turn ends with an error result."
      },
      {
-      "text": "In `ClaudeAgentOptions.output_format`.",
-      "explanation": "That is the request (the schema), not the answer."
+      "text": "It deletes the conversation.",
+      "explanation": "The session continues after an interrupt."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "Why validate `structured_output` with Pydantic if a schema was supplied?",
+    "prompt": "After an interrupt, what should you check before using the text?",
     "options": [
      {
-      "text": "Because the host must not trust model output without checking it.",
-      "explanation": "Correct. Validation enforces lengths, item counts and forbidden fields before the data is used."
+      "text": "The result subtype: the turn did not finish successfully.",
+      "explanation": "Correct. Partial text is not a complete answer."
      },
      {
-      "text": "Because the SDK returns XML.",
-      "explanation": "It returns parsed JSON-compatible data."
+      "text": "Nothing; partial text is always correct.",
+      "explanation": "It may stop mid-sentence."
      },
      {
-      "text": "Because `output_format` only works offline.",
-      "explanation": "It is a live option; offline uses a local fixture."
+      "text": "The CSS of the page.",
+      "explanation": "Presentation is unrelated."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "Which method stops an in-progress response on an interactive client?",
-    "options": [
-     {
-      "text": "`ClaudeSDKClient.disconnect()`",
-      "explanation": "This closes the connection entirely rather than interrupting one response."
-     },
-     {
-      "text": "`ClaudeSDKClient.set_model()`",
-      "explanation": "This changes the model; it does not stop a response."
-     },
-     {
-      "text": "`ClaudeSDKClient.interrupt()`",
-      "explanation": "Correct. `interrupt()` asks the running response to stop while the client stays usable."
-     }
-    ],
-    "correct": 2
    }
   ]
  },
@@ -1780,97 +1738,100 @@
  {
   "id": 18,
   "prerequisites": [
-   4,
-   7
+   4
   ],
-  "concept_brief": "`ClaudeAgentOptions.sandbox` takes a `SandboxSettings` value (fields such as `enabled`, `excludedCommands`, `network`) that asks for OS-level isolation of shell commands, which is different from a host path allowlist.",
-  "lab_brief": "The offline `sdk_contract` exercise reports the installed type of the `sandbox` option and the lesson note, so you can compare the real SDK sandbox setting with the lab's own path policy in `agent_lab/policy.py`.",
+  "concept_brief": "A path policy in a hook or permission callback decides which tool calls run. It does not confine processes those tools start. OS-level isolation, configured with `ClaudeAgentOptions.sandbox` (`SandboxSettings`), is what limits a running process.",
+  "lab_brief": "The `sandbox` exercise puts a file just outside the lesson workspace. The path policy denies a Read of it, yet a child process started in the workspace reads it. It also lists the SDK's `SandboxSettings` fields.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Open `agent_lab/policy.py` and read `inside` and `decide` so you know what the path policy actually checks."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 18 (or run `uv run agent-lab lesson 18`).",
+   "Before allowing Bash or other shell tools, configure a supported OS sandbox; the lab never enables Bash."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand the gap: a path allowlist blocks paths in tool arguments, but an executed program can still open any file or network address the OS allows."
+    "text": "Tell tool-level policy apart from process isolation."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `sdk_contract` (focus `sandbox`) and `policy.py`; the lab never enables Bash, so the path policy is enough here but it is not a sandbox."
+    "text": "Read `sandbox` in the source and `decide` in `agent_lab/policy.py`."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 18 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that `options.sandbox` is typed `SandboxSettings | None` and read `note`."
+    "text": "Compare `read_tool_through_policy` with `child_process_read_outside`."
    },
    {
     "title": "Try the challenge",
-    "text": "List the fields of `claude_agent_sdk.types.SandboxSettings` in a Python shell and decide which you would set before allowing shell commands."
+    "text": "Point the policy at a file inside the workspace."
    }
   ],
-  "inspect": "Look at `options.sandbox` (its type in the installed SDK), `note` (the adaptation warning) and `installed_version`.",
-  "expected": "`options.sandbox` shows `claude_agent_sdk.types.SandboxSettings | None` and `note` says the local path policy is not OS sandboxing.",
-  "evidence_criterion": "The check confirms the installed SDK exposes a sandbox option and the result carries the sandbox warning note.",
+  "inspect": "`read_tool_through_policy`, `child_process_read_outside`, the `lesson` text, `sdk_sandbox_settings` and `lab_choice`.",
+  "expected": "The policy returns `allowed` false for `../outside-secret.txt`, but `child_process_read_outside` is true. `sdk_sandbox_settings` lists fields such as `enabled`, `network` and `excludedCommands`.",
+  "evidence_criterion": "The check confirms the policy denied the read while a child process still read the file, showing the policy is not OS isolation.",
   "evidence_checks": [
    {
-    "key": "options",
+    "key": "child_process_read_outside",
+    "rule": "equals",
+    "value": true
+   },
+   {
+    "key": "read_tool_through_policy",
     "rule": "truthy"
    },
    {
-    "key": "note",
+    "key": "sdk_sandbox_settings",
     "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"from claude_agent_sdk.types import SandboxSettings; print(SandboxSettings.__annotations__)\"` and write which fields you would set to deny network access; then explain why `decide()` in `policy.py` cannot enforce that.",
+  "challenge": "Change the path passed to `decide` to `notes.txt`, run again and confirm the policy now allows it. Then explain why that changes nothing about what a process can read.",
   "hints": [
-   "`decide()` only inspects arguments of Read, Glob and Grep and denies every other tool.",
-   "`SandboxSettings` includes `enabled`, `excludedCommands`, `allowUnsandboxedCommands` and `network`; these configure the OS sandbox, not your host policy."
+   "The policy only answers questions about tool calls it is asked about.",
+   "A process runs with the user's OS permissions, so it can read anything the user can, whatever the policy said about a different call."
   ],
-  "reference": "The SDK models OS isolation as a separate `sandbox` option, which is why it appears as its own `SandboxSettings` type. The lab's `inside()` check rejects traversal and protected folders in tool arguments, but it cannot stop a running process from reaching other files. Before allowing shell tools you need a supported OS sandbox as well as host policy.",
+  "reference": "Hooks and permission callbacks are the right place for tool policy, but they cannot see inside a process. If an agent may run shell commands, an OS sandbox must confine them; otherwise keep shell tools disabled, as this lab does.",
   "recovery": [
-   "If the result shows \"Not available in this installed Python SDK\", run `uv sync --locked` so the pinned SDK version is installed.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why is a path allowlist not an OS sandbox?",
+    "prompt": "A hook denies Read of ../secret. Can an allowed Bash command still read it?",
     "options": [
      {
-      "text": "It is slower.",
-      "explanation": "Speed is not the issue; the boundary covers different things."
+      "text": "Yes. The hook governs tool calls, not what a process does.",
+      "explanation": "Correct. Only OS isolation confines processes."
      },
      {
-      "text": "It checks tool arguments, but a running process can still access whatever the OS permits.",
-      "explanation": "Correct. OS isolation restricts the process itself, whatever arguments it was given."
+      "text": "No. The hook blocks every file access.",
+      "explanation": "Hooks see tool calls, not system calls."
      },
      {
-      "text": "It only works on Windows.",
-      "explanation": "The policy is plain Python and runs on any platform."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Which `ClaudeAgentOptions` field configures sandboxing in the Python SDK?",
-    "options": [
-     {
-      "text": "`sandbox`",
-      "explanation": "Correct. It accepts a `SandboxSettings` value or None."
-     },
-     {
-      "text": "`permission_mode`",
-      "explanation": "Permission modes decide approvals, not process isolation."
-     },
-     {
-      "text": "`cwd`",
-      "explanation": "`cwd` sets the working directory; it does not confine a process."
+      "text": "Only if the model asks politely.",
+      "explanation": "Politeness is not a security boundary."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What confines a process the agent starts?",
+    "options": [
+     {
+      "text": "A longer system prompt.",
+      "explanation": "Prompts do not restrict processes."
+     },
+     {
+      "text": "An OS sandbox, configured for example with ClaudeAgentOptions.sandbox.",
+      "explanation": "Correct."
+     },
+     {
+      "text": "A PostToolUse hook.",
+      "explanation": "It runs after the process already ran."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -2563,94 +2524,99 @@
    6,
    10
   ],
-  "concept_brief": "`ClaudeSDKClient` exposes control methods such as `interrupt()`, `set_model()`, `set_permission_mode()`, `stop_task()` and `disconnect()`; the task that enters `async with ClaudeSDKClient(...)` must also exit it.",
-  "lab_brief": "The offline `sdk_contract` exercise lists the public methods of the installed `ClaudeSDKClient` and key option types, so you work from the real Python control surface rather than another language's API.",
+  "concept_brief": "`ClaudeSDKClient` exposes control methods that act on a live session: `set_model`, `set_permission_mode`, `interrupt` and `get_server_info`. Each sends a control request and waits for the CLI's response; an unsupported request raises.",
+  "lab_brief": "The `control` exercise runs one turn, switches the model to `claude-sonnet-5-5` and the permission mode to `plan`, runs a second turn, and calls a request the scripted CLI does not support. The offline run uses the real `ClaudeSDKClient` against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Live mode uses the `conversation` profile: two turns inside one `async with ClaudeSDKClient(options=options)` block."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 26 (or run `uv run agent-lab lesson 26`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn the difference: `interrupt()` stops the current turn and keeps the client connected; `disconnect()` ends the session process."
+    "text": "Change a running session with control methods."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the end of `run_sdk` in `agent_lab/sdk.py`: query, `receive_response()`, the follow-up and the context manager exit all happen in one task."
+    "text": "Read `control` and `scripted_turn` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 26 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `public_client_methods` includes `interrupt`, `disconnect`, `set_model`, `set_permission_mode` and `stop_task`."
+    "text": "Compare `before` and `after`, then read `control_requests` and `unsupported_request`."
    },
    {
     "title": "Try the challenge",
-    "text": "Pick one method and write a short async snippet showing where you would call it during a running turn."
+    "text": "Switch the permission mode again."
    }
   ],
-  "inspect": "Look at `public_client_methods`, `options` (`model`, `tools`, `hooks`, `can_use_tool`, `mcp_servers`) and `installed_version`.",
-  "expected": "`public_client_methods` lists `connect`, `disconnect`, `get_context_usage`, `get_mcp_status`, `get_server_info`, `interrupt`, `query`, `receive_messages`, `receive_response`, `reconnect_mcp_server`, `rewind_files`, `set_model`, `set_permission_mode`, `stop_task` and `toggle_mcp_server`.",
-  "evidence_criterion": "The check confirms the installed ClaudeSDKClient control methods were listed.",
+  "inspect": "`server_info_keys`, `before` and `after` (models and text), `cli_permission_mode`, `control_requests`, `unsupported_request` and `context_owned_by_one_task`.",
+  "expected": "`before.models` is `scripted-model` and `after.models` is `claude-sonnet-5-5`; `cli_permission_mode` is `plan`; control requests are initialize, set_model, set_permission_mode and mcp_status; the last raised `The scripted CLI does not support mcp_status.`",
+  "evidence_criterion": "The check confirms the model switch reached the CLI and the client context stayed in one task.",
   "evidence_checks": [
    {
-    "key": "public_client_methods",
-    "rule": "truthy"
+    "key": "cli_permission_mode",
+    "rule": "equals",
+    "value": "plan"
    },
    {
-    "key": "options",
+    "key": "context_owned_by_one_task",
+    "rule": "equals",
+    "value": true
+   },
+   {
+    "key": "after",
     "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"import inspect, claude_agent_sdk as s; print(inspect.signature(s.ClaudeSDKClient.set_model))\"` and explain what `set_model(None)` would mean for the next turn.",
+  "challenge": "After `set_permission_mode(\"plan\")`, add `await client.set_permission_mode(\"acceptEdits\")`, run again and confirm `cli_permission_mode` is `acceptEdits`.",
   "hints": [
-   "Control methods are async; call them with `await` while the client is connected.",
-   "Do not hand the client to another task to close it; the lab's `RunService` keeps connect and disconnect in the owning task."
+   "Each control call is a separate request with its own response.",
+   "The last mode request wins, so the scripted CLI reports `acceptEdits`, and `control_requests` lists set_permission_mode twice."
   ],
-  "reference": "The list comes from `inspect.getmembers` on the installed class, so it is the real API for your version. Interrupting a turn keeps the session for more queries, while disconnecting ends it. Keeping the `async with` block in one task avoids cleanup errors from closing a connection in a different task.",
+  "reference": "Control methods change a session in place without reconnecting. They are requests, not fire-and-forget: the client waits for success or raises the CLI's error. Keep `async with` and all calls in one owning task so cleanup is reliable.",
   "recovery": [
-   "If a method you expect is missing, check `installed_version` and run `uv sync --locked`.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What is the difference between `interrupt()` and `disconnect()`?",
+    "prompt": "What does client.set_model(...) change?",
     "options": [
      {
-      "text": "They are aliases.",
-      "explanation": "They have different effects on the session."
+      "text": "The model for later turns in the same session.",
+      "explanation": "Correct. The next reply comes from the new model."
      },
      {
-      "text": "`interrupt()` deletes the session.",
-      "explanation": "Interrupt only stops the current turn."
+      "text": "The model of replies already received.",
+      "explanation": "Past messages do not change."
      },
      {
-      "text": "`interrupt()` stops the current turn; `disconnect()` closes the client connection.",
-      "explanation": "Correct. After an interrupt you can still send another query."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "Why does the lab connect and disconnect the client in the same task?",
-    "options": [
-     {
-      "text": "Async context managers should be exited by the task that entered them.",
-      "explanation": "Correct. Closing from another task can break cleanup of the SDK connection."
-     },
-     {
-      "text": "It is required by Pydantic.",
-      "explanation": "Pydantic validates data; it does not manage async tasks."
-     },
-     {
-      "text": "It makes the model answer faster.",
-      "explanation": "Ownership is about safe cleanup, not speed."
+      "text": "The default model for every future app run.",
+      "explanation": "It affects only this session."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "A control request is unsupported. What happens?",
+    "options": [
+     {
+      "text": "It is ignored silently.",
+      "explanation": "The CLI answers with an error response."
+     },
+     {
+      "text": "The client raises the CLI's error.",
+      "explanation": "Correct. Handle it like any failed call."
+     },
+     {
+      "text": "The session restarts.",
+      "explanation": "The session stays usable."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -4205,118 +4171,102 @@
  {
   "id": 41,
   "prerequisites": [
-   1,
-   6
+   6,
+   26
   ],
-  "concept_brief": "`ClaudeSDKClient` is the interactive Python client: open it with `async with ClaudeSDKClient(options=...) as client`, send with `await client.query(prompt)` and read one reply with `async for message in client.receive_response()`, which stops after the `ResultMessage`. Other methods such as `interrupt()`, `set_model()` and `set_permission_mode()` control a live session, and connect and disconnect must happen in the same task.",
-  "lab_brief": "The offline exercise introspects the installed SDK and lists the public `ClaudeSDKClient` methods and the types of core options (`model`, `tools`, `hooks`, `can_use_tool`, `mcp_servers`). The live `conversation` profile runs the full lifecycle: connect, query, `receive_response`, a follow-up query, and disconnect.",
+  "concept_brief": "`ClaudeSDKClient` keeps one session across turns: connect (or `async with`), then repeat `query()` and `receive_response()`, then disconnect. Using the client after it closes raises `CLIConnectionError`.",
+  "lab_brief": "The `client_lifecycle` exercise runs two turns in one `async with` block, records the process lifecycle, and calls `query()` after exit. The offline run uses the real `ClaudeSDKClient` against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live run sends the prompt and then the follow-up \"Summarize your previous answer in one sentence.\" on one client."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 41 (or run `uv run agent-lab lesson 41`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live conversation profile runs the same two-turn pattern."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand the interactive client lifecycle and which methods the installed Python SDK exposes."
+    "text": "Run a multi-turn session and close it cleanly."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the conversation branch near the end of `run_sdk` in `agent_lab`/sdk.py and `sdk_contract` in `agent_lab`/exercises.py."
+    "text": "Read `client_lifecycle` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Find `query`, `receive_response`, `receive_messages`, `interrupt` and `disconnect` in `public_client_methods`."
+    "text": "Check `same_session`, `lifecycle` and `query_after_disconnect`."
    },
    {
     "title": "Try the challenge",
-    "text": "Inspect the signatures of the lifecycle methods yourself."
+    "text": "Add a third turn."
    }
   ],
-  "inspect": "Look at `public_client_methods`, `options` (model, tools, hooks, `can_use_tool`, `mcp_servers`), `installed_version` and `note`.",
-  "expected": "`public_client_methods` lists connect, disconnect, `get_context_usage`, `get_mcp_status`, `get_server_info`, interrupt, query, `receive_messages`, `receive_response`, `reconnect_mcp_server`, `rewind_files`, `set_model`, `set_permission_mode`, `stop_task` and `toggle_mcp_server`; `installed_version` is \"0.2.163\"; `note` is \"This lesson uses Python's public interactive client lifecycle.\".",
-  "evidence_criterion": "The check verifies that the installed SDK version, the client's public methods and the inspected options are reported.",
+  "inspect": "The two `turns`, `same_session`, `lifecycle`, `transport_ready_after_exit` and `query_after_disconnect`.",
+  "expected": "Both turns share `scripted-session` (`same_session` true); `lifecycle` is process started, control: initialize, process stopped; `transport_ready_after_exit` is false; `query_after_disconnect` starts with `CLIConnectionError`.",
+  "evidence_criterion": "The check confirms both turns used one session and the client refused use after disconnect.",
   "evidence_checks": [
    {
-    "key": "public_client_methods",
-    "rule": "truthy"
+    "key": "same_session",
+    "rule": "equals",
+    "value": true
    },
    {
-    "key": "installed_version",
-    "rule": "present"
+    "key": "transport_ready_after_exit",
+    "rule": "equals",
+    "value": false
    },
    {
-    "key": "options",
+    "key": "query_after_disconnect",
     "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"import inspect; from claude_agent_sdk import ClaudeSDKClient as C; print(inspect.signature(C.query)); print(inspect.isasyncgenfunction(C.receive_response))\"`. Verify that `query` accepts a string or an async iterable plus a `session_id`, and that `receive_response` is an async generator.",
+  "challenge": "Add a third reply to `ScriptedCLI([...])` and a third `query` plus `scripted_turn` inside the block. Confirm all three turns report the same session.",
   "hints": [
-   "`receive_response()` yields messages until the `ResultMessage` for the current query; `receive_messages()` keeps yielding across queries.",
-   "In `agent_lab`/sdk.py the `async with` block owns the client, so the connection is closed in the same task that opened it, even on errors or cancellation."
+   "Turns are sequential: send, then drain the response before the next query.",
+   "The scripted CLI answers each user message with the next scripted reply under one session id, so `same_session` stays true for all three."
   ],
-  "reference": "The evidence lists the real public API of the installed client rather than names from another language. A turn is `query()` followed by consuming `receive_response()` to its `ResultMessage`; a second `query()` on the same client keeps the conversation context. Using `async with` guarantees `disconnect()` runs in the owning task.",
+  "reference": "The client owns one process and one session. `async with` guarantees disconnect even when a turn fails, and a closed client refuses new work instead of silently reconnecting.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 41` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "When does `async for message in client.receive_response()` stop?",
+    "prompt": "What keeps context between two query() calls?",
     "options": [
      {
-      "text": "After the `ResultMessage` for the current query.",
-      "explanation": "Correct. It ends one turn so you can send the next `query()`."
+      "text": "Both run on the same connected ClaudeSDKClient session.",
+      "explanation": "Correct. The session carries the conversation."
      },
      {
-      "text": "Only when the client disconnects.",
-      "explanation": "No. That describes `receive_messages()`, which continues across queries."
+      "text": "Writing the first answer to a file.",
+      "explanation": "Host files are not SDK session state."
      },
      {
-      "text": "After the first text block.",
-      "explanation": "No. A turn can include several messages and tool calls before the result."
+      "text": "Calling query() twice as fast as possible.",
+      "explanation": "Speed has nothing to do with context."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "How does the live profile keep context between the first prompt and the follow-up?",
+    "prompt": "What happens if you query() after leaving async with?",
     "options": [
      {
-      "text": "It saves a transcript and resends it.",
-      "explanation": "No. Both turns go through the same connected client, which holds the context."
+      "text": "It reconnects automatically.",
+      "explanation": "The client does not reconnect silently."
      },
      {
-      "text": "It calls `query()` twice on the same `ClaudeSDKClient` inside one `async with` block.",
-      "explanation": "Correct. Reusing the client keeps the session alive between turns."
+      "text": "It raises CLIConnectionError.",
+      "explanation": "Correct. Connect again explicitly if you need a new session."
      },
      {
-      "text": "It creates a new client for each turn with `resume`.",
-      "explanation": "No. The lab does not resume across clients."
+      "text": "It returns an empty reply.",
+      "explanation": "It fails loudly instead."
      }
     ],
     "correct": 1
-   },
-   {
-    "prompt": "Why should connect and disconnect happen in the same asyncio task?",
-    "options": [
-     {
-      "text": "Because the SDK only allows one client per process.",
-      "explanation": "No. The rule is about task ownership, not the number of clients."
-     },
-     {
-      "text": "Because `disconnect()` is synchronous.",
-      "explanation": "No. It is awaited like the other client methods."
-     },
-     {
-      "text": "Because the client's connection resources are owned by the task that opened them, so cleanup must run there.",
-      "explanation": "Correct. The lab uses `async with` so cleanup happens in the owning task, even on cancellation."
-     }
-    ],
-    "correct": 2
    }
   ]
  },

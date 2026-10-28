@@ -115,6 +115,7 @@ before exposing these teaching endpoints to other users.
 | `agent_lab/exercises.py` | Actual offline host exercises |
 | `agent_lab/services.py` | Schemas, graph, approvals, ledger, retrieval and SQLite |
 | `agent_lab/sdk.py` | Official SDK tools, hooks and interactive client |
+| `agent_lab/scripted_cli.py` | Scripted stand-in for the Claude Code process: the real `ClaudeSDKClient` runs offline against it (lessons 10, 26, 41) |
 | `agent_lab/hooks.py` | PreToolUse policy, PostToolUse audit and `can_use_tool` callbacks shared by live runs and the offline hook lessons (7, 20, 37) |
 | `agent_lab/runtime.py` | Task ownership, deadlines and cancellation |
 | `agent_lab/api.py` | JSON, SSE and WebSocket routes |
