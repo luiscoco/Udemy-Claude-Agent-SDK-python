@@ -21,6 +21,9 @@ from agent_lab.learning import (
     visual_guides_for,
 )
 from agent_lab.models import LessonError
+from agent_lab.progress import KEYS as PROGRESS_KEYS
+from agent_lab.progress import MAX_BYTES as PROGRESS_MAX_BYTES
+from agent_lab.progress import export_progress, import_progress
 from agent_lab.tutor import TUTOR_BUDGET_USD, TutorRequest, TutorService
 
 REVIEW_ITEMS = [
@@ -500,6 +503,63 @@ def next_in_path(lessons: list[int]) -> int:
     return next((n for n in lessons if not completed(n)), lessons[0])
 
 
+def progress_card() -> None:
+    """Move progress between browsers: export a JSON file, or replace progress from one."""
+    with card("Your progress", "Backup and transfer"):
+        ui.label(
+            "Progress is stored in this browser only. Export it to keep a backup or to "
+            "continue in another browser; importing replaces the progress stored here."
+        ).classes("text-sm text-slate-600")
+
+        def export() -> None:
+            ui.download.content(
+                export_progress(_store()), "agent-lab-progress.json", "application/json"
+            )
+
+        async def received(event: Any) -> None:
+            try:
+                data = import_progress(await event.file.read())
+            except ValueError as exc:
+                ui.notify(str(exc), type="warning")
+                return
+            reviewed = sum(all(row["checkpoints"]) for row in data["lessons"].values())
+            with ui.dialog() as dialog, ui.card().classes("p-6 gap-3"):
+                ui.label("Replace your progress?").classes("text-lg font-bold")
+                ui.label(
+                    f"The file has {len(data['lessons'])} lessons with saved work, "
+                    f"{reviewed} of them reviewed. Your current progress in this browser "
+                    "will be replaced. This cannot be undone."
+                )
+
+                def replace() -> None:
+                    for key in PROGRESS_KEYS:
+                        _store()[key] = data[key]
+                    dialog.close()
+                    ui.navigate.reload()
+
+                with ui.row().classes("gap-2"):
+                    ui.button("Replace progress", on_click=replace).props("color=negative")
+                    ui.button("Cancel", on_click=dialog.close).props("flat")
+            dialog.open()
+            upload.reset()
+
+        with ui.row().classes("gap-3 items-center"):
+            ui.button("Export progress", icon="download", on_click=export).props("outline")
+            upload = (
+                ui.upload(
+                    label="Import progress (.json)",
+                    auto_upload=True,
+                    max_file_size=PROGRESS_MAX_BYTES,
+                    on_upload=received,
+                    on_rejected=lambda: ui.notify(
+                        "Choose a progress export under 2 MB.", type="warning"
+                    ),
+                )
+                .props("accept=.json flat bordered")
+                .classes("max-w-xs")
+            )
+
+
 def home_page() -> None:
     done = [n for n in LESSONS if completed(n)]
     last = int(preference("last_lesson", "0") or 0)
@@ -525,6 +585,7 @@ def home_page() -> None:
             ui.button("Start with lesson 1", on_click=lambda: ui.navigate.to("/?lesson=1")).props(
                 "outline" if last in LESSONS else ""
             )
+    progress_card()
 
     ui.label("Learning paths").classes("text-xl font-bold mt-4")
     with ui.grid(columns="repeat(auto-fit, minmax(260px, 1fr))").classes("w-full gap-4"):

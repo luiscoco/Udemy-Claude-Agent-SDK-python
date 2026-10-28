@@ -1,6 +1,7 @@
 """FastAPI transport; the lesson implementation is shared with CLI and NiceGUI."""
 
 import asyncio
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
@@ -26,6 +27,10 @@ class AnswerRequest(BaseModel):
 
 
 def create_app(service: RunService | None = None, with_ui: bool = True) -> FastAPI:
+    # Per-request INFO lines from in-process MCP servers and HTTP clients bury the app's own
+    # log; warnings and errors from them still appear.
+    for name in ("mcp", "httpx"):
+        logging.getLogger(name).setLevel(logging.WARNING)
     runner = service or RunService()
 
     @asynccontextmanager

@@ -30,6 +30,9 @@ with their quizzes, your progress and the visual guides. Each lesson has six tab
 Workbook entries, quiz answers, check results, saved tutor answers and appearance
 (Light/Dark/System theme, text size) are stored per browser in `.nicegui/` on
 this machine. They are never sent to Claude and do not sync between browsers.
+Use **Export progress** on the home page to save them as a JSON file, and
+**Import progress** in another browser to restore them. Imports are validated
+and replace that browser's progress only after you confirm.
 The automatic check covers local evidence only; your self-review stays separate.
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled

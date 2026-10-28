@@ -343,3 +343,34 @@ def test_browser_enables_the_prompt_only_for_offline_exercises_that_read_it(serv
         page.get_by_role("tab", name="Run the exercise").click()
         assert page.get_by_label("Agent prompt (live mode)").is_disabled()
         browser.close()
+
+
+def test_browser_exports_progress_and_imports_it_into_another_browser(server, tmp_path):
+    """A fresh browser context has its own storage, like moving to another browser."""
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        first = browser.new_context().new_page()
+        first.goto(base + "/?lesson=5")
+        first.get_by_label("Private notes").fill("moved between browsers")
+        first.get_by_text("I understand the objective and preparation.").click()
+        first.wait_for_timeout(500)  # let the note reach the server-side store
+        first.goto(base + "/")
+        with first.expect_download() as download:
+            first.get_by_role("button", name="Export progress").click()
+        exported = tmp_path / "progress.json"
+        download.value.save_as(exported)
+
+        second = browser.new_context().new_page()
+        second.goto(base + "/?lesson=5")
+        assert second.get_by_label("Private notes").input_value() == ""
+        second.goto(base + "/")
+        second.locator("input[type=file]").set_input_files(str(exported))
+        second.get_by_text("Replace your progress?").wait_for()
+        second.get_by_role("button", name="Replace progress").click()
+        second.wait_for_load_state()
+        second.goto(base + "/?lesson=5")
+        assert second.get_by_label("Private notes").input_value() == "moved between browsers"
+        browser.close()

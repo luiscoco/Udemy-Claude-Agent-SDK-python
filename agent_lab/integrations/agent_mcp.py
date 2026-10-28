@@ -9,7 +9,7 @@ from agent_lab.runtime import RunService
 
 def build_server(settings: Settings | None = None) -> FastMCP:
     """Settings are injectable so offline lessons can call the tool without a paid run."""
-    server = FastMCP("python-agent")
+    server = FastMCP("python-agent", log_level="WARNING")
 
     @server.tool()
     async def explain_python_agent(prompt: str) -> dict:

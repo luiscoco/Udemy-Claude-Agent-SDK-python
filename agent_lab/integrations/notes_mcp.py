@@ -10,7 +10,7 @@ NOTES = {
 
 def build_server() -> FastMCP:
     """A fresh server per transport: an HTTP session manager can only run once."""
-    server = FastMCP("python-notes")
+    server = FastMCP("python-notes", log_level="WARNING")
 
     @server.tool()
     def read_note(name: str) -> str:
