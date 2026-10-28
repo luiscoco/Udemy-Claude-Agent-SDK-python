@@ -94,6 +94,8 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     assert "Write" not in options.tools
     assert options.max_budget_usd == 0.1
     assert options.env["CLAUDE_CONFIG_DIR"] == str(tmp_path / "config")
+    # The shared policy and audit hooks that the offline hook lessons exercise.
+    assert set(options.hooks) == {"PreToolUse", "PostToolUse"}
     assert events[-1].kind == "result"
 
 

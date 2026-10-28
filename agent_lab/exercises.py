@@ -14,6 +14,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from pydantic import ValidationError
+
+from agent_lab.hooks import call_hook, lesson_hooks, matches, permission_callback
 from agent_lab.models import Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, inside, redact
 from agent_lab.services import (
@@ -171,7 +174,7 @@ def workspace(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]
     }
 
 
-@exercise("permissions", "hooks", "hook_pipeline", "permission_callback", "security", "redteam")
+@exercise("permissions", "security", "redteam")
 def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     cases = [
         ("normal read", "Read", {"file_path": "notes.txt"}, True),
@@ -200,7 +203,148 @@ def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[st
     }
 
 
-@exercise("calculator", "tool_design")
+# Tool calls shaped like the CLI's hook input; the same cases appear in lessons 4, 7, 20 and 37.
+TOOL_CALLS = [
+    ("normal read", "Read", {"file_path": "notes.txt"}),
+    ("path traversal", "Read", {"file_path": "../outside.txt"}),
+    ("secret read", "Read", {"file_path": ".env"}),
+    ("shell command", "Bash", {"command": "echo preapproved"}),
+    ("unapproved write", "Write", {"file_path": "notes.txt", "content": "changed"}),
+]
+
+
+def hook_input(event: str, tool: str, arguments: dict[str, Any], **extra: Any) -> dict[str, Any]:
+    return {
+        "hook_event_name": event,
+        "session_id": "offline-lesson",
+        "tool_name": tool,
+        "tool_input": arguments,
+        **extra,
+    }
+
+
+@exercise("hooks")
+async def hooks(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Run the live PreToolUse policy hook on recorded tool calls; no tool executes."""
+    audit_log: list[dict[str, Any]] = []
+
+    async def audit(kind: str, data: dict[str, Any]) -> None:
+        audit_log.append({"event": kind, **data})
+
+    config = lesson_hooks(lambda name, arguments: decide(root, name, arguments), audit)
+    pre_tool = config["PreToolUse"][0].hooks[0]
+    decisions = []
+    for number, (label, tool, arguments) in enumerate(TOOL_CALLS, 1):
+        output = await call_hook(
+            pre_tool, hook_input("PreToolUse", tool, arguments), f"toolu_{number}"
+        )
+        decision = output["hookSpecificOutput"]
+        decisions.append(
+            {
+                "case": label,
+                "tool": tool,
+                "decision": decision["permissionDecision"],
+                "reason": decision["permissionDecisionReason"],
+            }
+        )
+    return {
+        "registered_events": list(config),
+        "decisions": decisions,
+        "denied": sum(row["decision"] == "deny" for row in decisions),
+        "audit_log": audit_log,
+    }
+
+
+@exercise("hook_pipeline")
+async def hook_pipeline(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Dispatch matched hooks around a host tool loop, as the CLI does for each tool call."""
+    from claude_agent_sdk import HookContext, HookInput, HookJSONOutput, HookMatcher
+
+    timeline: list[dict[str, Any]] = []
+
+    async def audit(kind: str, data: dict[str, Any]) -> None:
+        step = {"hook": "PreToolUse hook", "audit": "PostToolUse audit"}[kind]
+        timeline.append({"step": step, **data})
+
+    config = lesson_hooks(lambda name, arguments: decide(root, name, arguments), audit)
+
+    async def write_alert(
+        arguments: HookInput, tool_use_id: str | None, context: HookContext
+    ) -> HookJSONOutput:
+        timeline.append({"step": "write alert hook", "tool": arguments.get("tool_name")})
+        return {}
+
+    # A matcher-scoped hook: it would only ever see Write or Edit results.
+    config["PostToolUse"].append(HookMatcher(matcher="Write|Edit", hooks=[write_alert]))
+    for number, (label, tool, arguments) in enumerate(TOOL_CALLS, 1):
+        tool_use_id = f"toolu_{number}"
+        timeline.append({"step": "tool requested", "case": label, "tool": tool})
+        allowed = True
+        for matcher in config["PreToolUse"]:
+            if matches(matcher.matcher, tool):
+                for callback in matcher.hooks:
+                    output = await call_hook(
+                        callback, hook_input("PreToolUse", tool, arguments), tool_use_id
+                    )
+                    allowed &= output["hookSpecificOutput"]["permissionDecision"] == "allow"
+        if not allowed:
+            timeline.append({"step": "tool blocked", "tool": tool})
+            continue
+        # Only allowed reads reach this point; the host performs the read itself.
+        result = inside(root, arguments["file_path"]).read_text(encoding="utf-8")
+        timeline.append({"step": "tool executed", "tool": tool, "characters": len(result)})
+        for matcher in config["PostToolUse"]:
+            if matches(matcher.matcher, tool):
+                for callback in matcher.hooks:
+                    await call_hook(
+                        callback,
+                        hook_input("PostToolUse", tool, arguments, tool_response=result),
+                        tool_use_id,
+                    )
+    executed = [row for row in timeline if row["step"] == "tool executed"]
+    audited = [row for row in timeline if row["step"] == "PostToolUse audit"]
+    return {
+        "matchers": {
+            event: [matcher.matcher or "*" for matcher in matchers]
+            for event, matchers in config.items()
+        },
+        "timeline": timeline,
+        "executed": len(executed),
+        "audited": len(audited),
+        "every_execution_audited": len(executed) == len(audited),
+        "write_alerts": sum(row["step"] == "write alert hook" for row in timeline),
+    }
+
+
+@exercise("permission_callback")
+async def permission_callback_cases(
+    root: Path, request: RunRequest, lesson: Lesson
+) -> dict[str, Any]:
+    """Call the live can_use_tool callback and show the SDK result object it returns."""
+    callback = permission_callback(lambda name, arguments: decide(root, name, arguments))
+    results = []
+    for label, tool, arguments in TOOL_CALLS:
+        outcome = await callback(tool, arguments, None)
+        results.append(
+            {
+                "case": label,
+                "tool": tool,
+                "result_type": type(outcome).__name__,
+                "behavior": outcome.behavior,
+                "message": getattr(outcome, "message", ""),
+                "input_unchanged": getattr(outcome, "updated_input", None) == arguments,
+            }
+        )
+    return {
+        "results": results,
+        "allowed": sum(row["behavior"] == "allow" for row in results),
+        "denied": sum(row["behavior"] == "deny" for row in results),
+        "note": "A PreToolUse hook that returns allow or deny decides first; can_use_tool is "
+        "asked only when no hook or rule settled the call.",
+    }
+
+
+@exercise("calculator")
 def calculator(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     good = Calculation(a=19.0, b=23.0)
     errors = []
@@ -214,6 +358,50 @@ def calculator(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any
         "input": good.model_dump(),
         "sum": good.a + good.b,
         "rejected": errors,
+    }
+
+
+FIX_HINTS = {
+    "float_type": "Send a JSON number, not a string or boolean.",
+    "finite_number": "Send a finite number; NaN and infinity are not allowed.",
+    "extra_forbidden": "Remove this field; the tool accepts only a and b.",
+    "missing": "Add this required number.",
+    "less_than_equal": "Use a value of at most 1000000.",
+    "greater_than_equal": "Use a value of at least -1000000.",
+}
+
+
+@exercise("tool_design")
+def tool_design(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Turn validation failures into per-field messages the model can act on."""
+    cases = {
+        "boolean instead of number": {"a": True, "b": 1},
+        "not a number": {"a": float("nan"), "b": 1},
+        "unexpected field": {"a": 1, "b": 1, "shell": "rm -rf /"},
+        "missing argument": {"a": 1},
+        "out of range": {"a": 2e6, "b": 1},
+    }
+    feedback = []
+    for label, arguments in cases.items():
+        try:
+            Calculation.model_validate(arguments)
+        except ValidationError as exc:
+            for error in exc.errors():
+                feedback.append(
+                    {
+                        "case": label,
+                        "field": ".".join(str(part) for part in error["loc"]) or "(input)",
+                        "problem": error["msg"],
+                        "fix": FIX_HINTS.get(error["type"], "Check the input schema."),
+                    }
+                )
+    schema = Calculation.model_json_schema()
+    return {
+        "tool_description": "Add two finite numbers between -1000000 and 1000000. Returns their sum.",
+        "input_schema": schema,
+        "valid_call": {"input": {"a": 12.5, "b": 29.5}, "sum": 42.0},
+        "feedback": feedback,
+        "every_error_actionable": all(row["fix"] != "Check the input schema." for row in feedback),
     }
 
 
@@ -381,15 +569,24 @@ def checkpoint(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any
 
 @exercise("compaction")
 def compaction(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Bound one oversized tool result and summarize history before it fills the context."""
+    limit = 600
     rows = [
         {"step": index, "status": "done", "details": "fixture detail " * 40} for index in range(8)
     ]
+    raw = json.dumps(rows)
+    marker = f"\n[truncated {len(raw) - limit} characters; ask for a specific step]"
+    bounded = raw if len(raw) <= limit else raw[:limit] + marker
     summary = {"completed": [row["step"] for row in rows], "next": "verify"}
     return {
-        "full_characters": len(json.dumps(rows)),
+        "limit_characters": limit,
+        "full_characters": len(raw),
+        "bounded_characters": len(bounded),
+        "bounded_within_limit": len(bounded) <= limit + len(marker),
+        "truncation_marker": marker.strip(),
         "summary_characters": len(json.dumps(summary)),
         "summary": summary,
-        "note": "Host compression demonstration; SDK compaction is a separate runtime behavior.",
+        "note": "Host bounding and summarizing; SDK compaction is a separate runtime behavior.",
     }
 
 
@@ -415,18 +612,46 @@ async def background(root: Path, request: RunRequest, lesson: Lesson) -> dict[st
 
 @exercise("retry")
 async def retry(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    attempts = []
-    for attempt in range(1, 4):
-        attempts.append(attempt)
-        try:
-            if attempt < 3:
-                raise ConnectionError("Transient fixture failure")
-            return {"attempts": attempts, "result": "recovered", "idempotent_operation": "read"}
-        except ConnectionError:
-            if attempt == 3:
-                raise
-            await asyncio.sleep(0)
-    raise AssertionError("Unreachable")
+    """Retry transient failures with backoff inside a deadline, without repeating a write."""
+    applied: dict[str, str] = {}  # idempotency key -> result: the host's write ledger
+    attempts: list[dict[str, Any]] = []
+
+    async def write_refund(key: str, attempt: int) -> str:
+        if key not in applied:
+            applied[key] = "refund A-100 for 500 cents"
+        if attempt == 1:
+            # The write succeeded, but its response was lost: the classic ambiguous failure.
+            raise ConnectionError("Connection reset after the request was sent")
+        if attempt == 2:
+            raise TimeoutError("Upstream timed out")
+        return applied[key]
+
+    key = "refund-A-100-500"
+    delays = [0.01, 0.02]
+    result = None
+    try:
+        async with asyncio.timeout(2):
+            for attempt in range(1, 4):
+                try:
+                    result = await write_refund(key, attempt)
+                    attempts.append({"attempt": attempt, "outcome": "succeeded"})
+                    break
+                except (ConnectionError, TimeoutError) as exc:
+                    attempts.append({"attempt": attempt, "outcome": type(exc).__name__})
+                    if attempt == 3:
+                        raise
+                    await asyncio.sleep(delays[attempt - 1])
+    except TimeoutError as exc:
+        raise LessonError("The retry deadline expired before the write was confirmed.") from exc
+    return {
+        "deadline_seconds": 2,
+        "backoff_seconds": delays,
+        "attempts": attempts,
+        "result": result,
+        "idempotency_key": key,
+        "writes_applied": len(applied),
+        "duplicate_write_prevented": len(applied) == 1 and len(attempts) > 1,
+    }
 
 
 @exercise("images")
@@ -452,16 +677,45 @@ def images(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
 
 @exercise("todos", "suggestions")
 def todos(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    tasks = [
-        {"id": "read", "status": "completed"},
-        {"id": "verify", "status": "in_progress"},
-        {"id": "release", "status": "pending"},
+    """Validate todo transitions and derive the next suggestion from the resulting state."""
+    allowed = {"pending": {"in_progress"}, "in_progress": {"completed", "pending"}}
+    tasks = {"read": "pending", "verify": "pending", "release": "pending"}
+    requested = [
+        ("read", "in_progress"),
+        ("read", "completed"),
+        ("release", "completed"),  # skips in_progress
+        ("verify", "in_progress"),
+        ("release", "in_progress"),  # a second task in progress
+        ("read", "pending"),  # reopens completed work
     ]
-    assert sum(task["status"] == "in_progress" for task in tasks) == 1
+    transitions = []
+    for task, target in requested:
+        current = tasks[task]
+        if target not in allowed.get(current, set()):
+            reason = f"{current} cannot move to {target}"
+        elif target == "in_progress" and "in_progress" in tasks.values():
+            reason = "another task is already in progress"
+        else:
+            reason = ""
+            tasks[task] = target
+        transitions.append(
+            {"task": task, "from": current, "to": target, "accepted": not reason, "reason": reason}
+        )
+    active = next((task for task, state in tasks.items() if state == "in_progress"), None)
+    waiting = next((task for task, state in tasks.items() if state == "pending"), None)
+    suggestion = (
+        f"Finish {active} before starting another task."
+        if active
+        else f"Start {waiting}."
+        if waiting
+        else "All tasks are complete."
+    )
     return {
-        "tasks": tasks,
-        "suggestion": "Finish verification before release.",
-        "source": "host state",
+        "transitions": transitions,
+        "rejected": sum(not row["accepted"] for row in transitions),
+        "tasks": [{"id": task, "status": state} for task, state in tasks.items()],
+        "suggestion": suggestion,
+        "source": "derived from validated host state",
     }
 
 
@@ -751,15 +1005,41 @@ def tool_search(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, An
 
 @exercise("routing")
 def routing(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Route each task to a model and limits with explicit, testable host rules."""
     from agent_lab.config import Settings
 
-    model = Settings().model
+    settings = Settings()
+    tiers = {
+        "fast": {"model": settings.model, "max_turns": 2, "max_budget_usd": 0.05},
+        "capable": {"model": settings.route_model, "max_turns": 6, "max_budget_usd": 0.25},
+    }
+    signals = ("refactor", "design", "debug", "architecture", "migrate", "security")
+    tasks = [
+        "Summarize notes.txt in one sentence.",
+        "Debug why the retry loop repeats the refund write.",
+        "Design the architecture for a multi-tenant agent service.",
+    ]
+    if request.prompt:
+        tasks.append(request.prompt)
+    routes = []
+    for task in tasks:
+        matched = [word for word in signals if word in task.lower()]
+        tier = "capable" if matched or len(task) > 400 else "fast"
+        routes.append(
+            {
+                "task": task[:120],
+                "tier": tier,
+                **tiers[tier],
+                "reason": f"matched {', '.join(matched)}"
+                if matched
+                else "long input"
+                if tier == "capable"
+                else "short task with no complexity signal",
+            }
+        )
     return {
-        "route": {
-            "model": model,
-            "max_turns": 4 if len(request.prompt) < 500 else 8,
-            "max_budget_usd": request.max_budget_usd,
-        },
+        "tiers": tiers,
+        "routes": routes,
         "decision_owner": "host policy",
         "fallback": "No automatic repeated paid calls after failure.",
     }

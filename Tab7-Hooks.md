@@ -27,37 +27,40 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `permission_cases`, line 174). Host contracts are in
+(function `hooks`, line 226). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("permissions", "hooks", "hook_pipeline", "permission_callback", "security", "redteam")
-def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    cases = [
-        ("normal read", "Read", {"file_path": "notes.txt"}, True),
-        ("path traversal", "Read", {"file_path": "../outside.txt"}, False),
-        ("secret read", "Read", {"file_path": ".env"}, False),
-        ("shell injection", "Bash", {"command": "echo preapproved"}, False),
-        ("unapproved write", "Write", {"file_path": "notes.txt"}, False),
-    ]
-    rows: list[dict[str, Any]] = []
-    for label, tool, arguments, expected in cases:
-        allowed, reason = decide(root, tool, arguments)
-        rows.append(
+@exercise("hooks")
+async def hooks(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Run the live PreToolUse policy hook on recorded tool calls; no tool executes."""
+    audit_log: list[dict[str, Any]] = []
+
+    async def audit(kind: str, data: dict[str, Any]) -> None:
+        audit_log.append({"event": kind, **data})
+
+    config = lesson_hooks(lambda name, arguments: decide(root, name, arguments), audit)
+    pre_tool = config["PreToolUse"][0].hooks[0]
+    decisions = []
+    for number, (label, tool, arguments) in enumerate(TOOL_CALLS, 1):
+        output = await call_hook(
+            pre_tool, hook_input("PreToolUse", tool, arguments), f"toolu_{number}"
+        )
+        decision = output["hookSpecificOutput"]
+        decisions.append(
             {
                 "case": label,
                 "tool": tool,
-                "allowed": allowed,
-                "expected": expected,
-                "passed": allowed == expected,
-                "reason": reason,
+                "decision": decision["permissionDecision"],
+                "reason": decision["permissionDecisionReason"],
             }
         )
     return {
-        "decisions": rows,
-        "pass_rate": sum(row["passed"] for row in rows) / len(rows),
-        "redacted": redact({"api_key": "fixture-only", "text": "Bearer fake-fixture-token"}),
+        "registered_events": list(config),
+        "decisions": decisions,
+        "denied": sum(row["decision"] == "deny" for row in decisions),
+        "audit_log": audit_log,
     }
 ```
 

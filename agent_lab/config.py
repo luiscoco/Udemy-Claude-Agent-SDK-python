@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parent.parent
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="LAB_", env_file=ROOT / ".env", extra="ignore")
     model: str = "claude-haiku-4-5"
+    # The stronger model the Lesson 59 routing policy selects for complex tasks.
+    route_model: str = "claude-sonnet-5-5"
     cli_path: str | None = None
     host: str = "127.0.0.1"
     port: int = 8080

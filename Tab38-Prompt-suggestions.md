@@ -27,23 +27,52 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `todos`, line 453). Host contracts are in
+(function `todos`, line 678). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("todos", "suggestions")
 def todos(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    tasks = [
-        {"id": "read", "status": "completed"},
-        {"id": "verify", "status": "in_progress"},
-        {"id": "release", "status": "pending"},
+    """Validate todo transitions and derive the next suggestion from the resulting state."""
+    allowed = {"pending": {"in_progress"}, "in_progress": {"completed", "pending"}}
+    tasks = {"read": "pending", "verify": "pending", "release": "pending"}
+    requested = [
+        ("read", "in_progress"),
+        ("read", "completed"),
+        ("release", "completed"),  # skips in_progress
+        ("verify", "in_progress"),
+        ("release", "in_progress"),  # a second task in progress
+        ("read", "pending"),  # reopens completed work
     ]
-    assert sum(task["status"] == "in_progress" for task in tasks) == 1
+    transitions = []
+    for task, target in requested:
+        current = tasks[task]
+        if target not in allowed.get(current, set()):
+            reason = f"{current} cannot move to {target}"
+        elif target == "in_progress" and "in_progress" in tasks.values():
+            reason = "another task is already in progress"
+        else:
+            reason = ""
+            tasks[task] = target
+        transitions.append(
+            {"task": task, "from": current, "to": target, "accepted": not reason, "reason": reason}
+        )
+    active = next((task for task, state in tasks.items() if state == "in_progress"), None)
+    waiting = next((task for task, state in tasks.items() if state == "pending"), None)
+    suggestion = (
+        f"Finish {active} before starting another task."
+        if active
+        else f"Start {waiting}."
+        if waiting
+        else "All tasks are complete."
+    )
     return {
-        "tasks": tasks,
-        "suggestion": "Finish verification before release.",
-        "source": "host state",
+        "transitions": transitions,
+        "rejected": sum(not row["accepted"] for row in transitions),
+        "tasks": [{"id": task, "status": state} for task, state in tasks.items()],
+        "suggestion": suggestion,
+        "source": "derived from validated host state",
     }
 ```
 

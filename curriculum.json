@@ -58,7 +58,7 @@
     "title": "Hooks",
     "document": "Tab7-Hooks.md",
     "module": "agent_lab.lessons.lesson_07",
-    "exercise_function": "permission_cases",
+    "exercise_function": "hooks",
     "live_profile": "hooks",
     "adaptation": ""
   },
@@ -175,7 +175,7 @@
     "title": "Hooks in depth",
     "document": "Tab20-Hooks-in-depth.md",
     "module": "agent_lab.lessons.lesson_20",
-    "exercise_function": "permission_cases",
+    "exercise_function": "hook_pipeline",
     "live_profile": "hooks",
     "adaptation": ""
   },
@@ -328,7 +328,7 @@
     "title": "Permission prompt tool",
     "document": "Tab37-Permission-prompt-tool.md",
     "module": "agent_lab.lessons.lesson_37",
-    "exercise_function": "permission_cases",
+    "exercise_function": "permission_callback_cases",
     "live_profile": "hooks",
     "adaptation": ""
   },
@@ -481,7 +481,7 @@
     "title": "Designing tools the model uses well",
     "document": "Tab54-Designing-tools-the-model-uses-well.md",
     "module": "agent_lab.lessons.lesson_54",
-    "exercise_function": "calculator",
+    "exercise_function": "tool_design",
     "live_profile": "calculator",
     "adaptation": ""
   },

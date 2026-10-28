@@ -27,22 +27,31 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `compaction`, line 382). Host contracts are in
+(function `compaction`, line 570). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("compaction")
 def compaction(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Bound one oversized tool result and summarize history before it fills the context."""
+    limit = 600
     rows = [
         {"step": index, "status": "done", "details": "fixture detail " * 40} for index in range(8)
     ]
+    raw = json.dumps(rows)
+    marker = f"\n[truncated {len(raw) - limit} characters; ask for a specific step]"
+    bounded = raw if len(raw) <= limit else raw[:limit] + marker
     summary = {"completed": [row["step"] for row in rows], "next": "verify"}
     return {
-        "full_characters": len(json.dumps(rows)),
+        "limit_characters": limit,
+        "full_characters": len(raw),
+        "bounded_characters": len(bounded),
+        "bounded_within_limit": len(bounded) <= limit + len(marker),
+        "truncation_marker": marker.strip(),
         "summary_characters": len(json.dumps(summary)),
         "summary": summary,
-        "note": "Host compression demonstration; SDK compaction is a separate runtime behavior.",
+        "note": "Host bounding and summarizing; SDK compaction is a separate runtime behavior.",
     }
 ```
 

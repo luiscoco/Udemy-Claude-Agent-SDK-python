@@ -13,9 +13,6 @@ from claude_agent_sdk import (
     AgentDefinition,
     ClaudeAgentOptions,
     ClaudeSDKClient,
-    HookMatcher,
-    PermissionResultAllow,
-    PermissionResultDeny,
     ResultMessage,
     SystemMessage,
     create_sdk_mcp_server,
@@ -26,6 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from agent_lab.config import Settings
 from agent_lab.doctor import resolve_cli_path
+from agent_lab.hooks import lesson_hooks, permission_callback
 from agent_lab.models import Event, Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, redact
 from agent_lab.services import Calculation, Orders, Summary, retrieve
@@ -282,33 +280,11 @@ async def run_sdk(
             return decide(work, name, arguments)
         return False, "Tool not enabled for this lesson."
 
-    async def permission(name: str, arguments: dict[str, Any], context: Any) -> Any:
-        allowed, reason = permitted(name, arguments)
-        if not allowed:
-            return PermissionResultDeny(message=reason)
-        if name == "AskUserQuestion":
-            parsed = Questions.model_validate(arguments)
-            response = await ask(parsed.model_dump())
-            return PermissionResultAllow(updated_input={**arguments, "answers": response})
-        return PermissionResultAllow(updated_input=arguments)
+    async def audit(kind: str, data: dict[str, Any]) -> None:
+        await emit(Event(kind=kind, data=data))
 
-    async def pre_tool(arguments: Any, tool_use_id: str | None, context: Any) -> Any:
-        name = str(arguments.get("tool_name", ""))
-        allowed, reason = permitted(name, arguments.get("tool_input", {}))
-        await emit(Event(kind="hook", data={"tool": name, "allowed": allowed, "reason": reason}))
-        # Allow decisions skip later permission checks; AskUserQuestion needs the callback.
-        if name == "AskUserQuestion" and allowed:
-            return {}
-        return {
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "allow" if allowed else "deny",
-                "permissionDecisionReason": reason,
-            }
-        }
-
-    options.can_use_tool = permission
-    options.hooks = {"PreToolUse": [HookMatcher(hooks=[pre_tool])]}
+    options.can_use_tool = permission_callback(permitted, ask)
+    options.hooks = lesson_hooks(permitted, audit)
 
     async def consume(messages: Any) -> None:
         async for message in messages:

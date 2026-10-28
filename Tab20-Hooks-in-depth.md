@@ -27,37 +27,69 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `permission_cases`, line 174). Host contracts are in
+(function `hook_pipeline`, line 258). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("permissions", "hooks", "hook_pipeline", "permission_callback", "security", "redteam")
-def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    cases = [
-        ("normal read", "Read", {"file_path": "notes.txt"}, True),
-        ("path traversal", "Read", {"file_path": "../outside.txt"}, False),
-        ("secret read", "Read", {"file_path": ".env"}, False),
-        ("shell injection", "Bash", {"command": "echo preapproved"}, False),
-        ("unapproved write", "Write", {"file_path": "notes.txt"}, False),
-    ]
-    rows: list[dict[str, Any]] = []
-    for label, tool, arguments, expected in cases:
-        allowed, reason = decide(root, tool, arguments)
-        rows.append(
-            {
-                "case": label,
-                "tool": tool,
-                "allowed": allowed,
-                "expected": expected,
-                "passed": allowed == expected,
-                "reason": reason,
-            }
-        )
+@exercise("hook_pipeline")
+async def hook_pipeline(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Dispatch matched hooks around a host tool loop, as the CLI does for each tool call."""
+    from claude_agent_sdk import HookContext, HookInput, HookJSONOutput, HookMatcher
+
+    timeline: list[dict[str, Any]] = []
+
+    async def audit(kind: str, data: dict[str, Any]) -> None:
+        step = {"hook": "PreToolUse hook", "audit": "PostToolUse audit"}[kind]
+        timeline.append({"step": step, **data})
+
+    config = lesson_hooks(lambda name, arguments: decide(root, name, arguments), audit)
+
+    async def write_alert(
+        arguments: HookInput, tool_use_id: str | None, context: HookContext
+    ) -> HookJSONOutput:
+        timeline.append({"step": "write alert hook", "tool": arguments.get("tool_name")})
+        return {}
+
+    # A matcher-scoped hook: it would only ever see Write or Edit results.
+    config["PostToolUse"].append(HookMatcher(matcher="Write|Edit", hooks=[write_alert]))
+    for number, (label, tool, arguments) in enumerate(TOOL_CALLS, 1):
+        tool_use_id = f"toolu_{number}"
+        timeline.append({"step": "tool requested", "case": label, "tool": tool})
+        allowed = True
+        for matcher in config["PreToolUse"]:
+            if matches(matcher.matcher, tool):
+                for callback in matcher.hooks:
+                    output = await call_hook(
+                        callback, hook_input("PreToolUse", tool, arguments), tool_use_id
+                    )
+                    allowed &= output["hookSpecificOutput"]["permissionDecision"] == "allow"
+        if not allowed:
+            timeline.append({"step": "tool blocked", "tool": tool})
+            continue
+        # Only allowed reads reach this point; the host performs the read itself.
+        result = inside(root, arguments["file_path"]).read_text(encoding="utf-8")
+        timeline.append({"step": "tool executed", "tool": tool, "characters": len(result)})
+        for matcher in config["PostToolUse"]:
+            if matches(matcher.matcher, tool):
+                for callback in matcher.hooks:
+                    await call_hook(
+                        callback,
+                        hook_input("PostToolUse", tool, arguments, tool_response=result),
+                        tool_use_id,
+                    )
+    executed = [row for row in timeline if row["step"] == "tool executed"]
+    audited = [row for row in timeline if row["step"] == "PostToolUse audit"]
     return {
-        "decisions": rows,
-        "pass_rate": sum(row["passed"] for row in rows) / len(rows),
-        "redacted": redact({"api_key": "fixture-only", "text": "Bearer fake-fixture-token"}),
+        "matchers": {
+            event: [matcher.matcher or "*" for matcher in matchers]
+            for event, matchers in config.items()
+        },
+        "timeline": timeline,
+        "executed": len(executed),
+        "audited": len(audited),
+        "every_execution_audited": len(executed) == len(audited),
+        "write_alerts": sum(row["step"] == "write alert hook" for row in timeline),
     }
 ```
 

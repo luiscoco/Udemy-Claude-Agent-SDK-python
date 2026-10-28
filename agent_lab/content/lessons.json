@@ -638,94 +638,98 @@
   "prerequisites": [
    4
   ],
-  "concept_brief": "Hooks run host code at agent events: `ClaudeAgentOptions(hooks={\"PreToolUse\": [HookMatcher(hooks=[callback])]})` registers a callback that can return a `permissionDecision` of allow or deny before a tool runs, and can record an audit event.",
-  "lab_brief": "The offline exercise reuses `permission_cases`, the same five `decide()` policy cases the live PreToolUse hook calls, so you can see each decision and reason the hook would emit. In live mode the hook also writes a HOOK event with tool, allowed and reason for every tool call.",
+  "concept_brief": "A `PreToolUse` hook is an async callback registered with `HookMatcher` in `ClaudeAgentOptions.hooks`. It receives the tool name and input before the tool runs and can return `permissionDecision` `allow` or `deny` with a reason.",
+  "lab_brief": "The `hooks` exercise builds the exact hook configuration that live runs use (`agent_lab/hooks.py`) and calls its `PreToolUse` callback with five CLI-shaped tool calls. No tool runs; you see each decision and the audit log the hook wrote.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 7 (or run `uv run agent-lab lesson 7`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. In live mode the same hook emits `hook` events, visible under Diagnostics."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "See how a PreToolUse hook turns a host policy decision into an allow or deny result plus an audit record."
+    "text": "See how a hook makes a host policy decision before any tool runs."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Find `pre_tool` in `agent_lab/sdk.py`: it calls the same policy, emits a `hook` event and returns `hookSpecificOutput` with `permissionDecision`."
+    "text": "Open the Python source tab and find `lesson_hooks` and `pre_tool` in `agent_lab/hooks.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the offline exercise and open the `decisions` table."
    },
    {
     "title": "Verify the evidence",
-    "text": "Read each `decisions` row as the audit record the hook would write: tool, allowed and reason. Confirm `pass_rate` is 1.0."
+    "text": "Confirm one `allow` (normal read) and four `deny` rows, and one audit entry per call in `audit_log`."
    },
    {
     "title": "Try the challenge",
-    "text": "Predict the hook decision for a new tool call and check it with `decide()`; in live mode, look for HOOK lines in Diagnostics — raw events."
+    "text": "Add a case to `TOOL_CALLS` and predict its decision before running."
    }
   ],
-  "inspect": "Look at `decisions` (tool, allowed, reason, passed) and `pass_rate`; in live mode also open Diagnostics — raw events for HOOK lines.",
-  "expected": "Five rows: \"normal read\" allowed with \"Read-only workspace access.\", traversal and .env reads denied, Bash and Write denied with \"This tool is not available in the read-only lesson policy.\", and `pass_rate` 1.0. The offline evidence matches lesson 4 because the hook delegates to the same policy.",
-  "evidence_criterion": "The check confirms every policy case that the hook relies on produced the expected decision.",
+  "inspect": "`registered_events` (PreToolUse and PostToolUse), the `decisions` table with each `decision` and `reason`, the `denied` count and the `audit_log`.",
+  "expected": "`decisions` shows `allow` for the normal read of notes.txt and `deny` for path traversal, the .env read, Bash and Write. `denied` is 4 and `audit_log` has five `hook` entries.",
+  "evidence_criterion": "The check confirms that both hook events are registered and the PreToolUse hook denied exactly four of the five tool calls.",
   "evidence_checks": [
    {
-    "key": "pass_rate",
-    "rule": "equals",
-    "value": 1.0
+    "key": "registered_events",
+    "rule": "truthy"
    },
    {
-    "key": "decisions",
+    "key": "denied",
+    "rule": "equals",
+    "value": 4
+   },
+   {
+    "key": "audit_log",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch script, call `decide(root, \"Glob\", {\"path\": \"config\"})` and predict the `permissionDecision` the hook would return. Verify it is denied, then, if live mode is available, run the lesson and confirm each HOOK line in Diagnostics shows `allowed` true only for workspace reads.",
+  "challenge": "Add `(\"glob search\", \"Glob\", {\"path\": \".\"})` to `TOOL_CALLS` in `agent_lab/exercises.py`, run again and explain why the hook allows it while `denied` stays 4.",
   "hints": [
-   "The hook maps `allowed` True to \"allow\" and False to \"deny\", and passes the reason as `permissionDecisionReason`.",
-   "`config` is in the protected set in `agent_lab/policy.py`, so `inside()` raises and `decide()` returns `(False, \"Read only non-secret files inside this lesson workspace.\")`."
+   "The hook does not decide by itself: it calls `permitted`, which wraps `policy.decide`.",
+   "`decide` allows Read, Glob and Grep when the path stays inside the workspace, so a Glob of `.` is allowed and only the four original risky calls are denied."
   ],
-  "reference": "The hook does not invent its own rules; it asks the host policy and reports the answer, which is why the offline cases are the hook's ground truth. Returning `permissionDecision` deny blocks the tool before it runs, and the emitted event leaves an audit trail. Offline you see the decisions; live you also see the hook firing per tool call.",
+  "reference": "The hook is the host's enforcement point: the model can request any tool, but the PreToolUse callback returns `deny` with a reason before execution. Because offline and live runs share `lesson_hooks`, the decisions you see here are the decisions a live agent meets.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. Hook events only appear in live runs, under Diagnostics — raw events."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "How is the PreToolUse hook registered in the Python SDK?",
+    "prompt": "When does a PreToolUse hook run?",
     "options": [
      {
-      "text": "`hooks={\"PreToolUse\": [HookMatcher(hooks=[pre_tool])]}` on `ClaudeAgentOptions`",
-      "explanation": "Correct. A `HookMatcher` groups callbacks for one event name."
+      "text": "After the tool returns its result.",
+      "explanation": "That is PostToolUse; PreToolUse runs before execution."
      },
      {
-      "text": "`@tool(\"PreToolUse\")` on the callback",
-      "explanation": "`@tool` defines a custom tool for the model, not a hook."
+      "text": "Before the tool executes, with the tool name and input.",
+      "explanation": "Correct. It can allow or deny the call before any effect happens."
      },
      {
-      "text": "`client.add_hook(\"PreToolUse\", pre_tool)`",
-      "explanation": "`ClaudeSDKClient` has no such method; hooks are passed in options."
+      "text": "Only when the model finishes the conversation.",
+      "explanation": "Stop hooks run at the end; tool hooks run around each tool call."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "How does a PreToolUse hook block a call?",
+    "options": [
+     {
+      "text": "It returns hookSpecificOutput with permissionDecision deny and a reason.",
+      "explanation": "Correct. The reason is reported back so the model can adjust."
+     },
+     {
+      "text": "It raises an exception inside the tool.",
+      "explanation": "Raising is a failure, not a policy decision; return an explicit deny."
+     },
+     {
+      "text": "It edits the system prompt.",
+      "explanation": "Prompts influence the model but do not enforce anything on the host."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "What does the hook return to block a Bash call?",
-    "options": [
-     {
-      "text": "An empty dict.",
-      "explanation": "An empty result expresses no decision, so it does not block the call."
-     },
-     {
-      "text": "A text message asking the model not to use Bash.",
-      "explanation": "Text is a request, not enforcement."
-     },
-     {
-      "text": "`hookSpecificOutput` with `permissionDecision` set to \"deny\" and a reason.",
-      "explanation": "Correct. The decision blocks the tool and the reason is reported."
-     }
-    ],
-    "correct": 2
    }
   ]
  },
@@ -1972,116 +1976,101 @@
  {
   "id": 20,
   "prerequisites": [
-   4,
    7
   ],
-  "concept_brief": "Hooks are configured with `ClaudeAgentOptions.hooks`, a dict from events such as `PreToolUse` and `PostToolUse` to lists of `HookMatcher`; a `PreToolUse` hook returns `permissionDecision` and `permissionDecisionReason` in `hookSpecificOutput`.",
-  "lab_brief": "The offline `permission_cases` exercise runs five labelled tool requests through the host `decide()` policy that the live `PreToolUse` hook also uses, records each allow or deny with its reason, and redacts secret-like values.",
+  "concept_brief": "Hooks form a pipeline around each tool call: `PreToolUse` decides, the tool runs, then `PostToolUse` sees `tool_response`. Each `HookMatcher` has an optional `matcher` regex, so a hook can be scoped to tools such as `Write|Edit`.",
+  "lab_brief": "The `hook_pipeline` exercise drives five tool calls through the shared hooks, matching each `HookMatcher` the way the CLI does. Allowed reads really execute on the host and are audited by the PostToolUse hook; a `Write|Edit` hook never fires because writes are blocked first.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Open `agent_lab/policy.py` (`decide`, `redact`) and the `pre_tool` function in `agent_lab/sdk.py`."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 20 (or run `uv run agent-lab lesson 20`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. Live runs emit `hook` and `audit` events under Diagnostics from the same callbacks."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand the pipeline: before a tool runs, the hook asks the host policy and returns allow or deny with a reason the model sees."
+    "text": "Follow one tool call from request through decision, execution and audit."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `permission_cases`: it tests a normal read, path traversal, a `.env` read, a Bash command and a Write."
+    "text": "Read `hook_pipeline` and `matches` in the Python source; note the extra `Write|Edit` matcher."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 20 in Offline mode."
+    "text": "Run the offline exercise and open the `timeline`."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that every row in `decisions` has `passed: true`, that only `normal read` is allowed, and that `pass_rate` is 1.0."
+    "text": "Confirm `executed` equals `audited` and `write_alerts` is 0."
    },
    {
     "title": "Try the challenge",
-    "text": "Add a case of your own and predict its decision and reason before running it."
+    "text": "Change the extra matcher and observe which calls it sees."
    }
   ],
-  "inspect": "Look at `decisions` (case, tool, allowed, expected, passed, reason for each), `pass_rate` and `redacted`.",
-  "expected": "Five decisions: `normal read` allowed with reason \"Read-only workspace access.\"; path traversal and secret read denied with \"Read only non-secret files inside this lesson workspace.\"; Bash and Write denied as not available; `pass_rate` 1.0; `redacted` shows `[REDACTED]` for both `api_key` and `text`.",
-  "evidence_criterion": "The check confirms all five labelled policy cases produced their expected decision.",
+  "inspect": "`matchers` per event, the ordered `timeline` (tool requested, PreToolUse hook, tool executed or blocked, PostToolUse audit), and the `executed`, `audited`, `every_execution_audited` and `write_alerts` values.",
+  "expected": "Only the normal read executes: `executed` 1, `audited` 1, `every_execution_audited` true. Four calls end in `tool blocked`, and `write_alerts` is 0 because no Write ever runs.",
+  "evidence_criterion": "The check confirms that every executed tool call was audited by the PostToolUse hook.",
   "evidence_checks": [
    {
-    "key": "pass_rate",
+    "key": "every_execution_audited",
     "rule": "equals",
-    "value": 1.0
+    "value": true
    },
    {
-    "key": "decisions",
+    "key": "executed",
+    "rule": "equals",
+    "value": 1
+   },
+   {
+    "key": "timeline",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a copy of `permission_cases`, add `(\"glob search\", \"Glob\", {\"path\": \".\"}, True)` and `(\"config read\", \"Read\", {\"file_path\": \".claude/settings.json\"}, False)`; rerun the function and confirm `pass_rate` stays 1.0.",
+  "challenge": "Change the extra matcher from `\"Write|Edit\"` to `\"Read\"` in `hook_pipeline`, run again and predict `write_alerts` (it becomes 1). Explain why a matcher cannot see blocked calls.",
   "hints": [
-   "`decide` allows only Read, Glob and Grep, and only for paths that `inside()` accepts.",
-   "`inside()` rejects absolute paths, paths escaping the root and any path containing `.git`, `.env`, `.venv`, `config` or `.claude`."
+   "PostToolUse only runs after a tool actually executes.",
+   "A blocked call never reaches execution, so no PostToolUse matcher sees it; with matcher `Read` the alert hook fires once, for the single allowed read."
   ],
-  "reference": "Each decision comes from deterministic host code, so the same input always gets the same answer and reason. The live hook emits the same decision as a `hook` event and returns it as `permissionDecision`, so the model is told why a call was refused. Redaction ensures audit records can be shared without leaking keys or bearer tokens.",
+  "reference": "Pre and post hooks have different jobs: PreToolUse enforces policy, PostToolUse records what really happened. The audit stores only `result_characters`, never content, because tool results can contain private data. Matchers scope hooks to the tools they care about.",
   "recovery": [
-   "If `pass_rate` is below 1.0, compare the failing row's `reason` with `decide()` in `policy.py`; do not loosen the policy to make a case pass.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does a `PreToolUse` hook return in this lab to block a tool?",
+    "prompt": "What does a PostToolUse hook receive that PreToolUse does not?",
     "options": [
      {
-      "text": "It raises an exception.",
-      "explanation": "Raising would crash the run instead of giving a clean decision with a reason."
+      "text": "The model's system prompt.",
+      "explanation": "Neither hook receives the system prompt."
      },
      {
-      "text": "`hookSpecificOutput` with `permissionDecision: \"deny\"` and a reason.",
-      "explanation": "Correct. The reason tells the model why the call was refused."
+      "text": "A permission decision to return.",
+      "explanation": "Decisions belong to PreToolUse."
      },
      {
-      "text": "An empty dict.",
-      "explanation": "An empty dict expresses no decision; the lab uses it only to let AskUserQuestion reach the permission callback."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Why is `../outside.txt` denied even though Read is an allowed tool?",
-    "options": [
-     {
-      "text": "Because it resolves outside the lesson workspace.",
-      "explanation": "Correct. `inside()` resolves the path and rejects anything not under the root."
-     },
-     {
-      "text": "Because the file does not exist.",
-      "explanation": "Existence is not checked; the path boundary is."
-     },
-     {
-      "text": "Because Read is denied for all .txt files.",
-      "explanation": "`notes.txt` is allowed, so the extension is not the reason."
-     }
-    ],
-    "correct": 0
-   },
-   {
-    "prompt": "What does `redact` do to `\"Bearer fake-fixture-token\"`?",
-    "options": [
-     {
-      "text": "Leaves it unchanged because it is not under a secret key.",
-      "explanation": "String values are also scanned for bearer tokens and `sk-ant-` keys."
-     },
-     {
-      "text": "Removes the whole result.",
-      "explanation": "Only the matching value is replaced."
-     },
-     {
-      "text": "Replaces the token with `[REDACTED]`.",
-      "explanation": "Correct. The regex replaces bearer tokens inside strings."
+      "text": "The tool_response from the executed tool.",
+      "explanation": "Correct. It runs after execution and can audit the result."
      }
     ],
     "correct": 2
+   },
+   {
+    "prompt": "A HookMatcher has matcher=\"Write|Edit\". Which calls run its hooks?",
+    "options": [
+     {
+      "text": "Only Write and Edit tool calls.",
+      "explanation": "Correct. The matcher is a regex on the tool name."
+     },
+     {
+      "text": "Every tool call.",
+      "explanation": "Only a missing matcher or \"*\" matches every tool."
+     },
+     {
+      "text": "Only calls the model marks as risky.",
+      "explanation": "Matching is done by the host on the tool name, not by the model."
+     }
+    ],
+    "correct": 0
    }
   ]
  },
@@ -2479,92 +2468,91 @@
    1,
    15
   ],
-  "concept_brief": "SDK compaction summarizes earlier context when a session grows (you can observe it with a `PreCompact` hook or `ClaudeSDKClient.get_context_usage()`); a host should also keep its own compact summary of completed work.",
-  "lab_brief": "The offline `compaction` exercise builds eight verbose step records, measures their JSON size, and keeps a small host summary of completed steps and the next action, showing how much context a summary saves and what detail it drops.",
+  "concept_brief": "Context is finite. Hosts keep it healthy by bounding large tool results before returning them and by summarizing completed work; the SDK's own compaction is a separate runtime behavior that summarizes history automatically.",
+  "lab_brief": "The `compaction` exercise takes an oversized tool result (about 5,000 characters), bounds it to a 600-character limit with an explicit truncation marker, and builds a compact summary of completed steps.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Live mode uses the plain `query` profile: the model only explains compaction; no tools are enabled."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 25 (or run `uv run agent-lab lesson 25`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand the trade-off: a summary keeps decisions and progress but loses detail such as raw tool output."
+    "text": "Learn two host techniques that keep tool output from flooding the context."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `compaction` in `agent_lab/exercises.py`; each row repeats `fixture detail ` 40 times."
+    "text": "Find `limit`, `marker` and `summary` in the `compaction` source."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 25 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare `full_characters` (5168) with `summary_characters` (57) and read `summary`."
+    "text": "Compare `full_characters`, `bounded_characters` and `summary_characters`."
    },
    {
     "title": "Try the challenge",
-    "text": "Decide which extra field you would add to the summary so a later step can still work."
+    "text": "Change the limit and check the bound still holds."
    }
   ],
-  "inspect": "Look at `full_characters`, `summary_characters`, `summary` (`completed` and `next`) and `note`.",
-  "expected": "`full_characters` is 5168, `summary_characters` is 57, `summary` is `{\"completed\": [0, 1, 2, 3, 4, 5, 6, 7], \"next\": \"verify\"}` and `note` says SDK compaction is a separate runtime behavior.",
-  "evidence_criterion": "The check confirms the host summary was produced and is much smaller than the full record.",
+  "inspect": "`limit_characters`, `full_characters`, `bounded_characters`, `bounded_within_limit`, the `truncation_marker` text and the `summary`.",
+  "expected": "`full_characters` is 5168, `bounded_characters` is 653 (600 plus the marker), `bounded_within_limit` is true, and the 57-character `summary` lists steps 0-7 with next `verify`.",
+  "evidence_criterion": "The check confirms that the oversized result was bounded within its limit and a compact summary was produced.",
   "evidence_checks": [
    {
-    "key": "summary_characters",
+    "key": "bounded_within_limit",
     "rule": "equals",
-    "value": 57
+    "value": true
    },
    {
     "key": "summary",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch copy of `compaction`, add a `failed` list to the summary for one step marked `status: \"failed\"`; rerun and confirm `summary_characters` grows slightly while staying far below `full_characters`.",
+  "challenge": "Set `limit = 200` in `compaction`, run again, and confirm `bounded_within_limit` stays true while the marker reports more truncated characters.",
   "hints": [
-   "Both sizes are `len(json.dumps(...))`.",
-   "Keep anything a later step needs to decide what to do next, such as failures and the next action."
+   "The marker tells the model what was removed and how to ask for more.",
+   "With limit 200 the bounded text is 200 characters plus the marker, and the marker reports 4968 truncated characters."
   ],
-  "reference": "The full records are about 90 times larger than the summary, yet the summary still says which steps are done and what is next. The repeated details are what get lost, which is acceptable only if no later step needs them. The SDK compacts conversation context on its own; this host summary is your application's record and does not depend on that.",
+  "reference": "Bounding protects the context window from one huge tool result, and the marker keeps the truncation honest so the model can request a specific part. Summaries carry forward only what the next step needs. Both are host decisions that complement SDK compaction.",
   "recovery": [
-   "If the numbers differ, check whether you changed the row count or detail text; both sizes are computed from the data in the function.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does a compact host summary typically lose?",
+    "prompt": "Why add a truncation marker instead of silently cutting a tool result?",
     "options": [
      {
-      "text": "Which steps are complete.",
-      "explanation": "That is exactly what the summary keeps in `completed`."
+      "text": "It makes the result longer, which helps caching.",
+      "explanation": "Length is not the goal; transparency is."
      },
      {
-      "text": "Detailed per-step output.",
-      "explanation": "Correct. Detail is dropped to save context, so keep anything still needed."
+      "text": "It tells the model content was removed and how to ask for more.",
+      "explanation": "Correct. Silent truncation can make the model reason from incomplete data."
      },
      {
-      "text": "The next action.",
-      "explanation": "The summary keeps `next: \"verify\"`."
+      "text": "The SDK rejects results without one.",
+      "explanation": "The SDK does not require a marker; it is host design."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "Is the offline exercise the SDK's compaction?",
+    "prompt": "What should a progress summary keep?",
     "options": [
      {
-      "text": "No; it is a host summary, and SDK compaction is a separate runtime behavior.",
-      "explanation": "Correct. The `note` field says so explicitly."
+      "text": "What the next step needs, such as completed steps and what comes next.",
+      "explanation": "Correct. Keep decisions and state, drop verbose details."
      },
      {
-      "text": "Yes; it calls the SDK compactor offline.",
-      "explanation": "Offline runs never start the SDK or call Claude."
+      "text": "Every tool result verbatim.",
+      "explanation": "That defeats the purpose of summarizing."
      },
      {
-      "text": "Yes; `PreCompact` runs inside it.",
-      "explanation": "No hooks run offline; the function is plain Python."
+      "text": "Only the first user message.",
+      "explanation": "That loses the progress the agent made."
      }
     ],
     "correct": 0
@@ -2773,92 +2761,96 @@
    1,
    15
   ],
-  "concept_brief": "Transient failures should be retried a bounded number of times, and only for idempotent operations; SDK errors such as `CLIConnectionError`, `ProcessError` and a failed `ResultMessage` need different handling.",
-  "lab_brief": "The offline `retry` exercise retries a read that raises `ConnectionError` twice and succeeds on the third of at most three attempts, labelling the operation as an idempotent read that is safe to repeat.",
+  "concept_brief": "Retry only transient failures, with backoff and an overall deadline (`asyncio.timeout`). A write whose response was lost may already have happened, so retried writes need an idempotency key the host checks before applying them again.",
+  "lab_brief": "The `retry` exercise retries a refund write that first loses its response (ConnectionError after the write was applied) and then times out. Backoff waits between attempts, a 2-second deadline bounds the whole loop, and the idempotency key keeps the refund applied exactly once.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Open `failure_message` in `agent_lab/sdk.py` to see how failed results such as `error_max_turns` become clear messages."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 28 (or run `uv run agent-lab lesson 28`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand which errors to retry: transient connection problems on safe operations, not writes that may already have happened."
+    "text": "Recover from transient errors without repeating a side effect."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `retry` in `agent_lab/exercises.py`: attempts 1 and 2 raise `ConnectionError`; attempt 3 returns; a third failure would be re-raised."
+    "text": "Read `write_refund`, the `applied` ledger and `asyncio.timeout(2)` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 28 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `attempts` is `[1, 2, 3]`, `result` is `recovered` and `idempotent_operation` is `read`."
+    "text": "Check the three `attempts`, `writes_applied` 1 and `duplicate_write_prevented` true."
    },
    {
     "title": "Try the challenge",
-    "text": "Make every attempt fail in a scratch copy and confirm the error is raised instead of looping forever."
+    "text": "Remove the idempotency check and observe the duplicate."
    }
   ],
-  "inspect": "Look at `attempts` (each try in order), `result` and `idempotent_operation`.",
-  "expected": "`attempts` is `[1, 2, 3]`, `result` is `\"recovered\"` and `idempotent_operation` is `\"read\"`.",
-  "evidence_criterion": "The check confirms the read recovered within the three-attempt limit.",
+  "inspect": "`attempts` (ConnectionError, TimeoutError, succeeded), `backoff_seconds`, `deadline_seconds`, `idempotency_key`, `writes_applied` and `duplicate_write_prevented`.",
+  "expected": "Three attempts end in `succeeded`, `result` is `refund A-100 for 500 cents`, `writes_applied` is 1 and `duplicate_write_prevented` is true.",
+  "evidence_criterion": "The check confirms the write recovered after retries and was applied exactly once.",
   "evidence_checks": [
    {
-    "key": "result",
+    "key": "writes_applied",
     "rule": "equals",
-    "value": "recovered"
+    "value": 1
    },
    {
-    "key": "attempts",
+    "key": "duplicate_write_prevented",
+    "rule": "equals",
+    "value": true
+   },
+   {
+    "key": "result",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch copy, change the condition to `if attempt < 4` so every attempt fails; run it and confirm it raises `ConnectionError` after three attempts. Then add an `asyncio.timeout(...)` around the loop to add an overall deadline.",
+  "challenge": "Replace the ledger with a list that appends on every attempt, run again, and explain why the count becomes 3. Then restore the idempotency key.",
   "hints": [
-   "The loop is `range(1, 4)`, so there are at most three attempts.",
-   "Retrying a write could repeat a side effect; use an idempotency key or check the state before retrying."
+   "The first failure happens after the write was applied: the client cannot tell success from failure.",
+   "Without the key each attempt appends again, so three attempts produce three refunds; the key turns the retry into a no-op for work already done."
   ],
-  "reference": "Two simulated transient failures were absorbed and the third attempt succeeded, so the result shows recovery within a bound. The operation is a read, which is why repeating it is safe. In live runs, authentication failures (HTTP 401) are reported immediately instead of retried, because the same credentials will fail again.",
+  "reference": "Retries are safe for reads but dangerous for writes with ambiguous failures. The deadline keeps recovery bounded, backoff avoids hammering a struggling service, and the idempotency key lets the host recognise a write it already applied.",
   "recovery": [
-   "If the run reports a `ConnectionError`, the retry bound was exhausted; inspect the cause instead of raising the limit.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Which operation is safest to retry automatically?",
+    "prompt": "A write fails with a connection reset after the request was sent. What is true?",
     "options": [
      {
-      "text": "A payment.",
-      "explanation": "Repeating it could charge twice."
+      "text": "The write definitely did not happen.",
+      "explanation": "The request may have been processed before the connection dropped."
      },
      {
-      "text": "A file write that may have partly succeeded.",
-      "explanation": "A blind retry could duplicate or corrupt the change."
+      "text": "The write may already have been applied, so a retry needs an idempotency key.",
+      "explanation": "Correct. Ambiguous failures are why idempotency matters."
      },
      {
-      "text": "A read with no side effects.",
-      "explanation": "Correct. Idempotent reads can be repeated without changing state."
+      "text": "Retrying is always unsafe, so give up.",
+      "explanation": "Retrying is fine when the host can detect an applied write."
      }
     ],
-    "correct": 2
+    "correct": 1
    },
    {
-    "prompt": "Why does the lab stop retrying on an HTTP 401 `api_retry` message?",
+    "prompt": "What does asyncio.timeout(2) around the retry loop add?",
     "options": [
      {
-      "text": "Because the same invalid credentials will keep failing.",
-      "explanation": "Correct. Authentication errors are not transient, so retries only waste time."
+      "text": "An overall deadline, so recovery cannot run forever.",
+      "explanation": "Correct. Each attempt and wait counts against one budget."
      },
      {
-      "text": "Because 401 means the server is busy.",
-      "explanation": "Busy servers return other codes; 401 means unauthorized."
+      "text": "A longer wait between attempts.",
+      "explanation": "Backoff controls the waits; the timeout bounds the total."
      },
      {
-      "text": "Because retries cost API credits.",
-      "explanation": "The reason is that the error is permanent, not cost."
+      "text": "Automatic idempotency.",
+      "explanation": "Idempotency is a separate host mechanism."
      }
     ],
     "correct": 0
@@ -2968,95 +2960,99 @@
   "prerequisites": [
    24
   ],
-  "concept_brief": "Agents track multi-step work as todos with `pending`, `in_progress` and `completed` states; the host should own that ledger and enforce rules such as only one task in progress.",
-  "lab_brief": "The offline `todos` exercise builds a three-task host ledger, asserts that exactly one task is `in_progress`, and derives a next-action suggestion from that state.",
+  "concept_brief": "A todo list is shared state between agent and host. The host should validate each status change (pending, in_progress, completed) against allowed transitions and keep exactly one task in progress, instead of trusting reported progress.",
+  "lab_brief": "The `todos` exercise applies six requested transitions through a small state machine. Three are rejected with reasons: skipping in_progress, starting a second task, and reopening completed work. The suggestion is derived from the resulting state.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Live mode uses the `exercise` profile: the model can only read this ledger with `inspect_exercise`."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 30 (or run `uv run agent-lab lesson 30`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand why the host owns task state: the model can propose progress, but the host decides what is recorded."
+    "text": "Validate todo state changes instead of accepting them."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `todos` in `agent_lab/exercises.py`: three tasks and an `assert` that counts `in_progress` tasks."
+    "text": "Find `allowed` and the in-progress rule in the `todos` source."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 30 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `tasks` shows read completed, verify in progress and release pending, and that `suggestion` is \"Finish verification before release.\""
+    "text": "Read each `transitions` row and the final `tasks`."
    },
    {
     "title": "Try the challenge",
-    "text": "Write a small transition check that rejects moving `release` to `completed` while `verify` is not completed."
+    "text": "Add a new transition and predict whether it is accepted."
    }
   ],
-  "inspect": "Look at `tasks` (id and status of each), `suggestion` and `source`.",
-  "expected": "`tasks` is read `completed`, verify `in_progress`, release `pending`; `suggestion` is \"Finish verification before release.\" and `source` is \"host state\".",
-  "evidence_criterion": "The check confirms the host ledger passed its single in-progress rule and produced a suggestion from host state.",
+  "inspect": "The `transitions` table (`accepted` and `reason`), the `rejected` count, the final `tasks` and the derived `suggestion`.",
+  "expected": "`rejected` is 3; `tasks` ends with read completed, verify in_progress and release pending; `suggestion` is `Finish verify before starting another task.`",
+  "evidence_criterion": "The check confirms that the three invalid transitions were rejected and the suggestion came from validated state.",
   "evidence_checks": [
+   {
+    "key": "rejected",
+    "rule": "equals",
+    "value": 3
+   },
    {
     "key": "source",
     "rule": "equals",
-    "value": "host state"
+    "value": "derived from validated host state"
    },
    {
     "key": "tasks",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch copy of `todos`, set `release` to `in_progress` as well and run it; the `assert` fails because two tasks are in progress. Then write a `transition(tasks, id, new_status)` function that allows only pending to `in_progress` to completed and test it.",
+  "challenge": "Append `(\"verify\", \"completed\")` and `(\"release\", \"in_progress\")` to `requested` and predict the final `suggestion`.",
   "hints": [
-   "The only rule the exercise enforces is the count of `in_progress` tasks.",
-   "A transition table such as `{\"pending\": {\"in_progress\"}, \"in_progress\": {\"completed\"}}` makes allowed moves explicit."
+   "Completing verify frees the single in-progress slot.",
+   "Both transitions are accepted, release becomes in_progress, and the suggestion becomes `Finish release before starting another task.`"
   ],
-  "reference": "The ledger is host data, so the suggestion is derived from validated state rather than from a model's description. Requiring exactly one `in_progress` task keeps focus clear and makes progress auditable. Because `verify` is still in progress, the host suggests finishing verification before release.",
+  "reference": "The host owns task state: it accepts only valid transitions and explains each rejection. Because the suggestion is computed from validated state, it cannot drift from what actually happened.",
   "recovery": [
-   "If the run fails with an `AssertionError`, more or fewer than one task is `in_progress`; fix the ledger, not the check.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Which rule does the lesson 30 exercise enforce?",
+    "prompt": "Why reject pending to completed?",
     "options": [
      {
-      "text": "Exactly one task is `in_progress`.",
-      "explanation": "Correct. The `assert` counts in-progress tasks before returning."
+      "text": "Completed tasks must be deleted.",
+      "explanation": "Deletion is unrelated to the transition rule."
      },
      {
-      "text": "All tasks must be completed.",
-      "explanation": "Release is still pending in a valid result."
+      "text": "The SDK forbids that string.",
+      "explanation": "The SDK does not enforce your task states; the host does."
      },
      {
-      "text": "Tasks must be sorted alphabetically.",
-      "explanation": "Order is not checked."
+      "text": "Work must be started before it can be completed, so progress is not skipped.",
+      "explanation": "Correct. The state machine requires in_progress first."
+     }
+    ],
+    "correct": 2
+   },
+   {
+    "prompt": "Where should the next-step suggestion come from?",
+    "options": [
+     {
+      "text": "From validated host state.",
+      "explanation": "Correct. Derived suggestions cannot drift from reality."
+     },
+     {
+      "text": "From a fixed string written in advance.",
+      "explanation": "A fixed string ignores what actually happened."
+     },
+     {
+      "text": "From the model's claim of progress.",
+      "explanation": "Claims need validation before they become state."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "Why is the suggestion labelled `source: \"host state\"`?",
-    "options": [
-     {
-      "text": "Because a model wrote it.",
-      "explanation": "No model runs offline; the suggestion is computed locally."
-     },
-     {
-      "text": "Because it is derived from the host-owned ledger.",
-      "explanation": "Correct. The host decides what is recorded and suggested."
-     },
-     {
-      "text": "Because it was loaded from CLAUDE.md.",
-      "explanation": "This lesson does not load project settings."
-     }
-    ],
-    "correct": 1
    }
   ]
  },
@@ -3776,117 +3772,98 @@
  {
   "id": 37,
   "prerequisites": [
-   4,
-   7,
-   31
+   7
   ],
-  "concept_brief": "`ClaudeAgentOptions.can_use_tool` is an async callback `(tool_name, input, ToolPermissionContext)` that returns `PermissionResultAllow(updated_input=...)` or `PermissionResultDeny(message=..., interrupt=...)`. It is mutually exclusive with `permission_prompt_tool_name`, which delegates prompts to an MCP tool instead.",
-  "lab_brief": "The offline exercise runs five tool requests through the host policy `decide()` in `agent_lab`/policy.py and compares each decision with the expected one; it also redacts a fake key and bearer token. The live `hooks` profile uses the same policy in its PreToolUse hook and `can_use_tool` callback.",
+  "concept_brief": "`can_use_tool` is the SDK permission callback. It receives the tool name and input and returns `PermissionResultAllow` (optionally with `updated_input`) or `PermissionResultDeny` with a message. It is consulted only when no hook or rule already decided.",
+  "lab_brief": "The `permission_callback` exercise calls the same `permission_callback` that live runs register and records the SDK result object for each of the five tool calls.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live profile enables only Read, Glob and Grep and logs each hook decision in Diagnostics."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 37 (or run `uv run agent-lab lesson 37`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Make tool permission decisions in host code and return them as SDK permission results."
+    "text": "Learn what the permission callback returns to the SDK."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `permission_cases` in `agent_lab`/exercises.py, `decide` in `agent_lab`/policy.py and `permitted`, `permission` and `pre_tool` in `agent_lab`/sdk.py."
+    "text": "Read `permission_callback` in `agent_lab/hooks.py`."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise and open `results`."
    },
    {
     "title": "Verify the evidence",
-    "text": "Read each row in `decisions` and confirm `pass_rate` and `redacted`."
+    "text": "Match each `result_type` with its `behavior` and `message`."
    },
    {
     "title": "Try the challenge",
-    "text": "Add your own case and predict its decision before running."
+    "text": "Change the policy and watch the result objects change."
    }
   ],
-  "inspect": "Look at each row of `decisions` (`case`, `tool`, `allowed`, `expected`, `passed`, `reason`), `pass_rate` and `redacted`.",
-  "expected": "Five decisions: \"normal read\" is allowed with reason \"Read-only workspace access.\"; \"path traversal\" and \"secret read\" are denied (\"Read only non-secret files inside this lesson workspace.\"); \"shell injection\" (Bash) and \"unapproved write\" (Write) are denied as not available. `pass_rate` is 1.0 and `redacted` shows both values as \"[REDACTED]\".",
-  "evidence_criterion": "The check verifies that every permission case matched its expected decision and that secrets were redacted.",
+  "inspect": "The `results` table (`result_type`, `behavior`, `message`, `input_unchanged`), the `allowed` and `denied` counts, and the `note` about hook precedence.",
+  "expected": "One `PermissionResultAllow` (normal read, `input_unchanged` true) and four `PermissionResultDeny` rows with the policy message: `allowed` 1, `denied` 4.",
+  "evidence_criterion": "The check confirms that the callback returned one allow result and four deny results.",
   "evidence_checks": [
    {
-    "key": "pass_rate",
+    "key": "allowed",
     "rule": "equals",
-    "value": 1.0
+    "value": 1
    },
    {
-    "key": "decisions",
-    "rule": "truthy"
+    "key": "denied",
+    "rule": "equals",
+    "value": 4
    },
    {
-    "key": "redacted",
+    "key": "results",
     "rule": "truthy"
    }
   ],
-  "challenge": "In your local copy of `permission_cases`, add `(\"glob escape\", \"Glob\", {\"path\": \"../\"}, False)` and `(\"grep workspace\", \"Grep\", {\"path\": \".\"}, True)`, rerun offline and verify both rows show `passed` true and `pass_rate` stays 1.0.",
+  "challenge": "In `permission_callback_cases`, wrap the policy so Read calls for notes.txt are rewritten to read sales.csv, return the updated input, and verify `input_unchanged` becomes false for that row.",
   "hints": [
-   "`decide` allows only Read, Glob and Grep, and only for paths that `inside()` accepts.",
-   "Glob and Grep pass `path`, Read passes `file_path`; a path outside the workspace or to `.env` makes `inside()` raise, which `decide` turns into a denial with a reason."
+   "`PermissionResultAllow(updated_input=...)` lets the host change arguments before execution.",
+   "Pass a custom `permitted` and modify the allowed input in a small wrapper around the callback; compare `updated_input` with the original arguments."
   ],
-  "reference": "Every case produced the expected decision, so the host policy is predictable before any model is involved. Live, `permission()` converts the same decision into `PermissionResultAllow` or `PermissionResultDeny(message=reason)`, and the PreToolUse hook reports the decision so it can be audited. The deny reason is returned to the model as an explanation, never as a way around the policy.",
+  "reference": "The callback turns a host decision into an SDK result object. Deny carries a message the model sees; allow can rewrite input. In this app the PreToolUse hook usually decides first, so the callback is the fallback for calls no hook settled.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 37` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What must a `can_use_tool` callback return to block a call?",
+    "prompt": "What does can_use_tool return to allow a call with modified arguments?",
     "options": [
      {
-      "text": "`False`",
-      "explanation": "No. The Python SDK expects a permission result object, not a bool."
+      "text": "True and a new prompt.",
+      "explanation": "The callback returns result objects, not booleans and prompts."
      },
      {
-      "text": "`PermissionResultDeny(message=reason)`",
-      "explanation": "Correct. The message explains the denial; `interrupt=True` can also stop the run."
+      "text": "PermissionResultAllow with updated_input.",
+      "explanation": "Correct. The host can adjust the input before execution."
      },
      {
-      "text": "`PermissionResultAllow(updated_input={})`",
-      "explanation": "No. That allows the call with empty input."
+      "text": "PermissionResultDeny with a message.",
+      "explanation": "Deny blocks the call."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "Can you set both `can_use_tool` and `permission_prompt_tool_name`?",
+    "prompt": "A PreToolUse hook already returned deny. Is can_use_tool asked?",
     "options": [
      {
-      "text": "Yes, the SDK asks both and requires agreement.",
-      "explanation": "No. The SDK treats them as mutually exclusive."
+      "text": "No. The hook's explicit decision settles the call first.",
+      "explanation": "Correct. The callback is the fallback when no hook or rule decided."
      },
      {
-      "text": "Yes, but only in plan mode.",
-      "explanation": "No. Permission mode does not change this rule."
+      "text": "Yes, and it can override the hook.",
+      "explanation": "An explicit hook decision is applied before the callback."
      },
      {
-      "text": "No. The SDK raises a `ValueError` if both are set.",
-      "explanation": "Correct. Choose a Python callback or an MCP permission prompt tool, not both."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "Why is the \"shell injection\" case denied?",
-    "options": [
-     {
-      "text": "Bash is not one of the tools the read-only policy allows.",
-      "explanation": "Correct. `decide` returns \"This tool is not available in the read-only lesson policy.\" for any tool except Read, Glob and Grep."
-     },
-     {
-      "text": "The command text contains a dangerous word.",
-      "explanation": "No. The decision is based on the tool name, not on scanning the command."
-     },
-     {
-      "text": "The model refused to run it.",
-      "explanation": "No. Offline mode calls no model; the host policy decided."
+      "text": "Only in plan mode.",
+      "explanation": "Plan mode is unrelated to this ordering."
      }
     ],
     "correct": 0
@@ -3898,117 +3875,95 @@
   "prerequisites": [
    30
   ],
-  "concept_brief": "A next-action suggestion should come from state the host has validated, not from model text. The host checks invariants of its task list (exactly one task in progress) before offering a suggestion the user can act on.",
-  "lab_brief": "The offline exercise builds three tasks (read completed, verify `in_progress`, release pending), asserts exactly one is in progress and returns the suggestion \"Finish verification before release.\" with `source` \"host state\". It is the same host code as the todo-tracking lesson, used here for a suggested next step.",
+  "concept_brief": "Prompt suggestions propose the user's next message. Good suggestions are derived from validated application state, so they never recommend work that is blocked or already done.",
+  "lab_brief": "Lesson 38 reuses the validated todo state machine from lesson 30 and focuses on its `suggestion`, which is computed from the task that is actually in progress or waiting.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live `exercise` profile exposes one read-only SDK MCP tool, `inspect_exercise`, built with `@tool` and `create_sdk_mcp_server`, so the model can only explain this already computed evidence."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 38 (or run `uv run agent-lab lesson 38`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Produce a suggested next action from trusted host state rather than from a model's guess."
+    "text": "Derive a next-step suggestion from real state."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `todos` in `agent_lab`/exercises.py and find the `assert` that guards the task list."
+    "text": "Find how `suggestion` is computed at the end of `todos`."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Match the `suggestion` to the in-progress and pending tasks in `tasks`."
+    "text": "Confirm the suggestion names the in-progress task."
    },
    {
     "title": "Try the challenge",
-    "text": "Derive the suggestion from the task list in code and test an invalid state."
+    "text": "Change the state and predict the new suggestion."
    }
   ],
-  "inspect": "Look at `tasks` (each `id` and `status`), `suggestion` and `source`.",
-  "expected": "`tasks` is read completed, verify `in_progress`, release pending; `suggestion` is \"Finish verification before release.\"; `source` is \"host state\".",
-  "evidence_criterion": "The check verifies that the task state is present and the suggestion came from host state.",
+  "inspect": "`suggestion`, `source` and the final `tasks`; the `transitions` table explains how the state was reached.",
+  "expected": "`suggestion` is `Finish verify before starting another task.` and `source` is `derived from validated host state`.",
+  "evidence_criterion": "The check confirms that the suggestion was derived from validated host state.",
   "evidence_checks": [
    {
     "key": "suggestion",
     "rule": "equals",
-    "value": "Finish verification before release."
+    "value": "Finish verify before starting another task."
    },
    {
     "key": "source",
     "rule": "equals",
-    "value": "host state"
-   },
-   {
-    "key": "tasks",
-    "rule": "truthy"
+    "value": "derived from validated host state"
    }
   ],
-  "challenge": "In your local copy of `todos`, replace the fixed text with one computed from the list, e.g. `current = next(t[\"id\"] for t in tasks if t[\"status\"] == \"in_progress\")`, and verify the suggestion names `verify`. Then mark verify as completed and confirm the run fails at the assertion instead of suggesting anything.",
+  "challenge": "Append `(\"verify\", \"completed\")` to `requested` and predict the suggestion (it becomes `Start release.`).",
   "hints": [
-   "The assertion counts tasks whose status is \"`in_progress`\" and requires exactly one.",
-   "Today the suggestion string is fixed; deriving it from the first in-progress and first pending task makes it follow the state, and the assertion stops it when the state is invalid."
+   "With no task in progress, the suggestion falls back to the first pending task.",
+   "After verify completes, release is the only pending task, so the suggestion is `Start release.`"
   ],
-  "reference": "The host validated its own task list and only then offered a next step, labelled with its source. Suggestions built this way cannot claim work that did not happen. In live mode the model reads this evidence through `inspect_exercise` and may explain it, but the suggestion itself stays host-owned.",
+  "reference": "A suggestion computed from validated state stays truthful as the work changes. Hard-coded or model-claimed suggestions can recommend steps that are blocked or finished.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 38` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why does the evidence label the suggestion with `source: \"host state\"`?",
+    "prompt": "Which suggestion source stays correct as work progresses?",
     "options": [
      {
-      "text": "Because Claude generated it from the host's files.",
-      "explanation": "No. Offline mode calls no model."
+      "text": "A string written when the app was built.",
+      "explanation": "It cannot reflect what actually happened."
      },
      {
-      "text": "Because it was produced by host code from a validated task list.",
-      "explanation": "Correct. Labelling the source tells the reader it is not model output."
+      "text": "The validated task state.",
+      "explanation": "Correct. The suggestion follows the real state."
      },
      {
-      "text": "Because the SDK requires a source field.",
-      "explanation": "No. `source` is a convention of this lab's evidence, not an SDK field."
+      "text": "The longest previous message.",
+      "explanation": "Message length is unrelated to progress."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "What happens if two tasks are marked `in_progress`?",
+    "prompt": "No task is in progress and release is pending. What should be suggested?",
     "options": [
      {
-      "text": "The assertion fails, so no suggestion is returned.",
-      "explanation": "Correct. The host refuses to suggest from an invalid state."
+      "text": "Start release.",
+      "explanation": "Correct. The first pending task is the next step."
      },
      {
-      "text": "The host suggests both tasks.",
-      "explanation": "No. The code asserts exactly one in-progress task before building the result."
+      "text": "Finish verify.",
+      "explanation": "Verify is no longer in progress."
      },
      {
-      "text": "The model picks one.",
-      "explanation": "No. The check is local Python; no model is involved."
+      "text": "Nothing; suggestions need a model call.",
+      "explanation": "The host can derive suggestions without a model."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "What is a weakness of the current offline suggestion that the challenge fixes?",
-    "options": [
-     {
-      "text": "It is too long for the UI.",
-      "explanation": "No. Length is not the issue."
-     },
-     {
-      "text": "It is redacted.",
-      "explanation": "No. Nothing in this evidence is redacted."
-     },
-     {
-      "text": "The text is fixed, so it would not change if the task states changed.",
-      "explanation": "Correct. Computing it from `tasks` keeps the suggestion tied to the validated state."
-     }
-    ],
-    "correct": 2
    }
   ]
  },
@@ -4872,14 +4827,14 @@
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that `source` says `recorded usage fixture` and `cache_read_ratio` is 0.9. The panel masks any field whose name contains 'token', so read the raw usage numbers with `uv run agent-lab lesson 46`."
+    "text": "Check that `source` says `recorded usage fixture`, `cache_read_ratio` is 0.9 and the `usage` group shows 900 cache-read input tokens."
    },
    {
     "title": "Try the challenge",
     "text": "Compute the ratio for other usage numbers in a one-line Python command and confirm the result matches your prediction."
    }
   ],
-  "inspect": "`source`, `cache_read_ratio` and the `usage` group. In the browser the four usage values show as [REDACTED] because the display redactor masks keys containing 'token'; the terminal command `uv run agent-lab lesson 46` prints the raw values.",
+  "inspect": "`source`, `cache_read_ratio` and the `usage` group with `input_tokens`, `cache_read_input_tokens`, `cache_creation_input_tokens` and `output_tokens`.",
   "expected": "`source` is `recorded usage fixture` and `cache_read_ratio` is 0.9. The raw usage is `input_tokens` 100, `cache_read_input_tokens` 900, `cache_creation_input_tokens` 0, `output_tokens` 50.",
   "evidence_criterion": "The check confirms that the result is labelled as a recorded usage fixture and that the cache read ratio is 0.9.",
   "evidence_checks": [
@@ -5712,116 +5667,94 @@
   "prerequisites": [
    5
   ],
-  "concept_brief": "A tool the model uses well has a precise description, a bounded input schema and clear failures. The lab's `add` tool is declared with `@tool(\"add\", description, Calculation.model_json_schema())` and re-validates its arguments with Pydantic in the handler, because the schema the model sees is not a guarantee.",
-  "lab_brief": "The `tool_design` exercise (shared with lesson 5) shows the JSON schema generated from the strict `Calculation` model, adds 19 and 23, and feeds three bad inputs (a boolean, NaN and an extra `shell` field) that host validation rejects.",
+  "concept_brief": "Tools the model uses well have a precise description, a strict input schema and actionable errors: when validation fails, report the field, the problem and how to fix it, so the model can correct its next call.",
+  "lab_brief": "The `tool_design` exercise validates five bad calculator inputs with Pydantic and turns each `ValidationError` into per-field feedback with a concrete fix, next to the tool description and schema the model sees.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 54 (or run `uv run agent-lab lesson 54` in a terminal).",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `calculator` profile exposes the `add` tool through `create_sdk_mcp_server`."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 54 (or run `uv run agent-lab lesson 54`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live calculator profile uses the same `Calculation` schema."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn what makes a tool easy for the model to call correctly and safe for the host to execute."
+    "text": "Design error messages a model can act on."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `Calculation` in `agent_lab`/services.py and the `add` tool in the `calculator` branch of `agent_lab`/sdk.py."
+    "text": "Read `FIX_HINTS` and `tool_design` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+    "text": "Run the offline exercise and open `feedback`."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that `sum` is 42.0, `rejected` has three entries and the `schema` has minimum and maximum bounds and additionalProperties false."
+    "text": "Check that each row names a `field`, a `problem` and a `fix`."
    },
    {
     "title": "Try the challenge",
-    "text": "Validate a few inputs of your own against `Calculation` and see which are accepted."
+    "text": "Add a bad input and give it an actionable fix."
    }
   ],
-  "inspect": "`input`, `sum`, the `rejected` list and the `schema` group (properties a and b, required, additionalProperties).",
-  "expected": "`input` is a 19.0 and b 23.0, `sum` is 42.0 and `rejected` lists 'Invalid calculator arguments rejected by host validation.' three times. The `schema` shows a and b as numbers between -1000000 and 1000000, both required, with additionalProperties false.",
-  "evidence_criterion": "The check confirms that the valid call summed to 42.0, the bad inputs were rejected and the input schema was published.",
+  "inspect": "`tool_description`, `input_schema`, the `valid_call`, the `feedback` table (`case`, `field`, `problem`, `fix`) and `every_error_actionable`.",
+  "expected": "`feedback` has one row per invalid field: boolean, NaN, the extra `shell` field, the missing `b` and the out-of-range `a`. `every_error_actionable` is true and `valid_call` sums to 42.0.",
+  "evidence_criterion": "The check confirms that every validation error came with an actionable fix.",
   "evidence_checks": [
    {
-    "key": "sum",
+    "key": "every_error_actionable",
     "rule": "equals",
-    "value": 42.0
+    "value": true
    },
    {
-    "key": "rejected",
+    "key": "feedback",
     "rule": "truthy"
-   },
-   {
-    "key": "schema",
-    "rule": "present"
    }
   ],
-  "challenge": "Run `uv run python -c \"from agent_lab.services import Calculation; print(Calculation(a=12.5, b=29.5)); Calculation.model_validate({'a': '12.5', 'b': 1})\"`. The first input (the live prompt's numbers) is accepted; the string '12.5' is rejected because the model is strict. Try a=2000000 and confirm it is rejected too.",
+  "challenge": "Add the case `\"string number\": {\"a\": \"19\", \"b\": 23}` and run again. Which fix does it get, and why does strict mode reject it?",
   "hints": [
-   "Strict mode means no silent type conversion: a string or a boolean is not a number.",
-   "`Calculation` uses `extra='forbid'`, `strict=True`, bounds of ±1e6 and `allow_inf_nan=False`. The same model produces the schema the model sees and validates the arguments the handler receives."
+   "`Calculation` uses `strict=True`, so a numeric string is not converted.",
+   "The error type is `float_type`, so the fix reads `Send a JSON number, not a string or boolean.`"
   ],
-  "reference": "One Pydantic model defines both the published schema and the validation, so the description, bounds and runtime checks cannot drift apart. The valid input sums to 42.0, and booleans, NaN and unexpected fields are refused before any arithmetic runs. The rejection message is generic; a production tool would also say which field was wrong so the model can correct its call.",
+  "reference": "Generic errors make the model guess. Per-field problems with a concrete fix let it repair the call in one step, and strict validation stays in force regardless of what the schema advertised.",
   "recovery": [
-   "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 54` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
-   "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why does the handler validate arguments again even though the model received a JSON schema?",
+    "prompt": "Which error helps the model fix its call fastest?",
     "options": [
      {
-      "text": "Because the schema is only a description for the model; the host must still enforce it on every call.",
-      "explanation": "Correct. Model output is untrusted input, so the handler re-validates with `Calculation`."
+      "text": "\"Invalid input.\"",
+      "explanation": "It names neither the field nor the fix."
      },
      {
-      "text": "Because the SDK strips the schema before sending it.",
-      "explanation": "The schema is sent; it just is not a guarantee."
+      "text": "A stack trace.",
+      "explanation": "Stack traces describe the host, not the correction."
      },
      {
-      "text": "Because Pydantic cannot generate JSON schemas.",
-      "explanation": "It can: `model_json_schema()` produces the schema shown in the evidence."
-     }
-    ],
-    "correct": 0
-   },
-   {
-    "prompt": "Why is `{'a': True, 'b': 1}` rejected?",
-    "options": [
-     {
-      "text": "Because b must be larger than a.",
-      "explanation": "There is no ordering rule between a and b."
-     },
-     {
-      "text": "Because the strict model does not accept a boolean as a float.",
-      "explanation": "Correct. With `strict=True`, True is not silently converted to 1.0."
-     },
-     {
-      "text": "Because the tool only accepts integers.",
-      "explanation": "Floats such as 12.5 are accepted."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "What would make a validation failure more actionable for the model?",
-    "options": [
-     {
-      "text": "Returning the full Python traceback.",
-      "explanation": "Tracebacks are noisy and can leak internals."
-     },
-     {
-      "text": "Silently clamping the value into range.",
-      "explanation": "Silent changes hide the error and produce wrong answers."
-     },
-     {
-      "text": "Naming the invalid field and the allowed range in the error.",
-      "explanation": "Correct. A precise message lets the model fix the next call."
+      "text": "\"b: field required. Add this required number.\"",
+      "explanation": "Correct. Field, problem and fix in one line."
      }
     ],
     "correct": 2
+   },
+   {
+    "prompt": "Why keep strict validation in the tool even with a schema?",
+    "options": [
+     {
+      "text": "The model may still send inputs the schema did not prevent.",
+      "explanation": "Correct. The handler is the last line of defense."
+     },
+     {
+      "text": "Schemas are ignored by the SDK.",
+      "explanation": "The SDK sends the schema; it just cannot guarantee compliance."
+     },
+     {
+      "text": "Strict mode makes the tool faster.",
+      "explanation": "Speed is not the reason."
+     }
+    ],
+    "correct": 0
    }
   ]
  },
@@ -6227,38 +6160,37 @@
    14,
    15
   ],
-  "concept_brief": "Model routing is a host decision made before the call: a deterministic policy chooses `model`, `max_turns` and `max_budget_usd` for `ClaudeAgentOptions`, and a failure does not trigger repeated paid calls. `ClaudeSDKClient.set_model` exists for changing models mid-session, but the routing decision stays with the host.",
-  "lab_brief": "The `routing` exercise reads the configured model from `Settings` (`LAB_MODEL`, default claude-haiku-4-5), gives 4 turns to prompts under 500 characters and 8 to longer ones, and copies the request's budget threshold into the route.",
+  "concept_brief": "Model routing picks a model and limits per task with explicit host rules: simple tasks go to a fast model with tight limits, complex ones to a more capable model with a larger turn and budget allowance.",
+  "lab_brief": "The `routing` exercise routes three sample tasks (and your prompt, if given) to a `fast` tier (`LAB_MODEL`) or a `capable` tier (`LAB_ROUTE_MODEL`) using complexity keywords and input length, and records the reason for each choice.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 59 (or run `uv run agent-lab lesson 59` in a terminal).",
-   "In the browser, the Budget threshold field still works offline; the prompt box does not, so use `uv run agent-lab lesson 59 --prompt \"...\"` to test prompt length.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 59 (or run `uv run agent-lab lesson 59`).",
+   "Optional: set `LAB_ROUTE_MODEL` in `.env` to choose the capable tier's model; routing itself makes no model call."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn to make model, turn and budget choices with predictable host rules instead of letting the model decide."
+    "text": "Make routing decisions explicit and testable."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `routing` in `agent_lab`/exercises.py and `Settings` in `agent_lab`/config.py."
+    "text": "Read `tiers`, `signals` and the routing rule in the source."
    },
    {
     "title": "Run one example",
-    "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm the `route` (model, `max_turns` 4, `max_budget_usd` 0.1), `decision_owner` 'host policy' and the `fallback` rule."
+    "text": "Check each route's `tier`, `model`, limits and `reason`."
    },
    {
     "title": "Try the challenge",
-    "text": "Change the budget and the prompt length and check that the route changes exactly as the code predicts."
+    "text": "Route your own task with `--prompt`."
    }
   ],
-  "inspect": "The `route` group (model, `max_turns`, `max_budget_usd`), `decision_owner` and `fallback`.",
-  "expected": "`route` shows model claude-haiku-4-5 (or your `LAB_MODEL`), `max_turns` 4 and `max_budget_usd` 0.1. `decision_owner` is 'host policy' and `fallback` is 'No automatic repeated paid calls after failure.'.",
-  "evidence_criterion": "The check confirms that a route was produced by the host policy and that a no-retry fallback rule is stated.",
+  "inspect": "`tiers` (model, max_turns and max_budget_usd for fast and capable), the `routes` table with each `reason`, `decision_owner` and `fallback`.",
+  "expected": "The summary task routes to `fast` (`claude-haiku-4-5`, 2 turns, 0.05 USD). The debugging and architecture tasks route to `capable` (`claude-sonnet-5-5`, 6 turns, 0.25 USD) with reasons `matched debug` and `matched design, architecture`.",
+  "evidence_criterion": "The check confirms that routes were produced by the host policy with both tiers defined.",
   "evidence_checks": [
    {
     "key": "decision_owner",
@@ -6266,60 +6198,60 @@
     "value": "host policy"
    },
    {
-    "key": "route",
+    "key": "routes",
     "rule": "truthy"
    },
    {
-    "key": "fallback",
-    "rule": "present"
+    "key": "tiers",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Set Budget threshold to 0.25 in the browser and run again: `route.max_budget_usd` becomes 0.25. Then in PowerShell run `uv run agent-lab lesson 59 --prompt (\"x\" * 600)` and confirm `max_turns` becomes 8.",
+  "challenge": "Run `uv run agent-lab lesson 59 --prompt \"Migrate the session store to SQLite\"` and confirm a fourth route with tier `capable` and reason `matched migrate`.",
   "hints": [
-   "The same input always gives the same route; nothing here is random or model-generated.",
-   "`max_turns` is 4 if `len(request.prompt) < 500`, otherwise 8; `max_budget_usd` is copied from the request; `model` comes from `Settings().model`, which reads `LAB_MODEL` from .env."
+   "The rule checks a fixed list of complexity words, then input length.",
+   "`migrate` is in `signals`, so the task goes to the capable tier; a short task without signal words would stay fast."
   ],
-  "reference": "The host computed the route from the prompt length, the configured model and the requested budget, so the result is predictable and auditable. The budget is a threshold for the run, not an exact billing cap. Because failures are not retried automatically, a broken request cannot quietly multiply its cost.",
+  "reference": "Routing belongs to host policy, not to the model: explicit rules are cheap, auditable and testable. Each route carries its own turn and budget limits, and failures are not retried automatically on a more expensive model.",
   "recovery": [
-   "If `route.model` is not what you expect, check `LAB_MODEL` in .env and restart the app, since Settings reads it at run time; if the budget field rejects a value, keep it between 0.01 and 1.",
-   "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What sets `max_turns` to 8 in this policy?",
+    "prompt": "Who should own the routing decision?",
     "options": [
      {
-      "text": "A prompt of 500 characters or more.",
-      "explanation": "Correct. Shorter prompts get 4 turns; longer ones get 8."
+      "text": "The model, by asking which model it prefers.",
+      "explanation": "That spends a call and is hard to audit."
      },
      {
-      "text": "A higher budget threshold.",
-      "explanation": "The budget is copied into the route but does not affect turns."
+      "text": "The host policy, with explicit rules.",
+      "explanation": "Correct. Rules are cheap, testable and auditable."
      },
      {
-      "text": "Claude asking for more turns.",
-      "explanation": "The model has no say; the host decides before the call."
+      "text": "Whichever model responds first.",
+      "explanation": "That is a race, not a policy."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "Why give each tier its own limits?",
+    "options": [
+     {
+      "text": "Capable models need room for longer tasks while fast tasks stay cheap.",
+      "explanation": "Correct. Limits follow the expected work."
+     },
+     {
+      "text": "The SDK requires different limits per model.",
+      "explanation": "The SDK does not require that; it is a cost decision."
+     },
+     {
+      "text": "Limits replace the need for routing.",
+      "explanation": "Limits bound a run; routing chooses the model."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "Why does the route state 'No automatic repeated paid calls after failure'?",
-    "options": [
-     {
-      "text": "Because the SDK cannot retry.",
-      "explanation": "Retries are possible; the host deliberately avoids automatic paid ones."
-     },
-     {
-      "text": "Because offline runs cost money.",
-      "explanation": "Offline runs make no paid calls at all."
-     },
-     {
-      "text": "Because silently retrying a failed paid call can multiply cost without fixing the cause.",
-      "explanation": "Correct. Failures are reported so a person can decide what to change."
-     }
-    ],
-    "correct": 2
    }
   ]
  },

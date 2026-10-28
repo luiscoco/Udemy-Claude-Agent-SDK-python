@@ -27,25 +27,42 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `calculator`, line 203). Host contracts are in
+(function `tool_design`, line 374). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("calculator", "tool_design")
-def calculator(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    good = Calculation(a=19.0, b=23.0)
-    errors = []
-    for bad in ({"a": True, "b": 1}, {"a": float("nan"), "b": 1}, {"a": 1, "b": 1, "shell": "bad"}):
+@exercise("tool_design")
+def tool_design(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Turn validation failures into per-field messages the model can act on."""
+    cases = {
+        "boolean instead of number": {"a": True, "b": 1},
+        "not a number": {"a": float("nan"), "b": 1},
+        "unexpected field": {"a": 1, "b": 1, "shell": "rm -rf /"},
+        "missing argument": {"a": 1},
+        "out of range": {"a": 2e6, "b": 1},
+    }
+    feedback = []
+    for label, arguments in cases.items():
         try:
-            Calculation.model_validate(bad)
-        except ValueError:
-            errors.append("Invalid calculator arguments rejected by host validation.")
+            Calculation.model_validate(arguments)
+        except ValidationError as exc:
+            for error in exc.errors():
+                feedback.append(
+                    {
+                        "case": label,
+                        "field": ".".join(str(part) for part in error["loc"]) or "(input)",
+                        "problem": error["msg"],
+                        "fix": FIX_HINTS.get(error["type"], "Check the input schema."),
+                    }
+                )
+    schema = Calculation.model_json_schema()
     return {
-        "schema": Calculation.model_json_schema(),
-        "input": good.model_dump(),
-        "sum": good.a + good.b,
-        "rejected": errors,
+        "tool_description": "Add two finite numbers between -1000000 and 1000000. Returns their sum.",
+        "input_schema": schema,
+        "valid_call": {"input": {"a": 12.5, "b": 29.5}, "sum": 42.0},
+        "feedback": feedback,
+        "every_error_actionable": all(row["fix"] != "Check the input schema." for row in feedback),
     }
 ```
 

@@ -27,22 +27,48 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `routing`, line 752). Host contracts are in
+(function `routing`, line 1006). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("routing")
 def routing(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Route each task to a model and limits with explicit, testable host rules."""
     from agent_lab.config import Settings
 
-    model = Settings().model
+    settings = Settings()
+    tiers = {
+        "fast": {"model": settings.model, "max_turns": 2, "max_budget_usd": 0.05},
+        "capable": {"model": settings.route_model, "max_turns": 6, "max_budget_usd": 0.25},
+    }
+    signals = ("refactor", "design", "debug", "architecture", "migrate", "security")
+    tasks = [
+        "Summarize notes.txt in one sentence.",
+        "Debug why the retry loop repeats the refund write.",
+        "Design the architecture for a multi-tenant agent service.",
+    ]
+    if request.prompt:
+        tasks.append(request.prompt)
+    routes = []
+    for task in tasks:
+        matched = [word for word in signals if word in task.lower()]
+        tier = "capable" if matched or len(task) > 400 else "fast"
+        routes.append(
+            {
+                "task": task[:120],
+                "tier": tier,
+                **tiers[tier],
+                "reason": f"matched {', '.join(matched)}"
+                if matched
+                else "long input"
+                if tier == "capable"
+                else "short task with no complexity signal",
+            }
+        )
     return {
-        "route": {
-            "model": model,
-            "max_turns": 4 if len(request.prompt) < 500 else 8,
-            "max_budget_usd": request.max_budget_usd,
-        },
+        "tiers": tiers,
+        "routes": routes,
         "decision_owner": "host policy",
         "fallback": "No automatic repeated paid calls after failure.",
     }

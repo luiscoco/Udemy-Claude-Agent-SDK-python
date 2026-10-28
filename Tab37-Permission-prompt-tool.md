@@ -27,37 +27,36 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `permission_cases`, line 174). Host contracts are in
+(function `permission_callback_cases`, line 319). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("permissions", "hooks", "hook_pipeline", "permission_callback", "security", "redteam")
-def permission_cases(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    cases = [
-        ("normal read", "Read", {"file_path": "notes.txt"}, True),
-        ("path traversal", "Read", {"file_path": "../outside.txt"}, False),
-        ("secret read", "Read", {"file_path": ".env"}, False),
-        ("shell injection", "Bash", {"command": "echo preapproved"}, False),
-        ("unapproved write", "Write", {"file_path": "notes.txt"}, False),
-    ]
-    rows: list[dict[str, Any]] = []
-    for label, tool, arguments, expected in cases:
-        allowed, reason = decide(root, tool, arguments)
-        rows.append(
+@exercise("permission_callback")
+async def permission_callback_cases(
+    root: Path, request: RunRequest, lesson: Lesson
+) -> dict[str, Any]:
+    """Call the live can_use_tool callback and show the SDK result object it returns."""
+    callback = permission_callback(lambda name, arguments: decide(root, name, arguments))
+    results = []
+    for label, tool, arguments in TOOL_CALLS:
+        outcome = await callback(tool, arguments, None)
+        results.append(
             {
                 "case": label,
                 "tool": tool,
-                "allowed": allowed,
-                "expected": expected,
-                "passed": allowed == expected,
-                "reason": reason,
+                "result_type": type(outcome).__name__,
+                "behavior": outcome.behavior,
+                "message": getattr(outcome, "message", ""),
+                "input_unchanged": getattr(outcome, "updated_input", None) == arguments,
             }
         )
     return {
-        "decisions": rows,
-        "pass_rate": sum(row["passed"] for row in rows) / len(rows),
-        "redacted": redact({"api_key": "fixture-only", "text": "Bearer fake-fixture-token"}),
+        "results": results,
+        "allowed": sum(row["behavior"] == "allow" for row in results),
+        "denied": sum(row["behavior"] == "deny" for row in results),
+        "note": "A PreToolUse hook that returns allow or deny decides first; can_use_tool is "
+        "asked only when no hook or rule settled the call.",
     }
 ```
 

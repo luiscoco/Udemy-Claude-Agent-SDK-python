@@ -115,6 +115,7 @@ before exposing these teaching endpoints to other users.
 | `agent_lab/exercises.py` | Actual offline host exercises |
 | `agent_lab/services.py` | Schemas, graph, approvals, ledger, retrieval and SQLite |
 | `agent_lab/sdk.py` | Official SDK tools, hooks and interactive client |
+| `agent_lab/hooks.py` | PreToolUse policy, PostToolUse audit and `can_use_tool` callbacks shared by live runs and the offline hook lessons (7, 20, 37) |
 | `agent_lab/runtime.py` | Task ownership, deadlines and cancellation |
 | `agent_lab/api.py` | JSON, SSE and WebSocket routes |
 | `agent_lab/ui.py` | NiceGUI navigation and exercise controls |
@@ -166,6 +167,10 @@ uv run mypy agent_lab
 uv run pytest
 uv run python scripts/build_curriculum.py
 ```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs these checks on Ubuntu and
+Windows with Python 3.12 and 3.13, including the browser tests, and fails if the
+generated lessons are out of date. CI never makes a paid model call.
 
 The documentation build uses the curriculum contract, document filenames in
 `curriculum.json`, and exercise source. It does not require the recovery archive.

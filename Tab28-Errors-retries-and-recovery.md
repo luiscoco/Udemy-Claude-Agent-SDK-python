@@ -27,25 +27,53 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `retry`, line 416). Host contracts are in
+(function `retry`, line 613). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("retry")
 async def retry(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    attempts = []
-    for attempt in range(1, 4):
-        attempts.append(attempt)
-        try:
-            if attempt < 3:
-                raise ConnectionError("Transient fixture failure")
-            return {"attempts": attempts, "result": "recovered", "idempotent_operation": "read"}
-        except ConnectionError:
-            if attempt == 3:
-                raise
-            await asyncio.sleep(0)
-    raise AssertionError("Unreachable")
+    """Retry transient failures with backoff inside a deadline, without repeating a write."""
+    applied: dict[str, str] = {}  # idempotency key -> result: the host's write ledger
+    attempts: list[dict[str, Any]] = []
+
+    async def write_refund(key: str, attempt: int) -> str:
+        if key not in applied:
+            applied[key] = "refund A-100 for 500 cents"
+        if attempt == 1:
+            # The write succeeded, but its response was lost: the classic ambiguous failure.
+            raise ConnectionError("Connection reset after the request was sent")
+        if attempt == 2:
+            raise TimeoutError("Upstream timed out")
+        return applied[key]
+
+    key = "refund-A-100-500"
+    delays = [0.01, 0.02]
+    result = None
+    try:
+        async with asyncio.timeout(2):
+            for attempt in range(1, 4):
+                try:
+                    result = await write_refund(key, attempt)
+                    attempts.append({"attempt": attempt, "outcome": "succeeded"})
+                    break
+                except (ConnectionError, TimeoutError) as exc:
+                    attempts.append({"attempt": attempt, "outcome": type(exc).__name__})
+                    if attempt == 3:
+                        raise
+                    await asyncio.sleep(delays[attempt - 1])
+    except TimeoutError as exc:
+        raise LessonError("The retry deadline expired before the write was confirmed.") from exc
+    return {
+        "deadline_seconds": 2,
+        "backoff_seconds": delays,
+        "attempts": attempts,
+        "result": result,
+        "idempotency_key": key,
+        "writes_applied": len(applied),
+        "duplicate_write_prevented": len(applied) == 1 and len(attempts) > 1,
+    }
 ```
 
 ## Live Agent SDK exercise
