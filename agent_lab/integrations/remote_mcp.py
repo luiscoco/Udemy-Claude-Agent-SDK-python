@@ -21,10 +21,13 @@ async def inspect_remote(url: str) -> dict:
                 initialized = await session.initialize()
                 tools = await session.list_tools()
                 resources = await session.list_resources()
+                # JSON mode turns AnyUrl resource URIs into strings the CLI can print.
                 return {
-                    "server": initialized.serverInfo.model_dump(),
-                    "tools": [tool.model_dump() for tool in tools.tools],
-                    "resources": [resource.model_dump() for resource in resources.resources],
+                    "server": initialized.serverInfo.model_dump(mode="json"),
+                    "tools": [tool.model_dump(mode="json") for tool in tools.tools],
+                    "resources": [
+                        resource.model_dump(mode="json") for resource in resources.resources
+                    ],
                 }
 
 
