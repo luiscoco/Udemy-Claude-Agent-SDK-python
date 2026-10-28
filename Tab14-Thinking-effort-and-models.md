@@ -27,42 +27,55 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 124). Host contracts are in
+(function `thinking`, line 124). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("thinking", "python_sdk")
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("thinking")
+def thinking(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Build every thinking configuration the installed SDK accepts, and reject foreign names."""
+    import typing
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from claude_agent_sdk import ClaudeAgentOptions
+    from claude_agent_sdk.types import (
+        ThinkingConfigAdaptive,
+        ThinkingConfigDisabled,
+        ThinkingConfigEnabled,
+    )
+
+    from agent_lab.sdk import THINKING_PROFILE
+
+    hints = typing.get_type_hints(ClaudeAgentOptions)
+    effort_values = list(typing.get_args(typing.get_args(hints["effort"])[0]))
+    configs: dict[str, Any] = {
+        "adaptive": ThinkingConfigAdaptive(type="adaptive"),
+        "fixed budget": ThinkingConfigEnabled(type="enabled", budget_tokens=4000),
+        "off": ThinkingConfigDisabled(type="disabled"),
+    }
+    built = [
+        {
+            "choice": label,
+            "thinking": ClaudeAgentOptions(thinking=config, effort="medium").thinking,
+            "keys": sorted(config),
+        }
+        for label, config in configs.items()
+    ]
+    foreign = []
+    for name in ("maxThinkingTokens", "thinkingBudget", "reasoningEffort"):
+        foreign_option: dict[str, Any] = {name: 4000}  # deliberately not a Python option
+        try:
+            ClaudeAgentOptions(**foreign_option)
+            foreign.append({"option": name, "accepted": True})
+        except TypeError:
+            foreign.append({"option": name, "accepted": False})
     return {
         "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "thinking_type": str(hints["thinking"]),
+        "effort_values": effort_values,
+        "configs": built,
+        "foreign_option_names": foreign,
+        "live_profile": THINKING_PROFILE,
     }
 ```
 

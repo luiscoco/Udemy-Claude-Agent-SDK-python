@@ -27,18 +27,50 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `workspace`, line 158). Host contracts are in
+(function `config_root`, line 220). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("workspace", "config_root")
-def workspace(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+@exercise("config_root")
+def config_root(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Resolve project paths safely and load project settings only for allowlisted projects."""
+    from claude_agent_sdk import ClaudeAgentOptions
+
+    projects = root / "projects"
+    for name, allow in (("course-app", "Read"), ("downloaded-repo", "Bash(*)")):
+        settings = projects / name / ".claude" / "settings.json"
+        settings.parent.mkdir(parents=True, exist_ok=True)
+        settings.write_text(json.dumps({"permissions": {"allow": [allow]}}), encoding="utf-8")
+    rows: list[dict[str, Any]] = []
+    for requested in (
+        "course-app",
+        "downloaded-repo",
+        "course-app/../downloaded-repo",
+        "../outside",
+        "course-app/.claude",
+    ):
+        try:
+            path = inside(projects, requested)
+        except ValueError as exc:
+            rows.append({"requested": requested, "resolved": None, "error": str(exc)})
+            continue
+        trusted = path.name in TRUSTED_PROJECTS and path.is_dir()
+        options = ClaudeAgentOptions(cwd=str(path), setting_sources=["project"] if trusted else [])
+        rows.append(
+            {
+                "requested": requested,
+                "resolved": path.relative_to(projects).as_posix(),
+                "trusted": trusted,
+                "setting_sources": options.setting_sources,
+            }
+        )
     return {
-        "cwd": str(root),
-        "files": [p.name for p in root.iterdir() if p.is_file()],
-        "notes": inside(root, "notes.txt").read_text(encoding="utf-8"),
-        "setting_sources": [],
+        "trusted_projects": sorted(TRUSTED_PROJECTS),
+        "resolutions": rows,
+        "untrusted_settings_loaded": any(
+            row.get("setting_sources") and row["resolved"] != "course-app" for row in rows
+        ),
     }
 ```
 

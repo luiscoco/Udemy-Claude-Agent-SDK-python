@@ -27,25 +27,39 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `streaming`, line 696). Host contracts are in
+(function `streaming`, line 821). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("streaming")
 async def streaming(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    async def inputs():
-        for text in [request.prompt or lesson.prompt, request.follow_up]:
-            yield {
-                "type": "user",
-                "message": {"role": "user", "content": text},
-                "parent_tool_use_id": None,
-                "session_id": "default",
-            }
+    """Stream an async iterable of user messages through query() and get one reply per message."""
+    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, query
 
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    texts = [request.prompt or lesson.prompt, request.follow_up]
+    cli = ScriptedCLI([["Async iterators yield values over time."], ["They produce items lazily."]])
+    replies: list[str] = []
+    results = 0
+    async with asyncio.timeout(20):
+        async for message in query(
+            prompt=user_messages(*texts), options=ClaudeAgentOptions(), transport=cli
+        ):
+            if isinstance(message, AssistantMessage):
+                replies += [getattr(block, "text", "") for block in message.content]
+            elif isinstance(message, ResultMessage):
+                results += 1
+    received = [m for m in cli.received if m["type"] == "user"]
     return {
-        "input_messages": [message async for message in inputs()],
-        "note": "Token output streaming is a separate include_partial_messages option.",
+        "input_messages": [message async for message in user_messages(*texts)],
+        "messages_the_cli_received": [m["message"]["content"] for m in received],
+        "replies": replies,
+        "turns_completed": results,
+        "lifecycle": cli.lifecycle,
+        "note": "Token output streaming is the separate include_partial_messages option.",
+        "source": "real query() streaming to a scripted CLI fixture",
     }
 ```
 

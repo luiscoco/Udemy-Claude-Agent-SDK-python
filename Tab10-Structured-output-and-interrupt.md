@@ -27,7 +27,7 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `structured`, line 547). Host contracts are in
+(function `structured`, line 641). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -47,7 +47,7 @@ async def structured(root: Path, request: RunRequest, lesson: Lesson) -> dict[st
         invalid = "accepted"
     except ValidationError as exc:
         invalid = f"rejected: {exc.error_count()} validation errors"
-    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=0.05)
+    cli = ScriptedCLI([[f"step {n} " for n in range(1, 7)]], chunk_delay=1.0)
     received, subtype = 0, None
     async with asyncio.timeout(20):
         async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:

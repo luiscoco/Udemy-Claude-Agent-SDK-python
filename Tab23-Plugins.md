@@ -27,33 +27,53 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `plugins`, line 670). Host contracts are in
+(function `plugins`, line 764). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("plugins")
 def plugins(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Build a local plugin with a command and a skill, validate it and list what it adds."""
+    import re
+
     directory = root / "teaching-plugin"
-    manifest = directory / ".claude-plugin" / "plugin.json"
-    manifest.parent.mkdir(parents=True, exist_ok=True)
-    manifest.write_text(
-        json.dumps(
-            {
-                "name": "python-teaching",
-                "version": "1.0.0",
-                "description": "Python teaching commands",
-            }
-        ),
-        encoding="utf-8",
-    )
+    manifest_path = directory / ".claude-plugin" / "plugin.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "name": "python-teaching",
+        "version": "1.0.0",
+        "description": "Python teaching commands and skills",
+    }
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     commands = directory / "commands"
     commands.mkdir(exist_ok=True)
     (commands / "explain.md").write_text(
         "Explain notes.txt with a Python example.\n", encoding="utf-8"
     )
+    skill = directory / "skills" / "python-example"
+    skill.mkdir(parents=True, exist_ok=True)
+    (skill / "SKILL.md").write_text(
+        "---\nname: python-example\ndescription: Write a short, runnable Python example "
+        "for a concept. Use when a lesson asks for an example.\n---\n"
+        "Write one example under 15 lines that runs with the standard library.\n",
+        encoding="utf-8",
+    )
+    problems = []
+    if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", manifest["name"]):
+        problems.append("name must be lowercase words joined by hyphens")
+    if not re.fullmatch(r"\d+\.\d+\.\d+", manifest["version"]):
+        problems.append("version must be MAJOR.MINOR.PATCH")
+    skills = []
+    for path in sorted((directory / "skills").glob("*/SKILL.md")):
+        front = path.read_text(encoding="utf-8").split("---")[1]
+        fields = dict(line.split(": ", 1) for line in front.strip().splitlines())
+        skills.append({"name": fields["name"], "description": fields["description"]})
     return {
-        "manifest": json.loads(manifest.read_text()),
+        "manifest": json.loads(manifest_path.read_text(encoding="utf-8")),
+        "manifest_problems": problems,
+        "commands": [f"/{manifest['name']}:{path.stem}" for path in sorted(commands.glob("*.md"))],
+        "skills": skills,
         "sdk_plugins": [{"type": "local", "path": str(directory)}],
     }
 ```

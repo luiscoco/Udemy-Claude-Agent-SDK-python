@@ -1117,94 +1117,94 @@
    1,
    6
   ],
-  "concept_brief": "Streaming input means passing an async iterable of user-message dicts to `query(prompt=...)` (or `client.query`), each shaped `{\"type\": \"user\", \"message\": {\"role\": \"user\", \"content\": ...}, \"parent_tool_use_id\": None, \"session_id\": ...}`; token-by-token output is a separate option, `include_partial_messages`.",
-  "lab_brief": "The offline exercise `streaming` drives an async generator that yields the prompt and the follow-up as SDK user-message dicts and collects them. It shows the exact input shape the SDK expects from an async iterable.",
+  "concept_brief": "`query()` accepts an async iterable instead of a string. Each item is a user-message dict (`type`, `message`, `parent_tool_use_id`, `session_id`), produced lazily; the CLI answers each one as a queued turn. Token streaming of the reply is the separate `include_partial_messages` option.",
+  "lab_brief": "The `streaming` exercise builds user messages with the `user_messages` async generator and streams them through the SDK's real `query()` to the scripted CLI, which answers each message as its own turn. Live runs use the same generator. The offline run uses the real SDK client code against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 12 (or run `uv run agent-lab lesson 12`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run streams your prompt and the follow-up as two turns."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Produce SDK user-message dictionaries from a Python asynchronous iterable."
+    "text": "Feed an agent from an async iterable instead of one string."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `inputs()` async generator in the Python source tab and note the four top-level keys of each message."
+    "text": "Read `user_messages` and `streaming` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the offline exercise; type your own prompt if you like."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `input_messages` has two dicts with `type` \"user\", the lesson prompt then the follow-up as `message.content`, and `session_id` \"default\"."
+    "text": "Compare `input_messages`, `messages_the_cli_received` and `turns_completed`."
    },
    {
     "title": "Try the challenge",
-    "text": "Write your own generator that yields three messages and check their shape."
+    "text": "Stream a third message."
    }
   ],
-  "inspect": "Look at `input_messages` (type, message.role, message.content, `parent_tool_use_id`, `session_id`) and `note`.",
-  "expected": "Two input messages: content \"Explain how an asynchronous input iterator works.\" then \"Summarize your previous answer in one sentence.\", each with `type` \"user\", `parent_tool_use_id` null and `session_id` \"default\"; `note` says token output streaming is the separate `include_partial_messages` option.",
-  "evidence_criterion": "The check confirms the async generator produced user-message dicts and the note separates input streaming from output streaming.",
+  "inspect": "`input_messages` (the dicts the generator yields), `messages_the_cli_received`, `replies`, `turns_completed` and `lifecycle`.",
+  "expected": "Two user messages, your prompt (or the example) then the follow-up, reach the CLI in order; `turns_completed` is 2; `lifecycle` ends with input closed and process stopped.",
+  "evidence_criterion": "The check confirms both streamed messages reached the CLI and each completed a turn.",
   "evidence_checks": [
    {
-    "key": "input_messages",
-    "rule": "truthy"
+    "key": "turns_completed",
+    "rule": "equals",
+    "value": 2
    },
    {
-    "key": "note",
-    "rule": "equals",
-    "value": "Token output streaming is a separate include_partial_messages option."
+    "key": "messages_the_cli_received",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Type `What is an async generator?` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 12 --prompt \"What is an async generator?\"`), then verify the first input message carries your text. Then, in a scratch script, write an async generator that yields three user-message dicts, collect them with `[m async for m in gen()]` and check each has `type` \"user\" and a `message.role` of \"user\".",
+  "challenge": "In `streaming`, add a third text to `texts`, run again and confirm `turns_completed` is 3. The third reply is `(no scripted reply)` because the fixture has two answers.",
   "hints": [
-   "An async generator is an `async def` function that uses `yield`; consume it with `async for` inside a coroutine.",
-   "Copy the dict shape from the evidence exactly, run the coroutine with `asyncio.run`, and assert `len(messages) == 3`."
+   "Each yielded dict becomes one queued turn.",
+   "The generator yields three messages, the CLI answers each in order, and the fixture's fallback text fills the missing third reply."
   ],
-  "reference": "The SDK can read user turns from an async iterable, so a host can feed messages as they arrive instead of one fixed string. Each item must be a user-message dict in the shape shown. Output streaming is unrelated: `include_partial_messages=True` makes the SDK emit partial events while Claude writes; the live profile enables it and sends only the first message.",
+  "reference": "An async iterable lets your application produce input over time, for example from a queue or a user typing. The SDK writes each message as it arrives and closes input when the iterable ends, after which the CLI finishes its queued turns and exits.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does `query(prompt=inputs())` with an async generator do?",
+    "prompt": "What does each item of the async iterable represent?",
     "options": [
      {
-      "text": "It streams Claude's output token by token.",
-      "explanation": "Output streaming is `include_partial_messages`, a separate option."
+      "text": "One user message, answered as a queued turn.",
+      "explanation": "Correct. Items are user-message dicts."
      },
      {
-      "text": "It reads user-message dicts from the iterable as input turns.",
-      "explanation": "Correct. Each yielded dict is a user message sent to the session."
+      "text": "One token of the model's reply.",
+      "explanation": "Reply tokens come from include_partial_messages."
      },
      {
-      "text": "It runs the generator in a separate operating-system process.",
-      "explanation": "The generator runs in your Python event loop."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Which value must `type` have in each streamed input dict?",
-    "options": [
-     {
-      "text": "\"user\"",
-      "explanation": "Correct. Each item is a user message with `type` \"user\" and a `message` holding role and content."
-     },
-     {
-      "text": "\"stream\"",
-      "explanation": "There is no \"stream\" message type for input."
-     },
-     {
-      "text": "\"prompt\"",
-      "explanation": "The prompt text goes in `message.content`, not in `type`."
+      "text": "One tool call.",
+      "explanation": "Tool calls come from the model, not your input stream."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "When does the CLI stop reading input?",
+    "options": [
+     {
+      "text": "After the first message.",
+      "explanation": "It reads every queued message."
+     },
+     {
+      "text": "When the iterable ends and input is closed.",
+      "explanation": "Correct. Then it finishes its turns and exits."
+     },
+     {
+      "text": "Never; it waits forever.",
+      "explanation": "Closing input ends the session."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -1313,111 +1313,97 @@
   "prerequisites": [
    2
   ],
-  "concept_brief": "In the installed Python SDK, reasoning is configured with `ClaudeAgentOptions(thinking=...)` (adaptive, enabled with `budget_tokens`, or disabled), `effort` (\"low\" to \"max\") and the older `max_thinking_tokens`; `model` picks the model.",
-  "lab_brief": "The offline exercise `sdk_contract` reads the real types of `thinking`, `effort` and `max_thinking_tokens` from the installed `ClaudeAgentOptions`. It stops you from copying option names or values from another language's SDK.",
+  "concept_brief": "Python configures reasoning with `thinking` (a `ThinkingConfigAdaptive`, `ThinkingConfigEnabled` with `budget_tokens`, or `ThinkingConfigDisabled`) and `effort` (`low` to `max`). Names from other SDKs, such as `maxThinkingTokens`, are not Python options.",
+  "lab_brief": "The `thinking` exercise reads the real types of `thinking` and `effort` from the installed SDK, builds `ClaudeAgentOptions` with each thinking configuration, shows that three foreign option names are rejected, and reports the live profile's settings.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 14 (or run `uv run agent-lab lesson 14`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run uses adaptive thinking at medium effort."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Inspect the installed SDK's thinking and effort fields instead of guessing them."
+    "text": "Configure thinking and effort with the Python SDK's own types."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Note that the live `thinking` profile in `agent_lab/sdk.py` sets `thinking={\"type\": \"adaptive\"}` and `effort=\"medium\"`."
+    "text": "Read `thinking` in the source and `THINKING_PROFILE` in `agent_lab/sdk.py`."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Read `options.thinking` (ThinkingConfigAdaptive, ThinkingConfigEnabled or ThinkingConfigDisabled), the allowed `effort` literals and `max_thinking_tokens`."
+    "text": "Check `effort_values`, each row of `configs` and `foreign_option_names`."
    },
    {
     "title": "Try the challenge",
-    "text": "Build options with a different thinking config and effort and confirm they match the installed types."
+    "text": "Let the type checker catch a bad value."
    }
   ],
-  "inspect": "Look at `options.thinking`, `options.effort`, `options.max_thinking_tokens` and `installed_version`.",
-  "expected": "`options.thinking` lists `ThinkingConfigAdaptive | ThinkingConfigEnabled | ThinkingConfigDisabled | None`, `options.effort` is `Optional[Literal['low', 'medium', 'high', 'xhigh', 'max']]`, `options.max_thinking_tokens` is `int | None`, and `installed_version` is 0.2.163 in this repo.",
-  "evidence_criterion": "The check confirms the run reported the installed SDK version and its thinking and effort option types.",
+  "inspect": "`thinking_type`, `effort_values`, the `configs` table, `foreign_option_names` and `live_profile`.",
+  "expected": "`effort_values` is low, medium, high, xhigh and max. The three configs build (`adaptive`, `enabled` with `budget_tokens` 4000, `disabled`). `maxThinkingTokens`, `thinkingBudget` and `reasoningEffort` are all rejected. `live_profile` is adaptive thinking at medium effort.",
+  "evidence_criterion": "The check confirms all three thinking configurations built and no foreign option name was accepted.",
   "evidence_checks": [
    {
-    "key": "installed_version",
-    "rule": "present"
+    "key": "configs",
+    "rule": "truthy"
    },
    {
-    "key": "options",
+    "key": "foreign_option_names",
+    "rule": "truthy"
+   },
+   {
+    "key": "effort_values",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a scratch script, create `ClaudeAgentOptions(thinking={\"type\": \"enabled\", \"budget_tokens\": 2000}, effort=\"high\")` and print both fields. Verify the values are among the types and literals shown in the evidence; if live mode is on, rerun the lesson and compare the reported cost with a previous run.",
+  "challenge": "Add `ClaudeAgentOptions(effort=\"extreme\")` to `thinking` and run the lesson: it still runs. Then run `uv run mypy agent_lab` and read the error. Remove the line afterwards.",
   "hints": [
-   "`ThinkingConfigEnabled` requires `type: \"enabled\"` and `budget_tokens`; adaptive needs only `type: \"adaptive\"`.",
-   "These options are dataclass fields and TypedDicts, so Python does not validate them at construction; compare your values with the `Literal` list in the evidence yourself."
+   "`ClaudeAgentOptions` is a dataclass, which does not check values at runtime.",
+   "The type checker knows `effort` is a Literal of five values, so mypy reports the invalid `extreme` before it ever reaches a live run."
   ],
-  "reference": "The exercise reads `dataclasses.fields(ClaudeAgentOptions)`, so the types reflect the package in `.venv`, not documentation for another language. Adaptive thinking lets the model decide how much to reason, while `effort` trades depth for latency and cost. More effort is worth it for multi-step reasoning, not for short factual answers.",
+  "reference": "Read options from the SDK you have installed, not from another language's documentation. Wrong names fail immediately with TypeError; wrong values pass at runtime and are caught by the type checker, which is why the lab runs mypy in CI.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. If a live run rejects the thinking or effort setting, the selected model may not support it; try the default model."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Which `effort` value does the installed SDK accept?",
+    "prompt": "Which option sets a fixed thinking budget in Python?",
     "options": [
      {
-      "text": "\"turbo\"",
-      "explanation": "It is not in the installed `Literal` list."
+      "text": "thinking=ThinkingConfigEnabled(type=\"enabled\", budget_tokens=4000)",
+      "explanation": "Correct."
      },
      {
-      "text": "\"xhigh\"",
-      "explanation": "Correct. The evidence lists 'low', 'medium', 'high', 'xhigh' and 'max'."
+      "text": "maxThinkingTokens=4000",
+      "explanation": "That name is rejected with TypeError."
      },
      {
-      "text": "\"auto\"",
-      "explanation": "It is not an `effort` value in this installed SDK."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "What does the live `thinking` profile pass?",
-    "options": [
-     {
-      "text": "`thinking={\"type\": \"adaptive\"}` and `effort=\"medium\"`",
-      "explanation": "Correct. That is how `agent_lab/sdk.py` configures the profile."
-     },
-     {
-      "text": "`max_thinking_tokens=100000` only",
-      "explanation": "The profile does not set `max_thinking_tokens`."
-     },
-     {
-      "text": "`thinking=True`",
-      "explanation": "`thinking` takes a typed dict, not a boolean."
+      "text": "effort=4000",
+      "explanation": "effort takes a level such as medium, not a token count."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "Why does the lesson read option types from the installed package?",
+    "prompt": "ClaudeAgentOptions(effort=\"extreme\") runs without error. What catches it?",
     "options": [
      {
-      "text": "Because option names are identical in every SDK language.",
-      "explanation": "Names and shapes differ between languages; that is the point of checking."
+      "text": "Nothing; it is valid.",
+      "explanation": "extreme is not an allowed effort level."
      },
      {
-      "text": "Because the model chooses its own options.",
-      "explanation": "The host chooses options; the model never sets them."
+      "text": "The type checker, because effort is a Literal.",
+      "explanation": "Correct. Run mypy before shipping."
      },
      {
-      "text": "Because the installed Python package is the source of truth for which fields exist.",
-      "explanation": "Correct. Introspection prevents copying options that do not exist in this version."
+      "text": "The model, during the first turn.",
+      "explanation": "Do not rely on a paid run to find configuration bugs."
      }
     ],
-    "correct": 2
+    "correct": 1
    }
   ]
  },
@@ -2236,191 +2222,196 @@
    11,
    21
   ],
-  "concept_brief": "Local plugins are passed with `ClaudeAgentOptions.plugins=[{\"type\": \"local\", \"path\": ...}]`; a plugin folder has a `.claude-plugin/plugin.json` manifest plus its own components such as `commands/`.",
-  "lab_brief": "The offline `plugins` exercise builds a `teaching-plugin` folder with a `python-teaching` manifest and a `commands/explain.md` command, then returns the manifest and the exact `plugins` list the live run passes to the SDK.",
+  "concept_brief": "A plugin bundles commands, skills and other extensions under one manifest (`.claude-plugin/plugin.json`). The SDK loads a trusted local plugin with `plugins=[{\"type\": \"local\", \"path\": ...}]`, and its commands are namespaced as `/plugin-name:command`.",
+  "lab_brief": "The `plugins` exercise builds a local plugin with a manifest, an `explain` command and a `python-example` skill, validates the manifest's name and version, and lists the command and skill it adds next to the `sdk_plugins` config the live run uses.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Live mode uses the `plugins` profile: `run_sdk` calls this same function and sets `options.plugins` from its result."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 23 (or run `uv run agent-lab lesson 23`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run loads this plugin from the lesson workspace."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand that a plugin packages commands (and other components) under one trusted folder with a manifest."
+    "text": "Package a command and a skill as one trusted plugin."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `plugins` in `agent_lab/exercises.py`; note the manifest path `.claude-plugin/plugin.json` and the `commands/explain.md` file."
+    "text": "Read `plugins` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 23 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `manifest` (name `python-teaching`, version `1.0.0`) and `sdk_plugins` (one `local` entry whose path ends in `teaching-plugin`)."
+    "text": "Check `manifest_problems`, `commands`, `skills` and `sdk_plugins`."
    },
    {
     "title": "Try the challenge",
-    "text": "Add another command to the plugin and decide how you would verify the CLI sees it."
+    "text": "Add a second command."
    }
   ],
-  "inspect": "Look at `manifest` (name, version, description) and `sdk_plugins` (type and absolute path).",
-  "expected": "`manifest` is `{\"name\": \"python-teaching\", \"version\": \"1.0.0\", \"description\": \"Python teaching commands\"}` and `sdk_plugins` holds one item with `type: \"local\"` and a path inside this run's temporary workspace ending in `teaching-plugin`.",
-  "evidence_criterion": "The check confirms a plugin manifest was written and a local plugin entry was produced for the SDK.",
+  "inspect": "`manifest`, `manifest_problems`, `commands`, `skills` (name and description) and `sdk_plugins`.",
+  "expected": "`manifest_problems` is empty; `commands` is `/python-teaching:explain`; `skills` lists `python-example` with its description; `sdk_plugins` has one local path.",
+  "evidence_criterion": "The check confirms a valid manifest that adds both a command and a skill.",
   "evidence_checks": [
    {
-    "key": "manifest",
+    "key": "commands",
     "rule": "truthy"
    },
    {
-    "key": "sdk_plugins",
+    "key": "skills",
     "rule": "truthy"
+   },
+   {
+    "key": "manifest_problems",
+    "rule": "equals",
+    "value": []
    }
   ],
-  "challenge": "In a scratch copy of `plugins`, write a second command `commands/quiz.md` and bump the manifest version to `1.1.0`; rerun and confirm `manifest.version` is `1.1.0`.",
+  "challenge": "Write a second file `commands/quiz.md` in `plugins`, run again and confirm `commands` lists `/python-teaching:quiz` too. Then set the version to `1.0` and read `manifest_problems`.",
   "hints": [
-   "The path in `sdk_plugins` changes every run because each run uses a fresh workspace.",
-   "Only load plugins from folders you created or reviewed; a plugin can add commands and other behaviour to the agent."
+   "Commands are discovered from the files in `commands/`.",
+   "Each Markdown file becomes a namespaced command, and `1.0` fails the MAJOR.MINOR.PATCH rule."
   ],
-  "reference": "The host builds the plugin on disk and returns the manifest it reads back, so the evidence reflects the real files. The `sdk_plugins` list is exactly what `run_sdk` assigns to `options.plugins` in live mode. A local path keeps the plugin trusted and reviewable rather than fetched from an unknown source.",
+  "reference": "Plugins make extensions installable as one reviewed unit. Validate the manifest, list what it adds before loading it, and only load local plugins you trust, because their commands and skills shape what the agent does.",
   "recovery": [
-   "If the manifest cannot be written, check that the lab data directory is writable and rerun.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Where is a local plugin's manifest stored?",
+    "prompt": "How is a plugin's explain command invoked?",
     "options": [
      {
-      "text": "In `CLAUDE.md`.",
-      "explanation": "CLAUDE.md is project instructions, not a plugin manifest."
+      "text": "/python-teaching:explain",
+      "explanation": "Correct. Plugin commands are namespaced."
      },
      {
-      "text": "In `pyproject.toml`.",
-      "explanation": "That is the Python package manifest, unrelated to Claude plugins."
+      "text": "/explain",
+      "explanation": "Unnamespaced commands could collide across plugins."
      },
      {
-      "text": "In `.claude-plugin/plugin.json` inside the plugin folder.",
-      "explanation": "Correct. The exercise writes it there and reads it back."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "How does the live run give the plugin to the SDK?",
-    "options": [
-     {
-      "text": "`options.plugins = [{\"type\": \"local\", \"path\": ...}]`",
-      "explanation": "Correct. `run_sdk` uses the `sdk_plugins` value from the exercise."
-     },
-     {
-      "text": "By adding the path to `allowed_tools`.",
-      "explanation": "`allowed_tools` holds tool names, not plugin paths."
-     },
-     {
-      "text": "By copying it into the user's home folder.",
-      "explanation": "The lab never writes into your personal configuration."
+      "text": "explain()",
+      "explanation": "Commands are slash commands, not Python calls."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What should you do before loading a local plugin?",
+    "options": [
+     {
+      "text": "Nothing; plugins are sandboxed.",
+      "explanation": "Plugins extend what the agent can do."
+     },
+     {
+      "text": "Review its manifest and the commands and skills it adds.",
+      "explanation": "Correct. Load only what you trust."
+     },
+     {
+      "text": "Rename it to match your project.",
+      "explanation": "Renaming does not make it safe."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
  {
   "id": 24,
   "prerequisites": [
-   5,
    10
   ],
-  "concept_brief": "A harness keeps the model as a proposer and the host as the validator and executor; in live mode the model only reads evidence through an `inspect_exercise` tool from `create_sdk_mcp_server`, while Pydantic models validate the plan.",
-  "lab_brief": "The offline `orchestration` exercise validates a three-task `Plan` with Pydantic (`TaskSpec` ids, `src/*.py` file ownership, known dependencies), computes dependency waves and runs scripted host workers with `execute_plan`.",
+  "concept_brief": "A harness treats model output as a proposal. The host parses it, validates it against strict rules, and executes only what passes; rejected proposals never reach a worker.",
+  "lab_brief": "The `harness` exercise validates five plan proposals that stand in for model replies: one valid, one with two owners for a file, one with a dependency cycle, one touching a file outside `src/` and one that is prose instead of JSON. Only the valid plan is executed.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson.",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server.",
-   "Open `Plan`, `TaskSpec` and `execute_plan` in `agent_lab/services.py`."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 24 (or run `uv run agent-lab lesson 24`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Understand the gate: a proposal is just data until host validation accepts it, and only host code executes it."
+    "text": "Separate what the model proposes from what the host executes."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `orchestration` in `exercises.py` and the `validate_graph` checks in `services.py` (unique ids, one owner per file, `src/*.py` only, known dependencies)."
+    "text": "Read `harness` in the source and `Plan` in `agent_lab/services.py`."
    },
    {
     "title": "Run one example",
-    "text": "Run lesson 24 in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `waves` is `[[\"T1\"], [\"T2\", \"T3\"]]` and every entry in `results` has `verified: true` and `source: \"scripted host worker\"`."
+    "text": "Read each row of `proposals`, then `executed` and `workers_started`."
    },
    {
     "title": "Try the challenge",
-    "text": "Try an invalid plan and see validation reject it before any worker runs."
+    "text": "Write another bad proposal."
    }
   ],
-  "inspect": "Look at `plan` (validated tasks), `waves` (execution order) and `results` (per-task owned files, verified flag and source).",
-  "expected": "`plan` has T1 (`src/tags.py`), T2 (`src/search.py`, depends on T1) and T3 (`src/report.py`, depends on T1); `waves` is `[[\"T1\"], [\"T2\", \"T3\"]]`; `results` has three verified entries from the scripted host worker.",
-  "evidence_criterion": "The check confirms the validated plan ran in dependency waves and produced results for each task.",
+  "inspect": "The `proposals` table (`accepted`, `problem`), `executed`, `waves`, `workers_started` and `results`.",
+  "expected": "Only `valid plan` is accepted. The others fail with `More than one owner for src/tags.py.`, `Dependency cycle.`, `Tasks own only src/*.py files.` and an invalid-JSON message. Workers start only for T1 and T2.",
+  "evidence_criterion": "The check confirms only the valid proposal was executed.",
   "evidence_checks": [
    {
-    "key": "waves",
-    "rule": "truthy"
+    "key": "executed",
+    "rule": "equals",
+    "value": [
+     "valid plan"
+    ]
    },
    {
-    "key": "results",
+    "key": "proposals",
     "rule": "truthy"
    }
   ],
-  "challenge": "In a Python shell run `from agent_lab.services import Plan; Plan.model_validate({\"tasks\": [{\"id\": \"T1\", \"files\": [\"src/a.py\"]}, {\"id\": \"T2\", \"files\": [\"src/a.py\"]}]})` and confirm it raises a validation error about more than one owner for `src/a.py`.",
+  "challenge": "Add a proposal where T2 depends on `T9`, run again and read its problem (`Unknown dependency.`).",
   "hints": [
-   "`waves()` groups tasks whose dependencies are all finished.",
-   "`TaskSpec` uses `extra=\"forbid\"`, so an unexpected field in a model proposal is rejected too."
+   "Every dependency must name a task in the same plan.",
+   "`Plan` checks that `depends_on` is a subset of the task ids, so T9 is rejected before anything runs."
   ],
-  "reference": "The plan passed Pydantic validation, so its ids, file ownership and dependencies are known to be consistent before anything runs. T1 runs first because T2 and T3 depend on it; they then run together in the second wave. The workers are scripted host code, so `verified` reflects host checks, not a model's claim.",
+  "reference": "Models produce useful plans and occasional bad ones. Parsing into a strict model, checking ownership, scope and dependencies, and executing only accepted plans keeps the host in control regardless of what the model wrote.",
   "recovery": [
-   "If the run raises a validation error, read its message; it names the rule the plan broke, such as an unknown dependency.",
-   "If live mode is unavailable or reports a key or 401 error, fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the server; the offline run teaches the same host evidence without calling Claude."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why do T2 and T3 run in the same wave?",
+    "prompt": "A model replies with prose instead of the JSON plan. What should the harness do?",
     "options": [
      {
-      "text": "They were listed last.",
-      "explanation": "Order in the list does not decide waves; dependencies do."
+      "text": "Reject it as unparseable and execute nothing.",
+      "explanation": "Correct. Ask again or stop; never guess."
      },
      {
-      "text": "Both depend only on T1, which finished in the first wave.",
-      "explanation": "Correct. `waves()` groups tasks whose dependencies are complete."
+      "text": "Extract task names from the prose and run them.",
+      "explanation": "Guessing turns model text into authority."
      },
      {
-      "text": "The model asked for it.",
-      "explanation": "No model is involved offline; waves are computed by host code."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "What happens if two tasks claim the same file?",
-    "options": [
-     {
-      "text": "`Plan` validation raises an error before execution.",
-      "explanation": "Correct. `validate_graph` rejects more than one owner for a file."
-     },
-     {
-      "text": "The second task overwrites the first.",
-      "explanation": "Execution never starts for an invalid plan."
-     },
-     {
-      "text": "They run in separate waves.",
-      "explanation": "Ownership conflicts are rejected, not scheduled."
+      "text": "Execute the previous plan instead.",
+      "explanation": "That plan was not proposed for this request."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Where are file ownership and dependency rules enforced?",
+    "options": [
+     {
+      "text": "In the system prompt.",
+      "explanation": "Prompts influence; they do not enforce."
+     },
+     {
+      "text": "In host validation before execution.",
+      "explanation": "Correct."
+     },
+     {
+      "text": "By the worker after it starts.",
+      "explanation": "By then the work has begun."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -3029,231 +3020,190 @@
    4,
    7
   ],
-  "concept_brief": "AskUserQuestion is a built-in tool the model uses to ask the user multiple-choice questions. In Python the host enables it in `ClaudeAgentOptions.tools` but leaves it out of `allowed_tools`, so the `can_use_tool` callback receives the call, collects the answer and returns `PermissionResultAllow(updated_input={..., \"answers\": ...})`.",
-  "lab_brief": "The offline `questions` exercise builds the exact AskUserQuestion input (one question, a header, two options, `multiSelect`) that the live `Questions` Pydantic model in `agent_lab`/sdk.py validates. No answer is supplied offline, because only a real user can answer.",
+  "concept_brief": "`AskUserQuestion` lets the agent ask the user a multiple-choice question. The host validates the question's shape, shows it, and returns the answer through `can_use_tool` as `PermissionResultAllow(updated_input={..., \"answers\": ...})`.",
+  "lab_brief": "The `questions` exercise validates four question inputs with the lab's `Questions` model, then calls the same `permission_callback` that live runs use: the question is shown, a fixture answer comes back inside `updated_input`, and another tool is denied.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live run opens a dialog in the browser that you must answer."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 31 (or run `uv run agent-lab lesson 31`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. In live mode the browser shows the question and you answer it yourself."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn how a model question reaches a human: the tool call is intercepted by `can_use_tool`, validated, answered in the UI and returned as `updated_input`."
+    "text": "Validate a question and route the user's answer back to the agent."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open the `questions` function in `agent_lab`/exercises.py and the `Question`/`Questions` models in `agent_lab`/sdk.py; note the limits (2-4 options, header up to 30 characters)."
+    "text": "Read `questions` in the source and `permission_callback` in `agent_lab/hooks.py`."
    },
    {
     "title": "Run one example",
-    "text": "Select Offline and click Run exercise."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "In Response and results, check `tool`, the single entry in `input.questions` and the `response` text."
+    "text": "Check `shape_checks`, `shown_to_user` and `routed`."
    },
    {
     "title": "Try the challenge",
-    "text": "Validate a malformed question with the `Questions` model and read the validation error."
+    "text": "Change the answer."
    }
   ],
-  "inspect": "Look at `tool`, then `input.questions[0]` (`question`, `header`, `options`, `multiSelect`) and the `response` note.",
-  "expected": "`tool` is \"AskUserQuestion\"; `input.questions` holds one question \"Which teaching style?\" with header \"Style\", options \"Concise\" and \"Detailed\" and `multiSelect` false; `response` says offline mode supplies no answer.",
-  "evidence_criterion": "The check verifies that the evidence names the AskUserQuestion tool and contains a question input and a response note.",
+  "inspect": "The `shape_checks` table, `shown_to_user`, `routed` (`result_type` and `answers`) and `other_tool`.",
+  "expected": "The valid question passes; one option, a header over 30 characters and an unknown field are rejected with the field that failed. `routed` is `PermissionResultAllow` with answers `Which teaching style?: Concise`; Bash gets `PermissionResultDeny`.",
+  "evidence_criterion": "The check confirms invalid questions were rejected and the answer was returned through the permission callback.",
   "evidence_checks": [
    {
-    "key": "tool",
-    "rule": "equals",
-    "value": "AskUserQuestion"
-   },
-   {
-    "key": "input",
+    "key": "routed",
     "rule": "truthy"
    },
    {
-    "key": "response",
-    "rule": "present"
+    "key": "shape_checks",
+    "rule": "truthy"
+   },
+   {
+    "key": "shown_to_user",
+    "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"from agent_lab.sdk import Questions; Questions.model_validate({'questions':[{'question':'Which?','header':'Style','options':[{'label':'Concise','description':'x'}]}]})\"`. Verify that Pydantic rejects it because `options` needs at least 2 items, then add a second option and confirm it validates.",
+  "challenge": "Change the fixture answer in `ask` to `Detailed`, run again and confirm `routed.answers` follows.",
   "hints": [
-   "The question shape lives in two places: the offline fixture in exercises.py and the `Questions` validator in sdk.py.",
-   "`Question.options` uses `Field(min_length=2, max_length=4)` and `header` uses `max_length=30`; any input outside those bounds raises `ValidationError` before the dialog opens."
+   "The callback copies whatever the user answered into `updated_input`.",
+   "The agent receives the tool input with `answers` added, so the next step uses the user's real choice."
   ],
-  "reference": "The evidence is the tool input the host expects, not an answer. In live mode `permission()` in sdk.py validates the arguments with `Questions.model_validate`, waits for the browser dialog and returns `PermissionResultAllow` with the answers merged into `updated_input`. Because AskUserQuestion is not in `allowed_tools`, the SDK must consult `can_use_tool`, which is what lets the host collect the answer.",
+  "reference": "Questions are tool calls the host must check: malformed input never reaches the user, and the answer travels back as data inside the permission result, so the agent cannot fabricate it.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 31` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "Why does `agent_lab`/sdk.py add AskUserQuestion to `tools` but not to `allowed_tools`?",
+    "prompt": "How does the user's answer reach the agent?",
     "options": [
      {
-      "text": "Pre-approving it would let the call run without `can_use_tool`, so the host could never collect the user's answer.",
-      "explanation": "Correct. Tools in `allowed_tools` skip the permission callback; leaving AskUserQuestion out forces the call through `can_use_tool`, where the host shows the dialog."
+      "text": "In PermissionResultAllow.updated_input under answers.",
+      "explanation": "Correct."
      },
      {
-      "text": "`allowed_tools` only accepts MCP tool names.",
-      "explanation": "No. `allowed_tools` also lists built-in tools; this file adds Read, Glob and Grep to it for other profiles."
+      "text": "As a new system prompt.",
+      "explanation": "The answer is tool input, not instructions."
      },
      {
-      "text": "Listing it in `allowed_tools` would turn on `multiSelect`.",
-      "explanation": "No. `multiSelect` is a field of each question in the tool input, unrelated to permission lists."
+      "text": "The model guesses it.",
+      "explanation": "The host returns the real choice."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "How does the user's answer get back to the model in the live profile?",
+    "prompt": "A question has one option. What should happen?",
     "options": [
      {
-      "text": "The host returns `PermissionResultDeny(message=answer)`.",
-      "explanation": "No. A deny result blocks the tool; the answer would be reported as a refusal, not as tool input."
+      "text": "Show it anyway.",
+      "explanation": "A single option is not a choice."
      },
      {
-      "text": "The host returns `PermissionResultAllow(updated_input={**arguments, \"answers\": response})`.",
-      "explanation": "Correct. `updated_input` replaces the tool input, so the answers travel with the approved AskUserQuestion call."
+      "text": "Reject it at validation before the user sees it.",
+      "explanation": "Correct."
      },
      {
-      "text": "The host writes the answer into notes.txt for the model to read.",
-      "explanation": "No. The lab never writes files for this; the answer is passed through the permission result."
+      "text": "Add a second option automatically.",
+      "explanation": "The host must not invent choices."
      }
     ],
     "correct": 1
-   },
-   {
-    "prompt": "What does the offline run prove?",
-    "options": [
-     {
-      "text": "That Claude asked a question and the user chose Concise.",
-      "explanation": "No. Offline mode never calls Claude and supplies no answer; the `response` field says so."
-     },
-     {
-      "text": "That AskUserQuestion works without any user interaction.",
-      "explanation": "No. The tool exists precisely to wait for a human; without one there is no answer."
-     },
-     {
-      "text": "That the host can build the question shape it will later validate and route to the user.",
-      "explanation": "Correct. The evidence is a locally built input in the format the `Questions` model accepts."
-     }
-    ],
-    "correct": 2
    }
   ]
  },
  {
   "id": 32,
   "prerequisites": [
-   3,
-   4
+   24
   ],
-  "concept_brief": "`ClaudeAgentOptions(permission_mode=\"plan\")` lets the agent read and propose a plan without executing changes. The host should still validate a plan as data before anything runs it.",
-  "lab_brief": "The offline exercise builds a Pydantic `Plan` of three `TaskSpec` items, whose validator rejects duplicate file owners, unknown dependencies and cycles, then `execute_plan` runs scripted host workers wave by wave. It shows that validating a plan and executing it are separate steps.",
+  "concept_brief": "Plan mode (`permission_mode=\"plan\"`) lets the agent explore and propose without making changes. The host validates the proposed plan, a person approves it, and only then does the session leave plan mode and execution begin.",
+  "lab_brief": "The `plan_mode` exercise switches a real `ClaudeSDKClient` session into plan mode, receives a JSON plan, validates it with `Plan`, records approval, switches back to default mode and only then runs the workers. The offline run uses the real SDK client code against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live `plan` profile allows only Read, Glob and Grep, sets `permission_mode=\"plan\"` and raises the turn limit to 12."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 32 (or run `uv run agent-lab lesson 32`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run uses `permission_mode=\"plan\"`."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Separate planning from execution: a plan is data the host validates, and plan permission mode keeps the live agent from acting."
+    "text": "Validate and approve a plan before executing it."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `orchestration` in `agent_lab`/exercises.py and `TaskSpec`, `Plan.validate_graph`, `Plan.waves` and `execute_plan` in `agent_lab`/services.py."
+    "text": "Read `plan_mode` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare `plan.tasks` with `waves` and confirm every entry in `results` is verified by a scripted host worker."
+    "text": "Follow the `timeline` and check `workers_before_approval`."
    },
    {
     "title": "Try the challenge",
-    "text": "Submit an invalid plan to `Plan.model_validate` and read which rule rejects it."
+    "text": "Break the plan and watch execution never start."
    }
   ],
-  "inspect": "Look at `plan.tasks` (each `id`, `files`, `depends_on`), the computed `waves` and the per-task `results`.",
-  "expected": "`plan.tasks` lists T1 (src/tags.py), T2 (src/search.py, depends on T1) and T3 (src/report.py, depends on T1); `waves` is [[\"T1\"], [\"T2\", \"T3\"]]; `results` has T1, T2 and T3 each with `verified` true and `source` \"scripted host worker\".",
-  "evidence_criterion": "The check verifies that a validated plan, its execution waves and the worker results are all present.",
+  "inspect": "The `timeline` steps with their `cli_mode`, `waves` and `workers_started`, then `workers_before_approval`, `results` and `live_option`.",
+  "expected": "The CLI is in `plan` mode while planning; the plan validates into waves T1, then T2 and T3, with 0 workers started; after approval the mode is `default` and 3 workers run.",
+  "evidence_criterion": "The check confirms no worker started before the plan was approved.",
   "evidence_checks": [
    {
-    "key": "plan",
-    "rule": "present"
-   },
-   {
-    "key": "waves",
-    "rule": "truthy"
+    "key": "workers_before_approval",
+    "rule": "equals",
+    "value": 0
    },
    {
     "key": "results",
     "rule": "truthy"
    }
   ],
-  "challenge": "Run `uv run python -c \"from agent_lab.services import Plan; Plan.model_validate({'tasks':[{'id':'T1','files':['src/a.py'],'depends_on':['T2']},{'id':'T2','files':['src/b.py'],'depends_on':['T1']}]})\"` and verify it fails with \"Dependency cycle.\". Then give both tasks the same file and verify \"More than one owner for src/a.py.\".",
+  "challenge": "Give T2 the file `src/tags.py` in the scripted proposal, run again and confirm the run fails at validation with no worker started.",
   "hints": [
-   "A wave is every task whose dependencies are already done; T2 and T3 both wait only for T1.",
-   "`validate_graph` checks unique ids, `src/*.py` ownership, single owners and known dependencies, then calls `waves()`, which raises \"Dependency cycle.\" when no task is ready."
+   "Validation happens before approval and execution.",
+   "Two owners for one file fails `Plan` validation, so the exercise stops before leaving plan mode and no worker ever runs."
   ],
-  "reference": "The plan is validated before any worker starts, so an invalid graph never executes. `waves()` groups T2 and T3 together because both depend only on T1, and `execute_plan` runs each wave with an `asyncio.TaskGroup` bounded by a semaphore. In live mode `permission_mode=\"plan\"` gives the same separation for the agent: it may read and propose, not edit.",
+  "reference": "Plan mode separates thinking from doing. Validating the plan and asking for approval while still in plan mode means a bad plan costs nothing, and execution happens only on a plan someone accepted.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 32` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt. If a live run stops at the turn limit, raise Maximum turns (up to 12)."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does `permission_mode=\"plan\"` do in the live profile?",
+    "prompt": "What does permission_mode=\"plan\" allow?",
     "options": [
      {
-      "text": "It lets the agent read and propose a plan without executing changes.",
-      "explanation": "Correct. Plan mode is for exploration and proposals; the live profile also allows only Read, Glob and Grep."
+      "text": "Exploring and proposing without making changes.",
+      "explanation": "Correct."
      },
      {
-      "text": "It approves every tool call automatically.",
-      "explanation": "No. Automatic approval is closer to `bypassPermissions`; plan mode is the most cautious choice here."
+      "text": "Running any tool without approval.",
+      "explanation": "That is the opposite of plan mode."
      },
      {
-      "text": "It makes the SDK run `execute_plan` for you.",
-      "explanation": "No. `execute_plan` is host code in `agent_lab`/services.py; the SDK knows nothing about it."
+      "text": "Editing files faster.",
+      "explanation": "Plan mode prevents edits."
      }
     ],
     "correct": 0
    },
    {
-    "prompt": "Why is `waves` equal to [[\"T1\"], [\"T2\", \"T3\"]]?",
+    "prompt": "When should workers start?",
     "options": [
      {
-      "text": "Tasks always run in alphabetical pairs.",
-      "explanation": "No. Waves are computed from `depends_on`, not from names."
+      "text": "As soon as the model replies.",
+      "explanation": "The plan is not validated or approved yet."
      },
      {
-      "text": "T3 depends on T2.",
-      "explanation": "No. T3 depends only on T1, which is why it can run alongside T2."
+      "text": "After validation and approval, outside plan mode.",
+      "explanation": "Correct."
      },
      {
-      "text": "T1 has no dependencies, and T2 and T3 each depend only on T1.",
-      "explanation": "Correct. After T1 is done, both remaining tasks are ready, so they share the second wave."
-     }
-    ],
-    "correct": 2
-   },
-   {
-    "prompt": "Who produced the `results` entries in the offline evidence?",
-    "options": [
-     {
-      "text": "Claude subagents editing src/tags.py.",
-      "explanation": "No. Offline mode calls no model and edits no source files."
-     },
-     {
-      "text": "A scripted async host worker that returns the owned files.",
-      "explanation": "Correct. Each result has `source` \"scripted host worker\"; it demonstrates execution order, not real work."
-     },
-     {
-      "text": "The SDK's plan mode.",
-      "explanation": "No. Plan mode is a live permission setting; the offline results come from `execute_plan` and a local worker."
+      "text": "While still in plan mode.",
+      "explanation": "Plan mode is for proposing, not executing."
      }
     ],
     "correct": 1
@@ -3375,7 +3325,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `styles` branch of `seed_workspace` and the `project_markdown` exercise in `agent_lab`/exercises.py."
+    "text": "Read the `styles` branch of `seed_workspace` and the `project_markdown` exercise in `agent_lab/exercises.py`."
    },
    {
     "title": "Run one example",
@@ -3492,7 +3442,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `store` in `agent_lab`/exercises.py: note the temporary path, `temporary.replace(target)` and the read-back."
+    "text": "Read `store` in `agent_lab/exercises.py`: note the temporary path, `temporary.replace(target)` and the read-back."
    },
    {
     "title": "Run one example",
@@ -3611,7 +3561,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `spawn` in `agent_lab`/exercises.py and find the argument list, `cwd=root`, the PIPE settings, `asyncio.timeout(10)` and the `finally` cleanup."
+    "text": "Read `spawn` in `agent_lab/exercises.py` and find the argument list, `cwd=root`, the PIPE settings, `asyncio.timeout(10)` and the `finally` cleanup."
    },
    {
     "title": "Run one example",
@@ -3702,7 +3652,7 @@
      },
      {
       "text": "The Claude Code CLI, whose path can be set with `cli_path`.",
-      "explanation": "Correct. The SDK talks to the CLI subprocess; this lab resolves `cli_path` in `agent_lab`/sdk.py."
+      "explanation": "Correct. The SDK talks to the CLI subprocess; this lab resolves `cli_path` in `agent_lab/sdk.py`."
      },
      {
       "text": "The lesson's `spawn` exercise.",
@@ -3914,119 +3864,96 @@
  {
   "id": 39,
   "prerequisites": [
-   3,
-   11,
    16
   ],
-  "concept_brief": "`ClaudeAgentOptions(cwd=...)` sets the project root the agent works in, and `setting_sources` decides whether user, project or local settings are loaded; an empty list loads none. This lab also sets `CLAUDE_CONFIG_DIR` per run through `env`, so personal configuration never leaks in.",
-  "lab_brief": "The offline exercise reports the isolated lesson workspace path, its files and the text of notes.txt read through `inside()`, with `setting_sources` empty. It shows that the host resolves paths against one trusted root and loads no settings unless a lesson opts in.",
+  "concept_brief": "The project root decides which `.claude/` settings a run may load. Resolve requested paths inside an allowed base, and opt into `setting_sources=[\"project\"]` only for projects on an explicit trust list.",
+  "lab_brief": "The `config_root` exercise creates a trusted `course-app` project and an untrusted `downloaded-repo` whose settings allow `Bash(*)`, then resolves five requested paths, including traversal tricks, and builds `ClaudeAgentOptions` for each.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK. The live `read` profile uses `cwd` set to the lesson workspace, `setting_sources=[]` and only Read, Glob and Grep."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 39 (or run `uv run agent-lab lesson 39`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Resolve every path against one trusted project root and keep settings off by default."
+    "text": "Load project settings only for trusted project roots."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `workspace` in `agent_lab`/exercises.py, `inside` in `agent_lab`/policy.py and the `cwd`, `setting_sources` and `env` options in `agent_lab`/sdk.py."
+    "text": "Read `config_root` and `TRUSTED_PROJECTS` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Run the lesson in Offline mode."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that `cwd` is a temporary lesson folder, `files` lists only the seeded files and `setting_sources` is empty."
+    "text": "Read each row of `resolutions`, then `untrusted_settings_loaded`."
    },
    {
     "title": "Try the challenge",
-    "text": "Test `inside()` with a path that escapes the root."
+    "text": "Trust the downloaded repository and see what changes."
    }
   ],
-  "inspect": "Look at `cwd`, `files`, `notes` and `setting_sources`.",
-  "expected": "`cwd` is a temporary `...\\work` directory for this run; `files` is [\"notes.txt\", \"sales.csv\"]; `notes` is \"Python agents combine an SDK, host tools, permissions and sessions.\"; `setting_sources` is [].",
-  "evidence_criterion": "The check verifies that the run reports its isolated working directory, the seeded files and the settings sources it loaded.",
+  "inspect": "`trusted_projects`, the `resolutions` table (`requested`, `resolved`, `trusted`, `setting_sources` or `error`) and `untrusted_settings_loaded`.",
+  "expected": "`course-app` loads `[\"project\"]`. `downloaded-repo` and `course-app/../downloaded-repo` resolve to the untrusted project with `[]`. `../outside` and `course-app/.claude` are refused. `untrusted_settings_loaded` is false.",
+  "evidence_criterion": "The check confirms no untrusted project's settings were loaded.",
   "evidence_checks": [
    {
-    "key": "cwd",
-    "rule": "truthy"
+    "key": "untrusted_settings_loaded",
+    "rule": "equals",
+    "value": false
    },
    {
-    "key": "files",
+    "key": "resolutions",
     "rule": "truthy"
-   },
-   {
-    "key": "setting_sources",
-    "rule": "present"
    }
   ],
-  "challenge": "Run `uv run python -c \"from pathlib import Path; from agent_lab.policy import inside; print(inside(Path('.'), 'README.md')); inside(Path('.'), '../outside.txt')\"`. Verify the first path resolves inside the root and the second raises \"Path is outside the permitted workspace.\". Try `.env` too.",
+  "challenge": "Add `\"downloaded-repo\"` to `TRUSTED_PROJECTS`, run again and confirm `untrusted_settings_loaded` becomes true. Explain what a live run would then load. Restore the list afterwards.",
   "hints": [
-   "Each run gets a fresh temporary workspace, so `cwd` differs between runs.",
-   "`inside()` resolves the joined path and rejects anything that is not under the root, including secret files such as `.env`; `decide()` turns that error into a denied tool call."
+   "Trust is a single list entry, so it must be a deliberate decision.",
+   "Trusting the downloaded repository loads its `.claude/settings.json`, including the `Bash(*)` permission it ships."
   ],
-  "reference": "The run worked in its own temporary project root and read notes.txt only after `inside()` confirmed the path. `setting_sources` is empty, so no user or project settings influenced it. Lessons such as skills and output styles opt into `[\"project\"]` explicitly, and only for the lesson's own trusted workspace.",
+  "reference": "Path resolution and trust are separate checks: first make sure the path stays inside the allowed base, then load settings only if that exact project is trusted. A path that merely starts at a trusted folder, like `course-app/../downloaded-repo`, gets no trust.",
   "recovery": [
-   "If the offline run fails, read the first error in the Diagnostics panel, run `uv sync --locked` again and confirm `uv run agent-lab lesson 39` completes in a terminal.",
-   "If live mode is disabled or rejects authentication, keep working offline; check `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app, never paste a key into the prompt."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "What does `setting_sources=[]` mean for a live run?",
+    "prompt": "course-app/../downloaded-repo resolves to which project?",
     "options": [
      {
-      "text": "The SDK loads only the user's personal settings.",
-      "explanation": "No. An empty list excludes user, project and local settings."
+      "text": "course-app, because the path starts there.",
+      "explanation": "Resolution follows the `..`."
      },
      {
-      "text": "No filesystem settings are loaded.",
-      "explanation": "Correct. The lab opts in per lesson with `[\"project\"]` only when needed."
+      "text": "downloaded-repo, which is untrusted.",
+      "explanation": "Correct. Trust follows the resolved path."
      },
      {
-      "text": "The run fails because settings are required.",
-      "explanation": "No. Runs work fine without settings; the lab uses this default for most lessons."
+      "text": "Neither; it is refused.",
+      "explanation": "It stays inside the base, so it resolves."
      }
     ],
     "correct": 1
    },
    {
-    "prompt": "Why does `cwd` point to a temporary folder?",
+    "prompt": "Why keep an explicit trusted-project list?",
     "options": [
      {
-      "text": "Each run gets an isolated workspace, so the agent never works in your real project.",
-      "explanation": "Correct. Paths are resolved against this root and the folder is disposable."
+      "text": "Project settings can grant permissions, so loading them is a trust decision.",
+      "explanation": "Correct."
      },
      {
-      "text": "The SDK cannot use folders inside the repo.",
-      "explanation": "No. It can; the lab isolates runs on purpose."
+      "text": "It makes runs faster.",
+      "explanation": "Speed is not the reason."
      },
      {
-      "text": "Temporary folders are faster to read.",
-      "explanation": "No. The reason is isolation, not speed."
+      "text": "The SDK requires it.",
+      "explanation": "The SDK leaves this decision to you."
      }
     ],
     "correct": 0
-   },
-   {
-    "prompt": "What isolates the CLI's own configuration for each live run in this lab?",
-    "options": [
-     {
-      "text": "`setting_sources=[\"user\"]`",
-      "explanation": "No. That would load user settings, the opposite of isolation."
-     },
-     {
-      "text": "A `.claude/settings.json` in the repo root.",
-      "explanation": "No. The lab does not rely on repo settings for isolation."
-     },
-     {
-      "text": "`env` with `CLAUDE_CONFIG_DIR` set to a per-run folder.",
-      "explanation": "Correct. `isolated_env()` in `agent_lab`/sdk.py sets it, with auto memory disabled."
-     }
-    ],
-    "correct": 2
    }
   ]
  },
@@ -4253,7 +4180,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `web` in `agent_lab`/exercises.py and the `web` branch of `run_sdk` in `agent_lab`/sdk.py."
+    "text": "Read `web` in `agent_lab/exercises.py` and the `web` branch of `run_sdk` in `agent_lab/sdk.py`."
    },
    {
     "title": "Run one example",
@@ -4345,7 +4272,7 @@
       "explanation": "No. The model cannot enable tools for itself."
      },
      {
-      "text": "In `ClaudeAgentOptions.tools` and `allowed_tools`, set by the `web` profile in `agent_lab`/sdk.py.",
+      "text": "In `ClaudeAgentOptions.tools` and `allowed_tools`, set by the `web` profile in `agent_lab/sdk.py`.",
       "explanation": "Correct. The host chooses the tool list before the run starts."
      }
     ],
@@ -4472,7 +4399,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `telemetry` in `agent_lab`/exercises.py: the provider, processor, exporter and `start_as_current_span`."
+    "text": "Read `telemetry` in `agent_lab/exercises.py`: the provider, processor, exporter and `start_as_current_span`."
    },
    {
     "title": "Run one example",
@@ -4580,7 +4507,7 @@
    16
   ],
   "concept_brief": "The SDK's CLI chooses a cloud provider from environment flags: `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX` or `CLAUDE_CODE_USE_FOUNDRY` set to `1`, otherwise the direct Anthropic API with `ANTHROPIC_API_KEY`. At most one flag should be set, and provider credentials come from the cloud account, never from code or prompts.",
-  "lab_brief": "The offline exercise reads only the three provider flags, raises an error if more than one is `1`, and reports the selected provider without reading or displaying any credential. The live check in `agent_lab`/sdk.py accepts either an API key or one configured provider flag.",
+  "lab_brief": "The offline exercise reads only the three provider flags, raises an error if more than one is `1`, and reports the selected provider without reading or displaying any credential. The live check in `agent_lab/sdk.py` accepts either an API key or one configured provider flag.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the app before choosing Live Agent SDK.",
@@ -4593,7 +4520,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `providers` in `agent_lab`/exercises.py and `require_live_access` in `agent_lab`/sdk.py."
+    "text": "Read `providers` in `agent_lab/exercises.py` and `require_live_access` in `agent_lab/sdk.py`."
    },
    {
     "title": "Run one example",
@@ -4677,7 +4604,7 @@
     "prompt": "Where should cloud provider credentials come from?",
     "options": [
      {
-      "text": "Hard-coded in `agent_lab`/exercises.py.",
+      "text": "Hard-coded in `agent_lab/exercises.py`.",
       "explanation": "No. Credentials must never be embedded in code."
      },
      {
@@ -4805,7 +4732,7 @@
      },
      {
       "text": "Because the display redactor masks any key whose name contains 'token'.",
-      "explanation": "Correct. `redact` in `agent_lab`/policy.py matches key names like 'token', so the panel masks these counts even though they are harmless."
+      "explanation": "Correct. `redact` in `agent_lab/policy.py` matches key names like 'token', so the panel masks these counts even though they are harmless."
      }
     ],
     "correct": 2
@@ -4831,7 +4758,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `Plan.validate_graph`, `Plan.waves` and `execute_plan` in `agent_lab`/services.py. Predict the waves for T1, T2 and T3."
+    "text": "Read `Plan.validate_graph`, `Plan.waves` and `execute_plan` in `agent_lab/services.py`. Predict the waves for T1, T2 and T3."
    },
    {
     "title": "Run one example",
@@ -4937,7 +4864,7 @@
    18,
    37
   ],
-  "concept_brief": "Hardening layers several host controls around the SDK: in live mode both the `can_use_tool` callback and a PreToolUse `HookMatcher` call one policy (`decide` in `agent_lab`/policy.py). The policy keeps paths inside the workspace, refuses protected names such as .env and .git, and allows only listed tools, while `redact` masks secrets before display.",
+  "concept_brief": "Hardening layers several host controls around the SDK: in live mode both the `can_use_tool` callback and a PreToolUse `HookMatcher` call one policy (`decide` in `agent_lab/policy.py`). The policy keeps paths inside the workspace, refuses protected names such as .env and .git, and allows only listed tools, while `redact` masks secrets before display.",
   "lab_brief": "The `security` exercise sends five tool requests through `decide`: a normal Read, a path traversal, a .env read, a Bash command and a Write. It compares each decision with the expected outcome, and it redacts an API key and a Bearer token, showing that each layer blocks a different attack.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 48 (or run `uv run agent-lab lesson 48` in a terminal).",
@@ -4950,7 +4877,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `inside`, `decide` and `redact` in `agent_lab`/policy.py, then predict which of the five cases is allowed."
+    "text": "Read `inside`, `decide` and `redact` in `agent_lab/policy.py`, then predict which of the five cases is allowed."
    },
    {
     "title": "Run one example",
@@ -5249,7 +5176,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `message_exercise` in `agent_lab`/exercises.py and find `recorded_messages` and the `async for` loop."
+    "text": "Read `message_exercise` in `agent_lab/exercises.py` and find `recorded_messages` and the `async for` loop."
    },
    {
     "title": "Run one example",
@@ -5349,7 +5276,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `evals` in `agent_lab`/exercises.py and `retrieve` and `POLICIES` in `agent_lab`/services.py."
+    "text": "Read `evals` in `agent_lab/exercises.py` and `retrieve` and `POLICIES` in `agent_lab/services.py`."
    },
    {
     "title": "Run one example",
@@ -5451,7 +5378,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `debugging` in `agent_lab`/exercises.py and `redact` in `agent_lab`/policy.py, and predict which values will be masked."
+    "text": "Read `debugging` in `agent_lab/exercises.py` and `redact` in `agent_lab/policy.py`, and predict which values will be masked."
    },
    {
     "title": "Run one example",
@@ -5741,7 +5668,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `Board` class in `agent_lab`/services.py and predict what `send` does with an unknown member or a seventh message."
+    "text": "Read the `Board` class in `agent_lab/services.py` and predict what `send` does with an unknown member or a seventh message."
    },
    {
     "title": "Run one example",
@@ -5837,7 +5764,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `worktrees` in `agent_lab`/exercises.py: note that each `await git(...)` finishes before the next starts."
+    "text": "Read `worktrees` in `agent_lab/exercises.py`: note that each `await git(...)` finishes before the next starts."
    },
    {
     "title": "Run one example",
@@ -5935,7 +5862,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `tool_search` in `agent_lab`/exercises.py and predict which tools match the lesson prompt."
+    "text": "Read `tool_search` in `agent_lab/exercises.py` and predict which tools match the lesson prompt."
    },
    {
     "title": "Run one example",
@@ -6137,7 +6064,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `Journal` class in `agent_lab`/services.py and `durable` in `agent_lab`/exercises.py; predict the effects after two passes."
+    "text": "Read the `Journal` class in `agent_lab/services.py` and `durable` in `agent_lab/exercises.py`; predict the effects after two passes."
    },
    {
     "title": "Run one example",
@@ -6323,7 +6250,7 @@
    54
   ],
   "concept_brief": "Retrieval works best as a custom tool: in live mode `agent_lab/sdk.py` defines `search_policy` with `@tool(\"search_policy\", ..., {\"query\": str})`, serves it with `create_sdk_mcp_server(name=\"lesson\")` and allows only `mcp__lesson__search_policy`. Retrieved text comes back as tool-result data labelled as evidence, never as system prompt instructions.",
-  "lab_brief": "The offline `retrieval` exercise calls `retrieve()` from `agent_lab`/services.py on a three-passage policy corpus, scoring passages by shared words, for a real query and an unrelated one. It shows bounded results with citation ids and an empty list when nothing matches, which stops the model from citing an irrelevant passage.",
+  "lab_brief": "The offline `retrieval` exercise calls `retrieve()` from `agent_lab/services.py` on a three-passage policy corpus, scoring passages by shared words, for a real query and an unrelated one. It shows bounded results with citation ids and an empty list when nothing matches, which stops the model from citing an irrelevant passage.",
   "preparation": [
    "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=62. Offline mode needs nothing else.",
    "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK."
@@ -6335,7 +6262,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `retrieve()` and `POLICIES` in `agent_lab`/services.py and the `retrieval` function in `agent_lab`/exercises.py."
+    "text": "Read `retrieve()` and `POLICIES` in `agent_lab/services.py` and the `retrieval` function in `agent_lab/exercises.py`."
    },
    {
     "title": "Run one example",
@@ -6438,7 +6365,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `Orders` class in `agent_lab`/services.py (list, cancel) and the `database` function in `agent_lab`/exercises.py."
+    "text": "Read the `Orders` class in `agent_lab/services.py` (list, cancel) and the `database` function in `agent_lab/exercises.py`."
    },
    {
     "title": "Run one example",
@@ -6628,7 +6555,7 @@
    37,
    48
   ],
-  "concept_brief": "Human approval must be bound to one exact action. The `Approval` class in `agent_lab`/services.py fingerprints a frozen `Refund` with SHA-256, issues a random token from `secrets.token_urlsafe`, expires after a 120-second TTL, compares secrets with `hmac.compare_digest` and moves pending, approved, consumed. Slack, Teams and email adapters in `agent_lab/integrations/channels.py` only deliver the notice; they never count as approval.",
+  "concept_brief": "Human approval must be bound to one exact action. The `Approval` class in `agent_lab/services.py` fingerprints a frozen `Refund` with SHA-256, issues a random token from `secrets.token_urlsafe`, expires after a 120-second TTL, compares secrets with `hmac.compare_digest` and moves pending, approved, consumed. Slack, Teams and email adapters in `agent_lab/integrations/channels.py` only deliver the notice; they never count as approval.",
   "lab_brief": "The offline `approval` exercise creates a 4200-cent refund for A-001, approves it with the real token, consumes it once and then tries to consume it again. It shows that an approval is single-use and that no message is sent to any channel.",
   "preparation": [
    "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=65. Offline mode needs nothing else.",
@@ -6642,7 +6569,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `Refund` and `Approval` (decide, consume) in `agent_lab`/services.py and the `approval` function in `agent_lab`/exercises.py."
+    "text": "Read `Refund` and `Approval` (decide, consume) in `agent_lab/services.py` and the `approval` function in `agent_lab/exercises.py`."
    },
    {
     "title": "Run one example",
@@ -7124,102 +7051,98 @@
  {
   "id": 70,
   "prerequisites": [
-   1,
-   2,
-   5
+   5,
+   55
   ],
-  "concept_brief": "The Python package `claude_agent_sdk` gives you `query()`, `ClaudeSDKClient`, the `ClaudeAgentOptions` dataclass with `snake_case` fields, `@tool` with `create_sdk_mcp_server`, `HookMatcher` hooks, `can_use_tool` callbacks returning `PermissionResultAllow` or `PermissionResultDeny`, and session helpers such as `list_sessions`. In live mode this lesson uses the calculator profile: an `add` tool exposed as `mcp__lesson__add`.",
-  "lab_brief": "The offline `sdk_contract` exercise inspects the installed package with `dataclasses.fields(ClaudeAgentOptions)` and `inspect.getmembers(ClaudeSDKClient)`. It reports the pinned version, real type annotations and public methods, so you work from the SDK you actually have rather than from memory.",
+  "concept_brief": "The lab uses the official Python SDK directly: `from claude_agent_sdk import ...` for `query`, `ClaudeSDKClient`, `tool`, `create_sdk_mcp_server` and the message and hook types. A `@tool` function becomes an `SdkMcpTool` whose `handler` you can call and test in plain Python.",
+  "lab_brief": "The `python_sdk` exercise scans `agent_lab` for every name imported from `claude_agent_sdk`, checks each resolves in the installed package, then defines a calculator with `@tool`, wraps it in `create_sdk_mcp_server` and calls its handler.",
   "preparation": [
-   "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=70. Offline mode needs nothing else.",
-   "Optional live mode: put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server and choose Live Agent SDK."
+   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 70 (or run `uv run agent-lab lesson 70`).",
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run uses the same calculator through the SDK."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Learn the native Python SDK surface by reading it from the installed package."
+    "text": "Use native SDK imports and test a tool without the model."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `sdk_contract` function in `agent_lab`/exercises.py and the imports at the top of `agent_lab`/sdk.py."
+    "text": "Read `python_sdk` in the source."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline selected and click Run exercise. The panel shows a LOCAL PYTHON RESULT badge; your prompt is not sent to Claude."
+    "text": "Run the offline exercise."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `installed_version` is 0.2.163 and the option types for model, tools, hooks, `can_use_tool` and `mcp_servers`."
+    "text": "Check `imported_names`, `all_imports_resolve`, `tool` and `handler_result`."
    },
    {
     "title": "Try the challenge",
-    "text": "Check other `ClaudeAgentOptions` fields from a scratch command."
+    "text": "Call the handler with bad input."
    }
   ],
-  "inspect": "Look at `installed_version`, the `options` annotations, `public_client_methods`, `session_functions` and `request`.",
-  "expected": "`installed_version` 0.2.163; `options` shows annotations such as `model: str | None` and `hooks` as a dict of hook event names to `list[HookMatcher]`; `public_client_methods` includes connect, query, `receive_response`, interrupt, `set_model` and disconnect; `session_functions` `list_sessions`, `get_session_messages`, `get_session_info`; `request` mode offline, `max_turns` 4, `max_budget_usd` 0.1.",
-  "evidence_criterion": "The check confirms the run read version 0.2.163 of the installed SDK and listed its client methods and session functions.",
+  "inspect": "`installed_version`, `imported_names`, `files_importing`, `all_imports_resolve`, `tool` (name and schema), `handler_result` and `server`.",
+  "expected": "About 20 names are imported across 8 files and all resolve. The tool is `add` with the `Calculation` schema, `handler_result` is `42.0`, and `server` has type `sdk` and name `lesson`.",
+  "evidence_criterion": "The check confirms every SDK import resolves and the tool handler returned the sum.",
   "evidence_checks": [
    {
-    "key": "installed_version",
+    "key": "all_imports_resolve",
     "rule": "equals",
-    "value": "0.2.163"
+    "value": true
    },
    {
-    "key": "public_client_methods",
-    "rule": "truthy"
-   },
-   {
-    "key": "session_functions",
-    "rule": "truthy"
+    "key": "handler_result",
+    "rule": "equals",
+    "value": "42.0"
    }
   ],
-  "challenge": "Run `uv run python -c \"import dataclasses, claude_agent_sdk as s; print(sorted(f.name for f in dataclasses.fields(s.ClaudeAgentOptions)))\"` and find `resume`, `fork_session`, `output_format` and `effort`. In live mode, ask \"Use the calculator to add 20 and 22\" and check a tool event with sum 42 appears.",
+  "challenge": "Change the handler call to `add.handler({\"a\": \"19\", \"b\": 23})`, run again and read the error: the strict `Calculation` model rejects the string.",
   "hints": [
-   "The SDK options are a dataclass, so `dataclasses.fields` lists every real option name.",
-   "The `focus` dict in `sdk_contract` picks which fields to show per lesson; lesson 70 uses the default list model, tools, hooks, `can_use_tool` and `mcp_servers`."
+   "The handler validates with `Calculation.model_validate`.",
+   "Strict mode refuses a numeric string, so the handler raises a ValidationError instead of computing."
   ],
-  "reference": "The evidence comes from introspecting the pinned package, so every name and type in it is real for version 0.2.163. `ClaudeSDKClient` exposes connect, query, `receive_response` and interrupt for interactive sessions, while `query()` covers one-shot runs. Checking names this way avoids copying options that only exist in another language's SDK.",
+  "reference": "Because tools are ordinary async Python functions, you can unit-test them without the model or the CLI. Checking that every imported SDK name exists is a cheap guard before an upgrade.",
   "recovery": [
-   "If `installed_version` differs from 0.2.163, run `uv sync --locked` again so the environment matches uv.lock.",
-   "If Live Agent SDK is missing or fails with an authentication error, keep working offline. Check that `ANTHROPIC_API_KEY` holds an Anthropic key and `LAB_ENABLE_LIVE`=true is in .env, then restart `uv run agent-lab serve`."
+   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
   ],
   "quiz": [
    {
-    "prompt": "How does a Python `can_use_tool` callback deny a tool call?",
+    "prompt": "How can you test an @tool function without calling Claude?",
     "options": [
      {
-      "text": "It raises PermissionError.",
-      "explanation": "No. The callback returns a decision object; raising is not the documented way to deny."
+      "text": "Await its handler with an arguments dict.",
+      "explanation": "Correct. It is plain async Python."
      },
      {
-      "text": "It returns `PermissionResultDeny(message=...)`.",
-      "explanation": "Correct. `agent_lab`/sdk.py returns `PermissionResultDeny` with a reason, or `PermissionResultAllow` to proceed."
+      "text": "Only through a live run.",
+      "explanation": "The handler is directly callable."
      },
      {
-      "text": "It returns False.",
-      "explanation": "No. The annotation requires an awaitable of `PermissionResultAllow | PermissionResultDeny`."
-     }
-    ],
-    "correct": 1
-   },
-   {
-    "prompt": "Which Python call registers in-process custom tools with the agent?",
-    "options": [
-     {
-      "text": "`create_sdk_mcp_server(name=\"lesson\", tools=[...])` placed in `options.mcp_servers`.",
-      "explanation": "Correct. Tools decorated with `@tool` become an SDK MCP server, and their names appear as `mcp__lesson__<name>`."
-     },
-     {
-      "text": "`ClaudeSDKClient.register_tool()`.",
-      "explanation": "No. That method does not exist; the evidence lists the client's real public methods."
-     },
-     {
-      "text": "Adding the function name to `allowed_tools` only.",
-      "explanation": "No. `allowed_tools` pre-approves tools; it does not define them."
+      "text": "By reading the schema.",
+      "explanation": "The schema does not run the code."
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What does create_sdk_mcp_server return?",
+    "options": [
+     {
+      "text": "A running web server.",
+      "explanation": "It runs in process; nothing listens on a port."
+     },
+     {
+      "text": "An in-process MCP server config you pass to mcp_servers.",
+      "explanation": "Correct."
+     },
+     {
+      "text": "A list of tool results.",
+      "explanation": "It wraps tools; it does not call them."
+     }
+    ],
+    "correct": 1
    }
   ]
  },
@@ -7242,7 +7165,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `analysis` function in `agent_lab`/exercises.py and the sales.csv seed in `seed_workspace`."
+    "text": "Read the `analysis` function in `agent_lab/exercises.py` and the sales.csv seed in `seed_workspace`."
    },
    {
     "title": "Run one example",
@@ -7536,7 +7459,7 @@
    48,
    52
   ],
-  "concept_brief": "Red-teaming tests labelled attack cases against deterministic host boundaries rather than trusting the model to refuse. The `decide()` and `inside()` functions in `agent_lab`/policy.py are the same checks the live `can_use_tool` callback and `PreToolUse` `HookMatcher` use, and `redact()` removes keys and bearer tokens from logged data.",
+  "concept_brief": "Red-teaming tests labelled attack cases against deterministic host boundaries rather than trusting the model to refuse. The `decide()` and `inside()` functions in `agent_lab/policy.py` are the same checks the live `can_use_tool` callback and `PreToolUse` `HookMatcher` use, and `redact()` removes keys and bearer tokens from logged data.",
   "lab_brief": "The offline `permission_cases` exercise runs five labelled cases (a normal read, path traversal, a .env read, a Bash command and a Write) through `decide()` and compares each result with its expected outcome. A 1.0 pass rate shows the boundary holds whatever text a prompt injection produces.",
   "preparation": [
    "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=74. Offline mode needs nothing else.",
@@ -7549,7 +7472,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `decide`, `inside`, `PROTECTED` and `redact` in `agent_lab`/policy.py and `permission_cases` in `agent_lab`/exercises.py."
+    "text": "Read `decide`, `inside`, `PROTECTED` and `redact` in `agent_lab/policy.py` and `permission_cases` in `agent_lab/exercises.py`."
    },
    {
     "title": "Run one example",
@@ -7634,7 +7557,7 @@
    56,
    60
   ],
-  "concept_brief": "An autonomous engineering team works when agents propose and the host decides. In live mode `run_live_team` in `agent_lab`/engineering.py runs a lead, two parallel developers and a reviewer through `query()` with `output_format` JSON schemas (`Plan`, `DevelopmentReport`, `TeamReview`); the host validates file ownership and dependencies, checks source with an AST allowlist, runs acceptance tests in an isolated `python -I` subprocess, tracks spend with `Budget` and decides the release gate.",
+  "concept_brief": "An autonomous engineering team works when agents propose and the host decides. In live mode `run_live_team` in `agent_lab/engineering.py` runs a lead, two parallel developers and a reviewer through `query()` with `output_format` JSON schemas (`Plan`, `DevelopmentReport`, `TeamReview`); the host validates file ownership and dependencies, checks source with an AST allowlist, runs acceptance tests in an isolated `python -I` subprocess, tracks spend with `Budget` and decides the release gate.",
   "lab_brief": "The offline `team` exercise uses scripted Python workers: it validates a three-task `Plan`, runs it in dependency waves with `execute_plan` (TaskGroup, at most 2 in parallel), records `Board` messages and a `Journal`, and runs an acceptance script in a subprocess. It shows the whole control loop, ending in a host release gate and no publication, without any model call.",
   "preparation": [
    "Run `uv sync --locked` once, then `uv run agent-lab serve` and open http://127.0.0.1:8080/?lesson=75. Offline mode needs nothing else.",
@@ -7648,7 +7571,7 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `Plan`, `execute_plan`, `Board` and `Journal` in `agent_lab`/services.py and the `team` function in `agent_lab`/exercises.py."
+    "text": "Read `Plan`, `execute_plan`, `Board` and `Journal` in `agent_lab/services.py` and the `team` function in `agent_lab/exercises.py`."
    },
    {
     "title": "Run one example",

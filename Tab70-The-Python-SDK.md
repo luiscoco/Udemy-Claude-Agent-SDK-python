@@ -27,42 +27,44 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `sdk_contract`, line 124). Host contracts are in
+(function `python_sdk`, line 171). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("thinking", "python_sdk")
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+@exercise("python_sdk")
+async def python_sdk(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Check every SDK import the app uses, then build and call a native Python tool."""
+    import ast
+
     import claude_agent_sdk as sdk
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from agent_lab.config import ROOT
+
+    used: dict[str, set[str]] = {}
+    for path in sorted((ROOT / "agent_lab").rglob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.ImportFrom) and node.module == "claude_agent_sdk":
+                for alias in node.names:
+                    used.setdefault(alias.name, set()).add(path.relative_to(ROOT).as_posix())
+    missing = sorted(name for name in used if not hasattr(sdk, name))
+
+    @sdk.tool("add", "Add two finite numbers.", Calculation.model_json_schema())
+    async def add(arguments: dict[str, Any]) -> dict[str, Any]:
+        parsed = Calculation.model_validate(arguments)
+        return {"content": [{"type": "text", "text": str(parsed.a + parsed.b)}]}
+
+    server = sdk.create_sdk_mcp_server(name="lesson", tools=[add])
+    result = await add.handler({"a": 19.0, "b": 23.0})
     return {
         "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "imported_names": sorted(used),
+        "files_importing": sorted({file for files in used.values() for file in files}),
+        "all_imports_resolve": not missing,
+        "missing": missing,
+        "tool": {"name": add.name, "input_schema": add.input_schema},
+        "handler_result": result["content"][0]["text"],
+        "server": {"type": server["type"], "name": server["name"]},
     }
 ```
 

@@ -27,12 +27,12 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `workspace`, line 158). Host contracts are in
+(function `workspace`, line 207). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("workspace", "config_root")
+@exercise("workspace")
 def workspace(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     return {
         "cwd": str(root),

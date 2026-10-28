@@ -121,47 +121,141 @@ async def message_exercise(root: Path, request: RunRequest, lesson: Lesson) -> d
     }
 
 
-@exercise("thinking", "python_sdk")
-def sdk_contract(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    import claude_agent_sdk as sdk
+@exercise("thinking")
+def thinking(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Build every thinking configuration the installed SDK accepts, and reject foreign names."""
+    import typing
 
-    fields = {field.name: str(field.type) for field in dataclasses.fields(sdk.ClaudeAgentOptions)}
-    focus = {
-        "options": ["model", "max_turns", "max_budget_usd", "include_partial_messages"],
-        "thinking": ["thinking", "effort", "max_thinking_tokens"],
-        "settings": ["setting_sources", "env", "cwd"],
-        "sandbox": ["sandbox"],
-        "session_management": ["resume", "continue_conversation", "fork_session"],
-        "resume": ["resume", "resume_session_at", "fork_session"],
-        "elicitation": ["on_elicitation", "hooks"],
-    }.get(lesson.exercise, ["model", "tools", "hooks", "can_use_tool", "mcp_servers"])
+    from claude_agent_sdk import ClaudeAgentOptions
+    from claude_agent_sdk.types import (
+        ThinkingConfigAdaptive,
+        ThinkingConfigDisabled,
+        ThinkingConfigEnabled,
+    )
+
+    from agent_lab.sdk import THINKING_PROFILE
+
+    hints = typing.get_type_hints(ClaudeAgentOptions)
+    effort_values = list(typing.get_args(typing.get_args(hints["effort"])[0]))
+    configs: dict[str, Any] = {
+        "adaptive": ThinkingConfigAdaptive(type="adaptive"),
+        "fixed budget": ThinkingConfigEnabled(type="enabled", budget_tokens=4000),
+        "off": ThinkingConfigDisabled(type="disabled"),
+    }
+    built = [
+        {
+            "choice": label,
+            "thinking": ClaudeAgentOptions(thinking=config, effort="medium").thinking,
+            "keys": sorted(config),
+        }
+        for label, config in configs.items()
+    ]
+    foreign = []
+    for name in ("maxThinkingTokens", "thinkingBudget", "reasoningEffort"):
+        foreign_option: dict[str, Any] = {name: 4000}  # deliberately not a Python option
+        try:
+            ClaudeAgentOptions(**foreign_option)
+            foreign.append({"option": name, "accepted": True})
+        except TypeError:
+            foreign.append({"option": name, "accepted": False})
     return {
         "installed_version": importlib.metadata.version("claude-agent-sdk"),
-        "options": {
-            name: fields.get(name, "Not available in this installed Python SDK") for name in focus
-        },
-        "public_client_methods": [
-            name
-            for name, _ in inspect.getmembers(sdk.ClaudeSDKClient, inspect.isfunction)
-            if not name.startswith("_")
-        ],
-        "session_functions": [
-            name
-            for name in ("list_sessions", "get_session_messages", "get_session_info")
-            if hasattr(sdk, name)
-        ],
-        "request": request.model_dump(exclude={"prompt", "follow_up"}),
-        "note": lesson.notes,
+        "thinking_type": str(hints["thinking"]),
+        "effort_values": effort_values,
+        "configs": built,
+        "foreign_option_names": foreign,
+        "live_profile": THINKING_PROFILE,
     }
 
 
-@exercise("workspace", "config_root")
+@exercise("python_sdk")
+async def python_sdk(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Check every SDK import the app uses, then build and call a native Python tool."""
+    import ast
+
+    import claude_agent_sdk as sdk
+
+    from agent_lab.config import ROOT
+
+    used: dict[str, set[str]] = {}
+    for path in sorted((ROOT / "agent_lab").rglob("*.py")):
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.ImportFrom) and node.module == "claude_agent_sdk":
+                for alias in node.names:
+                    used.setdefault(alias.name, set()).add(path.relative_to(ROOT).as_posix())
+    missing = sorted(name for name in used if not hasattr(sdk, name))
+
+    @sdk.tool("add", "Add two finite numbers.", Calculation.model_json_schema())
+    async def add(arguments: dict[str, Any]) -> dict[str, Any]:
+        parsed = Calculation.model_validate(arguments)
+        return {"content": [{"type": "text", "text": str(parsed.a + parsed.b)}]}
+
+    server = sdk.create_sdk_mcp_server(name="lesson", tools=[add])
+    result = await add.handler({"a": 19.0, "b": 23.0})
+    return {
+        "installed_version": importlib.metadata.version("claude-agent-sdk"),
+        "imported_names": sorted(used),
+        "files_importing": sorted({file for files in used.values() for file in files}),
+        "all_imports_resolve": not missing,
+        "missing": missing,
+        "tool": {"name": add.name, "input_schema": add.input_schema},
+        "handler_result": result["content"][0]["text"],
+        "server": {"type": server["type"], "name": server["name"]},
+    }
+
+
+@exercise("workspace")
 def workspace(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     return {
         "cwd": str(root),
         "files": [p.name for p in root.iterdir() if p.is_file()],
         "notes": inside(root, "notes.txt").read_text(encoding="utf-8"),
         "setting_sources": [],
+    }
+
+
+TRUSTED_PROJECTS = frozenset({"course-app"})
+
+
+@exercise("config_root")
+def config_root(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Resolve project paths safely and load project settings only for allowlisted projects."""
+    from claude_agent_sdk import ClaudeAgentOptions
+
+    projects = root / "projects"
+    for name, allow in (("course-app", "Read"), ("downloaded-repo", "Bash(*)")):
+        settings = projects / name / ".claude" / "settings.json"
+        settings.parent.mkdir(parents=True, exist_ok=True)
+        settings.write_text(json.dumps({"permissions": {"allow": [allow]}}), encoding="utf-8")
+    rows: list[dict[str, Any]] = []
+    for requested in (
+        "course-app",
+        "downloaded-repo",
+        "course-app/../downloaded-repo",
+        "../outside",
+        "course-app/.claude",
+    ):
+        try:
+            path = inside(projects, requested)
+        except ValueError as exc:
+            rows.append({"requested": requested, "resolved": None, "error": str(exc)})
+            continue
+        trusted = path.name in TRUSTED_PROJECTS and path.is_dir()
+        options = ClaudeAgentOptions(cwd=str(path), setting_sources=["project"] if trusted else [])
+        rows.append(
+            {
+                "requested": requested,
+                "resolved": path.relative_to(projects).as_posix(),
+                "trusted": trusted,
+                "setting_sources": options.setting_sources,
+            }
+        )
+    return {
+        "trusted_projects": sorted(TRUSTED_PROJECTS),
+        "resolutions": rows,
+        "untrusted_settings_loaded": any(
+            row.get("setting_sources") and row["resolved"] != "course-app" for row in rows
+        ),
     }
 
 
@@ -669,44 +763,89 @@ def project_markdown(root: Path, request: RunRequest, lesson: Lesson) -> dict[st
 
 @exercise("plugins")
 def plugins(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Build a local plugin with a command and a skill, validate it and list what it adds."""
+    import re
+
     directory = root / "teaching-plugin"
-    manifest = directory / ".claude-plugin" / "plugin.json"
-    manifest.parent.mkdir(parents=True, exist_ok=True)
-    manifest.write_text(
-        json.dumps(
-            {
-                "name": "python-teaching",
-                "version": "1.0.0",
-                "description": "Python teaching commands",
-            }
-        ),
-        encoding="utf-8",
-    )
+    manifest_path = directory / ".claude-plugin" / "plugin.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "name": "python-teaching",
+        "version": "1.0.0",
+        "description": "Python teaching commands and skills",
+    }
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     commands = directory / "commands"
     commands.mkdir(exist_ok=True)
     (commands / "explain.md").write_text(
         "Explain notes.txt with a Python example.\n", encoding="utf-8"
     )
+    skill = directory / "skills" / "python-example"
+    skill.mkdir(parents=True, exist_ok=True)
+    (skill / "SKILL.md").write_text(
+        "---\nname: python-example\ndescription: Write a short, runnable Python example "
+        "for a concept. Use when a lesson asks for an example.\n---\n"
+        "Write one example under 15 lines that runs with the standard library.\n",
+        encoding="utf-8",
+    )
+    problems = []
+    if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", manifest["name"]):
+        problems.append("name must be lowercase words joined by hyphens")
+    if not re.fullmatch(r"\d+\.\d+\.\d+", manifest["version"]):
+        problems.append("version must be MAJOR.MINOR.PATCH")
+    skills = []
+    for path in sorted((directory / "skills").glob("*/SKILL.md")):
+        front = path.read_text(encoding="utf-8").split("---")[1]
+        fields = dict(line.split(": ", 1) for line in front.strip().splitlines())
+        skills.append({"name": fields["name"], "description": fields["description"]})
     return {
-        "manifest": json.loads(manifest.read_text()),
+        "manifest": json.loads(manifest_path.read_text(encoding="utf-8")),
+        "manifest_problems": problems,
+        "commands": [f"/{manifest['name']}:{path.stem}" for path in sorted(commands.glob("*.md"))],
+        "skills": skills,
         "sdk_plugins": [{"type": "local", "path": str(directory)}],
     }
 
 
+async def user_messages(*texts: str) -> AsyncIterator[dict[str, Any]]:
+    """The SDK's streaming-input format: one user-message dict per item, produced lazily."""
+    for text in texts:
+        yield {
+            "type": "user",
+            "message": {"role": "user", "content": text},
+            "parent_tool_use_id": None,
+            "session_id": "default",
+        }
+
+
 @exercise("streaming")
 async def streaming(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    async def inputs():
-        for text in [request.prompt or lesson.prompt, request.follow_up]:
-            yield {
-                "type": "user",
-                "message": {"role": "user", "content": text},
-                "parent_tool_use_id": None,
-                "session_id": "default",
-            }
+    """Stream an async iterable of user messages through query() and get one reply per message."""
+    from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ResultMessage, query
 
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    texts = [request.prompt or lesson.prompt, request.follow_up]
+    cli = ScriptedCLI([["Async iterators yield values over time."], ["They produce items lazily."]])
+    replies: list[str] = []
+    results = 0
+    async with asyncio.timeout(20):
+        async for message in query(
+            prompt=user_messages(*texts), options=ClaudeAgentOptions(), transport=cli
+        ):
+            if isinstance(message, AssistantMessage):
+                replies += [getattr(block, "text", "") for block in message.content]
+            elif isinstance(message, ResultMessage):
+                results += 1
+    received = [m for m in cli.received if m["type"] == "user"]
     return {
-        "input_messages": [message async for message in inputs()],
-        "note": "Token output streaming is a separate include_partial_messages option.",
+        "input_messages": [message async for message in user_messages(*texts)],
+        "messages_the_cli_received": [m["message"]["content"] for m in received],
+        "replies": replies,
+        "turns_completed": results,
+        "lifecycle": cli.lifecycle,
+        "note": "Token output streaming is the separate include_partial_messages option.",
+        "source": "real query() streaming to a scripted CLI fixture",
     }
 
 
@@ -1015,27 +1154,65 @@ def todos(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
 
 
 @exercise("questions")
-def questions(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def questions(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Validate AskUserQuestion input, then route the user's answer through can_use_tool."""
+    from agent_lab.hooks import permission_callback
+    from agent_lab.sdk import Questions
+
+    def question(**changes: Any) -> dict[str, Any]:
+        item = {
+            "question": "Which teaching style?",
+            "header": "Style",
+            "options": [
+                {"label": "Concise", "description": "One short example"},
+                {"label": "Detailed", "description": "Explain each step"},
+            ],
+            "multiSelect": False,
+        }
+        return {"questions": [item | changes]}
+
+    candidates = {
+        "valid question": question(),
+        "only one option": question(options=[{"label": "Concise", "description": "Short"}]),
+        "header too long": question(header="A header that is far too long to fit"),
+        "unknown field": question(priority="high"),
+    }
+    shape_checks = []
+    for label, body in candidates.items():
+        try:
+            Questions.model_validate(body)
+            shape_checks.append({"case": label, "valid": True, "problem": ""})
+        except ValidationError as exc:
+            error = exc.errors()[0]
+            where = ".".join(str(part) for part in error["loc"])
+            shape_checks.append(
+                {"case": label, "valid": False, "problem": f"{where}: {error['msg']}"}
+            )
+    shown: list[str] = []
+
+    async def ask(arguments: dict[str, Any]) -> dict[str, Any]:
+        shown.extend(item["question"] for item in arguments["questions"])
+        return {"Which teaching style?": "Concise"}  # stands in for the user's click
+
+    callback = permission_callback(
+        lambda name, arguments: (name == "AskUserQuestion", "Only AskUserQuestion is enabled."),
+        ask,
+    )
+    answered = await callback("AskUserQuestion", candidates["valid question"], None)
+    other = await callback("Bash", {"command": "ls"}, None)
     return {
-        "tool": "AskUserQuestion",
-        "input": {
-            "questions": [
-                {
-                    "question": "Which teaching style?",
-                    "header": "Style",
-                    "options": [
-                        {"label": "Concise", "description": "One short example"},
-                        {"label": "Detailed", "description": "Explain each step"},
-                    ],
-                    "multiSelect": False,
-                }
-            ]
+        "shape_checks": shape_checks,
+        "shown_to_user": shown,
+        "routed": {
+            "result_type": type(answered).__name__,
+            "answers": answered.updated_input["answers"],
         },
-        "response": "The live UI requires a user's answer; offline mode supplies no answer.",
+        "other_tool": {"result_type": type(other).__name__, "message": other.message},
+        "source": "real can_use_tool callback; the answer stands in for the user",
     }
 
 
-@exercise("plan", "harness", "orchestration")
+@exercise("orchestration")
 async def orchestration(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
     plan = Plan(
         tasks=[
@@ -1053,6 +1230,96 @@ async def orchestration(root: Path, request: RunRequest, lesson: Lesson) -> dict
         "plan": plan.model_dump(),
         "waves": plan.waves(),
         "results": await execute_plan(plan, worker),
+    }
+
+
+@exercise("harness")
+async def harness(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Treat model output as a proposal: validate it, and execute only what passes."""
+    # Fixtures standing in for model replies, from good to unusable.
+    proposals = {
+        "valid plan": '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
+        '{"id": "T2", "files": ["src/search.py"], "depends_on": ["T1"]}]}',
+        "two owners for one file": '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
+        '{"id": "T2", "files": ["src/tags.py"]}]}',
+        "dependency cycle": '{"tasks": [{"id": "T1", "files": ["src/a.py"], "depends_on": ["T2"]}, '
+        '{"id": "T2", "files": ["src/b.py"], "depends_on": ["T1"]}]}',
+        "file outside src": '{"tasks": [{"id": "T1", "files": [".github/workflows/ci.yml"]}]}',
+        "prose instead of JSON": "Sure! First T1, then T2.",
+    }
+    reviewed = []
+    accepted: Plan | None = None
+    for label, text in proposals.items():
+        try:
+            plan = Plan.model_validate_json(text)
+        except ValidationError as exc:
+            problem = exc.errors()[0]["msg"].removeprefix("Value error, ")
+            reviewed.append({"proposal": label, "accepted": False, "problem": problem})
+            continue
+        reviewed.append({"proposal": label, "accepted": True, "problem": ""})
+        accepted = accepted or plan
+    started: list[str] = []
+
+    async def worker(task: TaskSpec) -> dict[str, Any]:
+        started.append(task.id)
+        return {"owned_files": task.files, "verified": True, "source": "scripted host worker"}
+
+    assert accepted is not None
+    results = await execute_plan(accepted, worker)
+    return {
+        "proposals": reviewed,
+        "executed": [row["proposal"] for row in reviewed if row["accepted"]],
+        "waves": accepted.waves(),
+        "workers_started": started,
+        "results": results,
+    }
+
+
+@exercise("plan")
+async def plan_mode(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Plan in plan mode, validate the plan, and only execute after approval."""
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    proposal = (
+        '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
+        '{"id": "T2", "files": ["src/search.py"], "depends_on": ["T1"]}, '
+        '{"id": "T3", "files": ["src/report.py"], "depends_on": ["T1"]}]}'
+    )
+    cli = ScriptedCLI([[proposal]])
+    started: list[str] = []
+    timeline: list[dict[str, Any]] = []
+
+    async def worker(task: TaskSpec) -> dict[str, Any]:
+        started.append(task.id)
+        return {"owned_files": task.files, "verified": True}
+
+    async with asyncio.timeout(20):
+        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
+            await client.set_permission_mode("plan")
+            timeline.append({"step": "enter plan mode", "cli_mode": cli.permission_mode})
+            await client.query("Plan the tag normalization change. Do not edit files.")
+            reply = await scripted_turn(client)
+            plan = Plan.model_validate_json(reply["text"])
+            timeline.append(
+                {
+                    "step": "plan validated",
+                    "waves": plan.waves(),
+                    "workers_started": len(started),
+                }
+            )
+            timeline.append({"step": "human approves the plan", "approved": True})
+            await client.set_permission_mode("default")
+            timeline.append({"step": "leave plan mode", "cli_mode": cli.permission_mode})
+    results = await execute_plan(plan, worker)
+    timeline.append({"step": "execute", "workers_started": len(started)})
+    return {
+        "timeline": timeline,
+        "workers_before_approval": timeline[1]["workers_started"],
+        "results": results,
+        "live_option": 'ClaudeAgentOptions(permission_mode="plan")',
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
     }
 
 

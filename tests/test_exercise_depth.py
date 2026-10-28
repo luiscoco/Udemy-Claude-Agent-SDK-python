@@ -381,3 +381,83 @@ def test_spec_errors_are_one_line_per_problem(tmp_path, monkeypatch, capsys):
         "SPEC ERROR: classification: Input should be 'Public', 'Internal' or 'Confidential'",
         "SPEC ERROR: blocks.0.heading.level: Input should be 1 or 2",
     ]
+
+
+async def test_streaming_sends_each_iterable_item_as_a_turn(work):
+    from agent_lab.exercises import streaming
+
+    evidence = await streaming(work, RunRequest(prompt="First", follow_up="Second"), LESSONS[12])
+    assert evidence["messages_the_cli_received"] == ["First", "Second"]
+    assert evidence["turns_completed"] == 2
+    assert evidence["lifecycle"][-2:] == ["input closed", "process stopped"]
+
+
+def test_thinking_uses_python_types_and_rejects_foreign_names(work):
+    from agent_lab.exercises import thinking
+
+    evidence = thinking(work, RunRequest(), LESSONS[14])
+    assert evidence["effort_values"] == ["low", "medium", "high", "xhigh", "max"]
+    assert [row["thinking"]["type"] for row in evidence["configs"]] == [
+        "adaptive",
+        "enabled",
+        "disabled",
+    ]
+    assert not any(row["accepted"] for row in evidence["foreign_option_names"])
+
+
+def test_plugin_adds_a_namespaced_command_and_a_skill(work):
+    from agent_lab.exercises import plugins
+
+    evidence = plugins(work, RunRequest(), LESSONS[23])
+    assert evidence["manifest_problems"] == []
+    assert evidence["commands"] == ["/python-teaching:explain"]
+    assert [skill["name"] for skill in evidence["skills"]] == ["python-example"]
+
+
+async def test_harness_executes_only_the_valid_proposal(work):
+    from agent_lab.exercises import harness
+
+    evidence = await harness(work, RunRequest(), LESSONS[24])
+    assert evidence["executed"] == ["valid plan"]
+    assert evidence["workers_started"] == ["T1", "T2"]
+    problems = {row["proposal"]: row["problem"] for row in evidence["proposals"]}
+    assert problems["dependency cycle"] == "Dependency cycle."
+
+
+async def test_question_answers_travel_through_the_permission_callback(work):
+    from agent_lab.exercises import questions
+
+    evidence = await questions(work, RunRequest(), LESSONS[31])
+    assert [row["valid"] for row in evidence["shape_checks"]] == [True, False, False, False]
+    assert evidence["routed"]["answers"] == {"Which teaching style?": "Concise"}
+    assert evidence["other_tool"]["result_type"] == "PermissionResultDeny"
+
+
+async def test_plan_mode_executes_only_after_validation_and_approval(work):
+    from agent_lab.exercises import plan_mode
+
+    evidence = await plan_mode(work, RunRequest(), LESSONS[32])
+    modes = [row["cli_mode"] for row in evidence["timeline"] if "cli_mode" in row]
+    assert modes == ["plan", "default"]
+    assert evidence["workers_before_approval"] == 0
+    assert set(evidence["results"]) == {"T1", "T2", "T3"}
+
+
+def test_settings_load_only_for_the_trusted_project_root(work):
+    from agent_lab.exercises import config_root
+
+    evidence = config_root(work, RunRequest(), LESSONS[39])
+    rows = {row["requested"]: row for row in evidence["resolutions"]}
+    assert rows["course-app"]["setting_sources"] == ["project"]
+    assert rows["course-app/../downloaded-repo"]["setting_sources"] == []
+    assert rows["../outside"]["resolved"] is None
+    assert evidence["untrusted_settings_loaded"] is False
+
+
+async def test_python_sdk_imports_resolve_and_the_tool_handler_runs(work):
+    from agent_lab.exercises import python_sdk
+
+    evidence = await python_sdk(work, RunRequest(), LESSONS[70])
+    assert evidence["all_imports_resolve"] and "ClaudeSDKClient" in evidence["imported_names"]
+    assert evidence["handler_result"] == "42.0"
+    assert evidence["server"] == {"type": "sdk", "name": "lesson"}

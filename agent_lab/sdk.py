@@ -92,6 +92,10 @@ def setting_sources_for(profile: str) -> list[Any]:
     return ["project"] if profile in PROJECT_SETTING_PROFILES else []
 
 
+# Lesson 14's live run: Claude decides how much to think, at medium effort.
+THINKING_PROFILE: dict[str, Any] = {"thinking": {"type": "adaptive"}, "effort": "medium"}
+
+
 def isolated_env(config: Path) -> dict[str, str]:
     """Each run gets its own CLI configuration; personal settings and memory are never loaded."""
     return {
@@ -257,8 +261,8 @@ async def run_sdk(
             "append": "Teach using Python examples.",
         }
     if profile == "thinking":
-        options.thinking = {"type": "adaptive"}
-        options.effort = "medium"
+        options.thinking = THINKING_PROFILE["thinking"]
+        options.effort = THINKING_PROFILE["effort"]
     if profile == "structured":
         schema = Summary.model_json_schema()
         schema.pop("$schema", None)
@@ -335,16 +339,10 @@ async def run_sdk(
         options.can_use_tool = None
         options.permission_mode = "dontAsk"
         if profile == "streaming":
+            from agent_lab.exercises import user_messages
 
-            async def inputs():
-                yield {
-                    "type": "user",
-                    "message": {"role": "user", "content": prompt},
-                    "parent_tool_use_id": None,
-                    "session_id": "default",
-                }
-
-            stream = query(prompt=inputs(), options=options)
+            # The same generator as the offline exercise: two queued turns from one iterable.
+            stream = query(prompt=user_messages(prompt, request.follow_up), options=options)
         else:
             stream = query(prompt=prompt, options=options)
         async with aclosing(stream):  # type: ignore[type-var]

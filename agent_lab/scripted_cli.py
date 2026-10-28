@@ -31,6 +31,7 @@ class ScriptedCLI(Transport):
         self._outbox: asyncio.Queue[Any] = asyncio.Queue()
         self._interrupted = asyncio.Event()
         self._turns: list[asyncio.Task[None]] = []
+        self._one_turn_at_a_time = asyncio.Lock()
         self._ready = False
 
     async def connect(self) -> None:
@@ -49,7 +50,6 @@ class ScriptedCLI(Transport):
             if message.get("type") == "control_request":
                 await self._control(message["request_id"], message["request"])
             elif message.get("type") == "user":
-                self._interrupted.clear()
                 self._turns.append(asyncio.create_task(self._turn()))
 
     async def _control(self, request_id: str, request: dict[str, Any]) -> None:
@@ -84,6 +84,12 @@ class ScriptedCLI(Transport):
         )
 
     async def _turn(self) -> None:
+        # Like the real CLI, queued user messages are answered one turn after another.
+        async with self._one_turn_at_a_time:
+            self._interrupted.clear()
+            await self._reply()
+
+    async def _reply(self) -> None:
         chunks = self.replies.pop(0) if self.replies else ["(no scripted reply)"]
         sent = 0
         for chunk in chunks:
@@ -128,7 +134,10 @@ class ScriptedCLI(Transport):
             yield message
 
     async def end_input(self) -> None:
+        # Like the real CLI after stdin EOF: finish queued turns, then end the output stream.
         self.lifecycle.append("input closed")
+        await asyncio.gather(*self._turns, return_exceptions=True)
+        await self._outbox.put(STOP)
 
     async def close(self) -> None:
         for task in self._turns:

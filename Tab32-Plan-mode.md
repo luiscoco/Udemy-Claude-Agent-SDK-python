@@ -27,29 +27,56 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `orchestration`, line 1038). Host contracts are in
+(function `plan_mode`, line 1278). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("plan", "harness", "orchestration")
-async def orchestration(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    plan = Plan(
-        tasks=[
-            TaskSpec(id="T1", files=["src/tags.py"]),
-            TaskSpec(id="T2", files=["src/search.py"], depends_on=["T1"]),
-            TaskSpec(id="T3", files=["src/report.py"], depends_on=["T1"]),
-        ]
+@exercise("plan")
+async def plan_mode(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Plan in plan mode, validate the plan, and only execute after approval."""
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+
+    from agent_lab.scripted_cli import ScriptedCLI
+
+    proposal = (
+        '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
+        '{"id": "T2", "files": ["src/search.py"], "depends_on": ["T1"]}, '
+        '{"id": "T3", "files": ["src/report.py"], "depends_on": ["T1"]}]}'
     )
+    cli = ScriptedCLI([[proposal]])
+    started: list[str] = []
+    timeline: list[dict[str, Any]] = []
 
-    async def worker(task: TaskSpec):
-        await asyncio.sleep(0)
-        return {"owned_files": task.files, "verified": True, "source": "scripted host worker"}
+    async def worker(task: TaskSpec) -> dict[str, Any]:
+        started.append(task.id)
+        return {"owned_files": task.files, "verified": True}
 
+    async with asyncio.timeout(20):
+        async with ClaudeSDKClient(ClaudeAgentOptions(), transport=cli) as client:
+            await client.set_permission_mode("plan")
+            timeline.append({"step": "enter plan mode", "cli_mode": cli.permission_mode})
+            await client.query("Plan the tag normalization change. Do not edit files.")
+            reply = await scripted_turn(client)
+            plan = Plan.model_validate_json(reply["text"])
+            timeline.append(
+                {
+                    "step": "plan validated",
+                    "waves": plan.waves(),
+                    "workers_started": len(started),
+                }
+            )
+            timeline.append({"step": "human approves the plan", "approved": True})
+            await client.set_permission_mode("default")
+            timeline.append({"step": "leave plan mode", "cli_mode": cli.permission_mode})
+    results = await execute_plan(plan, worker)
+    timeline.append({"step": "execute", "workers_started": len(started)})
     return {
-        "plan": plan.model_dump(),
-        "waves": plan.waves(),
-        "results": await execute_plan(plan, worker),
+        "timeline": timeline,
+        "workers_before_approval": timeline[1]["workers_started"],
+        "results": results,
+        "live_option": 'ClaudeAgentOptions(permission_mode="plan")',
+        "source": "real ClaudeSDKClient talking to a scripted CLI fixture",
     }
 ```
 

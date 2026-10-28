@@ -27,29 +27,50 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `orchestration`, line 1038). Host contracts are in
+(function `harness`, line 1236). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
-@exercise("plan", "harness", "orchestration")
-async def orchestration(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    plan = Plan(
-        tasks=[
-            TaskSpec(id="T1", files=["src/tags.py"]),
-            TaskSpec(id="T2", files=["src/search.py"], depends_on=["T1"]),
-            TaskSpec(id="T3", files=["src/report.py"], depends_on=["T1"]),
-        ]
-    )
+@exercise("harness")
+async def harness(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Treat model output as a proposal: validate it, and execute only what passes."""
+    # Fixtures standing in for model replies, from good to unusable.
+    proposals = {
+        "valid plan": '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
+        '{"id": "T2", "files": ["src/search.py"], "depends_on": ["T1"]}]}',
+        "two owners for one file": '{"tasks": [{"id": "T1", "files": ["src/tags.py"]}, '
+        '{"id": "T2", "files": ["src/tags.py"]}]}',
+        "dependency cycle": '{"tasks": [{"id": "T1", "files": ["src/a.py"], "depends_on": ["T2"]}, '
+        '{"id": "T2", "files": ["src/b.py"], "depends_on": ["T1"]}]}',
+        "file outside src": '{"tasks": [{"id": "T1", "files": [".github/workflows/ci.yml"]}]}',
+        "prose instead of JSON": "Sure! First T1, then T2.",
+    }
+    reviewed = []
+    accepted: Plan | None = None
+    for label, text in proposals.items():
+        try:
+            plan = Plan.model_validate_json(text)
+        except ValidationError as exc:
+            problem = exc.errors()[0]["msg"].removeprefix("Value error, ")
+            reviewed.append({"proposal": label, "accepted": False, "problem": problem})
+            continue
+        reviewed.append({"proposal": label, "accepted": True, "problem": ""})
+        accepted = accepted or plan
+    started: list[str] = []
 
-    async def worker(task: TaskSpec):
-        await asyncio.sleep(0)
+    async def worker(task: TaskSpec) -> dict[str, Any]:
+        started.append(task.id)
         return {"owned_files": task.files, "verified": True, "source": "scripted host worker"}
 
+    assert accepted is not None
+    results = await execute_plan(accepted, worker)
     return {
-        "plan": plan.model_dump(),
-        "waves": plan.waves(),
-        "results": await execute_plan(plan, worker),
+        "proposals": reviewed,
+        "executed": [row["proposal"] for row in reviewed if row["accepted"]],
+        "waves": accepted.waves(),
+        "workers_started": started,
+        "results": results,
     }
 ```
 

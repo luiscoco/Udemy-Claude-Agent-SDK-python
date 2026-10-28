@@ -27,29 +27,67 @@ state ownership and the condition that allows the next step. A model's descripti
 of an action is not evidence that the action happened.
 
 The exercise is in [agent_lab/exercises.py](agent_lab/exercises.py)
-(function `questions`, line 1017). Host contracts are in
+(function `questions`, line 1156). Host contracts are in
 [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
 ```python
 @exercise("questions")
-def questions(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def questions(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+    """Validate AskUserQuestion input, then route the user's answer through can_use_tool."""
+    from agent_lab.hooks import permission_callback
+    from agent_lab.sdk import Questions
+
+    def question(**changes: Any) -> dict[str, Any]:
+        item = {
+            "question": "Which teaching style?",
+            "header": "Style",
+            "options": [
+                {"label": "Concise", "description": "One short example"},
+                {"label": "Detailed", "description": "Explain each step"},
+            ],
+            "multiSelect": False,
+        }
+        return {"questions": [item | changes]}
+
+    candidates = {
+        "valid question": question(),
+        "only one option": question(options=[{"label": "Concise", "description": "Short"}]),
+        "header too long": question(header="A header that is far too long to fit"),
+        "unknown field": question(priority="high"),
+    }
+    shape_checks = []
+    for label, body in candidates.items():
+        try:
+            Questions.model_validate(body)
+            shape_checks.append({"case": label, "valid": True, "problem": ""})
+        except ValidationError as exc:
+            error = exc.errors()[0]
+            where = ".".join(str(part) for part in error["loc"])
+            shape_checks.append(
+                {"case": label, "valid": False, "problem": f"{where}: {error['msg']}"}
+            )
+    shown: list[str] = []
+
+    async def ask(arguments: dict[str, Any]) -> dict[str, Any]:
+        shown.extend(item["question"] for item in arguments["questions"])
+        return {"Which teaching style?": "Concise"}  # stands in for the user's click
+
+    callback = permission_callback(
+        lambda name, arguments: (name == "AskUserQuestion", "Only AskUserQuestion is enabled."),
+        ask,
+    )
+    answered = await callback("AskUserQuestion", candidates["valid question"], None)
+    other = await callback("Bash", {"command": "ls"}, None)
     return {
-        "tool": "AskUserQuestion",
-        "input": {
-            "questions": [
-                {
-                    "question": "Which teaching style?",
-                    "header": "Style",
-                    "options": [
-                        {"label": "Concise", "description": "One short example"},
-                        {"label": "Detailed", "description": "Explain each step"},
-                    ],
-                    "multiSelect": False,
-                }
-            ]
+        "shape_checks": shape_checks,
+        "shown_to_user": shown,
+        "routed": {
+            "result_type": type(answered).__name__,
+            "answers": answered.updated_input["answers"],
         },
-        "response": "The live UI requires a user's answer; offline mode supplies no answer.",
+        "other_tool": {"result_type": type(other).__name__, "message": other.message},
+        "source": "real can_use_tool callback; the answer stands in for the user",
     }
 ```
 
