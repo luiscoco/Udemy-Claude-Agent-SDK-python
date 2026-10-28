@@ -64,7 +64,7 @@ uv run agent-lab lesson 32 --live
 
 Suggested prompt:
 
-> Plan how to improve notes.txt. Do not change any files.
+> Read notes.txt, then plan how to improve it. Do not change any files.
 
 The live profile is `plan`. Its tools and configuration are in
 [agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
