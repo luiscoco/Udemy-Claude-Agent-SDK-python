@@ -116,7 +116,9 @@ def check_upload(name: object, size: object, attached: object = 0) -> str:
         raise ValueError(f"Upload one of: {allowed}.")
     if isinstance(size, bool) or not isinstance(size, int) or not 1 <= size <= MAX_UPLOAD_BYTES:
         raise ValueError("Each file must be between 1 byte and 5 MB.")
-    if kind != "png" and (not isinstance(attached, int) or attached >= MAX_UPLOADS):
+    if isinstance(attached, bool) or not isinstance(attached, int) or attached < 0:
+        raise ValueError("Source file count must be a non-negative whole number.")
+    if kind != "png" and attached >= MAX_UPLOADS:
         raise ValueError("Attach at most 3 source files to one answer.")
     return kind
 
@@ -355,25 +357,30 @@ def _excerpt(snippet: Mapping[str, str]) -> dict[str, str]:
 
 def prepared_plan(answer: str, kind: str, request: str, today: str) -> dict[str, Any]:
     """Free, deterministic plan from the selected answer: zero model calls."""
+    plan: dict[str, Any]
     if kind == "document":
         blocks: list[dict[str, Any]] = []
         for part in split_fences(answer):
             if part["type"] == "code":
                 if part["code"].strip():
+                    if len(part["code"]) > 12000:
+                        raise ValueError("A code block exceeds 12000 characters. Split the answer before exporting.")
                     blocks.append(
-                        {"type": "code", "language": part["language"][:24], "code": part["code"][:12000]}
+                        {"type": "code", "language": part["language"][:24], "code": part["code"]}
                     )
             else:
                 blocks.extend(_prose_blocks(part["text"]))
         title = _title(answer, request, 160)
         if blocks and blocks[0]["type"] == "heading" and blocks[0]["text"] == title:
             blocks.pop(0)  # the title already shows it
+        if len(blocks) > 60:
+            raise ValueError("The document exceeds 60 blocks. Split the answer before exporting.")
         plan = {
             "kind": "document",
             "title": title,
             "author": "Agent Publishing Studio",
             "date": today,
-            "blocks": blocks[:60] or [{"type": "paragraph", "text": "No response text was available."}],
+            "blocks": blocks or [{"type": "paragraph", "text": "No response text was available."}],
         }
     elif kind == "infographic":
         prose = "\n".join(part["text"] for part in split_fences(answer) if part["type"] == "text")
@@ -412,7 +419,8 @@ def prepared_plan(answer: str, kind: str, request: str, today: str) -> dict[str,
 
 
 def validate_plan(plan: object, kind: str) -> dict[str, Any]:
-    model = {"document": DocumentPlan, "infographic": InfographicPlan}.get(kind)
+    models: dict[str, type[BaseModel]] = {"document": DocumentPlan, "infographic": InfographicPlan}
+    model = models.get(kind)
     if model is None:
         raise ValueError("Choose a document or an infographic.")
     try:
@@ -425,7 +433,9 @@ def validate_plan(plan: object, kind: str) -> dict[str, Any]:
 
 def reconcile_code(plan: Mapping[str, Any], answer: str) -> dict[str, Any]:
     """Keep only code that is in the trusted answer, restore what the planner dropped."""
-    snippets = fenced_code(answer)[:20]
+    snippets = fenced_code(answer)
+    if plan["kind"] == "document" and (len(snippets) > 60 or any(len(snippet["code"]) > 12000 for snippet in snippets)):
+        raise ValueError("The answer code exceeds document limits. Split the answer before exporting.")
 
     def normal(code: str) -> str:
         return " ".join(code.split())
@@ -447,13 +457,13 @@ def reconcile_code(plan: Mapping[str, Any], answer: str) -> dict[str, Any]:
         if match is not None:  # restore the exact trusted text, language and indentation
             used.add(match)
             snippet = snippets[match]
-            kept.append({"type": "code", "language": snippet["language"][:24], "code": snippet["code"][:12000]})
+            kept.append({"type": "code", "language": snippet["language"][:24], "code": snippet["code"]})
     missing = [
-        {"type": "code", "language": s["language"][:24], "code": s["code"][:12000]}
+        {"type": "code", "language": s["language"][:24], "code": s["code"]}
         for i, s in enumerate(snippets)
         if i not in used
     ]
-    return validate_plan({**plan, "blocks": kept[: 60 - len(missing)] + missing}, "document")
+    return validate_plan({**plan, "blocks": kept + missing}, "document")
 
 
 # ------------------------------------------------------------------ stage 5 (M19)
@@ -575,6 +585,11 @@ def _code_svg(
     lines = code_lines(example["code"], example["language"])[: rows * columns]
     columns = 2 if columns == 2 and len(lines) > rows else 1
     column_width = (width - 20 * (columns - 1)) / columns
+    longest = max((len("".join(segment["text"] for segment in line).expandtabs(8)) for line in lines), default=1)
+    fitting_size = int((column_width - 40) / (max(1, longest) * 0.62))
+    if fitting_size < 10:
+        raise ValueError("The code excerpt is too wide to read. Shorten its lines or export a document.")
+    size = min(size, fitting_size)
     height = 64 + rows * (size + 7)
     out = ""
     for column in range(columns):
@@ -636,6 +651,8 @@ def infographic_svg(plan: Mapping[str, Any], style: Mapping[str, Any] | None = N
 
 # ------------------------------------------------------------------ stage 7 (M21)
 def source_settings(source: object, mode: object, mcp_consent: object = False) -> dict[str, Any]:
+    if mode not in ("prepared", "live"):
+        raise ValueError("Choose Prepared or Live.")
     if source == "none":
         return {"mcp_servers": {}, "allowed_tools": [], "label": "No external source", "max_turns": 2}
     if source != "docs":
@@ -647,8 +664,6 @@ def source_settings(source: object, mode: object, mcp_consent: object = False) -
             "label": "Official docs MCP (not used: Prepared mode makes no calls)",
             "max_turns": 2,
         }
-    if mode != "live":
-        raise ValueError("Choose Prepared or Live.")
     if mcp_consent is not True:
         raise PermissionError("Authorize the connection to the official documentation MCP.")
     return {
@@ -864,6 +879,8 @@ def _styled_svg(plan: Mapping[str, Any], style: Mapping[str, Any]) -> str:
         flow = ""
         takeaway_y = 870
     title = _wrap(plan["title"], 45, 2)
+    title_y = 108 if len(title) > 1 else 112
+    subtitle_y = 186 if len(title) > 1 else 164
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" '
         f'aria-label="{html.escape(plan["title"])}"><title>{html.escape(plan["title"])}</title>'
@@ -878,7 +895,7 @@ def _styled_svg(plan: Mapping[str, Any], style: Mapping[str, Any]) -> str:
         f'<rect width="1600" height="900" fill="{bg}"/>{background_art}'
         f'<rect x="18" y="18" width="1564" height="180" rx="28" fill="{_mix(bg, secondary, 0.08)}"/>{decoration}'
         f'<text x="52" y="62" class="eyebrow">CLAUDE AGENT SDK · VISUAL GUIDE</text>'
-        f'{_text(52, 112, title, "title", 46)}'
-        f'{_text(52, 112 + len(title) * 46 + 6, [plan["subtitle"]], "subtitle", 0)}{art}{cards}{middle}{flow}'
+        f'{_text(52, title_y, title, "title", 42)}'
+        f'{_text(52, subtitle_y, [plan["subtitle"]], "subtitle", 0)}{art}{cards}{middle}{flow}'
         f'{_text(44, takeaway_y, ["Takeaway: " + plan["takeaway"]], "takeaway", 0)}</svg>'
     )

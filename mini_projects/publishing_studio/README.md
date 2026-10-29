@@ -47,3 +47,8 @@ PDF and PNG files are rendered by Playwright: run `uv run playwright install chr
 - **Download project ZIP** on the page packages this folder (without the reference).
 
 Review every preview for layout and facts before you share a file.
+
+Document exports preserve the selected answer's fenced code. If a code block exceeds
+12,000 characters or the document needs more than 60 blocks, split the answer before
+exporting; the builder reports an error instead of silently removing code. Infographics
+use a bounded, labeled code excerpt, while the document retains the full snippets.

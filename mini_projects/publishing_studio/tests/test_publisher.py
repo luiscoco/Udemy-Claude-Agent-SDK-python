@@ -185,6 +185,9 @@ def test_upload_size_and_count_are_bounded(publisher):
         publisher.check_upload("fourth.txt", 10, 3)
     with pytest.raises(ValueError):
         publisher.check_upload("flag.txt", True, 0)
+    for attached in (True, -1, 1.5):
+        with pytest.raises(ValueError):
+            publisher.check_upload("notes.txt", 100, attached)
 
 
 @pytest.mark.stage(3)
@@ -321,6 +324,45 @@ def test_code_is_reconciled_against_the_trusted_answer(publisher):
     assert publisher.reconcile_code(faked, ANSWER)["code_example"] == info["code_example"]
 
 
+@pytest.mark.stage(4)
+def test_document_code_is_rejected_instead_of_silently_truncated(publisher):
+    oversized = "```python\n" + "x" * 12001 + "\n```"
+    with pytest.raises(ValueError, match="Split the answer"):
+        publisher.prepared_plan(oversized, "document", "Code", "2026-01-02")
+    plan = publisher.prepared_plan("Small answer.", "document", "Code", "2026-01-02")
+    with pytest.raises(ValueError, match="Split the answer"):
+        publisher.reconcile_code(plan, oversized)
+    infographic = publisher.prepared_plan(oversized, "infographic", "Code", "2026-01-02")
+    assert publisher.reconcile_code(infographic, oversized)["code_example"]["code"] == "x" * 85
+
+
+@pytest.mark.stage(4)
+def test_reconciliation_preserves_more_than_twenty_answer_snippets(publisher):
+    answer = "\n\n".join(f"```python\nx = {number}\n```" for number in range(21))
+    plan = publisher.prepared_plan("Small answer.", "document", "Code", "2026-01-02")
+    restored = publisher.reconcile_code(plan, answer)
+    assert [block["code"] for block in restored["blocks"] if block["type"] == "code"] == [
+        f"x = {number}" for number in range(21)
+    ]
+
+
+@pytest.mark.stage(4)
+def test_document_block_limit_never_discards_trusted_code(publisher):
+    at_limit = "# Code\n\n" + "\n\n".join(f"Paragraph {number}." for number in range(60))
+    assert len(publisher.prepared_plan(at_limit, "document", "Code", "2026-01-02")["blocks"]) == 60
+    answer = "```python\nfirst = 1\n```\n\n```python\nsecond = 2\n```"
+    plan = {
+        "kind": "document", "title": "Code", "author": "Author", "date": "2026-01-02",
+        "blocks": [{"type": "paragraph", "text": "Context"}] * 59
+        + [{"type": "code", "language": "python", "code": "first = 1"}],
+    }
+    with pytest.raises(ValueError):
+        publisher.reconcile_code(plan, answer)
+    too_many = "\n\n".join(f"```python\nx = {number}\n```" for number in range(61))
+    with pytest.raises(ValueError, match="Split the answer"):
+        publisher.prepared_plan(too_many, "document", "Code", "2026-01-02")
+
+
 # ------------------------------------------------------------------ stage 5 (M19)
 @pytest.mark.stage(5)
 def test_code_lines_keep_every_character_and_color_tokens(publisher):
@@ -392,6 +434,8 @@ def test_source_settings(publisher):
     assert docs["allowed_tools"] == ["mcp__claude_docs__*"] and docs["max_turns"] > none["max_turns"]
     with pytest.raises(ValueError):
         publisher.source_settings("https://evil.example/mcp", "live", True)
+    with pytest.raises(ValueError):
+        publisher.source_settings("none", "automatic")
 
 
 # ------------------------------------------------------------------ stage 8 (M22)
