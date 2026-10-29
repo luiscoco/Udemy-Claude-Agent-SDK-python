@@ -226,26 +226,31 @@ def tour_code_html(code: str, start: int, end: int) -> str:
     return highlight(code, PythonLexer(stripnl=False), formatter)
 
 
-def concept_code_card(lesson_id: int) -> None:
+def concept_code_card(lesson_id: int, guide_target: str = "guide-example-target") -> None:
     """The SDK code for this lesson's concept, as a developer would write it."""
     item = guide(lesson_id)
     sections = code_tour(lesson_id)
     step: dict[str, int | None] = {"index": None}
     with card("The concept in code", "Python SDK").classes("guide-example-context"):
+        code_view = ui.column().classes(f"w-full gap-0 guide-scroll-target {guide_target}").props(
+            'tabindex="0" aria-label="Python concept code"'
+        )
 
         @ui.refreshable
         def view() -> None:
             index = step["index"]
             if index is None:
-                ui.code(item.concept_code, language="python").classes("w-full")
-                ui.markdown(item.code_focus).classes("guide-example-target")
+                with code_view:
+                    ui.code(item.concept_code, language="python").classes("w-full")
+                ui.markdown(item.code_focus)
                 if sections:
                     ui.button(
                         "Start code tour", icon="route", on_click=lambda: go(0)
                     ).props("outline")
                 return
             section = sections[index]
-            ui.html(tour_code_html(item.concept_code, section.start, section.end), sanitize=False)
+            with code_view:
+                ui.html(tour_code_html(item.concept_code, section.start, section.end), sanitize=False)
             with ui.column().classes("tour-step w-full gap-1"):
                 ui.label(
                     f"Step {index + 1} of {len(sections)} · lines {section.start}-{section.end}"
@@ -275,6 +280,7 @@ def concept_code_card(lesson_id: int) -> None:
         def go(index: int | None) -> None:
             ui.run_javascript("window.speechSynthesis && speechSynthesis.cancel()")
             step["index"] = index
+            code_view.clear()
             view.refresh()
 
         view()
@@ -351,7 +357,7 @@ def workbook(lesson_id: int) -> None:
                 on_change=lambda e: update(lesson_id, draft=(e.value or "")[:10000]),
             )
             .props("outlined autogrow maxlength=10000")
-            .classes("w-full guide-practice-target")
+            .classes("w-full guide-practice-target guide-scroll-target")
         )
 
         @ui.refreshable

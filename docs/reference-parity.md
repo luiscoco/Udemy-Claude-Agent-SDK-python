@@ -132,9 +132,11 @@ All rows are **not yet certified** against every reference scenario. “Written 
 The pilot has automated browser checks in `tests/test_learning.py`:
 
 - `test_browser_written_guide_preserves_work_and_only_changes_tour_position`: all seven targets, keyboard opening and heading focus, manual-tab pause, Show section, minimize/expand, Escape, reload/Resume, retained notes, same-lesson Finish, and exported evidence that exercises, quizzes and manual completion checks remain untouched.
-- `test_browser_guide_phone_large_text_fallback_and_route_next`: all seven sections at 390 ? 844 with dark mode and Extra large text, viewport bounds, missing-target fallback, and route-aware navigation from lesson 1 to lesson 3.
+- `test_browser_guide_phone_large_text_fallback_and_route_next`: all seven sections at 390 x 844 with dark mode and Extra large text, viewport bounds, missing-target fallback, and route-aware navigation from lesson 1 to lesson 3.
+- Both checks assert that every complete highlight clears the fixed header and guide panel. Example and source highlights frame the actual code; long code, results and paragraphs remain scrollable within the frame. Navigation stays visible while the guide text scrolls.
+- `test_browser_guide_realigns_after_resize_code_tour_and_new_results`: target alignment after desktop/phone resizing, code-tour replacement and an explicitly started offline exercise, plus cleanup of temporary sizing and scroll space on close.
 
-`tests/test_lesson_guide.py` checks guide structure and route boundaries. `tests/test_progress.py` checks guide-position backup/restore and compatibility with exports made before this field existed. Desktop light (1440 ? 1000) and phone dark screenshots were inspected locally. These checks cover the written pilot; they do not constitute a full accessibility audit, student acceptance or recorded-audio verification.
+`tests/test_lesson_guide.py` checks guide structure and route boundaries. `tests/test_progress.py` checks guide-position backup/restore and compatibility with exports made before this field existed. All seven desktop light (1440 x 1000) and phone light (390 x 844) highlight screenshots were inspected after the alignment fix; phone dark/Extra large behavior is also covered by the browser test. These checks cover the written pilot; they do not constitute a full accessibility audit, student acceptance or recorded-audio verification.
 
 ## Maintaining the inventory
 

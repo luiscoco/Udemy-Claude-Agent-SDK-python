@@ -545,6 +545,21 @@ def test_browser_publishing_studio_builds_and_downloads_a_document(server, tmp_p
         browser.close()
 
 
+def assert_guide_target_fits(page):
+    """The whole outline must clear the fixed header and floating guide, not just exist."""
+    page.wait_for_function("""() => {
+        const target = document.querySelector('.learning-guide-target');
+        const panel = document.querySelector('.learning-guide');
+        const header = document.querySelector('.q-header');
+        if (!target || !panel || !header) return false;
+        const box = target.getBoundingClientRect();
+        const guide = panel.getBoundingClientRect();
+        return box.width > 0 && box.height > 0 && box.left >= 8 && box.right <= innerWidth - 8
+            && box.top >= header.getBoundingClientRect().bottom + 8
+            && box.bottom <= guide.top - 8;
+    }""")
+
+
 def test_browser_written_guide_preserves_work_and_only_changes_tour_position(server):
     import json
 
@@ -574,6 +589,10 @@ def test_browser_written_guide_preserves_work_and_only_changes_tour_position(ser
             expect(target).to_be_visible()
             expect(page.locator(".learning-guide-target")).to_have_count(1)
             expect(panel.locator(".learning-guide-step")).to_be_focused()
+            assert_guide_target_fits(page)
+            if section.id in {"example", "source"}:
+                expect(target.locator("code")).to_contain_text("async for message in query")
+                assert target.evaluate("e => e.scrollHeight > e.clientHeight")
             assert target.bounding_box()["height"] < 350  # Small teaching target, not a whole card.
         page.get_by_role("tab", name="AI Tutor", exact=True).click()
         panel.get_by_text("Tour paused after a tab change.", exact=False).wait_for()
@@ -635,6 +654,8 @@ def test_browser_guide_phone_large_text_fallback_and_route_next(server):
                 panel.get_by_role("button", name="Next section", exact=True).click()
             panel.get_by_text(f"Section {index + 1} of 7", exact=False).wait_for()
             expect(page.locator(section.target + ".learning-guide-target")).to_be_visible()
+            assert_guide_target_fits(page)
+            expect(panel.get_by_role("button", name="Previous section", exact=True)).to_be_in_viewport()
             bounds = panel.bounding_box()
             assert bounds["x"] >= 0 and bounds["x"] + bounds["width"] <= 391
             assert bounds["y"] >= 0 and bounds["y"] + bounds["height"] <= 845
@@ -648,4 +669,50 @@ def test_browser_guide_phone_large_text_fallback_and_route_next(server):
         expect(page.locator("#lesson-heading")).to_contain_text("3. Built-in tools")
         expect(page.locator("#lesson-heading")).to_be_focused()
         assert page.get_by_role("button", name="Open Learning Guide", exact=True).count() == 0
+        browser.close()
+
+
+def test_browser_guide_realigns_after_resize_code_tour_and_new_results(server):
+    from playwright.sync_api import expect, sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1366, "height": 768})
+        page.goto(base + "/?lesson=1")
+        page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+        panel = page.get_by_role("region", name="Lesson 1 Learning Guide", exact=True)
+        panel.get_by_role("button", name="Start guided tour", exact=True).click()
+        for _ in range(2):
+            panel.get_by_role("button", name="Next section", exact=True).click()
+        expect(page.locator(".guide-example-target.learning-guide-target")).to_be_visible()
+        assert_guide_target_fits(page)
+        # Automatic alignment must settle instead of pulling back a student's own scrolling.
+        page.wait_for_timeout(100)
+        scroll = page.evaluate("() => { scrollBy(0, 40); return scrollY; }")
+        page.wait_for_timeout(250)
+        assert abs(page.evaluate("scrollY") - scroll) < 2
+        panel.get_by_role("button", name="Show section", exact=True).click()
+        assert_guide_target_fits(page)
+        # The code tour replaces its code HTML while retaining the meaningful target.
+        page.get_by_role("button", name="Start code tour", exact=True).click()
+        expect(page.locator(".guide-example-target .tour-code")).to_be_visible()
+        assert_guide_target_fits(page)
+        page.set_viewport_size({"width": 390, "height": 844})
+        assert_guide_target_fits(page)
+        page.set_viewport_size({"width": 1366, "height": 768})
+        assert_guide_target_fits(page)
+        panel.get_by_role("button", name="Next section", exact=True).click()
+        # This explicit student action runs the free fixture; the tour does not click Run.
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        page.get_by_text("Completed", exact=True).wait_for()
+        panel.get_by_role("button", name="Next section", exact=True).click()
+        target = page.locator(".guide-evidence-target.learning-guide-target")
+        expect(target).to_contain_text("Recorded test text")
+        assert_guide_target_fits(page)
+        panel.get_by_role("button", name="Close Learning Guide", exact=True).click()
+        expect(page.locator("body")).not_to_have_class(re.compile(r".*learning-guide-active.*"))
+        assert not page.locator(".guide-evidence-target").evaluate(
+            "e => e.style.getPropertyValue('--learning-guide-target-height')"
+        )
         browser.close()

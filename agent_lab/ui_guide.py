@@ -11,13 +11,15 @@ from agent_lab.ui_learning import set_preference, stored
 GUIDE_CSS = """
 .learning-guide {
     position: fixed; right: 20px; bottom: 20px; z-index: 2500;
-    width: 410px; max-width: calc(100vw - 24px); max-height: min(76vh, 740px);
+    width: 410px; max-width: calc(100vw - 24px); max-height: min(56vh, 680px);
     background: #ffffff; color: #17294a; border: 2px solid #2563eb;
     border-radius: 16px; box-shadow: 0 12px 40px #0003;
     padding: 16px; gap: 12px; font-size: 18px; line-height: 1.5;
 }
 .learning-guide-heading { font-size: 21px; font-weight: 750; }
 .learning-guide-body { overflow-y: auto; min-height: 0; width: 100%; padding: 3px; }
+.learning-guide-footer { flex-shrink: 0; width: 100%; }
+.learning-guide > .nicegui-row { flex-shrink: 0; }
 .learning-guide .q-btn { white-space: normal; min-height: 44px; font-size: 16px; }
 .learning-guide .q-btn:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 3px; }
 .learning-guide .q-field { max-width: 100%; }
@@ -27,7 +29,15 @@ GUIDE_CSS = """
 .learning-guide-action { background: #eff6ff; color: #173b63; padding: 12px; border-radius: 10px; }
 .learning-guide-status { font-size: 16px; color: #475569; }
 .learning-guide-target { outline: 3px solid #dc2626 !important; outline-offset: 5px; border-radius: 5px; }
-.learning-guide-actions { width: 100%; gap: 8px; }
+.learning-guide-target.nicegui-markdown > :first-child { margin-top: 0; }
+.learning-guide-target.nicegui-markdown > :last-child { margin-bottom: 0; }
+.learning-guide-target:not(button) {
+    max-height: var(--learning-guide-target-height); overflow: auto; overscroll-behavior: contain;
+    flex-shrink: 0;
+}
+.guide-scroll-target .nicegui-code, .guide-scroll-target .tour-code { flex-shrink: 0; }
+body.learning-guide-active .q-page { padding-bottom: calc(100vh + 32px); }
+.learning-guide-actions { width: 100%; gap: 8px; align-items: stretch; }
 .learning-guide-actions .q-btn { flex: 1 1 130px; }
 .guide-lesson-actions { align-items: center; gap: 12px; }
 body.body--dark .learning-guide { background: #171e2e; color: #f1f5f9; border-color: #93c5fd; }
@@ -45,6 +55,7 @@ body.lab-text-xlarge .learning-guide { font-size: 22px; }
 # They never click a target or change any form value.
 CLEAR_TARGET = """
 if ((window.__learningGuideRevision || 0) <= REVISION) {
+    window.__learningGuideCleanup?.();
     document.querySelectorAll('.learning-guide-target').forEach(e => e.classList.remove('learning-guide-target'));
     window.__learningGuideRevision = REVISION;
 }
@@ -89,6 +100,7 @@ class LessonGuidePanel:
                             "flat round aria-label='Close Learning Guide'"
                         )
                 self.body = ui.column().classes("learning-guide-body gap-3")
+                self.footer = ui.column().classes("learning-guide-footer gap-0")
         self.panel.set_visibility(False)
         self.launch.props(f'aria-controls="{self.panel.html_id}" aria-expanded="false"')
         self.minimize.props(f'aria-controls="{self.body.html_id}" aria-expanded="true"')
@@ -138,6 +150,11 @@ class LessonGuidePanel:
                 if self.paused else "The outlined element belongs to this section."
             ).classes("learning-guide-status").props('role="status" aria-live="polite"')
             ui.button("Show section", icon="my_location", on_click=lambda: self.show(self.index)).props("outline")
+
+        @ui.refreshable
+        def navigation() -> None:
+            if not self.active:
+                return
             with ui.row().classes("learning-guide-actions"):
                 previous = ui.button("Previous section", icon="chevron_left", on_click=lambda: self.show(self.index - 1))
                 previous.set_enabled(self.index > 0)
@@ -147,6 +164,9 @@ class LessonGuidePanel:
                     ui.button("Finish tour", icon="done", on_click=self.finish)
                     if adjacent_lesson(self.guide.lesson, 1, self.path) is not None:
                         ui.button("Next lesson →", on_click=self.next_lesson).classes("guide-primary")
+        self.navigation = navigation
+        with self.footer:
+            navigation()
 
         self.content = content
         with self.body:
@@ -157,9 +177,11 @@ class LessonGuidePanel:
         self.launch.props('aria-expanded="true"')
         self.minimized = False
         self.body.set_visibility(True)
+        self.footer.set_visibility(True)
         self.minimize.props("aria-label='Minimize Learning Guide' aria-expanded='true'")
         self.minimize.set_icon("minimize")
         self.content.refresh()
+        self.navigation.refresh()
         ui.run_javascript(
             f"requestAnimationFrame(() => document.getElementById({json.dumps(self.panel.html_id)})?.focus({{preventScroll: true}}))"
         )
@@ -178,6 +200,7 @@ class LessonGuidePanel:
     def toggle_minimized(self) -> None:
         self.minimized = not self.minimized
         self.body.set_visibility(not self.minimized)
+        self.footer.set_visibility(not self.minimized)
         self.minimize.props(f'aria-expanded="{str(not self.minimized).lower()}"')
         self.minimize.props(
             "aria-label='Expand Learning Guide'" if self.minimized else "aria-label='Minimize Learning Guide'"
@@ -222,10 +245,12 @@ class LessonGuidePanel:
         set_preference("learning_guide_positions", positions)
         self.tabs.set_value(section.tab)
         self.content.refresh()
+        self.navigation.refresh()
         found = await ui.run_javascript(
             """return await new Promise(resolve => {
                 const revision = REVISION;
                 if ((window.__learningGuideRevision || 0) > revision) return resolve(false);
+                window.__learningGuideCleanup?.();
                 window.__learningGuideRevision = revision;
                 document.querySelectorAll('.learning-guide-target').forEach(e => e.classList.remove('learning-guide-target'));
                 const visible = selector => [...document.querySelectorAll(selector)]
@@ -239,19 +264,53 @@ class LessonGuidePanel:
                         if (++tries < 35) return setTimeout(find, 50);
                         return resolve(false);
                     }
-                    step.focus({preventScroll: true});
-                    const context = visible(CONTEXT) || target;
-                    const header = document.querySelector('.q-header');
-                    const top = header ? header.getBoundingClientRect().bottom + 20 : 20;
-                    window.scrollTo({top: Math.max(0, window.scrollY + context.getBoundingClientRect().top - top), behavior: 'auto'});
-                    const box = target.getBoundingClientRect();
                     const panel = visible('.learning-guide');
-                    const panelBox = panel?.getBoundingClientRect();
-                    const overlaps = panelBox && box.right > panelBox.left && box.left < panelBox.right;
-                    const bottom = overlaps && panelBox.top > top + 80 ? panelBox.top - 16 : window.innerHeight - 24;
-                    if (box.top < top || box.bottom > bottom)
-                        window.scrollTo({top: Math.max(0, window.scrollY + box.top - top), behavior: 'auto'});
+                    const header = document.querySelector('.q-header');
+                    const body = panel.querySelector('.learning-guide-body');
+                    body.scrollTop = 0;
+                    step.focus({preventScroll: true});
+                    document.body.classList.add('learning-guide-active');
                     target.classList.add('learning-guide-target');
+                    let frame = 0;
+                    function align() {
+                        if (!target.isConnected || window.__learningGuideRevision !== revision) return;
+                        const top = (header?.getBoundingClientRect().bottom || 0) + 20;
+                        // Reserve the complete target above the panel, including its outline.
+                        const bottom = Math.min(panel.getBoundingClientRect().top - 20, innerHeight - 20);
+                        const available = Math.max(64, bottom - top);
+                        const before = target.getBoundingClientRect();
+                        // Width is stable when height is capped. A height-based scale can
+                        // oscillate on rounded pixels and repeatedly pull the page back.
+                        const scale = target.offsetWidth ? before.width / target.offsetWidth : 1;
+                        target.style.setProperty('--learning-guide-target-height', `${available / scale}px`);
+                        const box = target.getBoundingClientRect();
+                        const context = visible(CONTEXT) || target;
+                        const contextBox = context.getBoundingClientRect();
+                        const start = contextBox.top <= box.top && box.bottom - contextBox.top <= available
+                            ? contextBox.top : box.top;
+                        window.scrollTo({top: Math.max(0, scrollY + start - top), behavior: 'instant'});
+                    }
+                    function schedule() {
+                        cancelAnimationFrame(frame);
+                        frame = requestAnimationFrame(align);
+                    }
+                    const observer = new ResizeObserver(schedule);
+                    observer.observe(target);
+                    observer.observe(panel);
+                    if (header) observer.observe(header);
+                    window.addEventListener('resize', schedule);
+                    window.visualViewport?.addEventListener('resize', schedule);
+                    window.__learningGuideCleanup = () => {
+                        cancelAnimationFrame(frame);
+                        observer.disconnect();
+                        window.removeEventListener('resize', schedule);
+                        window.visualViewport?.removeEventListener('resize', schedule);
+                        target.style.removeProperty('--learning-guide-target-height');
+                        document.body.classList.remove('learning-guide-active');
+                    };
+                    align();
+                    // Vue tab contents and font metrics can settle on the following frame.
+                    schedule();
                     resolve(true);
                 }
                 requestAnimationFrame(find);

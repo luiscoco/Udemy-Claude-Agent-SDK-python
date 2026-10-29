@@ -150,8 +150,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 with ui.tab_panel(visual_tab).classes("p-0 flex flex-col gap-5"):
                     visual_panel(lesson)
                 with ui.tab_panel(source_tab).classes("p-0 flex flex-col gap-5"):
-                    ui.label("Python source for this concept").classes("text-xl font-bold guide-source-target")
-                    concept_code_card(lesson)
+                    ui.label("Python source for this concept").classes("text-xl font-bold guide-source-context")
+                    concept_code_card(lesson, guide_target="guide-source-target")
                     with ui.expansion(
                         "How the offline lab checks this concept", icon="science"
                     ).classes("w-full course-card"):
@@ -234,7 +234,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             cancel_button.disable()
                             status = ui.label("Ready")
                     with ui.card().classes("course-card w-full p-6 guide-evidence-context"):
-                        ui.label("Response and results").classes("text-xl font-bold guide-evidence-target")
+                        evidence_view = ui.column().classes("w-full gap-3 guide-evidence-target guide-scroll-target")
+                        with evidence_view:
+                            ui.label("Response and results").classes("text-xl font-bold")
                         output_state = OutputState()
 
                         @ui.refreshable
@@ -243,7 +245,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 output_state, current.exercise, handle.id if handle else None
                             )
 
-                        output()
+                        with evidence_view:
+                            output()
                         with ui.expansion("Diagnostics — raw events", icon="code").classes(
                             "w-full"
                         ):
