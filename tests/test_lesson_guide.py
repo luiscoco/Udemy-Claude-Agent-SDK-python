@@ -6,7 +6,8 @@ from pydantic import ValidationError
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS
-from agent_lab.learning import course
+from agent_lab.exercises import EXERCISES
+from agent_lab.learning import course, guide
 from agent_lab.lesson_guide import (
     SECTION_IDS,
     LearningGuide,
@@ -17,15 +18,32 @@ from agent_lab.lesson_guide import (
 )
 
 
-def test_pilot_contains_the_seven_real_sections_and_explicit_student_actions():
+def test_every_lesson_contains_the_seven_sections_and_explicit_student_actions():
     tours = learning_guides()
-    assert set(tours) == {1}  # Other lessons are pending, never falsely presented as reviewed.
-    tour = tours[1]
-    assert tuple(section.id for section in tour.sections) == SECTION_IDS
-    assert {section.id for section in tour.sections if section.student_action} == {
-        "controls", "evidence", "practice",
-    }
-    assert all(section.target != section.context or section.id == "source" for section in tour.sections)
+    assert set(tours) == set(LESSONS)
+    assert sum(len(tour.sections) for tour in tours.values()) == 525
+    for number, tour in tours.items():
+        assert tour.lesson == number
+        assert tuple(section.id for section in tour.sections) == SECTION_IDS
+        assert {section.id for section in tour.sections if section.student_action} == {
+            "controls", "evidence", "practice",
+        }
+
+
+@pytest.mark.parametrize("number", range(2, 76))
+def test_expanded_guide_uses_its_own_preparation_code_evidence_and_challenge(number):
+    item = guide(number)
+    sections = {section.id: section for section in learning_guides()[number].sections}
+    assert LESSONS[number].objective in sections["goal"].text
+    for line in item.preparation:
+        assert line.replace("`", "") in sections["preparation"].text
+    assert item.code_focus.replace("`", "") in sections["example"].text
+    assert item.lab_brief.replace("`", "") in sections["controls"].text
+    assert item.inspect.replace("`", "") in sections["evidence"].text
+    assert item.expected.replace("`", "") in sections["evidence"].text
+    assert item.evidence_criterion.replace("`", "") in sections["evidence"].action
+    assert EXERCISES[LESSONS[number].exercise].__name__ + "()" in sections["source"].action
+    assert item.challenge.replace("`", "") == sections["practice"].text
 
 
 @pytest.mark.parametrize("change", ["missing", "duplicate", "unsafe-selector"])
@@ -65,6 +83,6 @@ def test_reference_inventory_tracks_all_current_lessons_without_certifying_parit
         lesson = LESSONS[row["id"]]
         assert row["title"] == lesson.title and row["live_profile"] == lesson.live_profile
         assert row["reference_parity"] == "not-certified"
-        assert row["written_guide"] == ("written-pilot" if row["id"] in learning_guides() else "pending")
+        assert row["written_guide"] == "written"
         assert row["reference_contract"].startswith(f"docs/prompts/l{row['id']:02}-")
         assert len(row["reference_blob_sha"]) == 40 and row["foundation_component"]

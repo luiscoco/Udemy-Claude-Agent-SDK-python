@@ -29,9 +29,9 @@ project. Feature parity work remains. The pinned TypeScript comparison and the
   (7/7) and Publishing Studio (8/8), with separate reference implementations.
 - Reviewed Python source tours for all 75 lessons; browser Read aloud remains
   separate from the reference's prerecorded TypeScript narration.
-- A seven-section written Learning Guide pilot for lesson 1: explicit Start/Resume,
+- Seven-section written Learning Guides for all 75 lessons: explicit Start/Resume,
   real targets, tab-change pause, minimize/close, saved position and route-aware
-  navigation. Recorded narration and the other 74 written guides are pending.
+  navigation. Each guide uses its own lesson content; recorded narration is pending.
 - On 29 October 2026, bounded live checks passed for lesson 1, Study Coach,
   Evaluation Studio, Publishing Studio and lesson 33's elicitation callback on
   SDK 0.2.174. These selected checks do not establish all-lesson live parity.
@@ -57,7 +57,7 @@ project. Feature parity work remains. The pinned TypeScript comparison and the
    checks; executable detection alone does not verify an API response.
 7. Verify browser/native startup on supported operating systems and build
    the container in an environment with Docker.
-8. Complete recorded Python narration, per-lesson written guides, shared navigation,
+8. Complete recorded Python narration, shared navigation,
    My learning and reference question/excerpt coverage. Supply separate student
    starter templates alongside the now-completed milestone apps.
 

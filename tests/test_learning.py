@@ -555,6 +555,16 @@ def assert_guide_target_fits(page):
         const box = target.getBoundingClientRect();
         const guide = panel.getBoundingClientRect();
         const style = getComputedStyle(target);
+        // A tab can be on screen while its slide transition still clips the frame.
+        if (target.closest('[class*="-enter-active"], [class*="-leave-active"]')) return false;
+        for (let parent = target.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+            const css = getComputedStyle(parent);
+            const clip = parent.getBoundingClientRect();
+            if (['hidden', 'clip', 'auto', 'scroll'].includes(css.overflowX)
+                && (box.left - 8 < clip.left || box.right + 8 > clip.right)) return false;
+            if (['hidden', 'clip', 'auto', 'scroll'].includes(css.overflowY)
+                && (box.top - 8 < clip.top || box.bottom + 8 > clip.bottom)) return false;
+        }
         return box.width > 0 && box.height > 0 && box.left >= 8 && box.right <= innerWidth - 8
             && style.outlineStyle === 'solid' && parseFloat(style.outlineWidth) >= 2
             && style.outlineColor === 'rgb(220, 38, 38)'
@@ -589,7 +599,7 @@ def test_browser_written_guide_preserves_work_and_only_changes_tour_position(ser
                 panel.get_by_role("button", name="Next section", exact=True).click()
             panel.get_by_text(f"Section {index + 1} of 7", exact=False).wait_for()
             target = page.locator(section.target + ".learning-guide-target")
-            expect(target).to_be_visible()
+            expect(target).to_be_visible(timeout=10000)
             expect(page.locator(".learning-guide-target")).to_have_count(1)
             expect(panel.locator(".learning-guide-step")).to_be_focused()
             assert_guide_target_fits(page)
@@ -671,7 +681,8 @@ def test_browser_guide_phone_large_text_fallback_and_route_next(server):
         page.wait_for_url("**/?lesson=3&path=application-developer")
         expect(page.locator("#lesson-heading")).to_contain_text("3. Built-in tools")
         expect(page.locator("#lesson-heading")).to_be_focused()
-        assert page.get_by_role("button", name="Open Learning Guide", exact=True).count() == 0
+        expect(page.get_by_role("button", name="Open Learning Guide", exact=True)).to_be_visible()
+        expect(page.get_by_role("region", name="Lesson 3 Learning Guide", exact=True)).not_to_be_visible()
         browser.close()
 
 
@@ -728,3 +739,100 @@ def test_browser_guide_realigns_after_resize_code_tour_and_new_results(server):
             "e => e.style.getPropertyValue('--learning-guide-target-height')"
         )
         browser.close()
+
+
+@pytest.fixture(scope="module")
+def guide_browser_context(server):
+    """Reuse Chromium and its asset cache while visiting the complete curriculum."""
+    from playwright.sync_api import sync_playwright
+
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        context = browser.new_context()
+        yield context
+        context.close()
+        browser.close()
+
+
+@pytest.mark.parametrize("lesson_id", range(2, 76))
+def test_browser_remaining_learning_guides_frame_all_seven_targets(server, guide_browser_context, lesson_id):
+    from playwright.sync_api import expect
+
+    from agent_lab.lesson_guide import learning_guides
+
+    base, data = server
+    page = guide_browser_context.new_page()
+    # Visit every lesson; also exercise the narrow layout across all course sections.
+    phone = lesson_id % 3 == 0
+    page.set_viewport_size({"width": 390 if phone else 1440, "height": 844 if phone else 1000})
+    try:
+        page.goto(base + f"/?lesson={lesson_id}")
+        page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+        panel = page.get_by_role("region", name=f"Lesson {lesson_id} Learning Guide", exact=True)
+        panel.get_by_role("button", name="Start guided tour", exact=True).click()
+        for index, section in enumerate(learning_guides()[lesson_id].sections):
+            if index:
+                panel.get_by_role("button", name="Next section", exact=True).click()
+            panel.get_by_text(f"Section {index + 1} of 7", exact=False).wait_for()
+            target = page.locator(section.target + ".learning-guide-target")
+            expect(target).to_be_visible(timeout=10000)
+            expect(page.locator(".learning-guide-target")).to_have_count(1)
+            assert_guide_target_fits(page)
+            expect(panel.get_by_role("button", name="Previous section", exact=True)).to_be_in_viewport()
+            if section.id in {"example", "source"}:
+                expect(target.locator("code")).to_be_visible()
+            assert panel.locator(".learning-guide-body").evaluate("e => e.scrollWidth <= e.clientWidth + 1")
+            assert not page.evaluate("document.documentElement.scrollWidth > innerWidth")
+            if os.environ.get("LAB_GUIDE_SCREENSHOTS") == "true" and lesson_id in {2, 13, 33, 43, 57, 72, 75}:
+                page.screenshot(path=str(data / f"guide-{lesson_id:02}-{section.id}.png"))
+        next_button = panel.get_by_role("button", name="Next lesson \u2192", exact=True)
+        if lesson_id == 75:
+            expect(next_button).to_have_count(0)
+        else:
+            expect(next_button).to_be_visible()
+        panel.get_by_role("button", name="Finish tour", exact=True).click()
+        expect(panel).not_to_be_visible()
+        expect(page.locator("#lesson-heading")).to_be_focused()
+        expect(page.locator(".learning-guide-target")).to_have_count(0)
+        assert f"lesson={lesson_id}" in page.url
+    finally:
+        page.close()
+
+
+def test_browser_guide_positions_are_independent_across_lessons_and_finish(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, _ = server
+    browser = guide_browser_context.browser
+    assert browser is not None
+    context = browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        for lesson_id, advances in ((2, 2), (75, 6)):
+            page.goto(base + f"/?lesson={lesson_id}")
+            page.get_by_label("Private notes", exact=True).fill(f"My lesson {lesson_id} notes")
+            page.get_by_label("Private notes", exact=True).press("Tab")
+            page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+            panel = page.get_by_role("region", name=f"Lesson {lesson_id} Learning Guide", exact=True)
+            panel.get_by_role("button", name="Start guided tour", exact=True).click()
+            for index in range(advances):
+                panel.get_by_role("button", name="Next section", exact=True).click()
+                panel.get_by_text(f"Section {index + 2} of 7", exact=False).wait_for()
+            panel.get_by_role("button", name="Close Learning Guide", exact=True).click()
+        # Reload the last course lesson: Finish clears only its saved tour position.
+        page.reload()
+        page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+        panel = page.get_by_role("region", name="Lesson 75 Learning Guide", exact=True)
+        panel.get_by_role("button", name="Resume: Explain and practise", exact=True).click()
+        assert_guide_target_fits(page)
+        expect(page.get_by_label("Private notes", exact=True)).to_have_value("My lesson 75 notes")
+        panel.get_by_role("button", name="Finish tour", exact=True).click()
+        expect(page.locator("#lesson-heading")).to_be_focused()
+        page.goto(base + "/?lesson=2")
+        page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+        panel = page.get_by_role("region", name="Lesson 2 Learning Guide", exact=True)
+        panel.get_by_role("button", name="Resume: Read one example", exact=True).click()
+        assert_guide_target_fits(page)
+        expect(page.get_by_label("Private notes", exact=True)).to_have_value("My lesson 2 notes")
+    finally:
+        context.close()

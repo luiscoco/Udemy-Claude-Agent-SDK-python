@@ -17,7 +17,7 @@ GUIDE_CSS = """
     padding: 16px; gap: 12px; font-size: 18px; line-height: 1.5;
 }
 .learning-guide-heading { font-size: 21px; font-weight: 750; }
-.learning-guide-body { overflow-y: auto; min-height: 0; width: 100%; padding: 3px; }
+.learning-guide-body { overflow-y: auto; overflow-wrap: anywhere; min-height: 0; width: 100%; padding: 3px; }
 .learning-guide-footer { flex-shrink: 0; width: 100%; }
 .learning-guide > .nicegui-row { flex-shrink: 0; }
 .learning-guide .q-btn { white-space: normal; min-height: 44px; font-size: 16px; }
@@ -82,6 +82,14 @@ def guide_positions() -> dict[str, str]:
     return dict(value) if isinstance(value, dict) else {}
 
 
+async def _locate_target(script: str) -> bool:
+    """A busy browser must leave a recoverable guide, not an unhandled UI timeout."""
+    try:
+        return bool(await ui.run_javascript(script, timeout=8))
+    except TimeoutError:
+        return False
+
+
 class LessonGuidePanel:
     def __init__(self, guide: LearningGuide, tabs: Any, path: str = "") -> None:
         self.guide, self.tabs, self.path = guide, tabs, path
@@ -130,7 +138,7 @@ class LessonGuidePanel:
                         f"Resume: {self.guide.sections[index].title}",
                         icon="play_arrow", on_click=lambda: self.show(index),
                     ).props("outline")
-                ui.label("Recorded Python narration is not included in this pilot.").classes(
+                ui.label("This written guide has no recorded Python narration.").classes(
                     "learning-guide-status"
                 )
                 return
@@ -153,7 +161,7 @@ class LessonGuidePanel:
                 )
             self.status = ui.label(
                 "Tour paused after a tab change. Select Show section to continue."
-                if self.paused else "The outlined element belongs to this section."
+                if self.paused else "Locating this section's highlighted content..."
             ).classes("learning-guide-status").props('role="status" aria-live="polite"')
             ui.button("Show section", icon="my_location", on_click=lambda: self.show(self.index)).props("outline")
 
@@ -252,7 +260,7 @@ class LessonGuidePanel:
         self.tabs.set_value(section.tab)
         self.content.refresh()
         self.navigation.refresh()
-        found = await ui.run_javascript(
+        found = await _locate_target(
             """return await new Promise(resolve => {
                 const revision = REVISION;
                 if ((window.__learningGuideRevision || 0) > revision) return resolve(false);
@@ -261,13 +269,14 @@ class LessonGuidePanel:
                 document.querySelectorAll('.learning-guide-target').forEach(e => e.classList.remove('learning-guide-target'));
                 const visible = selector => [...document.querySelectorAll(selector)]
                     .find(e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
-                let tries = 0;
+                const deadline = performance.now() + 5000;
                 function find() {
                     if (window.__learningGuideRevision !== revision) return resolve(false);
                     const step = visible('.learning-guide-step');
                     const target = visible(TARGET);
-                    if (!target || !step || !step.textContent.startsWith(STEP_TITLE)) {
-                        if (++tries < 35) return setTimeout(find, 50);
+                    if (!target || !step || !step.textContent.startsWith(STEP_TITLE)
+                        || target.closest('[class*="-enter-active"], [class*="-leave-active"]')) {
+                        if (performance.now() < deadline) return setTimeout(find, 50);
                         return resolve(false);
                     }
                     const panel = visible('.learning-guide');
@@ -331,7 +340,9 @@ class LessonGuidePanel:
                 requestAnimationFrame(find);
             });""".replace("REVISION", str(revision)).replace("TARGET", json.dumps(section.target)).replace("CONTEXT", json.dumps(section.context))
             .replace("STEP_TITLE", json.dumps(f"Section {index + 1} of 7")),
-            timeout=4,
         )
-        if self.revision == revision and not found:
-            self.status.set_text("This target is unavailable. Read the written action above, or try Show section again.")
+        if self.revision == revision:
+            self.status.set_text(
+                "The outlined element belongs to this section." if found else
+                "This target is unavailable. Read the written action above, or try Show section again."
+            )

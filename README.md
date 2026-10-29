@@ -27,11 +27,13 @@ with their quizzes, your progress and the visual guides. Each lesson has six tab
 | **Python source** | Read the host exercise used by the UI, CLI and API. |
 | **AI Tutor** | Get a free prepared answer grounded in the lesson, or explicitly authorize one live answer (one turn, no tools, 0.05 USD budget threshold) and save it. |
 
-Lesson 1 also has **Open Learning Guide**: an explicitly started, seven-section
-written tour with real target highlighting, saved-position Resume, tab-change pause,
-minimize/close, Finish tour and route-aware Next lesson. It never clicks Run or changes
-your manual checklist. Recorded Python narration and written guides for lessons 2–75
-remain pending; see the [reference parity comparison](docs/reference-parity.md).
+Every lesson has **Open Learning Guide**: an explicitly started, seven-section
+written tour with red target highlighting, saved-position Resume, tab-change pause,
+minimize/close, Finish tour and route-aware Next lesson. Each guide uses that lesson's
+preparation, Python example, offline exercise, expected evidence and challenge. It
+never clicks Run or changes your manual checklist. Recorded Python narration remains
+pending. See [Learning Guide maintenance](docs/learning-guides.md) and the
+[reference parity comparison](docs/reference-parity.md).
 
 Workbook entries, quiz answers, check results, saved tutor answers, guide position and appearance
 (Light/Dark/System theme, text size) are stored per browser in `.nicegui/` on

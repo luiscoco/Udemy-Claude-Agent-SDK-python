@@ -8,13 +8,13 @@
   "foundation_repository": "luiscoco/Udemy-Claude-Agent-SDK-Learning-Platform-v2",
   "foundation_commit": "539c7dffe97fe196166d36594ad7bad71bbd6b71"
  },
- "scope": "Initial source-contract inventory across 75 lessons, shared feature comparison and a tested written Learning Guide pilot. It is not a full 75-lesson scenario or media audit.",
+ "scope": "Source-contract inventory across 75 lessons, shared feature comparison and seven-section written Learning Guides for all 75 lessons. It is not a full 75-lesson scenario or media audit.",
  "shared_features": [
   {
    "id": "written-learning-guide",
-   "status": "partial",
-   "python": "Seven-section written pilot for lesson 1 only.",
-   "next": "Review the lesson 1 pilot with a student; author and verify written guides for lessons 2?75."
+   "status": "present",
+   "python": "Seven-section written Learning Guides for all 75 lessons, populated from each lesson's preparation, concept code, evidence and challenge; lesson 1 retains its curated wording.",
+   "next": "Student acceptance and recorded Python narration remain separate. Keep written guides synchronized with teaching content and verify all target outlines."
   },
   {
    "id": "recorded-guide-audio",
@@ -95,8 +95,9 @@
    "reference_blob_sha": "30b25baa062803899dfbb921fc86189783c46cf2",
    "foundation_component": "src/concepts/Concept01Query.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "written-pilot",
-   "gap": "Written-guide pilot only. Reference controls, default live limits, tab order and seven-question assessment are not yet matched."
+   "written_guide": "written",
+   "gap": "Reference controls, default live limits, tab order and seven-question assessment are not yet matched.",
+   "written_guide_content": "curated-override"
   },
   {
    "id": 2,
@@ -109,8 +110,9 @@
    "reference_blob_sha": "a54c4ec55bc1ef5af5951b82f08f3a21c8c487d0",
    "foundation_component": "src/concepts/Concept02Options.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 3,
@@ -123,8 +125,9 @@
    "reference_blob_sha": "753c709d178eea9078a5b3abe0e460c5433a6991",
    "foundation_component": "src/concepts/Concept03Tools.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 4,
@@ -137,8 +140,9 @@
    "reference_blob_sha": "d4281f8eeb71fae6c9c5e24f9cdfd3e17740ffe9",
    "foundation_component": "src/concepts/Concept04Permissions.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 5,
@@ -151,8 +155,9 @@
    "reference_blob_sha": "487bf876b51e04812bcbd48d8b5942389a76268d",
    "foundation_component": "src/concepts/Concept05CustomTools.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 6,
@@ -165,8 +170,9 @@
    "reference_blob_sha": "99f205311c6262aa30cdd5be3e6e2d45cf100ade",
    "foundation_component": "src/concepts/Concept06Sessions.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 7,
@@ -179,8 +185,9 @@
    "reference_blob_sha": "9a738bbb54ead942f79390b6acb7e80819ec4a14",
    "foundation_component": "src/concepts/Concept07Hooks.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 8,
@@ -193,8 +200,9 @@
    "reference_blob_sha": "5d78c8f7c6d5ca13e5c06f5dcf30b99114f0abd5",
    "foundation_component": "src/concepts/Concept08Subagents.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 9,
@@ -207,8 +215,9 @@
    "reference_blob_sha": "cbc367b2a236be418645370d98bdbb23e239b93c",
    "foundation_component": "src/concepts/Concept09SystemPrompts.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 10,
@@ -221,8 +230,9 @@
    "reference_blob_sha": "c910b20d585f5d2857c146864163133de3a0bc27",
    "foundation_component": "src/concepts/Concept10StructuredInterrupt.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 11,
@@ -235,8 +245,9 @@
    "reference_blob_sha": "b46f2b12df41aff0deedfbe9bfe0a5cd89c22a53",
    "foundation_component": "src/concepts/Concept11Skills.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 12,
@@ -249,8 +260,9 @@
    "reference_blob_sha": "9624bd5235fbb29102256438d0e12d944d1dd722",
    "foundation_component": "src/concepts/Concept12StreamingInput.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 13,
@@ -263,8 +275,9 @@
    "reference_blob_sha": "ca491755aa0f32f961fb457a3d488f19f36256f0",
    "foundation_component": "src/concepts/Concept13McpServers.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 14,
@@ -277,8 +290,9 @@
    "reference_blob_sha": "d53d8a112864683008ed3ce1d2116acdde52e450",
    "foundation_component": "src/concepts/Concept14ThinkingEffortModels.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 15,
@@ -291,8 +305,9 @@
    "reference_blob_sha": "be043f4ce5be9a97f24c69f4b155dc19bc46c81a",
    "foundation_component": "src/concepts/Concept15CostUsage.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 16,
@@ -305,8 +320,9 @@
    "reference_blob_sha": "24bde79efe0b292109ed0883f3c0031ce585f7cd",
    "foundation_component": "src/concepts/Concept16SettingsEnv.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 17,
@@ -319,8 +335,9 @@
    "reference_blob_sha": "2a11a39cddaa5645553df7f18cbd5352d88118ad",
    "foundation_component": "src/concepts/Concept17Checkpointing.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Host snapshot instead of the reference's SDK checkpoint/rewind experiment."
+   "written_guide": "written",
+   "gap": "Host snapshot instead of the reference's SDK checkpoint/rewind experiment.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 18,
@@ -333,8 +350,9 @@
    "reference_blob_sha": "adc2436a18a6b83a3112659605a29436fd42f22b",
    "foundation_component": "src/concepts/Concept18Sandbox.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Path policy demonstration; supported OS sandbox enforcement remains a separate experiment."
+   "written_guide": "written",
+   "gap": "Path policy demonstration; supported OS sandbox enforcement remains a separate experiment.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 19,
@@ -347,8 +365,9 @@
    "reference_blob_sha": "a48b28251b30079595485ed0099eb57bf2580940",
    "foundation_component": "src/concepts/Concept19SessionManagement.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 20,
@@ -361,8 +380,9 @@
    "reference_blob_sha": "73acef9b1b9f224f524c8bb9c918f15603bd5bd4",
    "foundation_component": "src/concepts/Concept20HooksInDepth.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 21,
@@ -375,8 +395,9 @@
    "reference_blob_sha": "c5b31697fe570dce6a099d44d39597dc00539e50",
    "foundation_component": "src/concepts/Concept21SlashCommands.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 22,
@@ -389,8 +410,9 @@
    "reference_blob_sha": "e95f1b1043281976be481c4642dafc3797a50e8b",
    "foundation_component": "src/concepts/Concept22ClaudeMdMemory.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 23,
@@ -403,8 +425,9 @@
    "reference_blob_sha": "60fd04caf1b52d374ed23baadbfe6fb4a9ac1072",
    "foundation_component": "src/concepts/Concept23Plugins.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 24,
@@ -417,8 +440,9 @@
    "reference_blob_sha": "4bcd1ad1aa09ee6c09ad9453198b37e6d6773e49",
    "foundation_component": "src/concepts/Concept24Harnesses.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 25,
@@ -431,8 +455,9 @@
    "reference_blob_sha": "7aa61891bdab876668b6726437cce0131a7323e0",
    "foundation_component": "src/concepts/Concept25CompactionContext.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 26,
@@ -445,8 +470,9 @@
    "reference_blob_sha": "37809b697a28cef55d123f639385493af7b2e28a",
    "foundation_component": "src/concepts/Concept26QueryControl.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 27,
@@ -459,8 +485,9 @@
    "reference_blob_sha": "d193c9c19c08d33a893554fc770973d9ec2db55f",
    "foundation_component": "src/concepts/Concept27BackgroundTasks.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 28,
@@ -473,8 +500,9 @@
    "reference_blob_sha": "00984ced559300d89c7ffcc0f6f2a42c3cdaf11c",
    "foundation_component": "src/concepts/Concept28ErrorsRetries.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 29,
@@ -487,8 +515,9 @@
    "reference_blob_sha": "93dbef540701233f5880be1879ad52f101121a81",
    "foundation_component": "src/concepts/Concept29ImagesFiles.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Image blocks are constructed offline; the live lesson does not send the example image."
+   "written_guide": "written",
+   "gap": "Image blocks are constructed offline; the live lesson does not send the example image.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 30,
@@ -501,8 +530,9 @@
    "reference_blob_sha": "34ed38dba8bb4faf127482ca567b03f884a31bd0",
    "foundation_component": "src/concepts/Concept30TodoTracking.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 31,
@@ -515,8 +545,9 @@
    "reference_blob_sha": "06189d2a565bfb79aa916d63c8a2a134045b7e07",
    "foundation_component": "src/concepts/Concept31AskUserQuestion.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 32,
@@ -529,8 +560,9 @@
    "reference_blob_sha": "ef0a87fc75664b363cbd1599ee7a1c603cb898ae",
    "foundation_component": "src/concepts/Concept32PlanMode.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 33,
@@ -543,8 +575,9 @@
    "reference_blob_sha": "23b31b3f56070e9fc55dbc29305206fff650dbea",
    "foundation_component": "src/concepts/Concept33McpElicitation.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 34,
@@ -557,8 +590,9 @@
    "reference_blob_sha": "9491b46be92d8dfd8df7cd440c2a806e8cfcd1d3",
    "foundation_component": "src/concepts/Concept34OutputStyles.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 35,
@@ -571,8 +605,9 @@
    "reference_blob_sha": "7c2cfabf1567275d0cadd0253d0f8c771ed9df83",
    "foundation_component": "src/concepts/Concept35SessionStores.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Host transcript JSON is not SDK-native session-store persistence."
+   "written_guide": "written",
+   "gap": "Host transcript JSON is not SDK-native session-store persistence.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 36,
@@ -585,8 +620,9 @@
    "reference_blob_sha": "ed788c4b3eee81284d9df8bd1e8dbfd08679706a",
    "foundation_component": "src/concepts/Concept36ProcessSpawning.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 37,
@@ -599,8 +635,9 @@
    "reference_blob_sha": "d5b1c76a8a413fb6d2ea06022bd06f937228795c",
    "foundation_component": "src/concepts/Concept37PermissionPromptTool.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 38,
@@ -613,8 +650,9 @@
    "reference_blob_sha": "a8d0b40a5339dfd1b58df5ff750b9f74b5ed2ca6",
    "foundation_component": "src/concepts/Concept38PromptSuggestions.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 39,
@@ -627,8 +665,9 @@
    "reference_blob_sha": "45e568a3f60d4daa631da1edaf03d5e26eb24434",
    "foundation_component": "src/concepts/Concept39ProjectConfigRoot.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 40,
@@ -641,8 +680,9 @@
    "reference_blob_sha": "0535915043fa4d5bdcf9f3ae8417f817ba9e167c",
    "foundation_component": "src/concepts/Concept40ResumeDropsTurn.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Cross-run resume and guarded truncating recovery remain incomplete."
+   "written_guide": "written",
+   "gap": "Cross-run resume and guarded truncating recovery remain incomplete.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 41,
@@ -655,8 +695,9 @@
    "reference_blob_sha": "f066e28e33a176f2533cf59886ac1a23d1333454",
    "foundation_component": "src/concepts/Concept41V2SessionApi.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Intentional Python interactive-client lesson replaces the historical TypeScript V2 comparison."
+   "written_guide": "written",
+   "gap": "Intentional Python interactive-client lesson replaces the historical TypeScript V2 comparison.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 42,
@@ -669,8 +710,9 @@
    "reference_blob_sha": "45844e36860da61a8daa55c468dd7a01f98446ea",
    "foundation_component": "src/concepts/Concept42WebTools.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 43,
@@ -683,8 +725,9 @@
    "reference_blob_sha": "99ab138bc173337306156ed1ef450c3383b50520",
    "foundation_component": "src/concepts/Concept43RemoteMcp.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Remote MCP adapter exists; browser transport/auth/resource experiments remain incomplete."
+   "written_guide": "written",
+   "gap": "Remote MCP adapter exists; browser transport/auth/resource experiments remain incomplete.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 44,
@@ -697,8 +740,9 @@
    "reference_blob_sha": "f2add6ed4455eac193dd6ff4b09350bf200fc4ee",
    "foundation_component": "src/concepts/Concept44OtelObservability.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 45,
@@ -711,8 +755,9 @@
    "reference_blob_sha": "43a230a740913730eeb6fe6e4b5adae619e98c30",
    "foundation_component": "src/concepts/Concept45CloudProviders.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Provider selection is local; actual cloud-provider experiments require separate verification."
+   "written_guide": "written",
+   "gap": "Provider selection is local; actual cloud-provider experiments require separate verification.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 46,
@@ -725,8 +770,9 @@
    "reference_blob_sha": "ba984009458b03d4a346cbda0736b9b2d72d838a",
    "foundation_component": "src/concepts/Concept46PromptCaching.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Fixture accounting and live usage exist; reference cache-measurement comparisons need parity work."
+   "written_guide": "written",
+   "gap": "Fixture accounting and live usage exist; reference cache-measurement comparisons need parity work.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 47,
@@ -739,8 +785,9 @@
    "reference_blob_sha": "59a73b9fb296f13203b3a3c8786e3789773f9ec7",
    "foundation_component": "src/concepts/Concept47MultiAgent.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 48,
@@ -753,8 +800,9 @@
    "reference_blob_sha": "c2d0e2d1f6a96de43d177d6c959246a59a1c8a1d",
    "foundation_component": "src/concepts/Concept48SecurityHardening.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 49,
@@ -767,8 +815,9 @@
    "reference_blob_sha": "b6d3b71952817e0ddbf16490dbd8cf8433e86ec4",
    "foundation_component": "src/concepts/Concept49DeployCiHeadless.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 50,
@@ -781,8 +830,9 @@
    "reference_blob_sha": "ee039c76f15f7a9f1de49366cd7bdc780bed24b3",
    "foundation_component": "src/concepts/Concept50Capstone.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 51,
@@ -795,8 +845,9 @@
    "reference_blob_sha": "db7cc5a234ec59184c619fee7d24684616b0bfcc",
    "foundation_component": "src/concepts/Concept51UnitTesting.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 52,
@@ -809,8 +860,9 @@
    "reference_blob_sha": "e0d0fc5a7c22901e3fada35c81c4412e52036672",
    "foundation_component": "src/concepts/Concept52Evals.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 53,
@@ -823,8 +875,9 @@
    "reference_blob_sha": "94d3e982d8d137c2656a22a2145b680b29b97ae0",
    "foundation_component": "src/concepts/Concept53Debugging.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 54,
@@ -837,8 +890,9 @@
    "reference_blob_sha": "c37c59f73f5b04663ba160327367a2f5eecab79f",
    "foundation_component": "src/concepts/Concept54ToolDesign.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 55,
@@ -851,8 +905,9 @@
    "reference_blob_sha": "2a6ad907c291c4dcc48e6de16753d3491e35e1bf",
    "foundation_component": "src/concepts/Concept55UpgradingSdk.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 56,
@@ -865,8 +920,9 @@
    "reference_blob_sha": "854263cf7db54383d302a05bda0514e3bb29cb37",
    "foundation_component": "src/concepts/Concept56AgentTeams.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 57,
@@ -879,8 +935,9 @@
    "reference_blob_sha": "bbcd80b6b343f6d9997c910ba4bca87a482fd0ae",
    "foundation_component": "src/concepts/Concept57ParallelWorktrees.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Disposable Git exercise exists; full concurrent integration/conflict/recovery comparisons remain to audit."
+   "written_guide": "written",
+   "gap": "Disposable Git exercise exists; full concurrent integration/conflict/recovery comparisons remain to audit.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 58,
@@ -893,8 +950,9 @@
    "reference_blob_sha": "74750345c8eddd439f3ff270c11dd87109321bdc",
    "foundation_component": "src/concepts/Concept58ToolSearch.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 59,
@@ -907,8 +965,9 @@
    "reference_blob_sha": "79d03fbb32ba0381be5ea240e1c396264d7eca95",
    "foundation_component": "src/concepts/Concept59ModelRouting.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 60,
@@ -921,8 +980,9 @@
    "reference_blob_sha": "3033cb417dbf59cd2b17ede8b8b4571c805e4fd2",
    "foundation_component": "src/concepts/Concept60DurableAgents.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Simplified durable host exercise; compare transactional effects, leases and crash recovery with the reference."
+   "written_guide": "written",
+   "gap": "Simplified durable host exercise; compare transactional effects, leases and crash recovery with the reference.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 61,
@@ -935,8 +995,9 @@
    "reference_blob_sha": "d0215055e9b81294b350fd64c096ce5efc38ab75",
    "foundation_component": "src/concepts/Concept61AgentMcpServer.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 62,
@@ -949,8 +1010,9 @@
    "reference_blob_sha": "d507912e6ba9af312b3970f9dbc0ad38dca911e0",
    "foundation_component": "src/concepts/Concept62RetrievalRag.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 63,
@@ -963,8 +1025,9 @@
    "reference_blob_sha": "cd19d160611e6083df081964c2c701253f247fb7",
    "foundation_component": "src/concepts/Concept63SafeDatabaseAgent.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 64,
@@ -977,8 +1040,9 @@
    "reference_blob_sha": "6dde26533b8a479b7d2c3c9a7c7cf7a4c39e3b4c",
    "foundation_component": "src/concepts/Concept64BrowserPlaywrightMcp.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Browser MCP service exists; integrate and verify its full experiment from the lesson UI."
+   "written_guide": "written",
+   "gap": "Browser MCP service exists; integrate and verify its full experiment from the lesson UI.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 65,
@@ -991,8 +1055,9 @@
    "reference_blob_sha": "89a81cea2b9cc7961a0ba7dd3c3b2365bf53897c",
    "foundation_component": "src/concepts/Concept65HumanApproval.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Local approvals plus standalone delivery adapters; connected channel workflow is pending."
+   "written_guide": "written",
+   "gap": "Local approvals plus standalone delivery adapters; connected channel workflow is pending.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 66,
@@ -1005,8 +1070,9 @@
    "reference_blob_sha": "bc1c7e2e8fb21127b138ae1e9f6ace6d93f453ec",
    "foundation_component": "src/concepts/Concept66RealtimeWebSocket.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 67,
@@ -1019,8 +1085,9 @@
    "reference_blob_sha": "39df7c4f599f54ea1f407e13efaf7db7ece3a623",
    "foundation_component": "src/concepts/Concept67MultiTenantSaas.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 68,
@@ -1033,8 +1100,9 @@
    "reference_blob_sha": "380bfd42530261c4e11d550c07f79e6ffd5d267a",
    "foundation_component": "src/concepts/Concept68ScheduledAgents.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Local scheduling demonstration; compare persistent job, retry and event-delivery behavior."
+   "written_guide": "written",
+   "gap": "Local scheduling demonstration; compare persistent job, retry and event-delivery behavior.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 69,
@@ -1047,8 +1115,9 @@
    "reference_blob_sha": "473040c9e2342d713facad0699e352127bb95897",
    "foundation_component": "src/concepts/Concept69EmbeddingSdk.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Intentional Python/NiceGUI desktop embedding replaces the TypeScript IDE-extension surface."
+   "written_guide": "written",
+   "gap": "Intentional Python/NiceGUI desktop embedding replaces the TypeScript IDE-extension surface.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 70,
@@ -1061,8 +1130,9 @@
    "reference_blob_sha": "9bc02016b328aac388c1875798cbf4e6f6dee81c",
    "foundation_component": "src/concepts/Concept70PythonSdk.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 71,
@@ -1075,8 +1145,9 @@
    "reference_blob_sha": "8d321846a95d92f0fcfdccc1c3cddc37774b0ef5",
    "foundation_component": "src/concepts/Concept71DataAnalysisAgent.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 72,
@@ -1089,8 +1160,9 @@
    "reference_blob_sha": "f88966f1b90bfe8d85a1c664b17859dbc9f80131",
    "foundation_component": "src/concepts/Concept72DocumentGenerationSkills.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 73,
@@ -1103,8 +1175,9 @@
    "reference_blob_sha": "c45f692f5bb823fa680c611f9601ed073cd25335",
    "foundation_component": "src/concepts/Concept73PrReviewerFixer.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Local patch fixture does not implement the complete GitHub PR publication workflow."
+   "written_guide": "written",
+   "gap": "Local patch fixture does not implement the complete GitHub PR publication workflow.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 74,
@@ -1117,8 +1190,9 @@
    "reference_blob_sha": "93cef50d222e62800203722270d3bbf93ee98e2b",
    "foundation_component": "src/concepts/Concept74PromptInjectionRedTeam.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks."
+   "written_guide": "written",
+   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "written_guide_content": "lesson-content"
   },
   {
    "id": 75,
@@ -1131,8 +1205,9 @@
    "reference_blob_sha": "aa9fd6f0dcbe57c6ed334a17805d3dce7f54dfb3",
    "foundation_component": "src/concepts/Concept75AutonomousTeam.tsx",
    "reference_parity": "not-certified",
-   "written_guide": "pending",
-   "gap": "Bounded source-proposal team fixture does not implement the complete worktree/merge/recovery/PR pipeline."
+   "written_guide": "written",
+   "gap": "Bounded source-proposal team fixture does not implement the complete worktree/merge/recovery/PR pipeline.",
+   "written_guide_content": "lesson-content"
   }
  ]
 }
