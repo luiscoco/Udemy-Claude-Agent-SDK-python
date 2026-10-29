@@ -73,3 +73,5 @@ import/export equality, saved notes and drafts, quiz feedback, attempt paginatio
 route retention and explicit guide resumption. They also exercise light and dark
 appearance at 320px and 150% content scaling, including long saved text. Existing
 progress tests continue to verify the unchanged backup format.
+Keyboard checks verify the rendered button outline and focus returning to the quiz
+launch button after its saved result updates.

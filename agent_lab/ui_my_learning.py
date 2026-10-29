@@ -9,6 +9,7 @@ from agent_lab.learning import course
 from agent_lab.lesson_guide import learning_guides, lesson_url
 from agent_lab.my_learning import (
     QuizAnswer,
+    SectionQuizSummary,
     filter_lessons,
     learning_snapshot,
     lesson_link,
@@ -35,8 +36,10 @@ WORKSPACE_CSS = """
 .my-learning a { display: inline-flex; align-items: center; min-height: 44px; max-width: 100%; }
 .my-learning-views { flex-wrap: wrap; max-width: 100%; gap: 4px; }
 .my-learning-text { white-space: pre-wrap; max-height: 18rem; overflow: auto; width: 100%; }
-.my-learning .q-btn:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
-body.body--dark .my-learning .q-btn:focus-visible { outline-color: #93c5fd; }
+@layer overrides {
+    .my-learning .q-btn:focus-visible { outline: 3px solid #2563eb !important; outline-offset: 3px; }
+    body.body--dark .my-learning .q-btn:focus-visible { outline-color: #93c5fd !important; }
+}
 @media (max-width: 600px) {
     .my-learning .course-card { padding: 16px; }
 }
@@ -69,6 +72,10 @@ def _answers(answers: tuple[QuizAnswer, ...]) -> None:
             ui.label(plain(option.explanation))
 
 
+def _section_score(quiz: SectionQuizSummary) -> str:
+    return f"{quiz.topic}: {sum(a.correct for a in quiz.answers)} correct / {quiz.total} questions; {len(quiz.answers)} answered"
+
+
 def install_my_learning_pages() -> None:
     @ui.page("/my-learning")
     def my_learning(path: str = "") -> None:
@@ -81,6 +88,8 @@ def install_my_learning_pages() -> None:
         selected = valid_path(path)
         page_state: dict[str, Any] = {"view": "Lessons", "limit": 12, "path": selected}
         attempt_limits: dict[int, int] = {}
+        section_scores: dict[str, ui.label] = {}
+        section_buttons: dict[str, ui.button] = {}
         with ui.column().classes("my-learning w-full max-w-6xl mx-auto py-4 md:p-8 gap-5"):
             ui.link("Back to course", "/").classes("font-bold")
             ui.label("My Learning").classes("course-title").props('role="heading" aria-level="1"')
@@ -205,15 +214,30 @@ def install_my_learning_pages() -> None:
                 if page_state["view"] == "Quiz results":
                     with card("Section quiz practice", "Separate assessment results"):
                         for quiz in snapshot.section_quizzes:
-                            ui.label(f"{quiz.topic}: {sum(a.correct for a in quiz.answers)} correct / {quiz.total} questions; {len(quiz.answers)} answered")
-                            ui.button(f"Open {quiz.topic} section quiz", on_click=lambda topic=quiz.topic: section_quiz_dialog(topic, on_close=refresh_quiz_results)).props("flat")
+                            section_scores[quiz.id] = ui.label(_section_score(quiz))
+                            section_buttons[quiz.id] = ui.button(
+                                f"Open {quiz.topic} section quiz",
+                                on_click=lambda topic=quiz.topic, number=quiz.id: section_quiz_dialog(
+                                    topic, on_close=lambda: refresh_quiz_results(number)
+                                ),
+                            ).props("flat")
 
-            def refresh_quiz_results() -> None:
+            def refresh_quiz_results(quiz_id: str) -> None:
                 nonlocal snapshot
                 snapshot = learning_snapshot({key: stored(key, None) for key in (
                     "lessons", "sections", "last_lesson", "learning_guide_positions",
                 )})
-                results.refresh()
+                # Keep the launch button in place so the dialog can restore keyboard focus.
+                if page_state["view"] == "Quiz results":
+                    for quiz in snapshot.section_quizzes:
+                        label = section_scores.get(quiz.id)
+                        if label is not None:
+                            label.set_text(_section_score(quiz))
+                    button = section_buttons.get(quiz_id)
+                    if button is not None:
+                        ui.run_javascript(
+                            f"document.getElementById({json.dumps(button.html_id)})?.focus({{preventScroll: true}})"
+                        )
 
             def refresh() -> None:
                 page_state["limit"] = 12
