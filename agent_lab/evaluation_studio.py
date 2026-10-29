@@ -304,6 +304,7 @@ class StudioService:
             system_prompt=system_prompt,
             tools=["Agent"] if specialist else [],
             setting_sources=[],
+            strict_mcp_config=True,
             permission_mode="dontAsk",
             mcp_servers=mcp["mcp_servers"],
             allowed_tools=(["Agent"] if specialist else []) + mcp["allowed_tools"],

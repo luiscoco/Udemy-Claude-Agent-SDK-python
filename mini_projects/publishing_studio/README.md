@@ -41,6 +41,9 @@ PDF and PNG files are rendered by Playwright: run `uv run playwright install chr
   are separate paid calls, each with its own spending cap and fresh consent, plus a third
   consent for the documentation MCP. They need `ANTHROPIC_API_KEY` and
   `LAB_ENABLE_LIVE=true` in `.env`.
+- Live answers and plans enable strict MCP configuration, excluding servers inherited
+  from project files, user settings or plugins. Answers can use the explicitly approved
+  documentation MCP; planning calls load no MCP servers.
 - **Download project ZIP** on the page packages this folder (without the reference).
 
 Review every preview for layout and facts before you share a file.

@@ -35,6 +35,8 @@ switch between **Your studio.py** and **Reference**; **Reload my code** picks up
 - Prepared runs are recorded fixtures with zero model calls. Live runs are optional: they
   need `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, fresh consent for every run
   and separate consent for an MCP connection. Suites run prepared fixtures only.
+- Live runs enable strict MCP configuration: only the explicitly selected servers are
+  loaded, excluding MCP servers inherited from project files, user settings or plugins.
 - Before each live run, the server resolves every MCP hostname and requires all returned
   IPv4 and IPv6 addresses to be public unicast addresses. Failed or empty DNS lookups and
   lookups taking over five seconds stop the run before the SDK starts. Prepared runs and

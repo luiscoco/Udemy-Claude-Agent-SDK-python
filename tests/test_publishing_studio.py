@@ -212,6 +212,7 @@ async def test_live_answers_need_consent_and_use_the_chosen_bounds(tmp_path, mon
     ((prompt, options),) = seen
     assert options.model == "claude-sonnet-5-5" and options.max_budget_usd == 0.5
     assert options.allowed_tools == ["mcp__claude_docs__*"] and "claude_docs" in options.mcp_servers
+    assert options.strict_mcp_config  # Exclude inherited MCP servers, even with docs consent.
     assert '<source name="notes.txt">' in prompt and "untrusted" in prompt
     assert answer["origin"] == "live" and answer["cost_usd"] == 0.003
     assert answer["files"][0]["name"] == "notes.txt" and answer["source"].startswith("Official")
@@ -274,6 +275,7 @@ async def test_live_planning_sends_the_image_and_validates_the_plan(tmp_path, mo
     assert blocks[0]["type"] == "image" and blocks[0]["source"]["media_type"] == "image/png"
     assert answer["id"] in blocks[1]["text"] and options.max_budget_usd == 1.0
     assert options.output_format["schema"]["required"] == ["content", "visual"]
+    assert options.strict_mcp_config and options.mcp_servers == {}  # Planning has no MCP consent.
     assert bundle["planning"] == "live" and bundle["visual"]["layout"] == "cards"
     # the planner may not drop the answer's code: it is restored from the trusted answer
     assert "CODE EXCERPT" in service.preview(bundle)

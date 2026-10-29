@@ -278,6 +278,7 @@ async def test_live_run_uses_the_students_options_and_reports_limits_honestly(
     assert "claude_docs" in sdk_options.mcp_servers
     assert sdk_options.allowed_tools == ["Agent", "mcp__claude_docs__*"]
     assert "source_reviewer" in sdk_options.agents and sdk_options.setting_sources == []
+    assert sdk_options.strict_mcp_config  # Only the separately authorized MCP may load.
     assert run["subtype"] == "error_max_turns" and run["is_error"] is True
     assert any(event["label"] == "SDK stream stopped" for event in run["events"])
 
