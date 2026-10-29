@@ -24,6 +24,59 @@ Audit = Callable[[str, dict[str, Any]], Awaitable[None]]
 Ask = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 
 
+def demo_elicitation_hook(ask: Ask, audit: Audit) -> HookCallback:
+    """Bridge only the local rooms demo to the lesson's existing question UI."""
+
+    async def answer(
+        arguments: HookInput, tool_use_id: str | None, context: HookContext
+    ) -> HookJSONOutput:
+        data = cast(dict[str, Any], arguments)
+        schema = data.get("requested_schema", {})
+        expected = (
+            data.get("mcp_server_name") == "rooms"
+            and data.get("mode", "form") == "form"
+            and isinstance(schema, dict)
+            and isinstance(schema.get("properties"), dict)
+            and set(schema.get("properties", {})) == {"name", "attendees", "confirmed"}
+        )
+        action = "decline"
+        if expected:
+            question = (
+                "Allow the local demo booking for Student with 2 attendees? "
+                "No external calendar is contacted."
+            )
+            response = await ask(
+                {
+                    "questions": [
+                        {
+                            "question": question,
+                            "header": "Demo booking",
+                            "multiSelect": False,
+                            "options": [
+                                {
+                                    "label": "Accept",
+                                    "description": "Confirm the local demonstration booking.",
+                                },
+                                {"label": "Decline", "description": "Refuse the booking."},
+                                {"label": "Cancel", "description": "Cancel this request."},
+                            ],
+                        }
+                    ]
+                }
+            )
+            # A missing answer or free text never authorizes the operation.
+            action = {"Accept": "accept", "Decline": "decline", "Cancel": "cancel"}.get(
+                response.get(question, ""), "cancel"
+            )
+        output: dict[str, Any] = {"hookEventName": "Elicitation", "action": action}
+        if action == "accept":
+            output["content"] = {"name": "Student", "attendees": 2, "confirmed": True}
+        await audit("elicitation", {"action": action, "known_demo": expected})
+        return cast(HookJSONOutput, {"hookSpecificOutput": output})
+
+    return answer
+
+
 def pre_tool_hook(permitted: Permitted, audit: Audit) -> HookCallback:
     async def pre_tool(
         arguments: HookInput, tool_use_id: str | None, context: HookContext

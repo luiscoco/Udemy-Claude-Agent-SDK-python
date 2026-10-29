@@ -78,9 +78,9 @@ uv run agent-lab lesson 33 --live
 
 Suggested prompt:
 
-> Explain how an MCP server asks its client for missing information.
+> Call the rooms MCP book_room tool once for room Blue. It is a local demonstration with no external calendar. Report the tool's actual outcome after the user answers the form.
 
-The live profile is `query`. Its tools and configuration are in
+The live profile is `elicitation`. Its tools and configuration are in
 [agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
 tool; the model explains already computed evidence. They do not autonomously
 perform the offline exercise. Conversation profiles send two turns on one
@@ -93,7 +93,7 @@ is a threshold, not an exact billing cap.
 
 ## Python edition adaptation
 
-This lesson inspects elicitation support in the pinned Python SDK and validates responses locally.
+Offline runs validate accept, decline and cancel through the MCP client. Live runs connect the local rooms MCP server and forward its Elicitation request to the lesson's question dialog. The callback was verified on SDK 0.2.174; its HookEvent typing omits Elicitation, so registration uses a narrow compatibility cast. There is still no on_elicitation option.
 
 ## API and lifecycle
 

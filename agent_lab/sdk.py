@@ -21,9 +21,9 @@ from claude_agent_sdk import (
 )
 from pydantic import BaseModel, ConfigDict, Field
 
-from agent_lab.config import Settings
+from agent_lab.config import ROOT, Settings
 from agent_lab.doctor import resolve_cli_path
-from agent_lab.hooks import lesson_hooks, permission_callback
+from agent_lab.hooks import demo_elicitation_hook, lesson_hooks, permission_callback
 from agent_lab.models import Event, Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, redact
 from agent_lab.services import Calculation, Orders, Summary, retrieve
@@ -276,6 +276,16 @@ async def run_sdk(
             }
         }
         allowed_custom.add("mcp__notes__read_note")
+    if profile == "elicitation":
+        options.mcp_servers = {
+            "rooms": {
+                "type": "stdio",
+                "command": sys.executable,
+                "args": ["-m", "agent_lab.integrations.rooms_mcp"],
+                "env": {"PYTHONPATH": str(ROOT)},
+            }
+        }
+        allowed_custom.add("mcp__rooms__book_room")
     options.include_partial_messages = profile in {"options", "streaming"}
 
     def permitted(name: str, arguments: dict[str, Any]) -> tuple[bool, str]:
@@ -295,6 +305,17 @@ async def run_sdk(
 
     options.can_use_tool = permission_callback(permitted, ask)
     options.hooks = lesson_hooks(permitted, audit)
+    if profile == "elicitation":
+        from typing import cast
+
+        from claude_agent_sdk import HookMatcher
+        from claude_agent_sdk.types import HookEvent
+
+        # Verified live on 0.2.174: the CLI delivers this callback even though the
+        # SDK's HookEvent union omits it. Keep the compatibility cast here only.
+        options.hooks[cast(HookEvent, "Elicitation")] = [
+            HookMatcher(hooks=[demo_elicitation_hook(ask, audit)], timeout=65)
+        ]
 
     async def consume(messages: Any) -> None:
         async for message in messages:
@@ -325,7 +346,7 @@ async def run_sdk(
         profile in {"conversation", "structured", "questions"}
         or tools_to_expose
         or builtins
-        or profile == "mcp"
+        or profile in {"mcp", "elicitation"}
     ):
         async with ClaudeSDKClient(options=options) as client:
             await client.query(prompt)

@@ -3856,10 +3856,10 @@
    13
   ],
   "concept_brief": "MCP elicitation lets a tool pause and ask the user for structured input. The client answers `accept` (with data), `decline` or `cancel`, and the server validates accepted data against its schema before acting.",
-  "lab_brief": "The `elicitation` exercise runs an MCP tool that asks to confirm deleting a draft, answers it four ways through the MCP client's `elicitation_callback`, and also reports whether the installed Agent SDK exposes `on_elicitation`.",
+  "lab_brief": "Offline, `elicitation` confirms deleting a draft four ways through the MCP client's `elicitation_callback`. Live, the rooms MCP server asks about a local demo booking and the SDK's Elicitation hook forwards the choice to the lesson's question dialog.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 33 (or run `uv run agent-lab lesson 33`).",
-   "Elicitation here runs between the official MCP client and server; no model or live SDK call is involved."
+   "Offline elicitation uses the official MCP client and server without a model. Optional Live Agent SDK mode makes a paid call and asks you to accept, decline or cancel a local demo booking; no external calendar is contacted."
   ],
   "steps": [
    {
@@ -3901,7 +3901,7 @@
    "Accept means the user answered, not that they agreed.",
    "The data validates, but `confirm` is false, so the tool keeps the draft and returns `Kept: not confirmed.`"
   ],
-  "reference": "Decline and cancel are normal answers, not errors, and must never be treated as consent. Accepted data is untrusted input until it passes the schema. The installed Python Agent SDK has no `on_elicitation` option yet, so this lesson uses the MCP client directly.",
+  "reference": "Decline and cancel are normal answers, not errors, and must never be treated as consent. Validate accepted data before acting. Offline runs use the MCP client directly. Live lesson 33 connects the local rooms server and forwards its form through an Elicitation hook. That callback was verified on SDK 0.2.174, although HookEvent typing omits it and there is no on_elicitation option. Registration uses a narrow compatibility cast; the live form only accepts the known demo server and fields.",
   "recovery": [
    "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
    "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."

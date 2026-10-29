@@ -293,8 +293,8 @@
     "document": "Tab33-MCP-elicitation.md",
     "module": "agent_lab.lessons.lesson_33",
     "exercise_function": "elicitation",
-    "live_profile": "query",
-    "adaptation": "This lesson inspects elicitation support in the pinned Python SDK and validates responses locally."
+    "live_profile": "elicitation",
+    "adaptation": "Offline runs validate accept, decline and cancel through the MCP client. Live runs connect the local rooms MCP server and forward its Elicitation request to the lesson's question dialog. The callback was verified on SDK 0.2.174; its HookEvent typing omits Elicitation, so registration uses a narrow compatibility cast. There is still no on_elicitation option."
   },
   {
     "id": 34,

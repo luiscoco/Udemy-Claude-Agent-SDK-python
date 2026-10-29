@@ -104,6 +104,21 @@ The browser offers downloads for the document-generation exercise.
 
 ## Enable live SDK calls
 
+After an SDK upgrade, run the optional provider smoke checks explicitly:
+
+```shell
+uv run python scripts/live_smoke.py                      # diagnostics only; no model calls
+uv run python scripts/live_smoke.py --live               # lesson 1 and the three milestone services
+uv run python scripts/live_smoke.py --live --only elicitation  # lesson 33 with a synthetic demo answer
+```
+
+The checks use isolated data folders and reference implementations, stop on the first
+failure, and save a JSON report under `.lab-data/live-smoke/`. The four application
+checks use per-call budget thresholds totaling $0.35; the elicitation check uses $0.15.
+These thresholds are not hard billing caps. The script does not retry failed checks.
+Lesson 33's browser version asks you to accept, decline or cancel; only this opt-in
+smoke script supplies a fixed synthetic acceptance to the local demonstration server.
+
 Windows: `Copy-Item .env.example .env`. macOS/Linux: `cp .env.example .env`.
 Edit the copied file:
 

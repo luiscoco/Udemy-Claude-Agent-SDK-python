@@ -2111,8 +2111,8 @@ async def elicitation(root: Path, request: RunRequest, lesson: Lesson) -> dict[s
         "outcomes": outcomes,
         "python_sdk_on_elicitation": "on_elicitation"
         in {field.name for field in dataclasses.fields(sdk.ClaudeAgentOptions)},
-        "note": "MCP elicitation runs between an MCP client and server. This installed Python "
-        "Agent SDK does not expose an on_elicitation option, so the lab uses the MCP client.",
+        "note": "Offline elicitation uses the MCP client. SDK 0.2.174 has no on_elicitation option, "
+        "but its Elicitation hook works live despite being absent from HookEvent typing. Live lesson 33 forwards the local rooms form to the question dialog.",
     }
 
 
