@@ -7,8 +7,10 @@ credentials, the saved runs, reviews and suites; the browser never sees the API 
 
 import asyncio
 import importlib.util
+import ipaddress
 import json
 import shutil
+import socket
 import time
 import uuid
 from datetime import UTC, datetime
@@ -16,6 +18,7 @@ from functools import cache
 from pathlib import Path
 from types import ModuleType
 from typing import Any, Literal
+from urllib.parse import urlsplit
 
 from agent_lab.config import ROOT, Settings
 
@@ -32,6 +35,58 @@ STAGE_FUNCTIONS = {
 }
 MAX_RUNS = 40
 LIVE_TIMEOUT_SECONDS = 120
+MCP_DNS_TIMEOUT_SECONDS = 5
+
+
+async def validate_mcp_addresses(servers: dict[str, Any]) -> None:
+    """Fail closed before the CLI starts; DNS is checked afresh for every live run.
+
+    This is a preflight check, not connection-time enforcement: the CLI resolves
+    again and owns redirects. Network egress controls are needed for that boundary.
+    """
+    try:
+        async with asyncio.timeout(MCP_DNS_TIMEOUT_SECONDS):
+            for server in servers.values():
+                if not isinstance(server, dict) or server.get("type") != "http":
+                    raise ValueError("Use a public HTTPS MCP server.")
+                url = server.get("url")
+                if not isinstance(url, str):
+                    raise ValueError("Use a public HTTPS MCP URL.")
+                parsed = urlsplit(url)
+                host = (parsed.hostname or "").rstrip(".")
+                port = parsed.port  # Reject invalid ports before passing them to the resolver.
+                if (
+                    parsed.scheme != "https"
+                    or not host
+                    or parsed.username is not None
+                    or parsed.password is not None
+                    or parsed.query
+                    or parsed.fragment
+                    or host == "localhost"
+                    or host.endswith((".localhost", ".local", ".internal"))
+                ):
+                    raise ValueError("Use a public HTTPS MCP URL without credentials or tokens.")
+                addresses = await asyncio.get_running_loop().getaddrinfo(
+                    host, 443 if port is None else port, type=socket.SOCK_STREAM
+                )
+                if not addresses:
+                    raise ValueError("The MCP hostname did not resolve to a public address.")
+                for family, _, _, _, sockaddr in addresses:
+                    if family not in (socket.AF_INET, socket.AF_INET6):
+                        raise ValueError("The MCP hostname returned an unsupported address.")
+                    address = ipaddress.ip_address(sockaddr[0])
+                    if isinstance(address, ipaddress.IPv6Address) and address.ipv4_mapped:
+                        address = address.ipv4_mapped
+                    if not address.is_global or address.is_multicast:
+                        raise ValueError("The MCP hostname must resolve only to public addresses.")
+    except TimeoutError:
+        raise ValueError(
+            "MCP hostname lookup timed out. Try again before starting a live run."
+        ) from None
+    except OSError:
+        raise ValueError(
+            "Could not resolve the MCP hostname. Check the URL and try again."
+        ) from None
 
 
 def studio_path(implementation: Implementation) -> Path:
@@ -231,6 +286,7 @@ class StudioService:
         variants = catalog()["variants"]
         if variant not in variants:
             raise ValueError("Unknown instruction variant.")
+        await validate_mcp_addresses(mcp["mcp_servers"])
         mode = (
             "none"
             if not mcp["mcp_servers"]

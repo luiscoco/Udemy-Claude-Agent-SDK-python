@@ -1,7 +1,10 @@
+import asyncio
 import json
 import os
+import socket
 import subprocess
 import sys
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -14,6 +17,7 @@ from agent_lab.evaluation_studio import (
     load_studio,
     message_to_dict,
     stage_of,
+    validate_mcp_addresses,
 )
 
 REFERENCE = load_studio("reference")
@@ -112,6 +116,135 @@ def stub_live(monkeypatch, seen, fail_after_result=False):
     monkeypatch.setattr(claude_agent_sdk, "query", fake_query)
     monkeypatch.setattr("agent_lab.doctor.resolve_cli_path", lambda settings: "claude")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "fixture-not-a-real-key")
+    monkeypatch.setattr(
+        asyncio.get_running_loop(), "getaddrinfo", AsyncMock(return_value=dns_answers("8.8.8.8"))
+    )
+
+
+def dns_answers(*addresses):
+    return [
+        (
+            socket.AF_INET6 if ":" in address else socket.AF_INET,
+            socket.SOCK_STREAM,
+            socket.IPPROTO_TCP,
+            "",
+            (address, 443, 0, 0) if ":" in address else (address, 443),
+        )
+        for address in addresses
+    ]
+
+
+@pytest.mark.parametrize(
+    "address",
+    [
+        "127.0.0.1",
+        "10.0.0.1",
+        "172.16.0.1",
+        "192.168.1.1",
+        "169.254.169.254",
+        "100.64.0.1",
+        "0.0.0.0",
+        "224.0.0.1",
+        "192.0.2.1",
+        "::1",
+        "::",
+        "fc00::1",
+        "fe80::1",
+        "ff02::1",
+        "::ffff:127.0.0.1",
+    ],
+)
+async def test_live_run_rejects_any_non_public_dns_answer(tmp_path, monkeypatch, address):
+    seen: list = []
+    stub_live(monkeypatch, seen)
+    resolver = AsyncMock(return_value=dns_answers("8.8.8.8", address))
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", resolver)
+    service = StudioService(Settings(data_dir=tmp_path, enable_live=True))
+    custom = REFERENCE.mcp_settings("custom", "kb", "https://kb.example.com/mcp", "search")
+    with pytest.raises(ValueError, match="only to public"):
+        await service.live_run(
+            REFERENCE,
+            "first-query",
+            "guided",
+            REFERENCE.parse_run_options("guided", 8, 0.15),
+            custom,
+            consent=True,
+            mcp_consent=True,
+        )
+    assert not seen and not service.runs and not service.root.exists()
+    resolver.assert_awaited_once_with("kb.example.com", 443, type=socket.SOCK_STREAM)
+
+
+async def test_public_mcp_dns_is_checked_again_on_every_live_run(tmp_path, monkeypatch):
+    seen: list = []
+    stub_live(monkeypatch, seen)
+    resolver = AsyncMock(
+        side_effect=[dns_answers("8.8.8.8", "2606:4700:4700::1111"), dns_answers("10.0.0.1")]
+    )
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", resolver)
+    service = StudioService(Settings(data_dir=tmp_path, enable_live=True))
+    custom = REFERENCE.mcp_settings("custom", "kb", "https://kb.example.com:8443/mcp", "search")
+    options = REFERENCE.parse_run_options("guided", 8, 0.15)
+    run = await service.live_run(
+        REFERENCE, "first-query", "guided", options, custom, consent=True, mcp_consent=True
+    )
+    assert run["subtype"] == "success" and seen[0].mcp_servers == custom["mcp_servers"]
+    with pytest.raises(ValueError, match="only to public"):
+        await service.live_run(
+            REFERENCE, "first-query", "guided", options, custom, consent=True, mcp_consent=True
+        )
+    assert len(seen) == 1 and resolver.await_count == 2
+    resolver.assert_awaited_with("kb.example.com", 8443, type=socket.SOCK_STREAM)
+
+
+@pytest.mark.parametrize("failure", [socket.gaierror("not found"), [], TimeoutError()])
+async def test_mcp_dns_failure_stops_validation(monkeypatch, failure):
+    resolver = AsyncMock(
+        **(
+            {"side_effect": failure}
+            if isinstance(failure, Exception)
+            else {"return_value": failure}
+        )
+    )
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", resolver)
+    with pytest.raises(ValueError, match="resolve|timed out"):
+        await validate_mcp_addresses({"kb": {"type": "http", "url": "https://kb.example.com"}})
+
+
+async def test_mcp_dns_deadline_cancels_slow_lookup(monkeypatch):
+    async def slow_lookup(*args, **kwargs):
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", slow_lookup)
+    monkeypatch.setattr("agent_lab.evaluation_studio.MCP_DNS_TIMEOUT_SECONDS", 0.01)
+    with pytest.raises(ValueError, match="timed out"):
+        await validate_mcp_addresses({"kb": {"type": "http", "url": "https://kb.example.com"}})
+
+
+async def test_no_mcp_means_no_dns_lookup(monkeypatch):
+    resolver = AsyncMock(side_effect=AssertionError("Unexpected DNS lookup"))
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", resolver)
+    await validate_mcp_addresses({})
+    resolver.assert_not_awaited()
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://kb.example.com",
+        "https://user:secret@kb.example.com",
+        "https://localhost./mcp",
+        "https://api.localhost/mcp",
+        "https://kb.example.com:invalid",
+        "https://kb.example.com?q=token",
+    ],
+)
+async def test_host_rechecks_url_contract_even_for_unfinished_learner_code(monkeypatch, url):
+    resolver = AsyncMock(side_effect=AssertionError("Unexpected DNS lookup"))
+    monkeypatch.setattr(asyncio.get_running_loop(), "getaddrinfo", resolver)
+    with pytest.raises(ValueError):
+        await validate_mcp_addresses({"kb": {"type": "http", "url": url}})
+    resolver.assert_not_awaited()
 
 
 async def test_live_runs_need_consent_for_the_run_and_the_mcp_connection(tmp_path, monkeypatch):
