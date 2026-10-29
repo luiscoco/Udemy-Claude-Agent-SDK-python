@@ -12,10 +12,12 @@ from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
+from agent_lab.lesson_guide import SectionId
+
 FORMAT: Final = "agent-lab-progress"
 VERSION: Final = 1
 MAX_BYTES = 2_000_000
-KEYS = ("lessons", "sections", "theme", "text_size", "last_lesson")
+KEYS = ("lessons", "sections", "theme", "text_size", "last_lesson", "learning_guide_positions")
 
 
 class Strict(BaseModel):
@@ -61,6 +63,14 @@ class Progress(Strict):
     theme: Literal["light", "dark", "auto"] = "light"
     text_size: Literal["small", "normal", "large", "xlarge"] = "normal"
     last_lesson: int = Field(default=0, ge=0, le=75)
+    learning_guide_positions: dict[str, SectionId] = Field(default_factory=dict, max_length=75)
+
+    @field_validator("learning_guide_positions")
+    @classmethod
+    def guide_numbers(cls, value: dict[str, SectionId]) -> dict[str, SectionId]:
+        if any(key not in {str(number) for number in range(1, 76)} for key in value):
+            raise ValueError("Guide keys must be lesson numbers from 1 to 75.")
+        return value
 
     @field_validator("lessons")
     @classmethod

@@ -1,8 +1,8 @@
 # Build the milestone projects
 
-The course has three milestone projects that you build yourself. Each one is a Python file
-of contracts (functions with a docstring and a `NotImplementedError` TODO) that the course
-app runs, so every stage you finish unlocks a feature on its page.
+The course has three milestone projects with completed learner and reference
+implementations in this checkout. Their prompts still teach how to implement and verify
+the contracts incrementally; the application runs the selected learner or reference file.
 
 | Order | Project | Your file | Page | Stages |
 |---|---|---|---|---|
@@ -10,8 +10,11 @@ app runs, so every stage you finish unlocks a feature on its page.
 | 2 · Evaluate | [Agent Evaluation Studio](../mini_projects/evaluation_studio/README.md) | `mini_projects/evaluation_studio/studio.py` | `/studio` | M08–M14 |
 | 3 · Publish | [Agent Publishing Studio](../mini_projects/publishing_studio/README.md) | `mini_projects/publishing_studio/publisher.py` | `/publish` | M15–M22 |
 
-The stages are your work, not finished submissions: a fresh clone starts every project at
-`STAGE = 1`.
+The current learner files are complete: Study Coach and Evaluation Studio are at
+`STAGE = 7`, and Publishing Studio is at `STAGE = 8`. A fresh clone of this revision
+therefore opens working applications. Separate pristine stage-1 starter templates are
+still pending. For incremental practice, work in a separate copy; preserve the working
+applications and saved data. Running a reference check never marks student work complete.
 
 ## Procedure for every stage
 

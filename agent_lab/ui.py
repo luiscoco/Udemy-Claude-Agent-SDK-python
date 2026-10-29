@@ -13,7 +13,8 @@ from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
 from agent_lab.evaluation_studio import StudioService
 from agent_lab.exercises import exercise_context, exercise_source, exercise_uses
-from agent_lab.learning import CheckResult, check_evidence
+from agent_lab.learning import CheckResult, check_evidence, course
+from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
 from agent_lab.models import Event, RunRequest
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
@@ -22,6 +23,7 @@ from agent_lab.runtime import RunHandle, RunService
 from agent_lab.study_coach import CoachService
 from agent_lab.tutor import TutorService
 from agent_lab.ui_coach import install_coach_page
+from agent_lab.ui_guide import LESSON_START, LessonGuidePanel
 from agent_lab.ui_learning import (
     appearance_controls,
     check_card,
@@ -60,8 +62,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
     install_publish_page(PublishingService(runner.settings))
 
     @ui.page("/")
-    async def home(lesson: int = 0) -> None:
+    async def home(lesson: int = 0, path: str = "") -> None:
         page_style()
+        active_path = route_id(path, lesson) if lesson in LESSONS else ""
         client = ui.context.client
         handle: RunHandle | None = None
         consumer: asyncio.Task[Any] | None = None
@@ -102,7 +105,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         for item in matches:
                             mark = " ✓" if completed(item.id) else ""
                             ui.link(
-                                f"{item.id}. {item.title}{mark}", f"/?lesson={item.id}"
+                                f"{item.id}. {item.title}{mark}", lesson_url(item.id, active_path)
                             ).classes(
                                 "text-sm"
                                 + (" font-bold text-purple-700" if item.id == lesson else "")
@@ -125,6 +128,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
             set_preference("last_lesson", lesson)
             source = exercise_source(current.exercise)
             lesson_header(lesson, runner.settings.enable_live)
+            with ui.row().classes("w-full items-center gap-3 guide-lesson-actions") as lesson_actions:
+                pass
             if current.notes:
                 with ui.card().classes("course-card w-full bg-amber-50"):
                     ui.label(current.notes)
@@ -145,6 +150,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 with ui.tab_panel(visual_tab).classes("p-0 flex flex-col gap-5"):
                     visual_panel(lesson)
                 with ui.tab_panel(source_tab).classes("p-0 flex flex-col gap-5"):
+                    ui.label("Python source for this concept").classes("text-xl font-bold guide-source-target")
                     concept_code_card(lesson)
                     with ui.expansion(
                         "How the offline lab checks this concept", icon="science"
@@ -222,13 +228,13 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             ui.label(
                                 "Live mode is disabled. Enable LAB_ENABLE_LIVE in .env after configuring your API key."
                             ).classes("text-sm text-slate-500")
-                        with ui.row().classes("items-center"):
-                            run_button = ui.button("Run exercise", icon="play_arrow")
+                        with ui.row().classes("items-center guide-controls-context"):
+                            run_button = ui.button("Run exercise", icon="play_arrow").classes("guide-controls-target")
                             cancel_button = ui.button("Cancel", icon="stop", color="secondary")
                             cancel_button.disable()
                             status = ui.label("Ready")
-                    with ui.card().classes("course-card w-full p-6"):
-                        ui.label("Response and results").classes("text-xl font-bold")
+                    with ui.card().classes("course-card w-full p-6 guide-evidence-context"):
+                        ui.label("Response and results").classes("text-xl font-bold guide-evidence-target")
                         output_state = OutputState()
 
                         @ui.refreshable
@@ -377,11 +383,19 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         )
                         checks.refresh()
 
+            with lesson_actions:
+                if tour := learning_guides().get(lesson):
+                    LessonGuidePanel(tour, tabs, active_path)
+                route_name = next((p.title for p in course().paths if p.id == active_path), "All lessons")
+                ui.label(f"Route: {route_name}").classes("text-sm text-slate-500")
+                if target := adjacent_lesson(lesson, 1, active_path):
+                    ui.link("Next lesson →", lesson_url(target, active_path)).classes("font-semibold")
             with ui.row().classes("w-full justify-between"):
-                if lesson > 1:
-                    ui.link("← Previous lesson", f"/?lesson={lesson - 1}")
-                if lesson < 75:
-                    ui.link("Next lesson →", f"/?lesson={lesson + 1}")
+                if previous := adjacent_lesson(lesson, -1, active_path):
+                    ui.link("← Previous lesson", lesson_url(previous, active_path))
+                if following := adjacent_lesson(lesson, 1, active_path):
+                    ui.link("Next lesson →", lesson_url(following, active_path))
+            ui.timer(0.15, lambda: ui.run_javascript(LESSON_START), once=True)
 
     ui.run_with(
         application,

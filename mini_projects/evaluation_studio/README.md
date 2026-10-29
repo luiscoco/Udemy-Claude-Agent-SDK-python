@@ -1,5 +1,9 @@
 # Agent Evaluation Studio milestone project
 
+This checkout includes the completed learner implementation at stage 7, alongside the
+reference. The prompts below remain the incremental learning sequence; separate pristine
+starter templates are pending. Keep a separate copy when practising from an empty stage.
+
 Evaluate an SDK tutor on 170 cases in 17 sections, from a first query to production
 readiness. You implement the contracts in [studio.py](studio.py); the course app runs
 **your** file at <http://127.0.0.1:8080/studio>, so every stage unlocks a feature.

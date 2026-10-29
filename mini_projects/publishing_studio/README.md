@@ -1,5 +1,9 @@
 # Agent Publishing Studio milestone project
 
+This checkout includes the completed learner implementation at stage 8, alongside the
+reference. The prompts below remain the incremental learning sequence; separate pristine
+starter templates are pending. Keep a separate copy when practising from an empty stage.
+
 Turn one saved SDK answer into Word, PDF, SVG and PNG files. Ask, select, build, download:
 you implement the contracts in [publisher.py](publisher.py), and the course app runs
 **your** file at <http://127.0.0.1:8080/publish>, so every stage unlocks a feature.

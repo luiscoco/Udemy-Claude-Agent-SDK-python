@@ -31,6 +31,7 @@ STORE = {
     "theme": "dark",
     "text_size": "large",
     "last_lesson": 5,
+    "learning_guide_positions": {"1": "evidence"},
     "unrelated_key": "never exported",
 }
 
@@ -49,6 +50,20 @@ def test_export_round_trips_exactly_what_the_app_stores():
 
 def test_export_of_an_empty_browser_is_still_importable():
     assert import_progress(export_progress({}))["lessons"] == {}
+
+
+def test_older_progress_exports_gain_an_empty_guide_position():
+    document = json.loads(export_progress(STORE))
+    document["progress"].pop("learning_guide_positions")
+    assert import_progress(json.dumps(document).encode())["learning_guide_positions"] == {}
+
+
+@pytest.mark.parametrize("positions", [{"99": "goal"}, {"1": "not-a-section"}, {"01": "goal"}])
+def test_import_validates_guide_positions(positions):
+    document = json.loads(export_progress(STORE))
+    document["progress"]["learning_guide_positions"] = positions
+    with pytest.raises(ValueError):
+        import_progress(json.dumps(document).encode())
 
 
 def corrupt(change):

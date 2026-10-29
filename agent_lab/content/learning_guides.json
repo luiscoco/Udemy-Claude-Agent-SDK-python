@@ -1,0 +1,56 @@
+[
+ {
+  "lesson": 1,
+  "sections": [
+   {
+    "id": "goal", "title": "Understand the goal", "tab": "Learn",
+    "target": ".guide-goal-target", "context": "#lesson-heading",
+    "text": "query() returns an asynchronous stream. AssistantMessage blocks contain the answer text; the final ResultMessage reports the outcome, session and cost.",
+    "action": "Read the objective. Be ready to explain why assistant text alone does not prove a successful run.",
+    "student_action": false
+   },
+   {
+    "id": "preparation", "title": "Prepare the exercise", "tab": "Learn",
+    "target": ".guide-preparation-target", "context": ".guide-preparation-context",
+    "text": "Start with the offline Python exercise. It consumes recorded SDK-shaped messages locally, without a model call, credentials or API cost. Live mode is a separate optional experiment.",
+    "action": "Read the setup instructions and keep the first run offline. Opening this guide never starts the exercise.",
+    "student_action": false
+   },
+   {
+    "id": "example", "title": "Read one example", "tab": "Learn",
+    "target": ".guide-example-target", "context": ".guide-example-context",
+    "text": "In the code above the highlighted explanation, async for consumes query(). The isinstance branches handle AssistantMessage and ResultMessage separately. The displayed SDK code is an example; the offline host uses a recorded fixture.",
+    "action": "Find the text-block loop and the final-result branch. Compare their different responsibilities before continuing.",
+    "student_action": false
+   },
+   {
+    "id": "controls", "title": "Run your own example", "tab": "Run the exercise",
+    "target": ".guide-controls-target", "context": ".guide-controls-context",
+    "text": "Keep Offline Python exercise selected. When you choose Run exercise, the host consumes the recorded stream and displays local evidence. The guide will not click Run, change the mode or authorize a paid call.",
+    "action": "Run the offline exercise yourself and wait for Completed. Continue only when you are ready to inspect its result.",
+    "student_action": true
+   },
+   {
+    "id": "evidence", "title": "Inspect the evidence", "tab": "Run the exercise",
+    "target": ".guide-evidence-target", "context": ".guide-evidence-context",
+    "text": "Inspect Response and results and the Automatic check below it. The fixture should collect Recorded test text, an offline-fixture session id and zero cost. Its source explicitly says that no SDK process was started.",
+    "action": "Check source, text and results. A passing local check validates fixture handling; it does not validate an API key or a live Claude answer.",
+    "student_action": true
+   },
+   {
+    "id": "source", "title": "Connect the source to the result", "tab": "Python source",
+    "target": ".guide-source-target", "context": ".guide-source-target",
+    "text": "The Python source tab shows the SDK concept and an expandable host exercise. The host code drives the browser, CLI and API offline exercise; it is distinct from a real query() call.",
+    "action": "Read the SDK example, then expand How the offline lab checks this concept and find the recorded_messages() loop. Neither action executes the code.",
+    "student_action": false
+   },
+   {
+    "id": "practice", "title": "Explain and practise", "tab": "Learn",
+    "target": ".guide-practice-target", "context": ".guide-practice-context",
+    "text": "Try the challenge: add a second recorded AssistantMessage in a scratch script and check that text has two entries while results still has one. Use your own words to describe the evidence.",
+    "action": "Write and save your explanation yourself. Finish tour returns to this lesson's heading; Next lesson follows your selected route. Neither changes your manual review checklist.",
+    "student_action": true
+   }
+  ]
+ }
+]

@@ -543,3 +543,109 @@ def test_browser_publishing_studio_builds_and_downloads_a_document(server, tmp_p
         phone.get_by_text("4 · Download").wait_for()
         assert not phone.evaluate("document.documentElement.scrollWidth > innerWidth")
         browser.close()
+
+
+def test_browser_written_guide_preserves_work_and_only_changes_tour_position(server):
+    import json
+
+    from playwright.sync_api import expect, sync_playwright
+
+    from agent_lab.lesson_guide import learning_guides
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1440, "height": 1000})
+        page.goto(base + "/?lesson=1&path=application-developer")
+        page.get_by_label("Private notes", exact=True).fill("My saved guide note")
+        page.get_by_label("Private notes", exact=True).press("Tab")
+        launch = page.get_by_role("button", name="Open Learning Guide", exact=True)
+        launch.focus()
+        launch.press("Enter")
+        panel = page.get_by_role("region", name="Lesson 1 Learning Guide", exact=True)
+        expect(panel).to_be_focused()
+        expect(launch).to_have_attribute("aria-expanded", "true")
+        panel.get_by_role("button", name="Start guided tour", exact=True).press("Enter")
+        for index, section in enumerate(learning_guides()[1].sections):
+            if index:
+                panel.get_by_role("button", name="Next section", exact=True).click()
+            panel.get_by_text(f"Section {index + 1} of 7", exact=False).wait_for()
+            target = page.locator(section.target + ".learning-guide-target")
+            expect(target).to_be_visible()
+            expect(page.locator(".learning-guide-target")).to_have_count(1)
+            expect(panel.locator(".learning-guide-step")).to_be_focused()
+            assert target.bounding_box()["height"] < 350  # Small teaching target, not a whole card.
+        page.get_by_role("tab", name="AI Tutor", exact=True).click()
+        panel.get_by_text("Tour paused after a tab change.", exact=False).wait_for()
+        expect(page.locator(".learning-guide-target")).to_have_count(0)
+        panel.get_by_role("button", name="Show section", exact=True).click()
+        expect(page.locator(".guide-practice-target.learning-guide-target")).to_be_visible()
+        panel.get_by_role("button", name="Minimize Learning Guide", exact=True).click()
+        expect(panel.get_by_role("button", name="Finish tour", exact=True)).not_to_be_visible()
+        panel.get_by_role("button", name="Expand Learning Guide", exact=True).click()
+        panel.get_by_role("button", name="Close Learning Guide", exact=True).focus()
+        page.keyboard.press("Escape")
+        expect(panel).not_to_be_visible()
+        expect(page.locator(".learning-guide-target")).to_have_count(0)
+        page.reload()
+        page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+        panel = page.get_by_role("region", name="Lesson 1 Learning Guide", exact=True)
+        expect(page.locator(".learning-guide-target")).to_have_count(0)
+        panel.get_by_role("button", name="Resume: Explain and practise", exact=True).click()
+        expect(page.locator(".guide-practice-target.learning-guide-target")).to_be_visible()
+        expect(page.get_by_label("Private notes", exact=True)).to_have_value("My saved guide note")
+        panel.get_by_role("button", name="Finish tour", exact=True).click()
+        expect(panel).not_to_be_visible()
+        expect(page.locator("#lesson-heading")).to_be_focused()
+        expect(page.locator(".learning-guide-target")).to_have_count(0)
+        assert "lesson=1" in page.url
+        page.goto(base + "/")
+        with page.expect_download() as downloaded:
+            page.get_by_role("button", name="Export progress", exact=True).click()
+        progress = json.loads(Path(downloaded.value.path()).read_bytes())["progress"]
+        saved = progress["lessons"]["1"]
+        assert saved["notes"] == "My saved guide note"
+        assert saved["checkpoints"] == [False] * 4
+        assert saved["attempts"] == [] and saved["answers"] == {}
+        assert saved["check"] is None and saved["last_run"] == ""
+        assert "1" not in progress["learning_guide_positions"]
+        browser.close()
+
+
+def test_browser_guide_phone_large_text_fallback_and_route_next(server):
+    from playwright.sync_api import expect, sync_playwright
+
+    from agent_lab.lesson_guide import learning_guides
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(base + "/?lesson=1&path=application-developer")
+        page.get_by_role("button", name="Appearance", exact=True).click()
+        page.get_by_role("button", name="Dark", exact=True).click()
+        page.get_by_label("Text size", exact=True).click()
+        page.get_by_role("option", name="Extra large", exact=True).click()
+        page.keyboard.press("Escape")
+        page.get_by_role("button", name="Open Learning Guide", exact=True).click()
+        panel = page.get_by_role("region", name="Lesson 1 Learning Guide", exact=True)
+        panel.get_by_role("button", name="Start guided tour", exact=True).click()
+        for index, section in enumerate(learning_guides()[1].sections):
+            if index:
+                panel.get_by_role("button", name="Next section", exact=True).click()
+            panel.get_by_text(f"Section {index + 1} of 7", exact=False).wait_for()
+            expect(page.locator(section.target + ".learning-guide-target")).to_be_visible()
+            bounds = panel.bounding_box()
+            assert bounds["x"] >= 0 and bounds["x"] + bounds["width"] <= 391
+            assert bounds["y"] >= 0 and bounds["y"] + bounds["height"] <= 845
+            assert not page.evaluate("document.documentElement.scrollWidth > innerWidth")
+        # A missing lazily rendered target must leave the written guidance usable.
+        page.locator(".guide-practice-target").evaluate("e => e.remove()")
+        panel.get_by_role("button", name="Show section", exact=True).click()
+        panel.get_by_text("This target is unavailable.", exact=False).wait_for()
+        panel.get_by_role("button", name="Next lesson →", exact=True).click()
+        page.wait_for_url("**/?lesson=3&path=application-developer")
+        expect(page.locator("#lesson-heading")).to_contain_text("3. Built-in tools")
+        expect(page.locator("#lesson-heading")).to_be_focused()
+        assert page.get_by_role("button", name="Open Learning Guide", exact=True).count() == 0
+        browser.close()

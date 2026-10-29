@@ -2,7 +2,8 @@
 
 The Python edition is runnable. The legacy app source, Node dependencies, bridge,
 generated lab folders and Node CI templates have been removed from the active
-project. Feature parity work remains; keep the recovery snapshot for reference.
+project. Feature parity work remains. The pinned TypeScript comparison and the
+75-lesson inventory are in [reference parity](docs/reference-parity.md).
 
 ## Implemented
 
@@ -24,6 +25,16 @@ project. Feature parity work remains; keep the recovery snapshot for reference.
 - Python companion fixtures, document Skill command and plugin manifests.
 - Offline tests, SDK configuration tests, MCP tests, lint/type checks and
   desktop/mobile browser checks.
+- Completed learner implementations of the Study Coach (7/7), Evaluation Studio
+  (7/7) and Publishing Studio (8/8), with separate reference implementations.
+- Reviewed Python source tours for all 75 lessons; browser Read aloud remains
+  separate from the reference's prerecorded TypeScript narration.
+- A seven-section written Learning Guide pilot for lesson 1: explicit Start/Resume,
+  real targets, tab-change pause, minimize/close, saved position and route-aware
+  navigation. Recorded narration and the other 74 written guides are pending.
+- On 29 October 2026, bounded live checks passed for lesson 1, Study Coach,
+  Evaluation Studio, Publishing Studio and lesson 33's elicitation callback on
+  SDK 0.2.174. These selected checks do not establish all-lesson live parity.
 
 ## Remaining before declaring the whole migration complete
 
@@ -40,12 +51,15 @@ project. Feature parity work remains; keep the recovery snapshot for reference.
 5. Complete the original PR-fix and engineering-team worktree/merge/recovery
    pipeline. The live teaching fixture validates bounded source proposals;
    it does not yet reproduce the original general repository workflow.
-6. Verify paid live calls with API or cloud credentials. The Windows SDK source
-   package has no bundled executable; native Claude Code 2.1.292 is now installed
-   and detected on this machine. Executable detection does not verify credentials
-   or a paid model response.
+6. Expand live verification beyond the selected smoke checks to the remaining
+   lesson-specific scenarios, connected integrations and cloud providers. The
+   installed 0.2.174 SDK's bundled Windows executable was used by the selected
+   checks; executable detection alone does not verify an API response.
 7. Verify browser/native startup on supported operating systems and build
    the container in an environment with Docker.
+8. Complete recorded Python narration, per-lesson written guides, shared navigation,
+   My learning and reference question/excerpt coverage. Supply separate student
+   starter templates alongside the now-completed milestone apps.
 
 ## Legacy cleanup
 
@@ -57,10 +71,12 @@ inside installed Python dependencies are still required by NiceGUI.
 
 ## Recovery
 
-`.migration/original-typescript.zip` preserves the original app and Markdown,
-with `.migration/original-manifest.json` recording SHA-256 hashes. The archive
-was read back and verified before original documents were rewritten. Secrets,
-dependency directories and caches were excluded.
+Earlier notes described `.migration/original-typescript.zip` and an accompanying
+manifest. Neither file is present in this checkout, so their contents and hashes
+were not reverified in the current audit. The pinned Student Rebuild and original
+Learning Platform v2 repositories in [reference parity](docs/reference-parity.md)
+are the available comparison sources. Keep any separately held recovery archive
+until its provenance and migration coverage have been reviewed.
 
 The machine-readable Python curriculum is `curriculum.json`. Lesson-specific
 adaptations are maintained in `agent_lab/curriculum.py` and rendered into the

@@ -24,6 +24,7 @@ from agent_lab.learning import (
     section_quiz,
     visual_guides_for,
 )
+from agent_lab.lesson_guide import lesson_url
 from agent_lab.models import LessonError
 from agent_lab.policy import redact
 from agent_lab.progress import KEYS as PROGRESS_KEYS
@@ -197,8 +198,8 @@ def visual_guide_card(item: VisualGuide, compact: bool = False) -> None:
 def lesson_header(lesson_id: int, live_enabled: bool) -> None:
     lesson, item = LESSONS[lesson_id], guide(lesson_id)
     ui.label(f"Course / {lesson.topic} / Lesson {lesson_id}").classes("text-sm text-slate-500")
-    ui.label(f"{lesson_id}. {lesson.title}").classes("course-title")
-    ui.label(lesson.objective).classes("text-lg text-slate-600")
+    ui.label(f"{lesson_id}. {lesson.title}").classes("course-title").props('id="lesson-heading" tabindex="-1"')
+    ui.label(lesson.objective).classes("text-lg text-slate-600 guide-goal-target")
     with ui.row().classes("items-center gap-3"):
         ui.badge(
             "Offline exercise + optional live SDK" if live_enabled else "Offline exercise",
@@ -230,14 +231,14 @@ def concept_code_card(lesson_id: int) -> None:
     item = guide(lesson_id)
     sections = code_tour(lesson_id)
     step: dict[str, int | None] = {"index": None}
-    with card("The concept in code", "Python SDK"):
+    with card("The concept in code", "Python SDK").classes("guide-example-context"):
 
         @ui.refreshable
         def view() -> None:
             index = step["index"]
             if index is None:
                 ui.code(item.concept_code, language="python").classes("w-full")
-                ui.markdown(item.code_focus)
+                ui.markdown(item.code_focus).classes("guide-example-target")
                 if sections:
                     ui.button(
                         "Start code tour", icon="route", on_click=lambda: go(0)
@@ -281,9 +282,9 @@ def concept_code_card(lesson_id: int) -> None:
 
 def learn_panel(lesson_id: int, tutorial: str, open_run: Any) -> None:
     item = guide(lesson_id)
-    with card("Prepare this lesson", "Before you begin"):
-        for line in item.preparation:
-            ui.markdown(f"- {line}")
+    with card("Prepare this lesson", "Before you begin").classes("guide-preparation-context"):
+        for number, line in enumerate(item.preparation):
+            ui.markdown(f"- {line}").classes("guide-preparation-target" if number == 0 else "")
     with card("Understand the concept", "Concept"):
         ui.markdown(item.concept_brief)
         ui.markdown(f"**In this lab:** {item.lab_brief}")
@@ -324,7 +325,7 @@ def workbook(lesson_id: int) -> None:
             value=saved["notes"],
             on_change=lambda e: update(lesson_id, notes=(e.value or "")[:20000]),
         ).props("outlined autogrow maxlength=20000").classes("w-full")
-        ui.label("Challenge").classes("text-lg font-bold mt-2")
+        ui.label("Challenge").classes("text-lg font-bold mt-2 guide-practice-context")
         ui.markdown(item.challenge)
         hints = ui.column().classes("w-full gap-1")
 
@@ -350,7 +351,7 @@ def workbook(lesson_id: int) -> None:
                 on_change=lambda e: update(lesson_id, draft=(e.value or "")[:10000]),
             )
             .props("outlined autogrow maxlength=10000")
-            .classes("w-full")
+            .classes("w-full guide-practice-target")
         )
 
         @ui.refreshable
@@ -796,7 +797,7 @@ def home_page() -> None:
                 target = next_in_path(path.lessons)
                 ui.button(
                     f"Open lesson {target}",
-                    on_click=lambda t=target: ui.navigate.to(f"/?lesson={t}"),
+                    on_click=lambda t=target, p=path.id: ui.navigate.to(lesson_url(t, p)),
                 ).props("outline")
 
     ui.label("Course sections").classes("text-xl font-bold mt-4")

@@ -1,5 +1,9 @@
 # Study Coach milestone project
 
+This checkout includes the completed learner implementation at stage 7, alongside the
+reference. The prompts below remain the incremental learning sequence; separate pristine
+starter templates are pending. Keep a separate copy when practising from an empty stage.
+
 Build a study coach for this course in seven stages. You write the host contracts in
 [coach.py](coach.py); the course app runs **your** file at
 <http://127.0.0.1:8080/coach>, so every stage you finish unlocks a feature on that page.

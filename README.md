@@ -27,7 +27,13 @@ with their quizzes, your progress and the visual guides. Each lesson has six tab
 | **Python source** | Read the host exercise used by the UI, CLI and API. |
 | **AI Tutor** | Get a free prepared answer grounded in the lesson, or explicitly authorize one live answer (one turn, no tools, 0.05 USD budget threshold) and save it. |
 
-Workbook entries, quiz answers, check results, saved tutor answers and appearance
+Lesson 1 also has **Open Learning Guide**: an explicitly started, seven-section
+written tour with real target highlighting, saved-position Resume, tab-change pause,
+minimize/close, Finish tour and route-aware Next lesson. It never clicks Run or changes
+your manual checklist. Recorded Python narration and written guides for lessons 2–75
+remain pending; see the [reference parity comparison](docs/reference-parity.md).
+
+Workbook entries, quiz answers, check results, saved tutor answers, guide position and appearance
 (Light/Dark/System theme, text size) are stored per browser in `.nicegui/` on
 this machine. They are never sent to Claude and do not sync between browsers.
 Use **Export progress** on the home page to save them as a JSON file, and
@@ -241,10 +247,10 @@ verification. Adaptations appear in lesson notes and the browser UI.
 Lesson 41 teaches the public Python interactive client. Lesson 69 teaches Python
 desktop embedding. The legacy runtime, Node dependencies, scripts, CI templates
 and generated lab folders have been removed from the active project.
-The original code and documents are preserved in
-`.migration/original-typescript.zip` with a SHA-256 manifest; secrets are excluded.
-Keep the snapshot until migration parity has been reviewed. It is recovery data
-and is not used by the app, tests or documentation builder.
+The recovery ZIP described in earlier migration notes is absent from this checkout.
+The [reference parity report](docs/reference-parity.md) pins the available TypeScript
+repositories and records all 75 lesson contracts, shared feature gaps and verification
+limits. The app, tests and documentation builder do not require a recovery archive.
 
 ### Learning features ported from the Student Rebuild
 
