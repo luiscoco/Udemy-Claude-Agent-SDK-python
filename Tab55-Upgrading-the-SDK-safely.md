@@ -28,8 +28,8 @@ import inspect
 
 import claude_agent_sdk
 
-# pyproject.toml pins claude-agent-sdk==0.2.163; uv.lock locks the tree; CI runs `uv sync --locked`.
-PIN = "0.2.163"
+# pyproject.toml pins claude-agent-sdk==0.2.174; uv.lock locks the tree; CI runs `uv sync --locked`.
+PIN = "0.2.174"
 EXPORTS = [
     "query",
     "tool",
