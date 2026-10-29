@@ -99,6 +99,8 @@ def test_build_system_prompt_combines_variant_depth_and_source_rules(studio):
         ("ok", "deep", "none"),
         ("ok", "brief", "web"),
         (None, "brief", "none"),
+        ("ok", [], "none"),
+        ("ok", "brief", []),
     ],
 )
 def test_build_system_prompt_rejects_invalid_parts(studio, variant, depth, mode):
@@ -133,6 +135,7 @@ def test_parse_run_options_accepts_offered_bounds(studio):
         ("brief", 8, 0.05, True, ""),
         ("brief", 8, 0.15, "yes", ""),
         ("brief", 1, 0.05, False, "x" * 2001),
+        ([], 1, 0.05, False, ""),
     ],
 )
 def test_parse_run_options_rejects_unoffered_or_unsafe_bounds(studio, arguments):
@@ -161,6 +164,10 @@ def test_mcp_settings_for_each_mode(studio):
     [
         ("kb", "http://kb.example.com/mcp", "search"),
         ("kb", "https://user:pw@kb.example.com/mcp", "search"),
+        ("kb", "https://@kb.example.com/mcp", "search"),
+        ("kb", "https://kb.example.com:invalid/mcp", "search"),
+        ("kb", "https://kb.example.com:0/mcp", "search"),
+        ("kb", "https://kb.example.com:65536/mcp", "search"),
         ("kb", "https://kb.example.com/mcp?token=abc", "search"),
         ("kb", "https://localhost/mcp", "search"),
         ("kb", "https://127.0.0.1/mcp", "search"),
@@ -209,6 +216,15 @@ def test_review_record_labels_the_kind_of_run(studio):
         RUN | {"run_mode": "live", "subtype": "error_max_turns"}, [True, True]
     )
     assert live["kind"] == "live SDK run" and live["passed"] is False
+
+
+@pytest.mark.stage(6)
+def test_review_cannot_pass_when_the_stream_failed_after_a_success_result(studio):
+    summary = studio.summarize_run([text("Answer"), result(), {"type": "stream_error"}])
+    assert summary["subtype"] == "success" and summary["is_error"] is True
+    run = RUN | summary
+    review = studio.review_record(run, [True, True])
+    assert review["passed"] is False
 
 
 @pytest.mark.stage(6)

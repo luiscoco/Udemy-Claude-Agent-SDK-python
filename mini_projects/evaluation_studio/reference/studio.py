@@ -81,9 +81,9 @@ def build_system_prompt(variant: object, depth: object, mcp_mode: object = "none
     """M10: compose the instruction variant with the depth and source rules."""
     if not isinstance(variant, str) or not variant.strip() or len(variant) > 2000:
         raise ValueError("The instruction variant must be 1 to 2000 characters.")
-    if depth not in DEPTHS:
+    if not isinstance(depth, str) or depth not in DEPTHS:
         raise ValueError(f"Depth must be one of {', '.join(DEPTHS)}.")
-    if mcp_mode not in {"none", "docs", "custom"}:
+    if not isinstance(mcp_mode, str) or mcp_mode not in {"none", "docs", "custom"}:
         raise ValueError("Source mode must be none, docs or custom.")
     source = (
         "No external source is configured. Be explicit about uncertainty."
@@ -109,7 +109,7 @@ def parse_run_options(
     question: object = "",
 ) -> dict[str, Any]:
     """M11: accept only the offered bounds; a specialist needs room to run."""
-    if depth not in DEPTHS:
+    if not isinstance(depth, str) or depth not in DEPTHS:
         raise ValueError("Choose a valid answer depth.")
     if (
         not isinstance(max_turns, int)
@@ -169,10 +169,12 @@ def mcp_settings(
     if not isinstance(url, str) or len(url) > 500:
         raise ValueError("Enter a valid HTTPS MCP URL.")
     parsed = urlparse(url)
+    port = parsed.port  # Also validate an explicitly supplied port.
     if (
         parsed.scheme != "https"
-        or parsed.username
-        or parsed.password
+        or parsed.username is not None
+        or parsed.password is not None
+        or port == 0
         or parsed.query
         or parsed.fragment
         or not _public_host(parsed.hostname or "")
@@ -211,7 +213,7 @@ def review_record(run: Mapping[str, Any], marks: object, note: object = "") -> d
         "criteria": [
             {"text": text, "met": mark} for text, mark in zip(criteria, marks, strict=True)
         ],
-        "passed": all(marks) and run.get("subtype") == "success",
+        "passed": all(marks) and run.get("subtype") == "success" and not run.get("is_error", False),
         "note": note.strip(),
     }
 
