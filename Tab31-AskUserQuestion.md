@@ -63,7 +63,7 @@ async def main() -> None:
             print(message)
 ```
 
-The can_use_tool callback catches AskUserQuestion, validates each question with the Question model, and returns PermissionResultAllow(updated_input={..., "answers": answers}).
+The `can_use_tool` callback catches AskUserQuestion, validates each question with the Question model, and returns PermissionResultAllow(`updated_input`={..., "answers": answers}).
 
 ## How the offline lab checks it
 

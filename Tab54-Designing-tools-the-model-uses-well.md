@@ -58,7 +58,7 @@ async def add(args: dict[str, Any]) -> dict[str, Any]:
     return {"content": [{"type": "text", "text": str(data.a + data.b)}]}
 ```
 
-The @tool call pairs a precise description with AddInput.model_json_schema(), and the handler turns a Pydantic ValidationError into is_error feedback naming the field, the problem and the fix.
+The @tool call pairs a precise description with AddInput.model_json_schema(), and the handler turns a Pydantic ValidationError into `is_error` feedback naming the field, the problem and the fix.
 
 ## How the offline lab checks it
 

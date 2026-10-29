@@ -91,7 +91,7 @@ OPTIONS = ClaudeAgentOptions(
 )
 ```
 
-One decide() policy is called from both can_use_tool and the PreToolUse HookMatcher, and tools=sorted(ALLOWED) removes every other built-in tool before either check runs.
+One decide() policy is called from both `can_use_tool` and the PreToolUse HookMatcher, and tools=sorted(ALLOWED) removes every other built-in tool before either check runs.
 
 ## How the offline lab checks it
 

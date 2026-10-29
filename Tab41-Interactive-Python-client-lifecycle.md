@@ -45,7 +45,7 @@ async def main() -> None:
         print("client is closed:", error)
 ```
 
-async with client connects and disconnects, each turn() pairs client.query with receive_response, and the final query raises CLIConnectionError.
+async with client connects and disconnects, each turn() pairs client.query with `receive_response`, and the final query raises CLIConnectionError.
 
 ## How the offline lab checks it
 

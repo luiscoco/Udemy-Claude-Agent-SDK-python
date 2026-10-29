@@ -71,7 +71,7 @@ def run_evals() -> float:
     return pass_rate
 ```
 
-run_evals() scores the labelled CASES against retrieve(), the same function the search_policy tool calls, and fails when the pass rate drops below BASELINE.
+`run_evals()` scores the labelled CASES against retrieve(), the same function the `search_policy` tool calls, and fails when the pass rate drops below BASELINE.
 
 ## How the offline lab checks it
 

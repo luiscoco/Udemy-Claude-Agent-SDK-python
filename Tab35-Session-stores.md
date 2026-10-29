@@ -61,7 +61,7 @@ async def main() -> None:
     save_transcript(path, rows)
 ```
 
-save_transcript writes transcript.tmp and calls temporary.replace(path) for an atomic update, while session_store=InMemorySessionStore() is the SDK's own, separate mirror.
+`save_transcript` writes transcript.tmp and calls temporary.replace(path) for an atomic update, while `session_store`=InMemorySessionStore() is the SDK's own, separate mirror.
 
 ## How the offline lab checks it
 

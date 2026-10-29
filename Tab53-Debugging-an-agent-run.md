@@ -65,7 +65,7 @@ async def main() -> None:
     print(redact(trace))  # only the redacted bundle leaves the process
 ```
 
-Every message and every CLI stderr line (via the stderr callback) is tagged with one run_id, and the bundle passes through redact() before it is printed or shared.
+Every message and every CLI stderr line (via the stderr callback) is tagged with one `run_id`, and the bundle passes through redact() before it is printed or shared.
 
 ## How the offline lab checks it
 

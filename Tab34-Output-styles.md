@@ -56,7 +56,7 @@ async def main() -> None:
             print(message.result)
 ```
 
-install_style writes .claude/output-styles/teaching.md and {"outputStyle": "teaching"}, and setting_sources=["project"] is what lets the run load them.
+`install_style` writes .claude/output-styles/teaching.md and {"outputStyle": "teaching"}, and `setting_sources`=["project"] is what lets the run load them.
 
 ## How the offline lab checks it
 

@@ -354,8 +354,8 @@ def infographic(lesson_id: int) -> None:
         with ui.element("div").classes("ig-grid ig-three"):
             for number, point in enumerate(item.concept_points, 1):
                 with ui.element("div").classes("ig-panel"):
-                    ui.label(f"{number}. {point.title}").classes("ig-panel-title")
-                    ui.label(point.text).classes("ig-panel-text")
+                    ui.label(f"{number}. {plain(point.title)}").classes("ig-panel-title")
+                    ui.markdown(point.text).classes("ig-panel-text")
         with ui.element("div").classes("ig-grid ig-two"):
             with ui.element("div").classes("ig-panel ig-code"):
                 ui.label("The concept in Python").classes("ig-panel-title")
@@ -677,6 +677,12 @@ def home_page() -> None:
                 "outline" if last in LESSONS else ""
             )
     progress_card()
+    with card("Study Coach", "Milestone project"):
+        ui.label(
+            "Build a study coach in seven stages: validated questions, live conversations that "
+            "resume the SDK session, structured study plans and safe recovery."
+        )
+        ui.button("Open the Study Coach", icon="school", on_click=lambda: ui.navigate.to("/coach"))
 
     ui.label("Learning paths").classes("text-xl font-bold mt-4")
     with ui.grid(columns="repeat(auto-fit, minmax(260px, 1fr))").classes("w-full gap-4"):
@@ -785,6 +791,41 @@ APPEARANCE_CSS = """
     body.body--dark .feedback-ok { background: #0b3b2c; color: #a7f3d0; }
     body.body--dark .feedback-bad { background: #43230b; color: #fed7aa; }
 """
+
+
+BASE_CSS = """
+    html { font-size: 18px; }
+    body { background: #f5f5fa; color: #222238; font-size: 18px; line-height: 1.6; }
+    .text-xs { font-size: 16px !important; line-height: 1.5 !important; }
+    .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
+    .text-lg { font-size: 22px !important; line-height: 1.5 !important; }
+    .text-xl { font-size: 26px !important; line-height: 1.4 !important; }
+    .q-btn, .q-tab__label, .q-item__label, .q-expansion-item__container > .q-item { font-size: 18px; }
+    .q-field__native, .q-field__input { font-size: 18px; line-height: 1.5; }
+    .q-field__label { font-size: 20px; }
+    .q-badge { font-size: 15px; line-height: 1.4; }
+    .q-table th, .q-table td { font-size: 18px; }
+    .nicegui-markdown { font-size: 20px; line-height: 1.75; }
+    .nicegui-markdown pre, .nicegui-code, .nicegui-code pre,
+    .nicegui-markdown code, .nicegui-code code { font-size: 17px !important; }
+    .nicegui-log { font-size: 16px; line-height: 1.6; }
+    .course-card { border: 1px solid #e6e3ee; border-radius: 16px; box-shadow: none; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+    .course-card .q-btn-toggle { flex-wrap: wrap; max-width: 100%; }
+    .lesson-menu a { color: #44415b; text-decoration: none; display: block; padding: 7px 0; }
+    .lesson-menu a:hover { color: #7c3aed; }
+    .course-title { font-size: 36px; font-weight: 750; line-height: 1.2; }
+    .q-drawer { background: #fff; border-right: 1px solid #e6e3ee; }
+    .response-prose { font-size: 20px; line-height: 1.75; overflow-wrap: anywhere; }
+    .response-prose pre { overflow-x: auto; max-width: 100%; padding: 16px; border-radius: 10px; }
+    .response-prose table { display: block; overflow-x: auto; max-width: 100%; }
+    .response-prose h1, .response-prose h2, .response-prose h3 { margin-top: 1em; font-weight: 700; }
+"""
+
+
+def page_style() -> None:
+    """Colors and styles shared by every page of the course."""
+    ui.colors(primary="#7c3aed", secondary="#0f766e", accent="#f59e0b")
+    ui.add_css(BASE_CSS + APPEARANCE_CSS)
 
 
 def appearance_controls() -> None:

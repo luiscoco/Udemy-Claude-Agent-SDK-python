@@ -43,7 +43,26 @@ def main() -> None:
     lesson.add_argument("--prompt", default="")
     subcommands.add_parser("list", help="List the curriculum")
     subcommands.add_parser("doctor", help="Check SDK and CLI installation without a model call")
+    coach = subcommands.add_parser("coach", help="Study Coach milestone project")
+    coach.add_argument("action", choices=["check"])
+    coach.add_argument(
+        "--reference", action="store_true", help="check the reference, not your coach.py"
+    )
     arguments = parser.parse_args()
+    if arguments.command == "coach":
+        import os
+        import subprocess
+        import sys
+
+        from agent_lab.study_coach import PROJECT, Implementation, coach_path
+
+        implementation: Implementation = "reference" if arguments.reference else "learner"
+        print(f"Checking {coach_path(implementation)} ...", flush=True)
+        result = subprocess.run(
+            [sys.executable, "-m", "pytest", "-q", "-rs", str(PROJECT)],
+            env=os.environ | {"COACH_IMPLEMENTATION": implementation},
+        )
+        raise SystemExit(result.returncode)
     if arguments.command == "doctor":
         from agent_lab.doctor import diagnose
 

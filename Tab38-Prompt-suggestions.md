@@ -64,7 +64,7 @@ async def main() -> None:
     print("Suggested next prompt:", suggestion(todos))
 ```
 
-The receive_response loop validates each TodoWrite ToolUseBlock into Todo models, and suggestion() derives the next prompt from the in-progress or pending task.
+The `receive_response` loop validates each TodoWrite ToolUseBlock into Todo models, and suggestion() derives the next prompt from the in-progress or pending task.
 
 ## How the offline lab checks it
 

@@ -56,7 +56,7 @@ def options_for(task: str) -> ClaudeAgentOptions:
     )
 ```
 
-route() applies explicit keyword and length rules and returns a Route whose model, max_turns and max_budget_usd are passed straight into ClaudeAgentOptions, with the reason logged.
+route() applies explicit keyword and length rules and returns a Route whose model, `max_turns` and `max_budget_usd` are passed straight into ClaudeAgentOptions, with the reason logged.
 
 ## How the offline lab checks it
 

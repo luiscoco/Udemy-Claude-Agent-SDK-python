@@ -62,7 +62,7 @@ async def main() -> None:
         print(await reply_text(client))
 ```
 
-ClaudeAgentOptions(permission_mode="plan") makes the first turn read-only; Plan.model_validate_json checks the proposal and set_permission_mode("acceptEdits") runs only after approval.
+ClaudeAgentOptions(`permission_mode`="plan") makes the first turn read-only; Plan.model_validate_json checks the proposal and `set_permission_mode`("acceptEdits") runs only after approval.
 
 ## How the offline lab checks it
 

@@ -62,7 +62,7 @@ async def run_member(board: Board, name: str, task: str) -> str:
     return ""
 ```
 
-Board.send enforces membership, a per-sender count and Note's 600-character limit, and run_member wraps each note in a <message from=... trust='untrusted'> tag that the system prompt treats as data.
+Board.send enforces membership, a per-sender count and Note's 600-character limit, and `run_member` wraps each note in a <message from=... trust='untrusted'> tag that the system prompt treats as data.
 
 ## How the offline lab checks it
 

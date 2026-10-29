@@ -55,7 +55,7 @@ async def main() -> None:
             print(message.result)
 ```
 
-selected_provider checks the three CLAUDE_CODE_USE_* flags, raises if more than one is "1", and falls back to ANTHROPIC_API_KEY without reading any secret value into code.
+`selected_provider` checks the three CLAUDE_CODE_USE_* flags, raises if more than one is "1", and falls back to `ANTHROPIC_API_KEY` without reading any secret value into code.
 
 ## How the offline lab checks it
 

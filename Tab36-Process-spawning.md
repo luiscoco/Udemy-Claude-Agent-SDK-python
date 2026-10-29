@@ -53,7 +53,7 @@ async def main() -> None:
             print(message.result)
 ```
 
-asyncio.create_subprocess_exec(*args) with asyncio.timeout and process.kill() is the host pattern, and ClaudeAgentOptions(cli_path=...) chooses the CLI the SDK itself spawns.
+asyncio.create_subprocess_exec(*args) with asyncio.timeout and process.kill() is the host pattern, and ClaudeAgentOptions(`cli_path`=...) chooses the CLI the SDK itself spawns.
 
 ## How the offline lab checks it
 

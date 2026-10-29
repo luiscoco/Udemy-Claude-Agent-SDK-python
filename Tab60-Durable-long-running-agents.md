@@ -61,7 +61,7 @@ async def run_job(journal: Journal, job_id: str) -> None:
                 journal.append(key, message.session_id)
 ```
 
-run_job() skips any idempotency key already in journal.completed() and appends a step only after a successful ResultMessage, with flush() and os.fsync() making the record durable.
+`run_job()` skips any idempotency key already in journal.completed() and appends a step only after a successful ResultMessage, with flush() and os.fsync() making the record durable.
 
 ## How the offline lab checks it
 

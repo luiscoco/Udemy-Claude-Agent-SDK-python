@@ -57,7 +57,7 @@ async def main(repo: Path) -> None:
         group.create_task(worker(repo, "T2", "Add docstrings to src/search.py."))
 ```
 
-Each worker runs git worktree add on its own branch through the GIT_LOCK-guarded git() helper, then points ClaudeAgentOptions(cwd=tree) at that worktree so parallel agents never share a working copy.
+Each worker runs git worktree add on its own branch through the `GIT_LOCK`-guarded git() helper, then points ClaudeAgentOptions(cwd=tree) at that worktree so parallel agents never share a working copy.
 
 ## How the offline lab checks it
 

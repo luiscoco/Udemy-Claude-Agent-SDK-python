@@ -49,7 +49,7 @@ async def main() -> None:
             print(message.session_id, message.duration_ms, message.total_cost_usd)
 ```
 
-telemetry_env returns OTLP exporter settings only when OTEL_EXPORTER_OTLP_ENDPOINT is configured, and ClaudeAgentOptions(env=...) hands them to the CLI.
+`telemetry_env` returns OTLP exporter settings only when `OTEL_EXPORTER_OTLP_ENDPOINT` is configured, and ClaudeAgentOptions(env=...) hands them to the CLI.
 
 ## How the offline lab checks it
 

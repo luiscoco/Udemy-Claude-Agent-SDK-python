@@ -55,7 +55,7 @@ async def main() -> None:
         print(item)
 ```
 
-ClaudeAgentOptions(tools=WEB_TOOLS, allowed_tools=WEB_TOOLS) enables the web tools, and every ToolResultBlock is stored labelled "untrusted retrieved content".
+ClaudeAgentOptions(tools=`WEB_TOOLS`, `allowed_tools`=`WEB_TOOLS`) enables the web tools, and every ToolResultBlock is stored labelled "untrusted retrieved content".
 
 ## How the offline lab checks it
 

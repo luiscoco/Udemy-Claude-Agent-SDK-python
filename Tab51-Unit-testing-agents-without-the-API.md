@@ -61,7 +61,7 @@ async def test_collect_reads_text_and_cost() -> None:
     assert await collect(fake_run()) == ("Refunds take 5 days.", 0.0)
 ```
 
-collect() accepts any AsyncIterator[Message], so the test feeds it fake_run(), a generator of real AssistantMessage, TextBlock and ResultMessage objects, instead of query().
+collect() accepts any AsyncIterator[Message], so the test feeds it `fake_run()`, a generator of real AssistantMessage, TextBlock and ResultMessage objects, instead of query().
 
 ## How the offline lab checks it
 

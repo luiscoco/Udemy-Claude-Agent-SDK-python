@@ -56,7 +56,7 @@ def main() -> None:
             print("refused:", error)
 ```
 
-options_for resolves the request under BASE, rejects anything not is_relative_to(BASE), and sets setting_sources=["project"] only for names in TRUSTED.
+`options_for` resolves the request under BASE, rejects anything not `is_relative_to`(BASE), and sets `setting_sources`=["project"] only for names in TRUSTED.
 
 ## How the offline lab checks it
 

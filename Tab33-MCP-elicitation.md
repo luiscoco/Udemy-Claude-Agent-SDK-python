@@ -55,7 +55,7 @@ async def main() -> None:
             print(result.content)
 ```
 
-on_elicit, passed as ClientSession(..., elicitation_callback=on_elicit), turns the server's ElicitRequestParams into an ElicitResult with action accept, decline or cancel.
+`on_elicit`, passed as ClientSession(..., `elicitation_callback`=`on_elicit`), turns the server's ElicitRequestParams into an ElicitResult with action accept, decline or cancel.
 
 ## How the offline lab checks it
 

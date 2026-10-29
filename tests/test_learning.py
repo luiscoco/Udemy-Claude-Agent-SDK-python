@@ -424,3 +424,26 @@ def test_browser_lessons_focus_on_concept_code_and_show_live_tutor_option(server
         page.get_by_text("Live answers are turned off").wait_for()
         assert page.get_by_role("button", name="Ask the tutor").is_disabled()
         browser.close()
+
+
+def test_browser_study_coach_runs_the_selected_coach_implementation(server):
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1280, "height": 1000})
+        page.goto(base + "/coach")
+        page.get_by_role("button", name="Reference").click()
+        page.get_by_text("is at stage 7 of 7").wait_for()
+        page.get_by_role("button", name="Simple code").click()
+        page.get_by_role("button", name="Ask", exact=True).click()
+        # Wait for the answer itself: "RUNNING" may not have appeared yet.
+        answer = page.locator(".response-prose").filter(has_text="async for message").first
+        answer.wait_for(timeout=15000)
+        page.get_by_text("RUNNING").wait_for(state="hidden", timeout=15000)
+        page.get_by_role("button", name="Try invalid prepared plan").click()
+        page.get_by_text("REJECTED").wait_for()
+        page.get_by_role("button", name="Inspect saved turn").click()
+        page.get_by_text("Reuse the saved answer").wait_for()
+        browser.close()

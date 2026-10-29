@@ -54,7 +54,7 @@ async def main() -> None:
     print(options.mcp_servers)
 ```
 
-streamable_http_client(URL) plus ClientSession lists tools and resources, then read_resource(AnyUrl(...)) reads data while call_tool(...) runs an action.
+`streamable_http_client`(URL) plus ClientSession lists tools and resources, then `read_resource`(AnyUrl(...)) reads data while `call_tool`(...) runs an action.
 
 ## How the offline lab checks it
 

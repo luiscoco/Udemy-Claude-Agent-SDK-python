@@ -61,7 +61,7 @@ def options_for(request: str, limit: int = 2) -> ClaudeAgentOptions:
     )
 ```
 
-options_for() scores CATALOG against the request, registers only the top matches with create_sdk_mcp_server, sets tools=[] to hide built-ins and pre-approves exactly those mcp__shop__ names in allowed_tools.
+`options_for()` scores CATALOG against the request, registers only the top matches with `create_sdk_mcp_server`, sets tools=[] to hide built-ins and pre-approves exactly those mcp__shop__ names in `allowed_tools`.
 
 ## How the offline lab checks it
 

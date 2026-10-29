@@ -51,7 +51,7 @@ async def main() -> None:
         print(info.session_id, info.summary)
 ```
 
-ask() captures ResultMessage.session_id, then ClaudeAgentOptions(resume=first), resume plus fork_session=True, and continue_conversation=True reopen it from one CLAUDE_CONFIG_DIR.
+ask() captures ResultMessage.session_id, then ClaudeAgentOptions(resume=first), resume plus `fork_session`=True, and `continue_conversation`=True reopen it from one `CLAUDE_CONFIG_DIR`.
 
 ## How the offline lab checks it
 

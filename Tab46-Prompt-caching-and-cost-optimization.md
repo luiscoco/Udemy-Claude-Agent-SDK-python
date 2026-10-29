@@ -49,7 +49,7 @@ async def main() -> None:
             print("cost USD:", message.total_cost_usd)
 ```
 
-The ResultMessage branch reads usage['cache_read_input_tokens'] and cache_creation_input_tokens, and cache_read_ratio turns them into a measured hit rate next to total_cost_usd.
+The ResultMessage branch reads usage['`cache_read_input_tokens`'] and `cache_creation_input_tokens`, and `cache_read_ratio` turns them into a measured hit rate next to `total_cost_usd`.
 
 ## How the offline lab checks it
 

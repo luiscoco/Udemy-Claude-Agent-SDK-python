@@ -31,7 +31,7 @@ jobs:
       - name: Install Chromium for the browser tests
         run: uv run playwright install ${{ runner.os == 'Linux' && '--with-deps' || '' }} chromium
       - name: Lint
-        run: uv run ruff check agent_lab tests scripts
+        run: uv run ruff check agent_lab tests scripts mini_projects
       - name: Type-check
         run: uv run mypy agent_lab
       - name: Check generated lessons are up to date

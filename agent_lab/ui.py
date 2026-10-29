@@ -17,9 +17,10 @@ from agent_lab.models import Event, RunRequest
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
 from agent_lab.runtime import RunHandle, RunService
+from agent_lab.study_coach import CoachService
 from agent_lab.tutor import TutorService
+from agent_lab.ui_coach import install_coach_page
 from agent_lab.ui_learning import (
-    APPEARANCE_CSS,
     appearance_controls,
     check_card,
     completed,
@@ -27,6 +28,7 @@ from agent_lab.ui_learning import (
     home_page,
     learn_panel,
     lesson_header,
+    page_style,
     record,
     run_summary,
     set_preference,
@@ -49,40 +51,11 @@ def storage_secret(runner: RunService) -> str:
 def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) -> None:
     if (ROOT / "public").is_dir():
         nice_app.add_static_files("/assets", str(ROOT / "public"))
+    install_coach_page(CoachService(runner.settings))
 
     @ui.page("/")
     async def home(lesson: int = 0) -> None:
-        ui.colors(primary="#7c3aed", secondary="#0f766e", accent="#f59e0b")
-        ui.add_css(
-            """
-            html { font-size: 18px; }
-            body { background: #f5f5fa; color: #222238; font-size: 18px; line-height: 1.6; }
-            .text-xs { font-size: 16px !important; line-height: 1.5 !important; }
-            .text-sm { font-size: 18px !important; line-height: 1.5 !important; }
-            .text-lg { font-size: 22px !important; line-height: 1.5 !important; }
-            .text-xl { font-size: 26px !important; line-height: 1.4 !important; }
-            .q-btn, .q-tab__label, .q-item__label, .q-expansion-item__container > .q-item { font-size: 18px; }
-            .q-field__native, .q-field__input { font-size: 18px; line-height: 1.5; }
-            .q-field__label { font-size: 20px; }
-            .q-badge { font-size: 15px; line-height: 1.4; }
-            .q-table th, .q-table td { font-size: 18px; }
-            .nicegui-markdown { font-size: 20px; line-height: 1.75; }
-            .nicegui-markdown pre, .nicegui-code, .nicegui-code pre,
-            .nicegui-markdown code, .nicegui-code code { font-size: 17px !important; }
-            .nicegui-log { font-size: 16px; line-height: 1.6; }
-            .course-card { border: 1px solid #e6e3ee; border-radius: 16px; box-shadow: none; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
-            .course-card .q-btn-toggle { flex-wrap: wrap; max-width: 100%; }
-            .lesson-menu a { color: #44415b; text-decoration: none; display: block; padding: 7px 0; }
-            .lesson-menu a:hover { color: #7c3aed; }
-            .course-title { font-size: 36px; font-weight: 750; line-height: 1.2; }
-            .q-drawer { background: #fff; border-right: 1px solid #e6e3ee; }
-            .response-prose { font-size: 20px; line-height: 1.75; overflow-wrap: anywhere; }
-            .response-prose pre { overflow-x: auto; max-width: 100%; padding: 16px; border-radius: 10px; }
-            .response-prose table { display: block; overflow-x: auto; max-width: 100%; }
-            .response-prose h1, .response-prose h2, .response-prose h3 { margin-top: 1em; font-weight: 700; }
-        """
-            + APPEARANCE_CSS
-        )
+        page_style()
         client = ui.context.client
         handle: RunHandle | None = None
         consumer: asyncio.Task[Any] | None = None

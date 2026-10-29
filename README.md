@@ -57,6 +57,15 @@ macOS or Linux:
 .venv/bin/python -m agent_lab serve
 ```
 
+## Milestone project: Study Coach
+
+Build a study coach in seven stages: validated questions, live conversations that resume
+the SDK session on the server, structured study plans and safe recovery of saved turns.
+You implement [mini_projects/study_coach/coach.py](mini_projects/study_coach/coach.py);
+the course app runs your file at http://127.0.0.1:8080/coach, so each finished stage
+unlocks a feature. Check your work with `uv run agent-lab coach check`. Start with the
+[project README](mini_projects/study_coach/README.md).
+
 ## Run lessons independently
 
 ```shell

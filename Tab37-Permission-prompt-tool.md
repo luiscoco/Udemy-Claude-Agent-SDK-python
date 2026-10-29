@@ -61,7 +61,7 @@ async def main() -> None:
             print(message)
 ```
 
-can_use_tool returns PermissionResultDeny(message=..., interrupt=True) for Bash, and PermissionResultAllow(updated_input=...) with a resolved path for in-workspace Write calls.
+`can_use_tool` returns PermissionResultDeny(message=..., interrupt=True) for Bash, and PermissionResultAllow(`updated_input`=...) with a resolved path for in-workspace Write calls.
 
 ## How the offline lab checks it
 

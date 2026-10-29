@@ -73,7 +73,7 @@ def compatibility_problems() -> list[str]:
     return problems
 ```
 
-compatibility_problems() compares the installed version with the exact pin and checks, with hasattr and inspect.signature, every export, ClaudeSDKClient method and ClaudeAgentOptions field the app relies on.
+`compatibility_problems()` compares the installed version with the exact pin and checks, with hasattr and inspect.signature, every export, ClaudeSDKClient method and ClaudeAgentOptions field the app relies on.
 
 ## How the offline lab checks it
 

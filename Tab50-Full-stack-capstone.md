@@ -79,7 +79,7 @@ def support_server(
     return create_sdk_mcp_server("support", tools=[list_orders, refund])
 ```
 
-support_server closes over the host's customer_id, so list_orders takes no customer argument, and refund only runs, and then deletes the approval, when an unexpired Approval for that order matches the customer and amount.
+`support_server` closes over the host's `customer_id`, so `list_orders` takes no customer argument, and refund only runs, and then deletes the approval, when an unexpired Approval for that order matches the customer and amount.
 
 ## How the offline lab checks it
 
