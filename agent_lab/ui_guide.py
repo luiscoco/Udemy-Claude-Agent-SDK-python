@@ -75,6 +75,10 @@ if (heading) {
     heading.focus({preventScroll: true});
 }
 """
+INITIAL_LESSON_START = """
+if (document.activeElement === document.body &&
+    !document.querySelector('.learning-guide')?.getClientRects().length) {
+""" + LESSON_START + "\n}"
 
 
 def guide_positions() -> dict[str, str]:
@@ -197,7 +201,11 @@ class LessonGuidePanel:
         self.content.refresh()
         self.navigation.refresh()
         ui.run_javascript(
-            f"requestAnimationFrame(() => document.getElementById({json.dumps(self.panel.html_id)})?.focus({{preventScroll: true}}))"
+            "let tries = 0; requestAnimationFrame(function focusGuide() {"
+            f"const panel = document.getElementById({json.dumps(self.panel.html_id)});"
+            "if (panel?.getClientRects().length) {"
+            "panel.focus({preventScroll: true});"
+            "} else if (++tries < 30) requestAnimationFrame(focusGuide); });"
         )
 
     def clear_target(self) -> None:

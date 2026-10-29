@@ -579,6 +579,7 @@ def test_browser_written_guide_preserves_work_and_only_changes_tour_position(ser
     from playwright.sync_api import expect, sync_playwright
 
     from agent_lab.lesson_guide import learning_guides
+    from agent_lab.ui_guide import INITIAL_LESSON_START
 
     base, _ = server
     with sync_playwright() as playwright:
@@ -591,6 +592,9 @@ def test_browser_written_guide_preserves_work_and_only_changes_tour_position(ser
         launch.focus()
         launch.press("Enter")
         panel = page.get_by_role("region", name="Lesson 1 Learning Guide", exact=True)
+        expect(panel).to_be_focused()
+        # A delayed startup callback must not steal focus from an opened guide.
+        page.evaluate(INITIAL_LESSON_START)
         expect(panel).to_be_focused()
         expect(launch).to_have_attribute("aria-expanded", "true")
         panel.get_by_role("button", name="Start guided tour", exact=True).press("Enter")

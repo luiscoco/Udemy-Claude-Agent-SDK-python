@@ -23,7 +23,7 @@ from agent_lab.runtime import RunHandle, RunService
 from agent_lab.study_coach import CoachService
 from agent_lab.tutor import TutorService
 from agent_lab.ui_coach import install_coach_page
-from agent_lab.ui_guide import LESSON_START, LessonGuidePanel
+from agent_lab.ui_guide import INITIAL_LESSON_START, LessonGuidePanel
 from agent_lab.ui_learning import (
     appearance_controls,
     check_card,
@@ -398,7 +398,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                     ui.link("← Previous lesson", lesson_url(previous, active_path))
                 if following := adjacent_lesson(lesson, 1, active_path):
                     ui.link("Next lesson →", lesson_url(following, active_path))
-            ui.timer(0.15, lambda: ui.run_javascript(LESSON_START), once=True)
+            ui.timer(0.15, lambda: ui.run_javascript(INITIAL_LESSON_START), once=True)
 
     ui.run_with(
         application,
