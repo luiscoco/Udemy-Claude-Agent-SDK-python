@@ -138,7 +138,10 @@ def install_publish_page(service: PublishingService) -> None:
             if isinstance(exc, NotImplementedError):
                 ui.notify(f"{exc}. See mini_projects/publishing_studio/prompts/.")
             else:
-                ui.notify(str(exc), type="info" if isinstance(exc, StageLocked) else "warning")
+                ui.notify(
+                    str(exc), type="info" if isinstance(exc, StageLocked) else "warning",
+                    close_button="Dismiss", timeout=0 if isinstance(exc, StageLocked) else 10000,
+                )
 
         failures = (StageLocked, NotImplementedError, ValueError, PermissionError, LessonError)
 

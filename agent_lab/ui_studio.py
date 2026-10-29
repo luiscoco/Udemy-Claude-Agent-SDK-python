@@ -73,7 +73,7 @@ def install_studio_page(service: StudioService) -> None:
             except NotImplementedError as exc:
                 ui.notify(f"{exc}. See mini_projects/evaluation_studio/prompts/.")
             except StageLocked as exc:
-                ui.notify(str(exc), type="info")
+                ui.notify(str(exc), type="info", close_button="Dismiss", timeout=0)
             except (ValueError, PermissionError, LessonError) as exc:
                 ui.notify(str(exc), type="warning")
             return None

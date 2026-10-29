@@ -83,7 +83,7 @@ def install_coach_page(service: CoachService) -> None:
             except NotImplementedError as exc:
                 ui.notify(f"{exc}. See the stage prompt in mini_projects/study_coach/prompts/.")
             except StageLocked as exc:
-                ui.notify(str(exc), type="info")
+                ui.notify(str(exc), type="info", close_button="Dismiss", timeout=0)
             except (ValueError, PermissionError, LessonError) as exc:
                 ui.notify(str(exc), type="warning")
             return None

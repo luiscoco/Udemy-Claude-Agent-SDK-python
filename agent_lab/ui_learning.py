@@ -870,6 +870,30 @@ APPEARANCE_CSS = """
     .legend-data { background: #f1f5f9; border-color: #64748b; }
     .feedback-ok { background: #ecfdf5; color: #065f46; }
     .feedback-bad { background: #fff7ed; color: #9a3412; }
+    .q-notification {
+        --q-info: #163a63; --q-negative: #7f1d1d; --q-positive: #14532d;
+        --q-warning: #fef3c7; --q-primary: #ffffff;
+        background: #1e293b; color: #ffffff;
+        max-width: min(860px, calc(100vw - 32px)); padding: 16px 20px;
+        border: 1px solid #64748b; border-radius: 12px;
+    }
+    .q-notification.bg-info { border-color: #93c5fd; }
+    .q-notification.bg-negative { border-color: #fca5a5; }
+    .q-notification.bg-positive { border-color: #86efac; }
+    .q-notification.bg-warning { --q-primary: #422006; color: #422006; border-color: #b45309; }
+    .q-notification__wrapper, .q-notification__content { min-width: 0; }
+    .q-notification__message {
+        font-size: 20px !important; font-weight: 600; line-height: 1.6;
+        white-space: normal; overflow-wrap: anywhere;
+    }
+    .q-notification__icon { color: inherit !important; font-size: 28px; }
+    .q-notification__actions .q-btn { color: inherit !important; font-size: 18px; min-height: 44px; }
+    @media (max-width: 600px) {
+        .q-notification__wrapper { flex-direction: column; align-items: stretch; }
+        .q-notification__actions { align-self: flex-end; padding-left: 0; }
+    }
+    body.lab-text-large .q-notification__message { font-size: 22px !important; }
+    body.lab-text-xlarge .q-notification__message { font-size: 24px !important; }
     body.lab-text-small .q-page-container { zoom: .9; }
     body.lab-text-large .q-page-container { zoom: 1.12; }
     body.lab-text-xlarge .q-page-container { zoom: 1.25; }
