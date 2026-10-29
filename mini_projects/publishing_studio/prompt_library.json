@@ -1,0 +1,311 @@
+[
+ {
+  "id": "first-steps",
+  "title": "01 - LLMs, agents, and harnesses",
+  "level": "Beginner",
+  "description": "Start from zero: define the model, agent, harness, SDK, and first query.",
+  "prompts": [
+   "What is a large language model (LLM)? Explain in plain words what it can and cannot do.",
+   "What is an AI agent? Compare it with one ordinary LLM question-and-answer call.",
+   "What is an agent harness? Explain how it supplies instructions, tools, permissions, and a runtime.",
+   "Show how an LLM, an agent, a harness, and an environment fit together in one simple example.",
+   "What is the Claude Agent SDK, and which parts of an agent does it help me run?",
+   "What do I need to install and configure before trying my first local SDK query?",
+   "What is `query()` in the Python Claude Agent SDK? Explain its input and the messages it yields.",
+   "Show the smallest Python `query()` example and explain each line.",
+   "Explain how an agent uses tools, in simple words.",
+   "Compare a model, an agent, a tool, and a tool result using one student app."
+  ]
+ },
+ {
+  "id": "query-results",
+  "title": "02 - Queries and results",
+  "level": "Beginner",
+  "description": "Read the SDK event stream and its final outcome.",
+  "prompts": [
+   "Walk through a query from user prompt to final result, one event at a time.",
+   "Show a short Python `async for` loop that handles AssistantMessage and ResultMessage.",
+   "What is the difference between an assistant message and a final result?",
+   "Explain why a tool request may lead to another model turn.",
+   "How should I recognize an incomplete or failed agent run?",
+   "Explain a result subtype in simple words and show how to inspect it.",
+   "What should I record from the final result for a student review?",
+   "Show how to collect readable answer text without losing the run status.",
+   "Why should I check the terminal result before saying the task succeeded?",
+   "Give me a tiny test that distinguishes a successful run from an error result."
+  ]
+ },
+ {
+  "id": "instructions-context",
+  "title": "03 - Instructions and context",
+  "level": "Beginner",
+  "description": "Shape requests without confusing source material with instructions.",
+  "prompts": [
+   "Compare a user prompt and a system instruction with a small SDK example.",
+   "Rewrite a vague agent request into a specific goal and success check.",
+   "Show how to ask for a short answer with one verified code example.",
+   "How do I separate an uploaded document from my instructions to the agent?",
+   "Explain prompt injection using one harmless document example.",
+   "Show a prompt that asks Claude to say when the source is insufficient.",
+   "How can I ask for citations without inventing a source I did not provide?",
+   "Compare a short task prompt with a reusable system instruction.",
+   "How should I limit the context sent to a small student project?",
+   "Give me a checklist for reviewing whether the answer followed the request."
+  ]
+ },
+ {
+  "id": "project-memory",
+  "title": "04 - CLAUDE.md and project memory",
+  "level": "Beginner",
+  "description": "Keep project instructions in the right place and verify what the SDK loads.",
+  "prompts": [
+   "What is a CLAUDE.md file, and how is it different from one user prompt?",
+   "Write a tiny CLAUDE.md for a Python student app with its uv, ruff and pytest commands.",
+   "Which facts belong in CLAUDE.md, and which belong in a task-specific prompt?",
+   "Show how the `cwd` and `setting_sources` options affect loading a project CLAUDE.md.",
+   "Compare project CLAUDE.md, user CLAUDE.md, and a custom system prompt.",
+   "How can I verify that an SDK run received the intended project instructions?",
+   "What happens if `setting_sources` is an empty list when I expect CLAUDE.md to load?",
+   "Rewrite a long CLAUDE.md as concise, checkable project guidance.",
+   "Explain why secrets and temporary chat history should stay out of CLAUDE.md.",
+   "Give me a test that compares an agent run with and without project instructions."
+  ]
+ },
+ {
+  "id": "tools-permissions",
+  "title": "05 - Tools and permissions",
+  "level": "Intermediate",
+  "description": "Understand what tools can do and how to bound them.",
+  "prompts": [
+   "Explain a tool call and tool result with a tiny Python example.",
+   "When should an agent use a tool instead of answering from context?",
+   "Compare read-only and write-capable tools for a local project.",
+   "What should an allowed-tools list contain for a read-only teaching agent?",
+   "Explain how to deny an unsafe tool call without claiming the run crashed.",
+   "Show a simple approval step before a tool changes a file.",
+   "How can I verify that a reported file change has a matching tool event?",
+   "Explain the difference between limiting a tool and removing it entirely.",
+   "Give me two tests for a tool: one valid input and one invalid input.",
+   "Draft a concise permission policy for an agent that reviews source code."
+  ]
+ },
+ {
+  "id": "skills",
+  "title": "06 - Skills and reusable workflows",
+  "level": "Intermediate",
+  "description": "Package reusable instructions in SKILL.md and check discovery and invocation.",
+  "prompts": [
+   "What is an Agent Skill, and how does it differ from a prompt or a tool?",
+   "Show the smallest useful SKILL.md with a name, description, and three steps.",
+   "Where should a project Skill live so a local SDK session can discover it?",
+   "Show a Python `query()` that enables project Skills using `cwd`, `setting_sources` and the Skill tool.",
+   "Explain progressive disclosure: metadata first, SKILL.md when relevant, resources as needed.",
+   "How should I write a Skill description so the agent chooses it for the right task?",
+   "Compare automatic Skill selection with explicitly invoking a named Skill.",
+   "How can I verify that a Skill was actually loaded and used in a run?",
+   "What should I review before allowing a downloaded Skill to run scripts or read files?",
+   "Give me a small test for a Skill that formats a student report consistently."
+  ]
+ },
+ {
+  "id": "mcp-sources",
+  "title": "07 - MCP and external sources",
+  "level": "Intermediate",
+  "description": "Connect external knowledge deliberately and inspect evidence.",
+  "prompts": [
+   "Explain MCP servers, tools, and resources with a simple diagram in words.",
+   "When would official documentation MCP improve an SDK answer?",
+   "Show a minimal server-side plan for connecting one read-only MCP source.",
+   "What should I check before trusting information returned by an MCP tool?",
+   "Explain why connecting an MCP server does not prove it was called.",
+   "How do I record which MCP tool supplied each claim in an answer?",
+   "Compare an answer using supplied documents with one using an external MCP source.",
+   "What should the app show when the external MCP source is unavailable?",
+   "Write a safe question that asks for current SDK guidance and linked evidence.",
+   "Give me a small test for denying an unapproved external tool call."
+  ]
+ },
+ {
+  "id": "rag-retrieval",
+  "title": "08 - Retrieval and grounded answers (RAG)",
+  "level": "Intermediate",
+  "description": "Retrieve relevant source excerpts, cite them, and test whether retrieval helped.",
+  "prompts": [
+   "What is retrieval-augmented generation (RAG), in simple words?",
+   "Compare sending one short document directly with retrieving from many documents.",
+   "Draw a small RAG flow: ingest, split, index, retrieve, answer, and cite.",
+   "Show a tiny read-only retrieval tool that returns a source ID and relevant excerpt.",
+   "How could a Claude Agent SDK agent call a retrieval tool or MCP source before answering?",
+   "How should I choose chunk size and overlap for a small collection of course notes?",
+   "What should the agent say when retrieval finds no evidence for the question?",
+   "How do I keep retrieved text as source data rather than instructions to the agent?",
+   "Design a test for stale, conflicting, or irrelevant retrieved passages.",
+   "Compare answers with and without retrieval using citation accuracy, cost, and latency."
+  ]
+ },
+ {
+  "id": "sessions",
+  "title": "09 - Sessions and continuity",
+  "level": "Intermediate",
+  "description": "Understand follow-ups, state, and what survives a restart.",
+  "prompts": [
+   "Explain a session ID and why I should not treat it as an answer.",
+   "Show a simple follow-up question that depends on an earlier agent response.",
+   "What context should a second turn receive to answer correctly?",
+   "Compare continuing one session with starting a fresh query.",
+   "How should I display the selected response when there are several runs?",
+   "What could go wrong if I publish a file from the wrong saved response?",
+   "Explain session persistence in plain language and what I should verify locally.",
+   "How do I avoid mixing two students’ uploaded files and responses?",
+   "Draft a recovery message for a session that can no longer be resumed.",
+   "Give me a test that proves a new response does not change an older artifact."
+  ]
+ },
+ {
+  "id": "streaming",
+  "title": "10 - Streaming and the browser",
+  "level": "Intermediate",
+  "description": "Present partial progress while preserving the final result.",
+  "prompts": [
+   "Explain streaming SDK messages to a browser in simple steps.",
+   "Compare partial text events with the final completed answer.",
+   "Show a small server-to-browser event flow for an agent response.",
+   "How should the page behave if a live stream disconnects?",
+   "What should I display while a tool call is still running?",
+   "Explain why streamed text alone is not proof of a successful result.",
+   "How can I avoid showing duplicate text when a final message replaces deltas?",
+   "Give me an accessible loading status for a long agent run.",
+   "How should I cancel a run without labeling it as completed?",
+   "Design a browser test for progress, failure, and final status."
+  ]
+ },
+ {
+  "id": "structured-output",
+  "title": "11 - Structured output and validation",
+  "level": "Intermediate",
+  "description": "Turn agent results into checked data before rendering or exporting.",
+  "prompts": [
+   "When should I request structured output instead of free-form Markdown?",
+   "Define a small JSON schema for a report title, summary, and three evidence items.",
+   "Show a Python `query()` using `output_format` to request a validated JSON result.",
+   "Explain why a JSON-looking answer is not the same as a validated schema result.",
+   "How should I handle a structured-output validation failure without publishing a file?",
+   "Write a Pydantic model that limits title length and the number of report sections.",
+   "How do I keep citations tied to source IDs in a structured answer?",
+   "Show how to render validated report data into HTML without executing model text.",
+   "Give me a test with missing fields, oversized text, and unexpected properties.",
+   "Compare a prepared fixed fixture with a live schema-validated agent response."
+  ]
+ },
+ {
+  "id": "source-analysis",
+  "title": "12 - Analyze uploaded sources",
+  "level": "Intermediate",
+  "description": "Turn supplied files into grounded questions and summaries.",
+  "prompts": [
+   "Summarize the attached document and identify three open questions.",
+   "Extract the main claim from the attached file and quote its supporting evidence briefly.",
+   "Compare two attached notes and list where they agree or disagree.",
+   "Make a glossary of unfamiliar SDK terms found in the attached document.",
+   "Find the steps in the attached guide that a beginner might miss.",
+   "Turn the attached notes into five review questions with short answers.",
+   "Identify any claim in the attached source that needs an external check.",
+   "Explain the attached Python code in plain language, one block at a time.",
+   "Summarize the attached CSV without inventing rows or columns.",
+   "List the assumptions and missing information in the attached report.",
+   "Create a source-based study outline and mark any unsupported conclusion."
+  ]
+ },
+ {
+  "id": "document-publishing",
+  "title": "13 - Reports and handouts",
+  "level": "Intermediate",
+  "description": "Prepare answers worth turning into Word and PDF files.",
+  "prompts": [
+   "Draft a concise report for a student learning the Claude Agent SDK.",
+   "Write a one-page beginner handout explaining the agent loop.",
+   "Create a short tutorial with prerequisites, steps, code, and a final check.",
+   "Turn this topic into a glossary with a simple example for each term.",
+   "Write an instructor note explaining when to use tools and when to answer directly.",
+   "Create a comparison of two SDK approaches with benefits and limitations.",
+   "Draft a troubleshooting guide for a failed live SDK run.",
+   "Make a source-grounded summary with headings, bullets, and one code snippet.",
+   "Write a lab worksheet with a goal, inputs, expected evidence, and reflection.",
+   "Create a concise implementation checklist for a read-only agent.",
+   "Revise this answer for a professional audience while keeping every factual claim."
+  ]
+ },
+ {
+  "id": "infographics",
+  "title": "14 - Infographics and review",
+  "level": "Intermediate",
+  "description": "Plan visual explanations and inspect what the export actually says.",
+  "prompts": [
+   "Explain the SDK agent loop in six short steps suitable for an infographic.",
+   "Describe tools, permissions, and results as three distinct visual blocks.",
+   "Create six concise key ideas about safe tool use with one short code example.",
+   "Write a beginner-friendly explanation of MCP for a visual guide.",
+   "Turn a source-backed answer into a title, subtitle, six cards, and a takeaway.",
+   "Show a simple flow from prompt to tool request to checked result.",
+   "Explain why the final result status belongs in an agent workflow diagram.",
+   "Create a visual checklist for reviewing claims against uploaded sources.",
+   "Write short infographic copy that keeps code examples readable at screen size.",
+   "Suggest a visual hierarchy for a technical lesson without copying reference text.",
+   "Review this infographic draft for clipped code, unsupported claims, and weak contrast."
+  ]
+ },
+ {
+  "id": "hooks",
+  "title": "15 - Hooks and tool oversight",
+  "level": "Advanced",
+  "description": "Inspect or block tool behavior at clear boundaries and record the decision.",
+  "prompts": [
+   "Explain what a pre-tool hook can inspect before a tool runs.",
+   "Give a small example of a hook that blocks an unexpected write.",
+   "How should I log a hook decision without exposing secrets?",
+   "Compare a hook check with an explicit user approval step.",
+   "Explain what a post-tool hook can record after a read-only tool call.",
+   "Show how to distinguish a denied tool call from a failed tool call.",
+   "How can I prevent a hook from trusting instructions inside tool output?",
+   "Give a small test for a hook that limits access to a project folder.",
+   "What should happen if a hook itself throws an error?",
+   "Give me a test showing that a blocked tool is never executed."
+  ]
+ },
+ {
+  "id": "subagents",
+  "title": "16 - Subagents and delegated review",
+  "level": "Advanced",
+  "description": "Delegate narrow tasks while tracking evidence, permissions, cost, and final ownership.",
+  "prompts": [
+   "What is a subagent, and when is one better than a single agent?",
+   "Show a minimal Python `AgentDefinition` for a read-only source reviewer.",
+   "How do I configure agents and allow the Agent tool in an SDK query?",
+   "What context must I pass explicitly to a subagent with a fresh context window?",
+   "Compare parallel specialist reviews with one sequential agent review.",
+   "When would a specialist agent improve a source review?",
+   "Write a narrow task for a specialist that checks factual evidence only.",
+   "How can I keep a specialist result separate from the main agent answer?",
+   "What should I do if two agents disagree about the same source?",
+   "Design a bounded reviewer that flags unsupported claims without rewriting them."
+  ]
+ },
+ {
+  "id": "reliability",
+  "title": "17 - Professional reliability and evaluation",
+  "level": "Professional",
+  "description": "Prove outcomes, control cost and permissions, and prepare an agent for real users.",
+  "prompts": [
+   "Define an evaluation rubric for an accurate Claude Agent SDK explanation.",
+   "Show how to test an answer against a reviewed source excerpt and flag unsupported claims.",
+   "What should a production app do when an agent reaches its turn limit?",
+   "Explain a budget-limited result and why I must not mark that task complete.",
+   "Design a small evaluation set with normal, edge, and adversarial agent requests.",
+   "What should I log for each run to inspect latency, cost, tool calls, and final status?",
+   "How can I compare two system instructions on the same cases without changing other variables?",
+   "Draft a regression test for a response that once invented a tool call or file change.",
+   "Write a release checklist covering source evidence, tool permissions, error paths, and data handling.",
+   "Design a production monitoring and recovery plan for failed or incomplete agent runs."
+  ]
+ }
+]

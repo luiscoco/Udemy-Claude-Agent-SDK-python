@@ -4,6 +4,7 @@ import socket
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import httpx
 import pytest
@@ -466,4 +467,37 @@ def test_browser_evaluation_studio_keeps_a_limited_run_a_failure(server):
         page.get_by_text("SDK stream stopped").wait_for()
         page.get_by_role("button", name="Save review").click()
         page.get_by_text("needs work").first.wait_for()
+        browser.close()
+
+
+def test_browser_publishing_studio_builds_and_downloads_a_document(server, tmp_path):
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    source = tmp_path / "notes.txt"
+    source.write_text("Results end with a ResultMessage.", encoding="utf-8")
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1280, "height": 1000})
+        page.goto(base + "/publish")
+        page.get_by_role("button", name="Reference").click()
+        page.get_by_text("is at stage 8 of 8").wait_for()
+        page.locator("input[type=file]").set_input_files(str(source))
+        page.get_by_text("notes.txt · 33 characters extracted").wait_for()
+        page.get_by_role("button", name="Send").click()
+        page.get_by_text("Attached sources: notes.txt").wait_for()
+        page.get_by_text("PREPARED SAMPLE", exact=True).wait_for()
+        page.get_by_role("button", name="Build files").click()
+        page.get_by_role("link", name="Download PDF").wait_for(timeout=60000)
+        with page.expect_download() as download:
+            page.get_by_role("link", name="Download DOCX").click()
+        assert download.value.suggested_filename.endswith(".docx")
+        assert Path(download.value.path()).read_bytes().startswith(b"PK")
+        page.get_by_role("button", name="Live SDK answer").click()
+        page.get_by_role("button", name="Send").click()
+        page.get_by_text("Authorize this paid answer").first.wait_for()
+        phone = browser.new_page(viewport={"width": 390, "height": 844})
+        phone.goto(base + "/publish")
+        phone.get_by_text("4 · Download").wait_for()
+        assert not phone.evaluate("document.documentElement.scrollWidth > innerWidth")
         browser.close()

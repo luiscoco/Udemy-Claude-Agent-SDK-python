@@ -693,6 +693,16 @@ def home_page() -> None:
             icon="fact_check",
             on_click=lambda: ui.navigate.to("/studio"),
         )
+    with card("Agent Publishing Studio", "Milestone project"):
+        ui.label(
+            "Turn a saved SDK answer into Word, PDF, SVG and PNG files: consented live answers, "
+            "uploaded sources, validated plans, highlighted code and a PNG style reference."
+        )
+        ui.button(
+            "Open the Publishing Studio",
+            icon="auto_stories",
+            on_click=lambda: ui.navigate.to("/publish"),
+        )
 
     ui.label("Learning paths").classes("text-xl font-bold mt-4")
     with ui.grid(columns="repeat(auto-fit, minmax(260px, 1fr))").classes("w-full gap-4"):

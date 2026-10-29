@@ -17,6 +17,7 @@ from agent_lab.learning import CheckResult, check_evidence
 from agent_lab.models import Event, RunRequest
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
+from agent_lab.publishing_studio import PublishingService
 from agent_lab.runtime import RunHandle, RunService
 from agent_lab.study_coach import CoachService
 from agent_lab.tutor import TutorService
@@ -38,6 +39,7 @@ from agent_lab.ui_learning import (
     visual_panel,
     walkthrough_panel,
 )
+from agent_lab.ui_publish import install_publish_page
 from agent_lab.ui_studio import install_studio_page
 
 
@@ -55,6 +57,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
         nice_app.add_static_files("/assets", str(ROOT / "public"))
     install_coach_page(CoachService(runner.settings))
     install_studio_page(StudioService(runner.settings))
+    install_publish_page(PublishingService(runner.settings))
 
     @ui.page("/")
     async def home(lesson: int = 0) -> None:

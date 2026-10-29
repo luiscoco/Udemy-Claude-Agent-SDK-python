@@ -75,6 +75,16 @@ and a release decision from regression suites. You implement
 app runs it at http://127.0.0.1:8080/studio. Check with `uv run agent-lab studio check` and
 start with the [project README](mini_projects/evaluation_studio/README.md).
 
+## Milestone project: Agent Publishing Studio
+
+Turn one saved SDK answer into Word, PDF, SVG and PNG files in eight stages: validated and
+consented live answers, uploaded sources with visible extracted text, strict document and
+infographic plans that keep code intact, deterministic builders, the optional documentation
+MCP and a PNG style reference. You implement
+[mini_projects/publishing_studio/publisher.py](mini_projects/publishing_studio/publisher.py);
+the app runs it at http://127.0.0.1:8080/publish. Check with `uv run agent-lab publish check`
+and start with the [project README](mini_projects/publishing_studio/README.md).
+
 ## Run lessons independently
 
 ```shell

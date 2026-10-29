@@ -37,21 +37,26 @@ def check_project(command: str, reference: bool) -> int:
     import sys
     from typing import Literal
 
-    from agent_lab import evaluation_studio, study_coach
+    from agent_lab import evaluation_studio, publishing_studio, study_coach
 
     implementation: Literal["learner", "reference"] = "reference" if reference else "learner"
-    if command == "coach":
-        project, path, variable = (
+    project, path, variable = {
+        "coach": (
             study_coach.PROJECT,
             study_coach.coach_path(implementation),
             "COACH_IMPLEMENTATION",
-        )
-    else:
-        project, path, variable = (
+        ),
+        "studio": (
             evaluation_studio.PROJECT,
             evaluation_studio.studio_path(implementation),
             "STUDIO_IMPLEMENTATION",
-        )
+        ),
+        "publish": (
+            publishing_studio.PROJECT,
+            publishing_studio.publisher_path(implementation),
+            "PUBLISHER_IMPLEMENTATION",
+        ),
+    }[command]
     print(f"Checking {path} ...", flush=True)
     result = subprocess.run(
         [sys.executable, "-m", "pytest", "-q", "-rs", str(project)],
@@ -76,6 +81,7 @@ def main() -> None:
     projects = {
         "coach": ("Study Coach milestone project", "coach.py"),
         "studio": ("Agent Evaluation Studio milestone project", "studio.py"),
+        "publish": ("Agent Publishing Studio milestone project", "publisher.py"),
     }
     for command, (help_text, filename) in projects.items():
         project = subcommands.add_parser(command, help=help_text)
