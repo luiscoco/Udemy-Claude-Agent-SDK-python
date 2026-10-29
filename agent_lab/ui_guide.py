@@ -28,7 +28,13 @@ GUIDE_CSS = """
 .learning-guide-step { font-weight: 700; font-size: 20px; }
 .learning-guide-action { background: #eff6ff; color: #173b63; padding: 12px; border-radius: 10px; }
 .learning-guide-status { font-size: 16px; color: #475569; }
-.learning-guide-target { outline: 3px solid #dc2626 !important; outline-offset: 5px; border-radius: 5px; }
+/* Layered !important declarations outrank unlayered ones. NiceGUI orders its
+   overrides layer before quasar_importants, so this beats Quasar's .no-outline. */
+@layer overrides {
+    body.learning-guide-active .learning-guide-target {
+        outline: 3px solid #dc2626 !important; outline-offset: 5px; border-radius: 5px;
+    }
+}
 .learning-guide-target.nicegui-markdown > :first-child { margin-top: 0; }
 .learning-guide-target.nicegui-markdown > :last-child { margin-bottom: 0; }
 .learning-guide-target:not(button) {
@@ -298,11 +304,20 @@ class LessonGuidePanel:
                     observer.observe(target);
                     observer.observe(panel);
                     if (header) observer.observe(header);
+                    // Vue reapplies a button's server-owned classes when Run is disabled
+                    // or enabled. Restore only our temporary marker, without scrolling.
+                    const classes = new MutationObserver(() => {
+                        if (window.__learningGuideRevision === revision && target.isConnected
+                            && !target.classList.contains('learning-guide-target'))
+                            target.classList.add('learning-guide-target');
+                    });
+                    classes.observe(target, {attributes: true, attributeFilter: ['class']});
                     window.addEventListener('resize', schedule);
                     window.visualViewport?.addEventListener('resize', schedule);
                     window.__learningGuideCleanup = () => {
                         cancelAnimationFrame(frame);
                         observer.disconnect();
+                        classes.disconnect();
                         window.removeEventListener('resize', schedule);
                         window.visualViewport?.removeEventListener('resize', schedule);
                         target.style.removeProperty('--learning-guide-target-height');

@@ -554,7 +554,10 @@ def assert_guide_target_fits(page):
         if (!target || !panel || !header) return false;
         const box = target.getBoundingClientRect();
         const guide = panel.getBoundingClientRect();
+        const style = getComputedStyle(target);
         return box.width > 0 && box.height > 0 && box.left >= 8 && box.right <= innerWidth - 8
+            && style.outlineStyle === 'solid' && parseFloat(style.outlineWidth) >= 2
+            && style.outlineColor === 'rgb(220, 38, 38)'
             && box.top >= header.getBoundingClientRect().bottom + 8
             && box.bottom <= guide.top - 8;
     }""")
@@ -683,8 +686,9 @@ def test_browser_guide_realigns_after_resize_code_tour_and_new_results(server):
         page.get_by_role("button", name="Open Learning Guide", exact=True).click()
         panel = page.get_by_role("region", name="Lesson 1 Learning Guide", exact=True)
         panel.get_by_role("button", name="Start guided tour", exact=True).click()
-        for _ in range(2):
+        for index in range(2):
             panel.get_by_role("button", name="Next section", exact=True).click()
+            panel.get_by_text(f"Section {index + 2} of 7", exact=False).wait_for()
         expect(page.locator(".guide-example-target.learning-guide-target")).to_be_visible()
         assert_guide_target_fits(page)
         # Automatic alignment must settle instead of pulling back a student's own scrolling.
@@ -704,8 +708,16 @@ def test_browser_guide_realigns_after_resize_code_tour_and_new_results(server):
         assert_guide_target_fits(page)
         panel.get_by_role("button", name="Next section", exact=True).click()
         # This explicit student action runs the free fixture; the tour does not click Run.
+        run = page.get_by_role("button", name="Run exercise", exact=True)
+        expect(run).to_have_css("outline-style", "solid")
+        expect(run).to_have_css("outline-color", "rgb(220, 38, 38)")
+        page.keyboard.press("Tab")
+        expect(run).to_have_css("outline-style", "solid")
         page.get_by_role("button", name="Run exercise", exact=True).click()
         page.get_by_text("Completed", exact=True).wait_for()
+        expect(run).to_have_class(re.compile(r".*learning-guide-target.*"))
+        expect(run).to_have_css("outline-style", "solid")
+        expect(run).to_have_css("outline-color", "rgb(220, 38, 38)")
         panel.get_by_role("button", name="Next section", exact=True).click()
         target = page.locator(".guide-evidence-target.learning-guide-target")
         expect(target).to_contain_text("Recorded test text")
