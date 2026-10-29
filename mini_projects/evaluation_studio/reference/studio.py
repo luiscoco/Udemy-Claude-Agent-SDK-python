@@ -139,13 +139,15 @@ def parse_run_options(
 
 
 def _public_host(host: str) -> bool:
-    if not host or host == "localhost" or host.endswith(".local"):
+    host = host.rstrip(".")  # "localhost." is still localhost
+    if not host or host == "localhost" or host.endswith((".localhost", ".local", ".internal")):
         return False
     try:
-        address = ipaddress.ip_address(host)
+        return ipaddress.ip_address(host).is_global
     except ValueError:
-        return True  # a domain name
-    return address.is_global
+        pass
+    # 2130706433, 0x7f.0.0.1 and 127.1 are not domains: URL parsers turn them into 127.0.0.1.
+    return not all(re.fullmatch(r"0x[0-9a-f]*|[0-9]+", label) for label in host.split("."))
 
 
 def mcp_settings(

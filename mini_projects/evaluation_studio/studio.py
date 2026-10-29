@@ -68,7 +68,9 @@ def mcp_settings(
     none: no servers. docs: the official docs server at DOCS_MCP_URL with
     "mcp__claude_docs__*". custom: a short name (letter first, not claude_docs), a public
     HTTPS URL without credentials, query or fragment (no localhost or private addresses),
-    and one to five exact tool names, allowed as mcp__<name>__<tool>.
+    and one to five exact tool names, allowed as mcp__<name>__<tool>. Also refuse hosts that
+    URL parsers turn into loopback: a trailing dot ("localhost."), *.localhost, and numeric
+    forms such as 2130706433, 0x7f.0.0.1 or 127.1.
     """
     raise NotImplementedError("TODO M12: implement mcp_settings")
 
