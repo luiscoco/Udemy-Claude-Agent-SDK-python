@@ -683,6 +683,16 @@ def home_page() -> None:
             "resume the SDK session, structured study plans and safe recovery."
         )
         ui.button("Open the Study Coach", icon="school", on_click=lambda: ui.navigate.to("/coach"))
+    with card("Agent Evaluation Studio", "Milestone project"):
+        ui.label(
+            "Evaluate an SDK tutor on 170 cases: honest run summaries, instruction variants, "
+            "bounded live runs with MCP, reviews, evidence export and a release decision."
+        )
+        ui.button(
+            "Open the Evaluation Studio",
+            icon="fact_check",
+            on_click=lambda: ui.navigate.to("/studio"),
+        )
 
     ui.label("Learning paths").classes("text-xl font-bold mt-4")
     with ui.grid(columns="repeat(auto-fit, minmax(260px, 1fr))").classes("w-full gap-4"):
@@ -733,6 +743,8 @@ APPEARANCE_CSS = """
     .response-prose h3 { font-size: 1.2em; line-height: 1.3; }
     .feedback { padding: 8px 12px; border-radius: 8px; }
     .exercise-diagram { min-width: 640px; }
+    .q-table__container { max-width: 100%; }
+    .q-table__middle { overflow-x: auto; }
     .infographic { border: 1px solid #c9d8f0; border-radius: 16px; padding: 18px; background: #f6f9fe; display: flex; flex-direction: column; gap: 14px; }
     .ig-header { display: flex; gap: 16px; align-items: center; }
     .ig-badge { background: #1e3a6e; color: #fff; font-weight: 800; letter-spacing: .04em; padding: 10px 16px; border-radius: 10px; white-space: nowrap; font-size: 20px !important; }

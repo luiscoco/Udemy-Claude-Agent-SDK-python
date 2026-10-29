@@ -11,6 +11,7 @@ from nicegui import ui
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
+from agent_lab.evaluation_studio import StudioService
 from agent_lab.exercises import exercise_context, exercise_source, exercise_uses
 from agent_lab.learning import CheckResult, check_evidence
 from agent_lab.models import Event, RunRequest
@@ -37,6 +38,7 @@ from agent_lab.ui_learning import (
     visual_panel,
     walkthrough_panel,
 )
+from agent_lab.ui_studio import install_studio_page
 
 
 def storage_secret(runner: RunService) -> str:
@@ -52,6 +54,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
     if (ROOT / "public").is_dir():
         nice_app.add_static_files("/assets", str(ROOT / "public"))
     install_coach_page(CoachService(runner.settings))
+    install_studio_page(StudioService(runner.settings))
 
     @ui.page("/")
     async def home(lesson: int = 0) -> None:

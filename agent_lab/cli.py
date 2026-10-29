@@ -30,6 +30,36 @@ async def run_lesson(lesson_id: int, request: RunRequest | None = None) -> int:
         await service.close()
 
 
+def check_project(command: str, reference: bool) -> int:
+    """Run a milestone project's stage checks against the student's file or the reference."""
+    import os
+    import subprocess
+    import sys
+    from typing import Literal
+
+    from agent_lab import evaluation_studio, study_coach
+
+    implementation: Literal["learner", "reference"] = "reference" if reference else "learner"
+    if command == "coach":
+        project, path, variable = (
+            study_coach.PROJECT,
+            study_coach.coach_path(implementation),
+            "COACH_IMPLEMENTATION",
+        )
+    else:
+        project, path, variable = (
+            evaluation_studio.PROJECT,
+            evaluation_studio.studio_path(implementation),
+            "STUDIO_IMPLEMENTATION",
+        )
+    print(f"Checking {path} ...", flush=True)
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "-rs", str(project)],
+        env=os.environ | {variable: implementation},
+    )
+    return result.returncode
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Python Claude Agent SDK Lab")
     subcommands = parser.add_subparsers(dest="command", required=True)
@@ -43,26 +73,19 @@ def main() -> None:
     lesson.add_argument("--prompt", default="")
     subcommands.add_parser("list", help="List the curriculum")
     subcommands.add_parser("doctor", help="Check SDK and CLI installation without a model call")
-    coach = subcommands.add_parser("coach", help="Study Coach milestone project")
-    coach.add_argument("action", choices=["check"])
-    coach.add_argument(
-        "--reference", action="store_true", help="check the reference, not your coach.py"
-    )
-    arguments = parser.parse_args()
-    if arguments.command == "coach":
-        import os
-        import subprocess
-        import sys
-
-        from agent_lab.study_coach import PROJECT, Implementation, coach_path
-
-        implementation: Implementation = "reference" if arguments.reference else "learner"
-        print(f"Checking {coach_path(implementation)} ...", flush=True)
-        result = subprocess.run(
-            [sys.executable, "-m", "pytest", "-q", "-rs", str(PROJECT)],
-            env=os.environ | {"COACH_IMPLEMENTATION": implementation},
+    projects = {
+        "coach": ("Study Coach milestone project", "coach.py"),
+        "studio": ("Agent Evaluation Studio milestone project", "studio.py"),
+    }
+    for command, (help_text, filename) in projects.items():
+        project = subcommands.add_parser(command, help=help_text)
+        project.add_argument("action", choices=["check"])
+        project.add_argument(
+            "--reference", action="store_true", help=f"check the reference, not your {filename}"
         )
-        raise SystemExit(result.returncode)
+    arguments = parser.parse_args()
+    if arguments.command in projects:
+        raise SystemExit(check_project(arguments.command, arguments.reference))
     if arguments.command == "doctor":
         from agent_lab.doctor import diagnose
 

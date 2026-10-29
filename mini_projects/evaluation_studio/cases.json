@@ -1,0 +1,3020 @@
+{
+ "source": "Adapted from luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild agent-evaluation-studio",
+ "cases": [
+  {
+   "id": "first-query",
+   "section": "foundations",
+   "number": 1,
+   "title": "Send a first query",
+   "question": "What belongs in a minimal SDK query?",
+   "context": "A student is starting a Python project.",
+   "explanation": "Provide a prompt and options; iterate SDK messages for assistant text and the final result.",
+   "check": "Find both an assistant message and the final result.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about send a first query",
+    "Use the case context without claiming unobserved actions",
+    "Find both an assistant message and the final result."
+   ]
+  },
+  {
+   "id": "stream-events",
+   "section": "foundations",
+   "number": 2,
+   "title": "Read the message stream",
+   "question": "Why inspect each SDK message instead of only the final text?",
+   "context": "A run emits intermediate messages.",
+   "explanation": "Different messages contain output, tool activity, and final status. Text alone does not establish success.",
+   "check": "Identify which message reported the terminal outcome.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about read the message stream",
+    "Use the case context without claiming unobserved actions",
+    "Identify which message reported the terminal outcome."
+   ]
+  },
+  {
+   "id": "result-subtype",
+   "section": "foundations",
+   "number": 3,
+   "title": "Explain a result subtype",
+   "question": "What does a Claude Agent SDK result subtype tell me?",
+   "context": "A student wants to know whether the run succeeded.",
+   "explanation": "The final result subtype describes how the run ended; earlier assistant text can still be partial.",
+   "check": "Inspect the final subtype and error flag.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about explain a result subtype",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the final subtype and error flag."
+   ]
+  },
+  {
+   "id": "sdk-error",
+   "section": "foundations",
+   "number": 4,
+   "title": "Handle a failed query",
+   "question": "What should my app show when the SDK call fails?",
+   "context": "The query threw before a usable final result.",
+   "explanation": "Catch and display the failure separately from an ordinary agent answer.",
+   "check": "Confirm the app never labels a thrown call as success.",
+   "resource": "none",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about handle a failed query",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the app never labels a thrown call as success."
+   ]
+  },
+  {
+   "id": "install-auth",
+   "section": "foundations",
+   "number": 5,
+   "title": "Install and authenticate",
+   "question": "What must be ready before the first live SDK query?",
+   "context": "A learner can run prepared cases but not paid live cases.",
+   "explanation": "Install the SDK on the backend and provide a valid server-side credential. Check the environment without exposing the secret to the browser.",
+   "check": "Confirm prepared mode works and live mode reports missing credentials clearly.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about install and authenticate",
+    "Use the case context without claiming unobserved actions",
+    "Confirm prepared mode works and live mode reports missing credentials clearly."
+   ]
+  },
+  {
+   "id": "text-blocks",
+   "section": "foundations",
+   "number": 6,
+   "title": "Extract assistant text blocks",
+   "question": "How do I read text when an assistant message contains multiple blocks?",
+   "context": "One assistant message contains text and another block type.",
+   "explanation": "Iterate content blocks and collect only text blocks for the user-facing answer; preserve other block types as separate evidence.",
+   "check": "Test a fixture with text plus a tool-use block.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about extract assistant text blocks",
+    "Use the case context without claiming unobserved actions",
+    "Test a fixture with text plus a tool-use block."
+   ]
+  },
+  {
+   "id": "result-vs-answer",
+   "section": "foundations",
+   "number": 7,
+   "title": "Separate answer from result",
+   "question": "Why can a fluent answer still be an unsuccessful run?",
+   "context": "Assistant text arrived before the final SDK result.",
+   "explanation": "The answer is content; the result reports run status. Keep these separate so a limit or error cannot look like completion.",
+   "check": "Produce text followed by an error result and verify the status remains failed.",
+   "resource": "none",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about separate answer from result",
+    "Use the case context without claiming unobserved actions",
+    "Produce text followed by an error result and verify the status remains failed."
+   ]
+  },
+  {
+   "id": "sdk-vs-client",
+   "section": "foundations",
+   "number": 8,
+   "title": "Choose the Agent SDK intentionally",
+   "question": "When should I use the Agent SDK instead of the Claude API client SDK?",
+   "context": "A team needs an agent that can plan and call tools.",
+   "explanation": "The Agent SDK supplies an agent loop, built-in tools, permissions, and sessions. A direct API client is appropriate when the application owns the loop.",
+   "check": "Explain who owns the tool loop in each design before choosing a package.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about choose the agent sdk intentionally",
+    "Use the case context without claiming unobserved actions",
+    "Explain who owns the tool loop in each design before choosing a package."
+   ]
+  },
+  {
+   "id": "agent-loop",
+   "section": "foundations",
+   "number": 9,
+   "title": "Trace the agent loop",
+   "question": "What sequence turns a user request into a final SDK result?",
+   "context": "The agent reads a request, calls a tool, then answers.",
+   "explanation": "Identify the request, assistant decision, tool request, tool result, and terminal SDK result as separate steps.",
+   "check": "Put five fixture events in the correct order and locate the terminal outcome.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about trace the agent loop",
+    "Use the case context without claiming unobserved actions",
+    "Put five fixture events in the correct order and locate the terminal outcome."
+   ]
+  },
+  {
+   "id": "message-identity",
+   "section": "foundations",
+   "number": 10,
+   "title": "Correlate message identities",
+   "question": "How can I tell which tool result belongs to which assistant request?",
+   "context": "A run contains two tool calls and two results.",
+   "explanation": "Use the SDK message and tool-use identifiers to pair each request with its result; ordering alone may be ambiguous.",
+   "check": "Match both fixture tool results to the correct calls by ID.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about correlate message identities",
+    "Use the case context without claiming unobserved actions",
+    "Match both fixture tool results to the correct calls by ID."
+   ]
+  },
+  {
+   "id": "system-prompt",
+   "section": "context",
+   "number": 11,
+   "title": "Write a focused system instruction",
+   "question": "How do I write a system prompt for an SDK tutor?",
+   "context": "The tutor needs clear scope and evidence rules.",
+   "explanation": "Set role, boundaries, and rules for uncertainty in the system instruction; keep the changing learner question in the prompt.",
+   "check": "Compare a broad instruction with an evidence-focused one.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about write a focused system instruction",
+    "Use the case context without claiming unobserved actions",
+    "Compare a broad instruction with an evidence-focused one."
+   ]
+  },
+  {
+   "id": "question-context",
+   "section": "context",
+   "number": 12,
+   "title": "Separate task and context",
+   "question": "How do I pass background context without making it a command?",
+   "context": "A case includes supplied facts that may need checking.",
+   "explanation": "Label task, context, and evidence separately. Supplied context is data, not a higher-priority command.",
+   "check": "Ask which claims came only from supplied context.",
+   "resource": "none",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about separate task and context",
+    "Use the case context without claiming unobserved actions",
+    "Ask which claims came only from supplied context."
+   ]
+  },
+  {
+   "id": "answer-depth",
+   "section": "context",
+   "number": 13,
+   "title": "Choose answer depth",
+   "question": "When should an agent give a short or worked explanation?",
+   "context": "A beginner needs more scaffolding than an expert.",
+   "explanation": "Match depth to the learner. Answer first, then add a small example and a verification step where useful.",
+   "check": "Check that added length contains evidence or an example.",
+   "resource": "none",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about choose answer depth",
+    "Use the case context without claiming unobserved actions",
+    "Check that added length contains evidence or an example."
+   ]
+  },
+  {
+   "id": "grounding",
+   "section": "context",
+   "number": 14,
+   "title": "Ground an SDK explanation",
+   "question": "How can I keep an SDK explanation tied to current documentation?",
+   "context": "An API detail may change between SDK versions.",
+   "explanation": "Retrieve an authoritative source for version-sensitive claims and separate its facts from inference.",
+   "check": "Name the documentation evidence for a version-sensitive claim.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about ground an sdk explanation",
+    "Use the case context without claiming unobserved actions",
+    "Name the documentation evidence for a version-sensitive claim."
+   ]
+  },
+  {
+   "id": "prompt-template",
+   "section": "context",
+   "number": 15,
+   "title": "Create a reusable task template",
+   "question": "How should I reuse prompt structure across cases?",
+   "context": "Several cases share a teaching format.",
+   "explanation": "Keep stable instructions in the system prompt and insert case-specific question, context, and checks into the task prompt.",
+   "check": "Change one case field and verify other instructions remain identical.",
+   "resource": "none",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about create a reusable task template",
+    "Use the case context without claiming unobserved actions",
+    "Change one case field and verify other instructions remain identical."
+   ]
+  },
+  {
+   "id": "examples",
+   "section": "context",
+   "number": 16,
+   "title": "Use a minimal example",
+   "question": "How much example code should an SDK tutor provide?",
+   "context": "The learner needs a concrete illustration.",
+   "explanation": "Prefer the smallest runnable snippet that demonstrates one concept, then explain inputs, output, and verification.",
+   "check": "Check that the snippet demonstrates the selected concept without unrelated setup.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about use a minimal example",
+    "Use the case context without claiming unobserved actions",
+    "Check that the snippet demonstrates the selected concept without unrelated setup."
+   ]
+  },
+  {
+   "id": "uncertainty",
+   "section": "context",
+   "number": 17,
+   "title": "State uncertainty honestly",
+   "question": "What should the agent say when no source supports an SDK claim?",
+   "context": "The relevant documentation could not be retrieved.",
+   "explanation": "State what is known, what is inferred, and what remains unverified. Offer a specific source check.",
+   "check": "Confirm the answer does not present an unsupported version claim as fact.",
+   "resource": "none",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about state uncertainty honestly",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the answer does not present an unsupported version claim as fact."
+   ]
+  },
+  {
+   "id": "configuration-sources",
+   "section": "context",
+   "number": 18,
+   "title": "Control configuration loading",
+   "question": "Why should an embedded SDK app choose its setting sources deliberately?",
+   "context": "A local Claude Code configuration may contain tools or instructions the app did not intend.",
+   "explanation": "Decide whether the run should load user or project settings and make that choice explicit in the query options. Inspect the effective capabilities.",
+   "check": "Compare a run with intentionally empty setting sources against one with an approved source.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about control configuration loading",
+    "Use the case context without claiming unobserved actions",
+    "Compare a run with intentionally empty setting sources against one with an approved source."
+   ]
+  },
+  {
+   "id": "prompt-starting-point",
+   "section": "context",
+   "number": 19,
+   "title": "Choose a prompt starting point",
+   "question": "When should I use the Claude Code preset or a custom system prompt?",
+   "context": "A teaching app differs from an IDE coding agent.",
+   "explanation": "Choose a starting prompt that matches the application role and permission model; a custom prompt must supply the instructions it needs.",
+   "check": "Explain which starting point fits the app and what capability guidance must remain.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about choose a prompt starting point",
+    "Use the case context without claiming unobserved actions",
+    "Explain which starting point fits the app and what capability guidance must remain."
+   ]
+  },
+  {
+   "id": "context-budget",
+   "section": "context",
+   "number": 20,
+   "title": "Keep task context relevant",
+   "question": "How can I avoid filling a run with unrelated history?",
+   "context": "A long conversation includes facts unrelated to the current task.",
+   "explanation": "Select the evidence and prior turns needed for the question, and record what was omitted or summarized.",
+   "check": "Compare a focused prompt with an overloaded one on the same case.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about keep task context relevant",
+    "Use the case context without claiming unobserved actions",
+    "Compare a focused prompt with an overloaded one on the same case."
+   ]
+  },
+  {
+   "id": "memory-purpose",
+   "section": "memory",
+   "number": 21,
+   "title": "Explain CLAUDE.md",
+   "question": "What belongs in project CLAUDE.md?",
+   "context": "A team wants stable build and test guidance.",
+   "explanation": "Include concise project conventions and commands, not one-off user tasks or secrets.",
+   "check": "Identify one stable rule and one item to remove.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about explain claude.md",
+    "Use the case context without claiming unobserved actions",
+    "Identify one stable rule and one item to remove."
+   ]
+  },
+  {
+   "id": "memory-cwd",
+   "section": "memory",
+   "number": 22,
+   "title": "Locate project instructions",
+   "question": "How does cwd change which CLAUDE.md is found?",
+   "context": "The agent starts from a nested project folder.",
+   "explanation": "Resolve the working directory and project source before claiming instructions were loaded.",
+   "check": "Show the configured cwd and effective project file.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about locate project instructions",
+    "Use the case context without claiming unobserved actions",
+    "Show the configured cwd and effective project file."
+   ]
+  },
+  {
+   "id": "memory-sources",
+   "section": "memory",
+   "number": 23,
+   "title": "Check setting sources",
+   "question": "What happens when setting_sources excludes project?",
+   "context": "A run sets setting_sources to an empty list.",
+   "explanation": "Project CLAUDE.md is not loaded from that setting source; a file existing on disk is not proof it influenced the run.",
+   "check": "Compare effective settings for empty and project-enabled sources.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about check setting sources",
+    "Use the case context without claiming unobserved actions",
+    "Compare effective settings for empty and project-enabled sources."
+   ]
+  },
+  {
+   "id": "memory-user-project",
+   "section": "memory",
+   "number": 24,
+   "title": "Separate user and project rules",
+   "question": "Which instruction should be shared with the team?",
+   "context": "A personal preference and a repository command are mixed.",
+   "explanation": "Keep personal preferences in the user scope and repository commands in the project scope.",
+   "check": "Show where each instruction should live and why.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about separate user and project rules",
+    "Use the case context without claiming unobserved actions",
+    "Show where each instruction should live and why."
+   ]
+  },
+  {
+   "id": "memory-system",
+   "section": "memory",
+   "number": 25,
+   "title": "Compare project rules with system prompt",
+   "question": "Can CLAUDE.md replace every system instruction?",
+   "context": "A host must enforce a read-only run.",
+   "explanation": "Use CLAUDE.md for project context, while the host still configures tools, permissions, and run limits.",
+   "check": "Confirm the read-only policy exists outside prose alone.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about compare project rules with system prompt",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the read-only policy exists outside prose alone."
+   ]
+  },
+  {
+   "id": "memory-conflict",
+   "section": "memory",
+   "number": 26,
+   "title": "Resolve conflicting instructions",
+   "question": "What should the agent do with a conflicting project note?",
+   "context": "A stale file says to skip tests; current task requires tests.",
+   "explanation": "Surface the conflict and obey the higher-priority current instruction without silently rewriting evidence.",
+   "check": "Point to both conflicting instructions and the chosen action.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about resolve conflicting instructions",
+    "Use the case context without claiming unobserved actions",
+    "Point to both conflicting instructions and the chosen action."
+   ]
+  },
+  {
+   "id": "memory-length",
+   "section": "memory",
+   "number": 27,
+   "title": "Trim oversized memory",
+   "question": "How should a large CLAUDE.md be shortened?",
+   "context": "The file repeats logs and old task history.",
+   "explanation": "Retain stable commands and constraints, then link focused reference files when needed.",
+   "check": "Compare the concise version against the same task.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about trim oversized memory",
+    "Use the case context without claiming unobserved actions",
+    "Compare the concise version against the same task."
+   ]
+  },
+  {
+   "id": "memory-secret",
+   "section": "memory",
+   "number": 28,
+   "title": "Reject secrets in instructions",
+   "question": "Why should credentials stay out of CLAUDE.md?",
+   "context": "A key is pasted into a project instruction file.",
+   "explanation": "Remove the secret from the file and use server-side configuration; do not echo it in output.",
+   "check": "Inspect the reviewed file and run record for the token.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about reject secrets in instructions",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the reviewed file and run record for the token."
+   ]
+  },
+  {
+   "id": "memory-test",
+   "section": "memory",
+   "number": 29,
+   "title": "Test instruction loading",
+   "question": "How can I prove a project rule affected a run?",
+   "context": "A project asks for a specific test command.",
+   "explanation": "Compare controlled runs with and without the project source; inspect configuration and observed behavior.",
+   "check": "Record the setting source and the actual test command event.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about test instruction loading",
+    "Use the case context without claiming unobserved actions",
+    "Record the setting source and the actual test command event."
+   ]
+  },
+  {
+   "id": "memory-change",
+   "section": "memory",
+   "number": 30,
+   "title": "Evaluate a memory edit",
+   "question": "What evidence is needed after changing CLAUDE.md?",
+   "context": "A team edits a shared instruction.",
+   "explanation": "Treat it as an instruction change: review the diff and rerun representative cases.",
+   "check": "Show a before-and-after result for one normal and one edge case.",
+   "resource": "docs",
+   "category": "Beginner",
+   "criteria": [
+    "Answer the question about evaluate a memory edit",
+    "Use the case context without claiming unobserved actions",
+    "Show a before-and-after result for one normal and one edge case."
+   ]
+  },
+  {
+   "id": "tool-boundary",
+   "section": "tools",
+   "number": 31,
+   "title": "Understand the tool boundary",
+   "question": "What can an SDK agent do only when a tool is available?",
+   "context": "The model described a file change without a write event.",
+   "explanation": "Model text is not a side effect. File, API, and database changes require permitted tool calls and independent evidence.",
+   "check": "Look for a successful tool event and inspect the resource.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about understand the tool boundary",
+    "Use the case context without claiming unobserved actions",
+    "Look for a successful tool event and inspect the resource."
+   ]
+  },
+  {
+   "id": "tool-scope",
+   "section": "tools",
+   "number": 32,
+   "title": "Limit available tools",
+   "question": "How do tools, allowed_tools, and disallowed_tools differ?",
+   "context": "The learner wants a narrow capability set.",
+   "explanation": "Tool exposure, automatic approval, and denial are distinct. An approval allowlist alone is not a complete capability boundary.",
+   "check": "Verify an unwanted tool is absent or denied.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about limit available tools",
+    "Use the case context without claiming unobserved actions",
+    "Verify an unwanted tool is absent or denied."
+   ]
+  },
+  {
+   "id": "custom-tool",
+   "section": "tools",
+   "number": 33,
+   "title": "Design a custom tool",
+   "question": "What makes a custom agent tool predictable?",
+   "context": "The agent needs a small deterministic function.",
+   "explanation": "Define a clear name, schema, bounded output, and failure response; validate input before work.",
+   "check": "Test valid input, invalid input, and downstream failure.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about design a custom tool",
+    "Use the case context without claiming unobserved actions",
+    "Test valid input, invalid input, and downstream failure."
+   ]
+  },
+  {
+   "id": "tool-result",
+   "section": "tools",
+   "number": 34,
+   "title": "Inspect a tool result",
+   "question": "How do I know whether a tool actually succeeded?",
+   "context": "An assistant claimed a tool returned data.",
+   "explanation": "Inspect the request, matching result, and target resource. A successful model turn does not prove an external effect.",
+   "check": "Match the tool call to its result and verify the resource.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about inspect a tool result",
+    "Use the case context without claiming unobserved actions",
+    "Match the tool call to its result and verify the resource."
+   ]
+  },
+  {
+   "id": "schema-validation",
+   "section": "tools",
+   "number": 35,
+   "title": "Validate tool input",
+   "question": "Why is a tool input schema useful?",
+   "context": "The model supplied missing or malformed arguments.",
+   "explanation": "A schema documents required fields and rejects invalid input before the tool performs work.",
+   "check": "Try a missing required field and confirm the tool returns an error.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about validate tool input",
+    "Use the case context without claiming unobserved actions",
+    "Try a missing required field and confirm the tool returns an error."
+   ]
+  },
+  {
+   "id": "tool-error",
+   "section": "tools",
+   "number": 36,
+   "title": "Recover from a tool error",
+   "question": "What should the agent do after a tool returns an error?",
+   "context": "A tool call failed with a recoverable message.",
+   "explanation": "Show the failure accurately, correct the input when safe, and retry within explicit limits. Do not invent a successful result.",
+   "check": "Inspect the failed call and any bounded retry in the timeline.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about recover from a tool error",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the failed call and any bounded retry in the timeline."
+   ]
+  },
+  {
+   "id": "read-write",
+   "section": "tools",
+   "number": 37,
+   "title": "Separate read and write tools",
+   "question": "Why should a student distinguish read-only and mutating tools?",
+   "context": "The agent only needs to inspect a resource.",
+   "explanation": "Use a read-only capability for lookup; require separate permission and evidence before a write.",
+   "check": "Show that the lookup task never invokes a write tool.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about separate read and write tools",
+    "Use the case context without claiming unobserved actions",
+    "Show that the lookup task never invokes a write tool."
+   ]
+  },
+  {
+   "id": "tool-search",
+   "section": "tools",
+   "number": 38,
+   "title": "Scale tool discovery with tool search",
+   "question": "How can an agent find one relevant tool in a large catalog?",
+   "context": "A server exposes many tools and listing all of them would crowd context.",
+   "explanation": "Use tool search when supported, then inspect the selected tool and its actual call. Search discovery is not permission to execute every result.",
+   "check": "Confirm the chosen tool matches the task and remains within the allowlist.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about scale tool discovery with tool search",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the chosen tool matches the task and remains within the allowlist."
+   ]
+  },
+  {
+   "id": "tool-output-bound",
+   "section": "tools",
+   "number": 39,
+   "title": "Bound a custom tool result",
+   "question": "Why should a custom tool avoid returning a huge unfiltered payload?",
+   "context": "A search tool can return thousands of records.",
+   "explanation": "Return a bounded, relevant result with a clear truncation signal so the agent does not mistake a partial set for all data.",
+   "check": "Feed an oversized fixture and verify the limit and truncation label.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about bound a custom tool result",
+    "Use the case context without claiming unobserved actions",
+    "Feed an oversized fixture and verify the limit and truncation label."
+   ]
+  },
+  {
+   "id": "tool-registration",
+   "section": "tools",
+   "number": 40,
+   "title": "Register an in-process tool",
+   "question": "How does a custom Python function become callable by the agent?",
+   "context": "A deterministic lookup function exists in application code.",
+   "explanation": "Declare a schema, register the function through the supported SDK tool mechanism, and verify the agent sees the intended name only.",
+   "check": "Invoke the tool with valid and invalid input and inspect both results.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about register an in-process tool",
+    "Use the case context without claiming unobserved actions",
+    "Invoke the tool with valid and invalid input and inspect both results."
+   ]
+  },
+  {
+   "id": "skill-definition",
+   "section": "skills",
+   "number": 41,
+   "title": "Read a Skill contract",
+   "question": "What must a SKILL.md communicate?",
+   "context": "A student writes a report-formatting Skill.",
+   "explanation": "Use a clear name, triggering description, bounded instructions, and only relevant resources.",
+   "check": "Identify the trigger and the action the Skill requests.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about read a skill contract",
+    "Use the case context without claiming unobserved actions",
+    "Identify the trigger and the action the Skill requests."
+   ]
+  },
+  {
+   "id": "skill-location",
+   "section": "skills",
+   "number": 42,
+   "title": "Check Skill discovery",
+   "question": "Why is a project Skill not visible?",
+   "context": "SKILL.md is placed in the wrong folder.",
+   "explanation": "Check the project skill directory, cwd, and enabled setting sources before changing prompts.",
+   "check": "Show the discovered path and skill name.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about check skill discovery",
+    "Use the case context without claiming unobserved actions",
+    "Show the discovered path and skill name."
+   ]
+  },
+  {
+   "id": "skill-progressive",
+   "section": "skills",
+   "number": 43,
+   "title": "Inspect progressive loading",
+   "question": "Which Skill content is loaded at each step?",
+   "context": "The Skill has metadata, instructions, and a reference file.",
+   "explanation": "Distinguish advertised metadata from invoked SKILL.md and optional resources.",
+   "check": "Name the event or file read that shows each stage.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about inspect progressive loading",
+    "Use the case context without claiming unobserved actions",
+    "Name the event or file read that shows each stage."
+   ]
+  },
+  {
+   "id": "skill-allowlist",
+   "section": "skills",
+   "number": 44,
+   "title": "Limit Skill availability",
+   "question": "How do I allow one Skill instead of every discovered Skill?",
+   "context": "The workspace contains several unrelated Skills.",
+   "explanation": "Use the SDK skills option to select the intended name and verify excluded Skills remain unavailable.",
+   "check": "Try an allowed and an excluded Skill in a fixture.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about limit skill availability",
+    "Use the case context without claiming unobserved actions",
+    "Try an allowed and an excluded Skill in a fixture."
+   ]
+  },
+  {
+   "id": "skill-choice",
+   "section": "skills",
+   "number": 45,
+   "title": "Evaluate automatic Skill choice",
+   "question": "Did Claude invoke the right Skill for this task?",
+   "context": "Two descriptions overlap on document work.",
+   "explanation": "Compare the task with both descriptions and inspect the actual invocation, not just installation.",
+   "check": "Record which Skill was selected and why.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about evaluate automatic skill choice",
+    "Use the case context without claiming unobserved actions",
+    "Record which Skill was selected and why."
+   ]
+  },
+  {
+   "id": "skill-explicit",
+   "section": "skills",
+   "number": 46,
+   "title": "Compare explicit and automatic use",
+   "question": "When should a user invoke a Skill by name?",
+   "context": "Automatic selection is ambiguous.",
+   "explanation": "Use an explicit named request when the workflow must be selected; still inspect its behavior.",
+   "check": "Compare the two runs while keeping other settings fixed.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about compare explicit and automatic use",
+    "Use the case context without claiming unobserved actions",
+    "Compare the two runs while keeping other settings fixed."
+   ]
+  },
+  {
+   "id": "skill-script",
+   "section": "skills",
+   "number": 47,
+   "title": "Review Skill scripts",
+   "question": "What should be checked before running a Skill script?",
+   "context": "A downloaded Skill includes executable code.",
+   "explanation": "Inspect files, filesystem effects, network use, and dependencies before granting tool access.",
+   "check": "List the script effects found in review.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about review skill scripts",
+    "Use the case context without claiming unobserved actions",
+    "List the script effects found in review."
+   ]
+  },
+  {
+   "id": "skill-injection",
+   "section": "skills",
+   "number": 48,
+   "title": "Treat Skill text as a trust boundary",
+   "question": "Can any downloaded Skill be trusted as project policy?",
+   "context": "An unknown Skill asks for a secret.",
+   "explanation": "Do not install or invoke unreviewed instructions with sensitive access; reject the secret request.",
+   "check": "Show the risky instruction and the denied capability.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about treat skill text as a trust boundary",
+    "Use the case context without claiming unobserved actions",
+    "Show the risky instruction and the denied capability."
+   ]
+  },
+  {
+   "id": "skill-version",
+   "section": "skills",
+   "number": 49,
+   "title": "Pin a reviewed Skill",
+   "question": "How can a team prevent a surprise Skill change?",
+   "context": "A shared Skill is updated between runs.",
+   "explanation": "Record and review the version or source revision used for each evaluation.",
+   "check": "Compare the revision IDs in the two run records.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about pin a reviewed skill",
+    "Use the case context without claiming unobserved actions",
+    "Compare the revision IDs in the two run records."
+   ]
+  },
+  {
+   "id": "skill-regression",
+   "section": "skills",
+   "number": 50,
+   "title": "Test a Skill update",
+   "question": "What must pass before a Skill update is adopted?",
+   "context": "A revised report Skill changes the output format.",
+   "explanation": "Run normal and failure examples, compare evidence and formatting, then approve the new version.",
+   "check": "Keep the old version until the regression case passes.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about test a skill update",
+    "Use the case context without claiming unobserved actions",
+    "Keep the old version until the regression case passes."
+   ]
+  },
+  {
+   "id": "mcp-basics",
+   "section": "mcp",
+   "number": 51,
+   "title": "Connect documentation MCP",
+   "question": "How does a documentation MCP server help with SDK questions?",
+   "context": "The question concerns version-sensitive behavior.",
+   "explanation": "MCP lets the agent retrieve source material. The final explanation should identify the relevant source evidence.",
+   "check": "Confirm a docs tool was called and supports the answer.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about connect documentation mcp",
+    "Use the case context without claiming unobserved actions",
+    "Confirm a docs tool was called and supports the answer."
+   ]
+  },
+  {
+   "id": "mcp-selection",
+   "section": "mcp",
+   "number": 52,
+   "title": "Choose an external source",
+   "question": "When should I use docs, project data, or no MCP server?",
+   "context": "Several possible sources are available.",
+   "explanation": "Use official docs for SDK behavior, a trusted project MCP for project facts, and no source for self-contained reasoning.",
+   "check": "Explain why the chosen source answers this question.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about choose an external source",
+    "Use the case context without claiming unobserved actions",
+    "Explain why the chosen source answers this question."
+   ]
+  },
+  {
+   "id": "mcp-permission",
+   "section": "mcp",
+   "number": 53,
+   "title": "Approve specific MCP tools",
+   "question": "How do I grant one MCP tool without approving everything?",
+   "context": "A remote server exposes several tools.",
+   "explanation": "Name only the needed remote tool or trusted server scope; make the connection explicit for each run.",
+   "check": "Inspect enabled names and actual tool-use events.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about approve specific mcp tools",
+    "Use the case context without claiming unobserved actions",
+    "Inspect enabled names and actual tool-use events."
+   ]
+  },
+  {
+   "id": "mcp-evidence",
+   "section": "mcp",
+   "number": 54,
+   "title": "Check an MCP-backed answer",
+   "question": "How do I verify that an external answer is grounded?",
+   "context": "A plausible answer appeared after connecting a server.",
+   "explanation": "Configuration alone does not prove use. Inspect the tool call, result, and claim supported by retrieved content.",
+   "check": "Compare one claim with the retrieved source.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about check an mcp-backed answer",
+    "Use the case context without claiming unobserved actions",
+    "Compare one claim with the retrieved source."
+   ]
+  },
+  {
+   "id": "mcp-discovery",
+   "section": "mcp",
+   "number": 55,
+   "title": "Discover available MCP tools",
+   "question": "How do I know which tools an MCP server actually exposes?",
+   "context": "A server connected but the expected tool is missing.",
+   "explanation": "Inspect server connection status and its advertised tools before naming a tool in an allowlist.",
+   "check": "Compare the tool name shown by the server with the allowed_tools entry.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about discover available mcp tools",
+    "Use the case context without claiming unobserved actions",
+    "Compare the tool name shown by the server with the allowed_tools entry."
+   ]
+  },
+  {
+   "id": "mcp-timeout",
+   "section": "mcp",
+   "number": 56,
+   "title": "Handle an MCP connection failure",
+   "question": "What should happen when an MCP server is unavailable?",
+   "context": "The remote source did not connect in time.",
+   "explanation": "Report the source failure separately from an agent answer. Continue only if a source-free answer is useful and clearly marked.",
+   "check": "Simulate an unavailable server and inspect the connection event.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about handle an mcp connection failure",
+    "Use the case context without claiming unobserved actions",
+    "Simulate an unavailable server and inspect the connection event."
+   ]
+  },
+  {
+   "id": "mcp-source-choice",
+   "section": "mcp",
+   "number": 57,
+   "title": "Use project knowledge responsibly",
+   "question": "When should I connect a project-specific MCP server?",
+   "context": "The question concerns private project facts absent from public docs.",
+   "explanation": "Use a trusted project server with exact needed tools and server-side credentials; avoid broad access for a narrow question.",
+   "check": "Identify one claim that needs project data and its tool evidence.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about use project knowledge responsibly",
+    "Use the case context without claiming unobserved actions",
+    "Identify one claim that needs project data and its tool evidence."
+   ]
+  },
+  {
+   "id": "mcp-transport",
+   "section": "mcp",
+   "number": 58,
+   "title": "Choose an MCP transport",
+   "question": "How should I decide between a local and remote MCP server?",
+   "context": "A source can run beside the app or at a trusted HTTPS endpoint.",
+   "explanation": "Match the transport to the deployment and trust boundary. Check connection status, authentication handling, and the exact tools exposed.",
+   "check": "Demonstrate a failed connection without presenting the source as used.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about choose an mcp transport",
+    "Use the case context without claiming unobserved actions",
+    "Demonstrate a failed connection without presenting the source as used."
+   ]
+  },
+  {
+   "id": "mcp-server-auth",
+   "section": "mcp",
+   "number": 59,
+   "title": "Protect remote MCP authentication",
+   "question": "Where should a remote MCP credential be configured?",
+   "context": "An external source requires an access token.",
+   "explanation": "Keep credentials in server-side configuration and do not place them in a browser URL, authored prompt, or exported event log.",
+   "check": "Inspect the frontend bundle and sanitized run record for absent tokens.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about protect remote mcp authentication",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the frontend bundle and sanitized run record for absent tokens."
+   ]
+  },
+  {
+   "id": "mcp-multiple-servers",
+   "section": "mcp",
+   "number": 60,
+   "title": "Attribute tools to the right MCP server",
+   "question": "How do I distinguish similarly named tools from two servers?",
+   "context": "Two connected servers advertise a search tool.",
+   "explanation": "Use the fully qualified server and tool identity and inspect which server actually answered; do not merge evidence by short tool name.",
+   "check": "Show the exact server and tool for each fixture response.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about attribute tools to the right mcp server",
+    "Use the case context without claiming unobserved actions",
+    "Show the exact server and tool for each fixture response."
+   ]
+  },
+  {
+   "id": "rag-definition",
+   "section": "retrieval",
+   "number": 61,
+   "title": "Define RAG accurately",
+   "question": "Is RAG a built-in SDK switch?",
+   "context": "A student has many course notes.",
+   "explanation": "RAG is an application pattern that retrieves relevant external evidence before generation; the SDK can call tools that perform retrieval.",
+   "check": "Identify the retrieval step and its data source.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about define rag accurately",
+    "Use the case context without claiming unobserved actions",
+    "Identify the retrieval step and its data source."
+   ]
+  },
+  {
+   "id": "rag-small-source",
+   "section": "retrieval",
+   "number": 62,
+   "title": "Choose direct context or retrieval",
+   "question": "When is a small attachment enough?",
+   "context": "One short document fits the task context.",
+   "explanation": "Send relevant source text directly when practical; add retrieval when a larger collection needs search.",
+   "check": "Explain the choice using size and relevance.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about choose direct context or retrieval",
+    "Use the case context without claiming unobserved actions",
+    "Explain the choice using size and relevance."
+   ]
+  },
+  {
+   "id": "rag-ingest",
+   "section": "retrieval",
+   "number": 63,
+   "title": "Inspect document ingestion",
+   "question": "What must happen before search can find a document?",
+   "context": "A new guide was uploaded but not indexed.",
+   "explanation": "Validate, extract, split, and index the document; record source identity and revision.",
+   "check": "Search for a known sentence and confirm its source ID.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about inspect document ingestion",
+    "Use the case context without claiming unobserved actions",
+    "Search for a known sentence and confirm its source ID."
+   ]
+  },
+  {
+   "id": "rag-chunk",
+   "section": "retrieval",
+   "number": 64,
+   "title": "Evaluate chunk boundaries",
+   "question": "What happens when evidence is split badly?",
+   "context": "A definition spans two retrieved chunks.",
+   "explanation": "Adjust chunking or overlap so the retrieved passage keeps the claim and its qualification together.",
+   "check": "Compare results before and after the boundary change.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about evaluate chunk boundaries",
+    "Use the case context without claiming unobserved actions",
+    "Compare results before and after the boundary change."
+   ]
+  },
+  {
+   "id": "rag-retrieve",
+   "section": "retrieval",
+   "number": 65,
+   "title": "Rank relevant passages",
+   "question": "Which retrieved result should the agent use?",
+   "context": "Search returns one relevant and two irrelevant hits.",
+   "explanation": "Use relevant passages with source IDs and discard unrelated hits instead of summarizing all of them.",
+   "check": "Identify the passage supporting the answer.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about rank relevant passages",
+    "Use the case context without claiming unobserved actions",
+    "Identify the passage supporting the answer."
+   ]
+  },
+  {
+   "id": "rag-citation",
+   "section": "retrieval",
+   "number": 66,
+   "title": "Verify source attribution",
+   "question": "How can I detect an invented citation?",
+   "context": "An answer cites a document not returned by search.",
+   "explanation": "Tie each cited claim to a retrieved source ID and excerpt seen in the run.",
+   "check": "Reject the citation with no matching retrieval event.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about verify source attribution",
+    "Use the case context without claiming unobserved actions",
+    "Reject the citation with no matching retrieval event."
+   ]
+  },
+  {
+   "id": "rag-no-hit",
+   "section": "retrieval",
+   "number": 67,
+   "title": "Handle missing evidence",
+   "question": "What should the agent say when retrieval returns nothing?",
+   "context": "No passage answers the question.",
+   "explanation": "State the gap and ask for a better source or narrower query; do not fabricate a source-backed answer.",
+   "check": "Confirm the response reports no supporting passage.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about handle missing evidence",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the response reports no supporting passage."
+   ]
+  },
+  {
+   "id": "rag-conflict",
+   "section": "retrieval",
+   "number": 68,
+   "title": "Compare conflicting sources",
+   "question": "How should the agent handle two disagreeing guides?",
+   "context": "Two retrieved versions give different option names.",
+   "explanation": "Show source dates and disagreement, then prefer the reviewed current source only with evidence.",
+   "check": "Record both source IDs and the reason for the choice.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about compare conflicting sources",
+    "Use the case context without claiming unobserved actions",
+    "Record both source IDs and the reason for the choice."
+   ]
+  },
+  {
+   "id": "rag-tenant",
+   "section": "retrieval",
+   "number": 69,
+   "title": "Prevent cross-tenant retrieval",
+   "question": "Can one learner search another learner’s upload?",
+   "context": "A shared index contains private course notes.",
+   "explanation": "Filter retrieval on the authenticated owner at the host boundary, not in a model prompt alone.",
+   "check": "Query with a second owner and confirm zero leaked passages.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about prevent cross-tenant retrieval",
+    "Use the case context without claiming unobserved actions",
+    "Query with a second owner and confirm zero leaked passages."
+   ]
+  },
+  {
+   "id": "rag-eval",
+   "section": "retrieval",
+   "number": 70,
+   "title": "Measure whether retrieval helps",
+   "question": "Did RAG improve the answer?",
+   "context": "Two controlled runs answer the same SDK question.",
+   "explanation": "Compare grounded correctness, citation precision, latency, and cost with and without retrieval.",
+   "check": "Use the same rubric and question for both runs.",
+   "resource": "project",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about measure whether retrieval helps",
+    "Use the case context without claiming unobserved actions",
+    "Use the same rubric and question for both runs."
+   ]
+  },
+  {
+   "id": "permissions",
+   "section": "control",
+   "number": 71,
+   "title": "Review a permission request",
+   "question": "What should happen before a sensitive tool action?",
+   "context": "A tool could change files or call a service.",
+   "explanation": "Seek a scoped decision before sensitive action and record approval or denial.",
+   "check": "Test a denied action and verify no side effect.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about review a permission request",
+    "Use the case context without claiming unobserved actions",
+    "Test a denied action and verify no side effect."
+   ]
+  },
+  {
+   "id": "hooks",
+   "section": "control",
+   "number": 72,
+   "title": "Use a hook for policy",
+   "question": "When is an SDK hook useful?",
+   "context": "A team needs a consistent tool check.",
+   "explanation": "A hook can observe or intercept lifecycle events; keep policy small and inspectable.",
+   "check": "Trigger the hook and inspect its decision.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about use a hook for policy",
+    "Use the case context without claiming unobserved actions",
+    "Trigger the hook and inspect its decision."
+   ]
+  },
+  {
+   "id": "turn-budget",
+   "section": "control",
+   "number": 73,
+   "title": "Set turn and cost bounds",
+   "question": "How do max_turns and max_budget_usd bound a run?",
+   "context": "A query may continue longer than expected.",
+   "explanation": "Turn and budget thresholds stop execution; the budget threshold is not a precise billing cap.",
+   "check": "Record bounds and final subtype after a limit.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about set turn and cost bounds",
+    "Use the case context without claiming unobserved actions",
+    "Record bounds and final subtype after a limit."
+   ]
+  },
+  {
+   "id": "abort-run",
+   "section": "control",
+   "number": 74,
+   "title": "Cancel a running query",
+   "question": "How should an app handle cancellation?",
+   "context": "The user stops a live run early.",
+   "explanation": "Use cancellation and report interruption. Preserve partial output as partial evidence only.",
+   "check": "Cancel a test run and confirm it is not marked successful.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about cancel a running query",
+    "Use the case context without claiming unobserved actions",
+    "Cancel a test run and confirm it is not marked successful."
+   ]
+  },
+  {
+   "id": "retry-policy",
+   "section": "control",
+   "number": 75,
+   "title": "Set a retry policy",
+   "question": "When is it reasonable to retry a failed SDK run?",
+   "context": "A transient failure occurred.",
+   "explanation": "Retry only recoverable failures with a small limit and record each attempt. Do not retry an action blindly if it may already have taken effect.",
+   "check": "Inspect duplicate prevention and attempt count.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about set a retry policy",
+    "Use the case context without claiming unobserved actions",
+    "Inspect duplicate prevention and attempt count."
+   ]
+  },
+  {
+   "id": "idempotency",
+   "section": "control",
+   "number": 76,
+   "title": "Avoid duplicate side effects",
+   "question": "How can a retry avoid creating the same effect twice?",
+   "context": "A write may have succeeded before a timeout.",
+   "explanation": "Use stable request identifiers or inspect the target state before repeating a mutating action.",
+   "check": "Replay a simulated timeout and confirm only one effect exists.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about avoid duplicate side effects",
+    "Use the case context without claiming unobserved actions",
+    "Replay a simulated timeout and confirm only one effect exists."
+   ]
+  },
+  {
+   "id": "partial-answer",
+   "section": "control",
+   "number": 77,
+   "title": "Label a partial answer",
+   "question": "How should a run stopped by a limit appear to the student?",
+   "context": "The run emitted text then reached a limit.",
+   "explanation": "Keep the text visible but label the run incomplete. Require a new check before relying on the answer.",
+   "check": "Confirm the UI shows the limit subtype beside the partial text.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about label a partial answer",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the UI shows the limit subtype beside the partial text."
+   ]
+  },
+  {
+   "id": "permission-callback",
+   "section": "control",
+   "number": 78,
+   "title": "Decide a sensitive tool request",
+   "question": "When is a runtime permission decision better than a broad allowlist?",
+   "context": "A tool request depends on the exact target and arguments.",
+   "explanation": "Use a scoped permission decision when the action needs contextual review. Record the proposed tool and outcome without leaking sensitive arguments.",
+   "check": "Deny one unsafe target and verify no effect occurred.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about decide a sensitive tool request",
+    "Use the case context without claiming unobserved actions",
+    "Deny one unsafe target and verify no effect occurred."
+   ]
+  },
+  {
+   "id": "hook-decision",
+   "section": "control",
+   "number": 79,
+   "title": "Inspect a hook decision",
+   "question": "How do I know whether a lifecycle hook allowed or blocked an action?",
+   "context": "A hook evaluates a proposed tool request.",
+   "explanation": "Record the hook event, decision, and resulting tool behavior separately. A configured hook is not proof that it ran.",
+   "check": "Trigger allow and deny fixtures and verify the denied tool has no result event.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about inspect a hook decision",
+    "Use the case context without claiming unobserved actions",
+    "Trigger allow and deny fixtures and verify the denied tool has no result event."
+   ]
+  },
+  {
+   "id": "error-subtypes",
+   "section": "control",
+   "number": 80,
+   "title": "Distinguish terminal error subtypes",
+   "question": "Why should a turn limit, budget limit, and execution failure have different UI states?",
+   "context": "Three runs stop for different reasons.",
+   "explanation": "Keep the SDK final subtype and partial answer together; give each reason its own recovery advice without claiming success.",
+   "check": "Map three fixture subtypes to distinct labels and next actions.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about distinguish terminal error subtypes",
+    "Use the case context without claiming unobserved actions",
+    "Map three fixture subtypes to distinct labels and next actions."
+   ]
+  },
+  {
+   "id": "structured-output",
+   "section": "outputs",
+   "number": 81,
+   "title": "Request structured output",
+   "question": "When should I ask for a schema instead of prose?",
+   "context": "Downstream code needs reliable fields.",
+   "explanation": "Use structured output when code consumes the answer and validate its shape before use.",
+   "check": "Reject an output with a missing required field.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about request structured output",
+    "Use the case context without claiming unobserved actions",
+    "Reject an output with a missing required field."
+   ]
+  },
+  {
+   "id": "output-schema",
+   "section": "outputs",
+   "number": 82,
+   "title": "Define a small result schema",
+   "question": "What fields should a structured agent result require?",
+   "context": "A UI expects a summary and a list of checks.",
+   "explanation": "Define only fields the app consumes, with explicit types and required fields, before asking for structured output.",
+   "check": "Reject a fixture missing the required summary.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about define a small result schema",
+    "Use the case context without claiming unobserved actions",
+    "Reject a fixture missing the required summary."
+   ]
+  },
+  {
+   "id": "schema-conversion",
+   "section": "outputs",
+   "number": 83,
+   "title": "Convert a Python schema safely",
+   "question": "How can Pydantic help create a structured output contract?",
+   "context": "A Python app already validates its domain object with Pydantic.",
+   "explanation": "Generate JSON Schema with the model's model_json_schema(), pass it as output_format, and validate the structured output with the same Pydantic model.",
+   "check": "Validate a good and a bad fixture against the generated schema.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about convert a python schema safely",
+    "Use the case context without claiming unobserved actions",
+    "Validate a good and a bad fixture against the generated schema."
+   ]
+  },
+  {
+   "id": "structured-result",
+   "section": "outputs",
+   "number": 84,
+   "title": "Read the structured result",
+   "question": "Where should validated data be taken from after a successful run?",
+   "context": "The assistant wrote prose and the SDK returned structured data.",
+   "explanation": "Read the structured result field on a successful final result rather than parsing an arbitrary paragraph as JSON.",
+   "check": "Show that the UI uses the final validated object and not a JSON-looking text block.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about read the structured result",
+    "Use the case context without claiming unobserved actions",
+    "Show that the UI uses the final validated object and not a JSON-looking text block."
+   ]
+  },
+  {
+   "id": "schema-failure",
+   "section": "outputs",
+   "number": 85,
+   "title": "Handle schema validation failure",
+   "question": "What should the app show when the agent never produces a valid object?",
+   "context": "The agent exhausted structured-output validation attempts.",
+   "explanation": "Preserve the error subtype and any partial explanation; do not invent a conforming object or continue as success.",
+   "check": "Simulate a schema-retry error and confirm no accepted object is published.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about handle schema validation failure",
+    "Use the case context without claiming unobserved actions",
+    "Simulate a schema-retry error and confirm no accepted object is published."
+   ]
+  },
+  {
+   "id": "markdown-rendering",
+   "section": "outputs",
+   "number": 86,
+   "title": "Render an answer as reading text",
+   "question": "How should a web app display agent Markdown?",
+   "context": "The model returns headings, lists, links, and code fences.",
+   "explanation": "Render safe Markdown as readable HTML, escape raw HTML, and keep long code blocks scrollable.",
+   "check": "Check that visible text has headings and code without raw Markdown markers.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about render an answer as reading text",
+    "Use the case context without claiming unobserved actions",
+    "Check that visible text has headings and code without raw Markdown markers."
+   ]
+  },
+  {
+   "id": "code-language",
+   "section": "outputs",
+   "number": 87,
+   "title": "Label code examples accurately",
+   "question": "How should a teaching app handle an unlabeled or wrong-language code fence?",
+   "context": "An answer contains a fenced snippet.",
+   "explanation": "Use the declared language only when known, fall back to plain code otherwise, and avoid claiming a snippet was executed.",
+   "check": "Render Python and unknown-language fixtures with readable contrast.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about label code examples accurately",
+    "Use the case context without claiming unobserved actions",
+    "Render Python and unknown-language fixtures with readable contrast."
+   ]
+  },
+  {
+   "id": "answer-provenance",
+   "section": "outputs",
+   "number": 88,
+   "title": "Label prepared and live answers",
+   "question": "How can a student tell a fixture from an actual SDK response?",
+   "context": "Two visually similar answers have different origins.",
+   "explanation": "Show mode, source access, final subtype, and actual tool events beside the answer. A fixture remains teaching material.",
+   "check": "Compare one prepared and one mocked live record and identify their origins.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about label prepared and live answers",
+    "Use the case context without claiming unobserved actions",
+    "Compare one prepared and one mocked live record and identify their origins."
+   ]
+  },
+  {
+   "id": "clarifying-input",
+   "section": "outputs",
+   "number": 89,
+   "title": "Ask for missing user input",
+   "question": "When should an agent request clarification before acting?",
+   "context": "A user asks for a file change but gives no target folder.",
+   "explanation": "Pause or ask a focused question when a required decision is missing; do not guess a consequential target.",
+   "check": "Verify the fixture does not perform a write before the target is supplied.",
+   "resource": "docs",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about ask for missing user input",
+    "Use the case context without claiming unobserved actions",
+    "Verify the fixture does not perform a write before the target is supplied."
+   ]
+  },
+  {
+   "id": "accessible-status",
+   "section": "outputs",
+   "number": 90,
+   "title": "Announce run status clearly",
+   "question": "How should a browser report loading, partial, success, and failure states?",
+   "context": "A student uses a screen reader while a run completes.",
+   "explanation": "Use visible text and accessible status regions for state changes; color alone is insufficient.",
+   "check": "Inspect each fixture state with keyboard navigation and an accessible-name check.",
+   "resource": "none",
+   "category": "Intermediate",
+   "criteria": [
+    "Answer the question about announce run status clearly",
+    "Use the case context without claiming unobserved actions",
+    "Inspect each fixture state with keyboard navigation and an accessible-name check."
+   ]
+  },
+  {
+   "id": "stream-input",
+   "section": "sessions",
+   "number": 91,
+   "title": "Send a follow-up into a session",
+   "question": "How should an interactive app send a follow-up without losing context?",
+   "context": "The user asks a second question about an earlier answer.",
+   "explanation": "Use a supported streaming input or session continuation path and preserve the session identity. Keep independent users in separate sessions.",
+   "check": "Show that the follow-up sees the intended prior exchange but not another user’s.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about send a follow-up into a session",
+    "Use the case context without claiming unobserved actions",
+    "Show that the follow-up sees the intended prior exchange but not another user’s."
+   ]
+  },
+  {
+   "id": "stream-output",
+   "section": "sessions",
+   "number": 92,
+   "title": "Show output as it arrives",
+   "question": "How can a webpage show an answer before the SDK result completes?",
+   "context": "A live response takes several seconds.",
+   "explanation": "Enable partial output only when needed, display incoming text as provisional, and wait for the final SDK result before marking completion.",
+   "check": "Interrupt a stream and verify the partial text remains labelled incomplete.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about show output as it arrives",
+    "Use the case context without claiming unobserved actions",
+    "Interrupt a stream and verify the partial text remains labelled incomplete."
+   ]
+  },
+  {
+   "id": "session-fork",
+   "section": "sessions",
+   "number": 93,
+   "title": "Fork a session for comparison",
+   "question": "When is a fork better than changing the active conversation?",
+   "context": "A student wants to compare two directions from the same context.",
+   "explanation": "Fork a supported session so both branches begin at the same checkpoint, then keep each branch’s results and costs separate.",
+   "check": "Verify one branch cannot silently overwrite the other’s answer.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about fork a session for comparison",
+    "Use the case context without claiming unobserved actions",
+    "Verify one branch cannot silently overwrite the other’s answer."
+   ]
+  },
+  {
+   "id": "session-storage",
+   "section": "sessions",
+   "number": 94,
+   "title": "Persist session state outside a process",
+   "question": "What must survive a service restart for a long-running conversation?",
+   "context": "The web server restarts while a learner’s session should continue.",
+   "explanation": "Use the documented session persistence mechanism and verify identity, ownership, and stored artifacts before resuming.",
+   "check": "Restart a disposable service and resume only the matching student session.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about persist session state outside a process",
+    "Use the case context without claiming unobserved actions",
+    "Restart a disposable service and resume only the matching student session."
+   ]
+  },
+  {
+   "id": "compact-boundary",
+   "section": "sessions",
+   "number": 95,
+   "title": "Recognize context compaction",
+   "question": "What should a run inspector show when conversation history is compacted?",
+   "context": "A long session crosses a context boundary.",
+   "explanation": "Record the compaction boundary as an event and explain that later context may be summarized. Do not treat a summary as the original transcript.",
+   "check": "Locate the boundary and compare retained evidence with the source transcript.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about recognize context compaction",
+    "Use the case context without claiming unobserved actions",
+    "Locate the boundary and compare retained evidence with the source transcript."
+   ]
+  },
+  {
+   "id": "stream-cutoff",
+   "section": "sessions",
+   "number": 96,
+   "title": "Handle a cut-off stream",
+   "question": "How should the UI recover if a network connection ends mid-answer?",
+   "context": "The transport closes before the final result.",
+   "explanation": "Keep received text as partial, mark the run interrupted, and separate an incomplete tool call from a completed one.",
+   "check": "Simulate a dropped stream and verify no success state or invented tool result.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about handle a cut-off stream",
+    "Use the case context without claiming unobserved actions",
+    "Simulate a dropped stream and verify no success state or invented tool result."
+   ]
+  },
+  {
+   "id": "sessions",
+   "section": "sessions",
+   "number": 97,
+   "title": "Resume a session",
+   "question": "How is a resumed session different from a new query?",
+   "context": "A follow-up depends on earlier context.",
+   "explanation": "A session preserves conversation continuity; a fresh query needs its own relevant context.",
+   "check": "Check that a resumed turn sees the intended exchange.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about resume a session",
+    "Use the case context without claiming unobserved actions",
+    "Check that a resumed turn sees the intended exchange."
+   ]
+  },
+  {
+   "id": "session-boundary",
+   "section": "sessions",
+   "number": 98,
+   "title": "Avoid context leakage",
+   "question": "When should I start a new session instead of resuming?",
+   "context": "A new learner or unrelated case starts a task.",
+   "explanation": "Use a fresh session when prior context could bias or expose another task; resume only for an intended continuation.",
+   "check": "Start two independent cases and verify the second lacks prior private context.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about avoid context leakage",
+    "Use the case context without claiming unobserved actions",
+    "Start two independent cases and verify the second lacks prior private context."
+   ]
+  },
+  {
+   "id": "stream-block-boundary",
+   "section": "sessions",
+   "number": 99,
+   "title": "Recognize completed stream blocks",
+   "question": "What is the difference between a text delta and a completed assistant block?",
+   "context": "Partial streaming is enabled.",
+   "explanation": "Treat deltas as provisional and complete assistant blocks as committed content; avoid appending both to the final answer.",
+   "check": "Use a delta-plus-block fixture and verify the text appears once.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about recognize completed stream blocks",
+    "Use the case context without claiming unobserved actions",
+    "Use a delta-plus-block fixture and verify the text appears once."
+   ]
+  },
+  {
+   "id": "session-id-ownership",
+   "section": "sessions",
+   "number": 100,
+   "title": "Check a session owner before resume",
+   "question": "Why is a session ID not enough to authorize resumption?",
+   "context": "A browser supplies another learner session ID.",
+   "explanation": "Bind session IDs to the authenticated owner on the host and reject cross-owner resume requests.",
+   "check": "Try a foreign session ID and verify the backend denies it.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about check a session owner before resume",
+    "Use the case context without claiming unobserved actions",
+    "Try a foreign session ID and verify the backend denies it."
+   ]
+  },
+  {
+   "id": "subagent-purpose",
+   "section": "subagents",
+   "number": 101,
+   "title": "Choose delegation deliberately",
+   "question": "When should a specialist subagent be used?",
+   "context": "A review has independent evidence checks.",
+   "explanation": "Delegate a narrow check only when its separate context and cost have a clear benefit.",
+   "check": "Name the bounded task and expected evidence.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about choose delegation deliberately",
+    "Use the case context without claiming unobserved actions",
+    "Name the bounded task and expected evidence."
+   ]
+  },
+  {
+   "id": "subagent-definition",
+   "section": "subagents",
+   "number": 102,
+   "title": "Inspect AgentDefinition",
+   "question": "What belongs in a specialist definition?",
+   "context": "A read-only reviewer is configured.",
+   "explanation": "Give it a description, narrow prompt, tool scope, and relevant limits.",
+   "check": "Show the actual definition used for the run.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about inspect agentdefinition",
+    "Use the case context without claiming unobserved actions",
+    "Show the actual definition used for the run."
+   ]
+  },
+  {
+   "id": "subagent-invoke",
+   "section": "subagents",
+   "number": 103,
+   "title": "Verify an Agent tool call",
+   "question": "How can I prove a specialist was invoked?",
+   "context": "The parent is configured with agents.",
+   "explanation": "Inspect the Agent tool request and result; configuration alone is not an invocation.",
+   "check": "Find the matching tool-use and tool-result IDs.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about verify an agent tool call",
+    "Use the case context without claiming unobserved actions",
+    "Find the matching tool-use and tool-result IDs."
+   ]
+  },
+  {
+   "id": "subagent-context",
+   "section": "subagents",
+   "number": 104,
+   "title": "Pass needed context explicitly",
+   "question": "What does a fresh subagent know about the parent task?",
+   "context": "A reviewer starts without the whole parent conversation.",
+   "explanation": "Pass the source location, exact question, and success criteria in the delegated request.",
+   "check": "Check that the reviewer got the required path and criteria.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about pass needed context explicitly",
+    "Use the case context without claiming unobserved actions",
+    "Check that the reviewer got the required path and criteria."
+   ]
+  },
+  {
+   "id": "subagent-tools",
+   "section": "subagents",
+   "number": 105,
+   "title": "Restrict specialist tools",
+   "question": "Should a reviewer be able to edit the project?",
+   "context": "It only needs to read evidence.",
+   "explanation": "Give it read-only tools and verify no write-capable tool is available or invoked.",
+   "check": "Attempt a write request and confirm denial.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about restrict specialist tools",
+    "Use the case context without claiming unobserved actions",
+    "Attempt a write request and confirm denial."
+   ]
+  },
+  {
+   "id": "subagent-wait",
+   "section": "subagents",
+   "number": 106,
+   "title": "Check completion before synthesis",
+   "question": "May the parent summarize a still-running specialist?",
+   "context": "The specialist has not returned its report.",
+   "explanation": "Wait for the result or mark the review incomplete; do not invent its findings.",
+   "check": "Show the completion event before the parent claim.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about check completion before synthesis",
+    "Use the case context without claiming unobserved actions",
+    "Show the completion event before the parent claim."
+   ]
+  },
+  {
+   "id": "subagent-disagree",
+   "section": "subagents",
+   "number": 107,
+   "title": "Resolve conflicting specialists",
+   "question": "Two reviewers disagree; what should the parent do?",
+   "context": "One report says the claim is supported, another says it is not.",
+   "explanation": "Compare cited evidence and escalate unresolved disagreement rather than averaging assertions.",
+   "check": "Point to the exact source excerpt for the final choice.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about resolve conflicting specialists",
+    "Use the case context without claiming unobserved actions",
+    "Point to the exact source excerpt for the final choice."
+   ]
+  },
+  {
+   "id": "subagent-cost",
+   "section": "subagents",
+   "number": 108,
+   "title": "Bound delegated spend",
+   "question": "How should subagent cost enter the budget?",
+   "context": "Several specialists can run in one parent query.",
+   "explanation": "Set limits and inspect cumulative reported usage; delegation can add turns and cost.",
+   "check": "Show total cost and each specialist invocation.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about bound delegated spend",
+    "Use the case context without claiming unobserved actions",
+    "Show total cost and each specialist invocation."
+   ]
+  },
+  {
+   "id": "subagent-error",
+   "section": "subagents",
+   "number": 109,
+   "title": "Handle specialist failure",
+   "question": "What if a reviewer stops at a limit?",
+   "context": "The subagent returns an incomplete result.",
+   "explanation": "Keep its partial observations labelled incomplete and let the parent decide whether to retry or continue without that review.",
+   "check": "Verify the parent answer does not say the review passed.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about handle specialist failure",
+    "Use the case context without claiming unobserved actions",
+    "Verify the parent answer does not say the review passed."
+   ]
+  },
+  {
+   "id": "subagent-compare",
+   "section": "subagents",
+   "number": 110,
+   "title": "Evaluate delegation benefit",
+   "question": "Was a subagent better than one agent?",
+   "context": "The same case runs with and without a specialist.",
+   "explanation": "Compare evidence quality, latency, cost, and error rate under a fixed rubric.",
+   "check": "Report a tradeoff rather than assuming more agents are better.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about evaluate delegation benefit",
+    "Use the case context without claiming unobserved actions",
+    "Report a tradeoff rather than assuming more agents are better."
+   ]
+  },
+  {
+   "id": "subagents",
+   "section": "advanced",
+   "number": 111,
+   "title": "Delegate to a specialist",
+   "question": "When is a subagent useful?",
+   "context": "A complex task has a separable research step.",
+   "explanation": "Delegate a bounded specialist task and check its returned evidence. Delegation adds cost and is not final verification.",
+   "check": "Inspect the delegated task and parent review.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about delegate to a specialist",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the delegated task and parent review."
+   ]
+  },
+  {
+   "id": "checkpoint",
+   "section": "advanced",
+   "number": 112,
+   "title": "Rewind a file change",
+   "question": "What does checkpointing help recover?",
+   "context": "An agent edited files and a learner wants to restore state.",
+   "explanation": "Checkpointing can restore supported file changes. Check its scope before treating it as a full backup.",
+   "check": "Rewind a disposable change and inspect the file.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about rewind a file change",
+    "Use the case context without claiming unobserved actions",
+    "Rewind a disposable change and inspect the file."
+   ]
+  },
+  {
+   "id": "specialist-review",
+   "section": "advanced",
+   "number": 113,
+   "title": "Use a specialist reviewer",
+   "question": "How can a second agent improve a teaching answer?",
+   "context": "A draft explanation may contain unsupported claims.",
+   "explanation": "Delegate a bounded critique to a tool-free specialist, then revise the parent answer; inspect whether delegation actually occurred.",
+   "check": "Find the Agent tool event and one concrete revision.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about use a specialist reviewer",
+    "Use the case context without claiming unobserved actions",
+    "Find the Agent tool event and one concrete revision."
+   ]
+  },
+  {
+   "id": "agent-handoff",
+   "section": "advanced",
+   "number": 114,
+   "title": "Inspect an agent handoff",
+   "question": "What evidence proves a subagent contributed?",
+   "context": "The parent says a reviewer checked the answer.",
+   "explanation": "Look for the Agent invocation and returned critique. A configured subagent alone does not prove it ran.",
+   "check": "Match the delegated task to the returned review.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about inspect an agent handoff",
+    "Use the case context without claiming unobserved actions",
+    "Match the delegated task to the returned review."
+   ]
+  },
+  {
+   "id": "skills",
+   "section": "advanced",
+   "number": 115,
+   "title": "Load an agent skill deliberately",
+   "question": "How can a reusable skill teach the agent a specialized workflow?",
+   "context": "Several tasks share the same procedures and supporting files.",
+   "explanation": "Package a focused skill, load it through an approved settings source, and verify the agent used the relevant instructions. A skill is not proof that the result is correct.",
+   "check": "Inspect the loaded skill and one behavior it changed.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about load an agent skill deliberately",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the loaded skill and one behavior it changed."
+   ]
+  },
+  {
+   "id": "plugins",
+   "section": "advanced",
+   "number": 116,
+   "title": "Package a reusable extension",
+   "question": "When is an SDK plugin useful?",
+   "context": "A team wants to distribute related skills, hooks, agents, and MCP configuration.",
+   "explanation": "Use a plugin when a coherent capability should be versioned and reused; inspect what it enables before loading it into a host app.",
+   "check": "List the enabled components and compare them with the approved scope.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about package a reusable extension",
+    "Use the case context without claiming unobserved actions",
+    "List the enabled components and compare them with the approved scope."
+   ]
+  },
+  {
+   "id": "todo-progress",
+   "section": "advanced",
+   "number": 117,
+   "title": "Report task progress",
+   "question": "How should a multi-step agent report progress before finishing?",
+   "context": "A long task has several observable steps.",
+   "explanation": "Represent progress as steps or todos and reconcile them with actual tool and result events. An unchecked or merely narrated step is not completed work.",
+   "check": "Compare the displayed progress with a matching event or artifact for each completed step.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about report task progress",
+    "Use the case context without claiming unobserved actions",
+    "Compare the displayed progress with a matching event or artifact for each completed step."
+   ]
+  },
+  {
+   "id": "subagent-boundary",
+   "section": "advanced",
+   "number": 118,
+   "title": "Limit a specialist task",
+   "question": "What should a delegated specialist be allowed to do?",
+   "context": "A reviewer only needs to critique text.",
+   "explanation": "Give the specialist a bounded prompt, tool scope, model, and turn limit; check the parent response before showing a final claim.",
+   "check": "Verify the reviewer cannot call an unrelated write tool.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about limit a specialist task",
+    "Use the case context without claiming unobserved actions",
+    "Verify the reviewer cannot call an unrelated write tool."
+   ]
+  },
+  {
+   "id": "checkpoint-scope",
+   "section": "advanced",
+   "number": 119,
+   "title": "Check checkpoint recovery limits",
+   "question": "What does file checkpointing fail to undo?",
+   "context": "An agent edited a file and called an external API.",
+   "explanation": "Treat checkpoint rewind as file-state recovery within its supported scope; separately inspect database or network side effects.",
+   "check": "Rewind a disposable file and confirm the external fixture remains unchanged.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about check checkpoint recovery limits",
+    "Use the case context without claiming unobserved actions",
+    "Rewind a disposable file and confirm the external fixture remains unchanged."
+   ]
+  },
+  {
+   "id": "skill-provenance",
+   "section": "advanced",
+   "number": 120,
+   "title": "Audit an instruction extension",
+   "question": "How do I know which skill or plugin influenced a run?",
+   "context": "A reusable extension is loaded into the agent.",
+   "explanation": "Record the approved extension version and relevant loading event; do not infer influence merely from installation.",
+   "check": "Compare the effective configuration of runs with and without the extension.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about audit an instruction extension",
+    "Use the case context without claiming unobserved actions",
+    "Compare the effective configuration of runs with and without the extension."
+   ]
+  },
+  {
+   "id": "trust-document",
+   "section": "trust",
+   "number": 121,
+   "title": "Treat uploaded text as data",
+   "question": "Should an attached document change the agent’s rules?",
+   "context": "A PDF says to ignore system instructions.",
+   "explanation": "Use the document as evidence only; host permissions and higher-priority instructions remain authoritative.",
+   "check": "Confirm the agent quotes the data without obeying the injected command.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about treat uploaded text as data",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the agent quotes the data without obeying the injected command."
+   ]
+  },
+  {
+   "id": "trust-tool",
+   "section": "trust",
+   "number": 122,
+   "title": "Inspect untrusted tool output",
+   "question": "Can a search result instruct the agent to call Bash?",
+   "context": "An MCP result contains an action request.",
+   "explanation": "Treat tool text as source content, not as a new instruction.",
+   "check": "Show the denied tool request or absence of Bash execution.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about inspect untrusted tool output",
+    "Use the case context without claiming unobserved actions",
+    "Show the denied tool request or absence of Bash execution."
+   ]
+  },
+  {
+   "id": "trust-link",
+   "section": "trust",
+   "number": 123,
+   "title": "Review a retrieved URL",
+   "question": "Should a URL in source text be opened automatically?",
+   "context": "A retrieved page links to an unknown domain.",
+   "explanation": "Check the target against source policy before network access and record the decision.",
+   "check": "Compare allowed and denied link fixtures.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about review a retrieved url",
+    "Use the case context without claiming unobserved actions",
+    "Compare allowed and denied link fixtures."
+   ]
+  },
+  {
+   "id": "trust-secret",
+   "section": "trust",
+   "number": 124,
+   "title": "Stop secret exposure",
+   "question": "What if an agent asks to print an API key?",
+   "context": "A retrieved instruction requests environment variables.",
+   "explanation": "Deny secret reads and redact sensitive values from logs and answers.",
+   "check": "Scan the event and answer for a secret marker.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about stop secret exposure",
+    "Use the case context without claiming unobserved actions",
+    "Scan the event and answer for a secret marker."
+   ]
+  },
+  {
+   "id": "trust-approval",
+   "section": "trust",
+   "number": 125,
+   "title": "Bind approval to one action",
+   "question": "Can one approval authorize a later different write?",
+   "context": "The proposed file path changes after approval.",
+   "explanation": "Bind consent to the exact operation, parameters, and current request; require new approval for a changed action.",
+   "check": "Reject the mismatched path.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about bind approval to one action",
+    "Use the case context without claiming unobserved actions",
+    "Reject the mismatched path."
+   ]
+  },
+  {
+   "id": "trust-scope",
+   "section": "trust",
+   "number": 126,
+   "title": "Confine file access",
+   "question": "How should a host limit an agent to one project?",
+   "context": "The model requests a parent folder.",
+   "explanation": "Validate resolved paths at the host and deny access outside the intended workspace.",
+   "check": "Test a normal file and a traversal path.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about confine file access",
+    "Use the case context without claiming unobserved actions",
+    "Test a normal file and a traversal path."
+   ]
+  },
+  {
+   "id": "trust-mcp",
+   "section": "trust",
+   "number": 127,
+   "title": "Review external MCP access",
+   "question": "What should be checked before connecting a remote server?",
+   "context": "A custom MCP endpoint is suggested.",
+   "explanation": "Verify the owner, transport, credentials, tool list, and data that may leave the host.",
+   "check": "Show exact allowed tool names and consent record.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about review external mcp access",
+    "Use the case context without claiming unobserved actions",
+    "Show exact allowed tool names and consent record."
+   ]
+  },
+  {
+   "id": "trust-output",
+   "section": "trust",
+   "number": 128,
+   "title": "Sanitize rendered agent content",
+   "question": "Can model output be placed directly into HTML?",
+   "context": "An answer contains raw tags and a code block.",
+   "explanation": "Render safe Markdown and escape untrusted HTML while preserving readable code.",
+   "check": "Confirm no script runs in the browser fixture.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about sanitize rendered agent content",
+    "Use the case context without claiming unobserved actions",
+    "Confirm no script runs in the browser fixture."
+   ]
+  },
+  {
+   "id": "trust-redteam",
+   "section": "trust",
+   "number": 129,
+   "title": "Run benign and attack tests",
+   "question": "How can a team check a prompt-injection defense?",
+   "context": "A rule blocks one attack but may break normal questions.",
+   "explanation": "Measure both attack success and benign task completion on representative cases.",
+   "check": "Record outcomes for an attack and a harmless source quote.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about run benign and attack tests",
+    "Use the case context without claiming unobserved actions",
+    "Record outcomes for an attack and a harmless source quote."
+   ]
+  },
+  {
+   "id": "trust-release",
+   "section": "trust",
+   "number": 130,
+   "title": "Gate release on trust evidence",
+   "question": "When is a security fix ready to ship?",
+   "context": "A patch passes one adversarial example.",
+   "explanation": "Require repeatable regression cases, reviewed permission paths, and a human release decision.",
+   "check": "Show the regression suite and approval evidence.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about gate release on trust evidence",
+    "Use the case context without claiming unobserved actions",
+    "Show the regression suite and approval evidence."
+   ]
+  },
+  {
+   "id": "test-case",
+   "section": "evaluation",
+   "number": 131,
+   "title": "Write an evaluation case",
+   "question": "What makes a useful agent evaluation case?",
+   "context": "A team compares agent behavior.",
+   "explanation": "Specify input, context, expected behavior, and observable failure conditions. Fluency is not a score.",
+   "check": "Ask another student to apply the same criteria.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about write an evaluation case",
+    "Use the case context without claiming unobserved actions",
+    "Ask another student to apply the same criteria."
+   ]
+  },
+  {
+   "id": "variant",
+   "section": "evaluation",
+   "number": 132,
+   "title": "Compare instruction variants",
+   "question": "How do I know whether a new instruction improved the agent?",
+   "context": "Two variants answer the same case.",
+   "explanation": "Keep case, source access, model, and bounds consistent. Change one variable at a time.",
+   "check": "Run both variants and record the changed criterion.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about compare instruction variants",
+    "Use the case context without claiming unobserved actions",
+    "Run both variants and record the changed criterion."
+   ]
+  },
+  {
+   "id": "trace",
+   "section": "evaluation",
+   "number": 133,
+   "title": "Read a run timeline",
+   "question": "Which events should an SDK timeline show?",
+   "context": "The response exists but outcome is uncertain.",
+   "explanation": "Record request, configuration, output, tool use, result, duration, and cost without secrets.",
+   "check": "Find the final result and separate it from text output.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about read a run timeline",
+    "Use the case context without claiming unobserved actions",
+    "Find the final result and separate it from text output."
+   ]
+  },
+  {
+   "id": "cost",
+   "section": "evaluation",
+   "number": 134,
+   "title": "Inspect cost and latency",
+   "question": "How should I compare quality, cost, and speed?",
+   "context": "One variant may improve quality but cost more.",
+   "explanation": "Track cost and latency per comparable run and judge usefulness against case criteria.",
+   "check": "Compare two identical cases on quality, time, and cost.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about inspect cost and latency",
+    "Use the case context without claiming unobserved actions",
+    "Compare two identical cases on quality, time, and cost."
+   ]
+  },
+  {
+   "id": "negative-case",
+   "section": "evaluation",
+   "number": 135,
+   "title": "Add a negative test case",
+   "question": "Why test an agent with missing or misleading evidence?",
+   "context": "A demo only covers successful inputs.",
+   "explanation": "Negative cases reveal whether the agent admits uncertainty and avoids unsupported claims.",
+   "check": "Run a missing-evidence case and inspect whether it refuses to claim success.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about add a negative test case",
+    "Use the case context without claiming unobserved actions",
+    "Run a missing-evidence case and inspect whether it refuses to claim success."
+   ]
+  },
+  {
+   "id": "source-ablation",
+   "section": "evaluation",
+   "number": 136,
+   "title": "Compare with and without MCP",
+   "question": "Did external retrieval actually improve the answer?",
+   "context": "The same case can run with no source or docs MCP.",
+   "explanation": "Hold other settings constant, then compare evidence, accuracy, latency, and cost. Source availability alone is not quality.",
+   "check": "Record a specific source-supported improvement or lack of one.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about compare with and without mcp",
+    "Use the case context without claiming unobserved actions",
+    "Record a specific source-supported improvement or lack of one."
+   ]
+  },
+  {
+   "id": "regression",
+   "section": "evaluation",
+   "number": 137,
+   "title": "Build a regression set",
+   "question": "How do I catch a prompt change that breaks earlier cases?",
+   "context": "A new instruction helps one case but harms another.",
+   "explanation": "Re-run a stable set of prepared cases and manually review live cases with consent. Compare criteria across versions.",
+   "check": "Name one improved and one regressed criterion.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about build a regression set",
+    "Use the case context without claiming unobserved actions",
+    "Name one improved and one regressed criterion."
+   ]
+  },
+  {
+   "id": "telemetry",
+   "section": "evaluation",
+   "number": 138,
+   "title": "Trace a run across services",
+   "question": "How can OpenTelemetry help investigate a slow agent run?",
+   "context": "A request passes through the web host, SDK process, and MCP server.",
+   "explanation": "Correlate spans and safe attributes across services while keeping prompts, credentials, and sensitive payloads out of telemetry.",
+   "check": "Trace one request ID from the web request to its SDK result without exposing a secret.",
+   "resource": "docs",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about trace a run across services",
+    "Use the case context without claiming unobserved actions",
+    "Trace one request ID from the web request to its SDK result without exposing a secret."
+   ]
+  },
+  {
+   "id": "rubric",
+   "section": "evaluation",
+   "number": 139,
+   "title": "Use an observable evaluation rubric",
+   "question": "How do I score an answer without rewarding fluent but unsupported claims?",
+   "context": "Two answers sound confident but only one cites actual evidence.",
+   "explanation": "Define separate criteria for correctness, evidence, tool behavior, and final status before reading the answer.",
+   "check": "Apply the same rubric to both fixtures and explain one difference.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about use an observable evaluation rubric",
+    "Use the case context without claiming unobserved actions",
+    "Apply the same rubric to both fixtures and explain one difference."
+   ]
+  },
+  {
+   "id": "repeated-samples",
+   "section": "evaluation",
+   "number": 140,
+   "title": "Measure variation across repeated runs",
+   "question": "Why should one good live answer not prove a prompt is reliable?",
+   "context": "The same case can produce different valid outputs.",
+   "explanation": "Repeat a bounded case with the same configuration when authorized, then report the distribution and failures rather than a single anecdote.",
+   "check": "Compare at least three saved fixture outcomes without hiding a failure.",
+   "resource": "none",
+   "category": "Advanced",
+   "criteria": [
+    "Answer the question about measure variation across repeated runs",
+    "Use the case context without claiming unobserved actions",
+    "Compare at least three saved fixture outcomes without hiding a failure."
+   ]
+  },
+  {
+   "id": "fixture-first",
+   "section": "testing",
+   "number": 141,
+   "title": "Start with a deterministic fixture",
+   "question": "Why test an SDK UI with prepared messages before paying for a live run?",
+   "context": "A renderer and status mapper need validation.",
+   "explanation": "Feed authored SDK-shaped messages through the display path to test parsing, labels, and evidence without a paid call.",
+   "check": "Show that the fixture test has zero model calls and still exercises the inspector.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about start with a deterministic fixture",
+    "Use the case context without claiming unobserved actions",
+    "Show that the fixture test has zero model calls and still exercises the inspector."
+   ]
+  },
+  {
+   "id": "stream-contract",
+   "section": "testing",
+   "number": 142,
+   "title": "Test the message-stream contract",
+   "question": "Which SDK message kinds must the app handle explicitly?",
+   "context": "The stream can contain initialization, assistant, tool result, and terminal result events.",
+   "explanation": "Build a fixture with each expected kind and assert the app preserves order and correct final status.",
+   "check": "Remove the final result and verify the run is incomplete.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about test the message-stream contract",
+    "Use the case context without claiming unobserved actions",
+    "Remove the final result and verify the run is incomplete."
+   ]
+  },
+  {
+   "id": "permission-matrix",
+   "section": "testing",
+   "number": 143,
+   "title": "Test allowed and denied tools",
+   "question": "How can a team prove its tool policy is narrow?",
+   "context": "Several tools are configured for one case.",
+   "explanation": "Construct allowed, denied, and unknown-tool fixtures and verify both decision events and absence of unwanted effects.",
+   "check": "Show a table of expected versus actual decisions for three tool requests.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about test allowed and denied tools",
+    "Use the case context without claiming unobserved actions",
+    "Show a table of expected versus actual decisions for three tool requests."
+   ]
+  },
+  {
+   "id": "tool-fault",
+   "section": "testing",
+   "number": 144,
+   "title": "Inject a custom-tool failure",
+   "question": "What should happen if a tool throws or returns malformed data?",
+   "context": "A tool fails after the agent requested it.",
+   "explanation": "Surface the tool error as evidence, keep the run bounded, and avoid a fabricated successful tool result.",
+   "check": "Run a failing fixture and inspect the terminal subtype and tool trace.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about inject a custom-tool failure",
+    "Use the case context without claiming unobserved actions",
+    "Run a failing fixture and inspect the terminal subtype and tool trace."
+   ]
+  },
+  {
+   "id": "mcp-outage",
+   "section": "testing",
+   "number": 145,
+   "title": "Simulate an MCP outage",
+   "question": "How should a source-dependent answer behave when its server is down?",
+   "context": "The documentation MCP server is unavailable.",
+   "explanation": "Report the connection failure and either pause or continue with a clearly source-free answer according to the case policy.",
+   "check": "Verify no answer is labelled source-verified without a tool result.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about simulate an mcp outage",
+    "Use the case context without claiming unobserved actions",
+    "Verify no answer is labelled source-verified without a tool result."
+   ]
+  },
+  {
+   "id": "cancel-case",
+   "section": "testing",
+   "number": 146,
+   "title": "Test interruption of a live-like stream",
+   "question": "What evidence shows cancellation actually stopped work?",
+   "context": "A user cancels while text is streaming.",
+   "explanation": "Abort the host run, close the iterator, and keep received text as partial. Do not show a success subtype.",
+   "check": "Assert cancellation reaches the fake SDK iterator and no later tool call executes.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about test interruption of a live-like stream",
+    "Use the case context without claiming unobserved actions",
+    "Assert cancellation reaches the fake SDK iterator and no later tool call executes."
+   ]
+  },
+  {
+   "id": "limit-case",
+   "section": "testing",
+   "number": 147,
+   "title": "Test turn and budget limits",
+   "question": "How can a run limit be tested without paying for repeated calls?",
+   "context": "A fixture emits text then an error result at a limit.",
+   "explanation": "Preserve the final subtype, reported usage, and partial text even if iteration throws afterward.",
+   "check": "Exercise turn and budget fixtures and confirm distinct recovery messages.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about test turn and budget limits",
+    "Use the case context without claiming unobserved actions",
+    "Exercise turn and budget fixtures and confirm distinct recovery messages."
+   ]
+  },
+  {
+   "id": "session-resume-case",
+   "section": "testing",
+   "number": 148,
+   "title": "Test session continuity and isolation",
+   "question": "How can I verify a resumed session has only the intended context?",
+   "context": "Two learners each have a session.",
+   "explanation": "Test a same-owner continuation and a denied cross-owner resume; check what context reaches the resumed turn.",
+   "check": "Confirm the second learner cannot inspect or resume the first session.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about test session continuity and isolation",
+    "Use the case context without claiming unobserved actions",
+    "Confirm the second learner cannot inspect or resume the first session."
+   ]
+  },
+  {
+   "id": "export-contract",
+   "section": "testing",
+   "number": 149,
+   "title": "Test evidence export for secrets",
+   "question": "What should an exported run contain and exclude?",
+   "context": "A student downloads a review record.",
+   "explanation": "Include case, configuration, status, safe events, and human decision while excluding credentials and raw sensitive payloads.",
+   "check": "Scan an export fixture for required fields and absence of token markers.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about test evidence export for secrets",
+    "Use the case context without claiming unobserved actions",
+    "Scan an export fixture for required fields and absence of token markers."
+   ]
+  },
+  {
+   "id": "regression-release",
+   "section": "testing",
+   "number": 150,
+   "title": "Gate a release on regression evidence",
+   "question": "What would make a new instruction variant ready to publish?",
+   "context": "A candidate passes most cases but fails one critical negative case.",
+   "explanation": "Compare against the baseline rubric and require human review of high-impact regressions before release.",
+   "check": "Keep the candidate blocked until the failing criterion is explained and retested.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about gate a release on regression evidence",
+    "Use the case context without claiming unobserved actions",
+    "Keep the candidate blocked until the failing criterion is explained and retested."
+   ]
+  },
+  {
+   "id": "host-process",
+   "section": "operations",
+   "number": 151,
+   "title": "Keep the SDK on a backend",
+   "question": "Why should a browser interface call a host instead of embedding the Agent SDK?",
+   "context": "A learner opens the Studio in a browser.",
+   "explanation": "Run the SDK in a controlled server process with server-side credentials and explicit request validation. Expose only the needed application API.",
+   "check": "Inspect the browser bundle and network responses for absent credentials.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about keep the sdk on a backend",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the browser bundle and network responses for absent credentials."
+   ]
+  },
+  {
+   "id": "worker-isolation",
+   "section": "operations",
+   "number": 152,
+   "title": "Isolate concurrent runs",
+   "question": "What should happen when two learners start agent runs together?",
+   "context": "Two requests share one host process.",
+   "explanation": "Give each run its own state, limits, and cancellation path; do not mix session IDs, events, or logs.",
+   "check": "Run two fixture streams concurrently and verify their results remain separate.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about isolate concurrent runs",
+    "Use the case context without claiming unobserved actions",
+    "Run two fixture streams concurrently and verify their results remain separate."
+   ]
+  },
+  {
+   "id": "queue-admission",
+   "section": "operations",
+   "number": 153,
+   "title": "Bound admission and concurrency",
+   "question": "How should the host behave when too many runs arrive?",
+   "context": "The service has finite model and tool capacity.",
+   "explanation": "Apply an explicit concurrency or queue limit and return a clear busy response rather than silently overloading the host.",
+   "check": "Submit more fixture requests than capacity and inspect the bounded response.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about bound admission and concurrency",
+    "Use the case context without claiming unobserved actions",
+    "Submit more fixture requests than capacity and inspect the bounded response."
+   ]
+  },
+  {
+   "id": "request-timeout",
+   "section": "operations",
+   "number": 154,
+   "title": "Set an end-to-end timeout",
+   "question": "How can a host stop a stalled run safely?",
+   "context": "A downstream tool never returns.",
+   "explanation": "Use a deadline that covers the whole request, propagate cancellation, and label the outcome separately from a model failure.",
+   "check": "Hold a fixture tool open and confirm cancellation closes the run.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about set an end-to-end timeout",
+    "Use the case context without claiming unobserved actions",
+    "Hold a fixture tool open and confirm cancellation closes the run."
+   ]
+  },
+  {
+   "id": "health-readiness",
+   "section": "operations",
+   "number": 155,
+   "title": "Expose useful readiness",
+   "question": "What does a healthy agent host need to report?",
+   "context": "The webpage loads while the SDK host is unavailable.",
+   "explanation": "Separate process liveness from readiness to accept a run; avoid claiming model or MCP reachability without checking it.",
+   "check": "Stop the SDK host and verify the UI reports unavailable without losing prepared practice.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about expose useful readiness",
+    "Use the case context without claiming unobserved actions",
+    "Stop the SDK host and verify the UI reports unavailable without losing prepared practice."
+   ]
+  },
+  {
+   "id": "usage-guardrail",
+   "section": "operations",
+   "number": 156,
+   "title": "Monitor usage against limits",
+   "question": "How should a team notice unexpectedly expensive runs?",
+   "context": "A new variant consumes more turns and cost.",
+   "explanation": "Record comparable usage and alert on abnormal trends while retaining the SDK result and configured stop threshold.",
+   "check": "Compare a high-cost fixture to a baseline and show the flagged change.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about monitor usage against limits",
+    "Use the case context without claiming unobserved actions",
+    "Compare a high-cost fixture to a baseline and show the flagged change."
+   ]
+  },
+  {
+   "id": "release-configuration",
+   "section": "operations",
+   "number": 157,
+   "title": "Version the run configuration",
+   "question": "What must be recorded to reproduce a production agent result?",
+   "context": "A prompt changes after a run was saved.",
+   "explanation": "Record the prompt or configuration version, model, source choice, permissions, bounds, and deployment revision with the result.",
+   "check": "Reconstruct the exact configuration of an earlier fixture run.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about version the run configuration",
+    "Use the case context without claiming unobserved actions",
+    "Reconstruct the exact configuration of an earlier fixture run."
+   ]
+  },
+  {
+   "id": "incident-playbook",
+   "section": "operations",
+   "number": 158,
+   "title": "Recover from a failed dependency",
+   "question": "What should operators do when an MCP source fails during a live run?",
+   "context": "A trusted documentation server is down.",
+   "explanation": "Show source failure clearly, preserve the partial trace, and use a documented fallback or pause policy. Do not present a source-free answer as source-verified.",
+   "check": "Disable the source in a fixture and inspect the fallback label and evidence.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about recover from a failed dependency",
+    "Use the case context without claiming unobserved actions",
+    "Disable the source in a fixture and inspect the fallback label and evidence."
+   ]
+  },
+  {
+   "id": "graceful-shutdown",
+   "section": "operations",
+   "number": 159,
+   "title": "Drain active runs on shutdown",
+   "question": "What should happen when the agent host restarts during a live request?",
+   "context": "A deployment stops one worker.",
+   "explanation": "Stop accepting new work, cancel or finish bounded active runs, and persist their honest terminal state before exit.",
+   "check": "Simulate shutdown and inspect one completed and one interrupted run.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about drain active runs on shutdown",
+    "Use the case context without claiming unobserved actions",
+    "Simulate shutdown and inspect one completed and one interrupted run."
+   ]
+  },
+  {
+   "id": "stream-backpressure",
+   "section": "operations",
+   "number": 160,
+   "title": "Bound streaming delivery",
+   "question": "How should a host handle a browser that reads events slowly?",
+   "context": "A live stream produces output faster than a client consumes it.",
+   "explanation": "Use bounded buffering or backpressure and cancel abandoned clients so memory does not grow without limit.",
+   "check": "Run a slow-client fixture and verify bounded memory or a controlled disconnect.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about bound streaming delivery",
+    "Use the case context without claiming unobserved actions",
+    "Run a slow-client fixture and verify bounded memory or a controlled disconnect."
+   ]
+  },
+  {
+   "id": "secret-boundary",
+   "section": "production",
+   "number": 161,
+   "title": "Keep credentials server-side",
+   "question": "Where should API and MCP credentials live?",
+   "context": "A browser app calls the SDK through its backend.",
+   "explanation": "Keep credentials in the server environment, never browser bundles, prompts, or response logs.",
+   "check": "Inspect the frontend build and history for secrets.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about keep credentials server-side",
+    "Use the case context without claiming unobserved actions",
+    "Inspect the frontend build and history for secrets."
+   ]
+  },
+  {
+   "id": "untrusted-data",
+   "section": "production",
+   "number": 162,
+   "title": "Treat external text as untrusted",
+   "question": "What if an MCP result contains instructions?",
+   "context": "A retrieved page contains command-like text.",
+   "explanation": "External content is data, not a higher-priority instruction. Require separate authorization for tool effects.",
+   "check": "Use a benign injection fixture and inspect tool behavior.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about treat external text as untrusted",
+    "Use the case context without claiming unobserved actions",
+    "Use a benign injection fixture and inspect tool behavior."
+   ]
+  },
+  {
+   "id": "human-review",
+   "section": "production",
+   "number": 163,
+   "title": "Add human review",
+   "question": "Which outcomes need a human check?",
+   "context": "An answer may affect a consequential workflow.",
+   "explanation": "Require review for high-impact decisions and irreversible actions, showing evidence and uncertainty.",
+   "check": "Have a reviewer accept or reject a sample action.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about add human review",
+    "Use the case context without claiming unobserved actions",
+    "Have a reviewer accept or reject a sample action."
+   ]
+  },
+  {
+   "id": "release",
+   "section": "production",
+   "number": 164,
+   "title": "Prepare a production release",
+   "question": "What should be checked before deploying an SDK agent?",
+   "context": "A prototype works locally.",
+   "explanation": "Validate cases, failure paths, permissions, logging, cost bounds, secrets, and recovery in staging.",
+   "check": "Run a release checklist against a staging trace.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about prepare a production release",
+    "Use the case context without claiming unobserved actions",
+    "Run a release checklist against a staging trace."
+   ]
+  },
+  {
+   "id": "audit-log",
+   "section": "production",
+   "number": 165,
+   "title": "Design a safe audit log",
+   "question": "What should a production run log contain?",
+   "context": "Operators need to debug a run without exposing credentials.",
+   "explanation": "Record configuration, tool names, status, subtype, duration, and cost; redact secrets and sensitive tool payloads.",
+   "check": "Inspect a log export for useful evidence and absent credentials.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about design a safe audit log",
+    "Use the case context without claiming unobserved actions",
+    "Inspect a log export for useful evidence and absent credentials."
+   ]
+  },
+  {
+   "id": "resource-policy",
+   "section": "production",
+   "number": 166,
+   "title": "Approve external resources",
+   "question": "How should a team decide which MCP servers to trust?",
+   "context": "A new remote server is proposed for a production agent.",
+   "explanation": "Review owner, data access, authentication, allowed tools, and failure behavior before enabling it.",
+   "check": "Document the approved endpoint and exact tools for one use case.",
+   "resource": "project",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about approve external resources",
+    "Use the case context without claiming unobserved actions",
+    "Document the approved endpoint and exact tools for one use case."
+   ]
+  },
+  {
+   "id": "rollback",
+   "section": "production",
+   "number": 167,
+   "title": "Plan a safe rollback",
+   "question": "What should happen if a deployed prompt performs worse?",
+   "context": "A new version regressed on important cases.",
+   "explanation": "Keep a known-good prompt and configuration, compare traces, and restore only after checking stateful effects.",
+   "check": "Demonstrate rollback in staging and rerun the affected cases.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about plan a safe rollback",
+    "Use the case context without claiming unobserved actions",
+    "Demonstrate rollback in staging and rerun the affected cases."
+   ]
+  },
+  {
+   "id": "red-team",
+   "section": "production",
+   "number": 168,
+   "title": "Challenge the agent before release",
+   "question": "How can a team test unsafe or misleading inputs before deployment?",
+   "context": "A retrieved document tries to override the application’s instructions.",
+   "explanation": "Use a reviewed set of adversarial and benign cases, inspect actual tool effects, and track false positives as well as unsafe outcomes.",
+   "check": "Show one blocked attack and one benign task that still succeeds.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about challenge the agent before release",
+    "Use the case context without claiming unobserved actions",
+    "Show one blocked attack and one benign task that still succeeds."
+   ]
+  },
+  {
+   "id": "retention-policy",
+   "section": "production",
+   "number": 169,
+   "title": "Set evidence retention rules",
+   "question": "How long should agent run evidence be kept?",
+   "context": "Run history may contain student questions and tool metadata.",
+   "explanation": "Define a retention period and deletion path, minimize stored content, and verify exports respect the same privacy boundary.",
+   "check": "Delete an expired fixture run and confirm it is absent from history and export.",
+   "resource": "none",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about set evidence retention rules",
+    "Use the case context without claiming unobserved actions",
+    "Delete an expired fixture run and confirm it is absent from history and export."
+   ]
+  },
+  {
+   "id": "release-smoke",
+   "section": "production",
+   "number": 170,
+   "title": "Perform a bounded release smoke check",
+   "question": "What is the smallest useful check after deployment?",
+   "context": "A new build is live behind a web host.",
+   "explanation": "Verify readiness, one prepared case, and one explicitly authorized bounded live case when credentials are available. Record subtype and cost.",
+   "check": "Show the deployment revision and matching result evidence for the smoke run.",
+   "resource": "docs",
+   "category": "Professional",
+   "criteria": [
+    "Answer the question about perform a bounded release smoke check",
+    "Use the case context without claiming unobserved actions",
+    "Show the deployment revision and matching result evidence for the smoke run."
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": "foundations",
+   "title": "01 - Foundations",
+   "level": "Beginner",
+   "description": "Run a first query and read the SDK evidence.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/overview"
+  },
+  {
+   "id": "context",
+   "title": "02 - Prompts and context",
+   "level": "Beginner",
+   "description": "Give the agent a clear task and useful context.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/modifying-system-prompts"
+  },
+  {
+   "id": "memory",
+   "title": "03 - Project instructions and memory",
+   "level": "Beginner",
+   "description": "Check what project instructions the SDK actually loads.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/modifying-system-prompts"
+  },
+  {
+   "id": "tools",
+   "title": "04 - Tools and permissions",
+   "level": "Intermediate",
+   "description": "Add capabilities while keeping tool effects verifiable.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/custom-tools"
+  },
+  {
+   "id": "skills",
+   "title": "05 - Skills and reusable workflows",
+   "level": "Intermediate",
+   "description": "Inspect Skill discovery, selection, and trust boundaries.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/skills"
+  },
+  {
+   "id": "mcp",
+   "title": "06 - External knowledge with MCP",
+   "level": "Intermediate",
+   "description": "Retrieve authoritative documentation and trusted project data.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/mcp"
+  },
+  {
+   "id": "retrieval",
+   "title": "07 - Retrieval and grounded answers",
+   "level": "Intermediate",
+   "description": "Evaluate RAG as an application retrieval pattern backed by tools and sources.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/mcp"
+  },
+  {
+   "id": "control",
+   "title": "08 - Control and recovery",
+   "level": "Intermediate",
+   "description": "Bound runs and distinguish partial work from success.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/permissions"
+  },
+  {
+   "id": "outputs",
+   "title": "09 - Outputs and interaction",
+   "level": "Intermediate",
+   "description": "Turn agent messages into validated, readable, user-facing results.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/structured-outputs"
+  },
+  {
+   "id": "sessions",
+   "title": "10 - Sessions and streaming",
+   "level": "Advanced",
+   "description": "Keep conversation state and show partial output without overstating completion.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/sessions"
+  },
+  {
+   "id": "subagents",
+   "title": "11 - Subagents and delegated review",
+   "level": "Advanced",
+   "description": "Assess specialist scope, evidence, disagreement, and cost.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/subagents"
+  },
+  {
+   "id": "advanced",
+   "title": "12 - Advanced patterns",
+   "level": "Advanced",
+   "description": "Use specialists, skills, plugins, and checkpoints.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/subagents"
+  },
+  {
+   "id": "trust",
+   "title": "13 - Trust boundaries and attacks",
+   "level": "Professional",
+   "description": "Test untrusted source text, tool output, and approval boundaries.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/secure-deployment"
+  },
+  {
+   "id": "evaluation",
+   "title": "14 - Evaluation and observability",
+   "level": "Advanced",
+   "description": "Compare cases and inspect evidence, latency, cost, and traces.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/observability"
+  },
+  {
+   "id": "testing",
+   "title": "15 - Testing and reliability",
+   "level": "Professional",
+   "description": "Exercise success, failure, and recovery paths with repeatable evidence.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/agent-loop"
+  },
+  {
+   "id": "operations",
+   "title": "16 - Hosting and operations",
+   "level": "Professional",
+   "description": "Run the SDK behind a dependable service with useful operational signals.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/hosting"
+  },
+  {
+   "id": "production",
+   "title": "17 - Production readiness",
+   "level": "Professional",
+   "description": "Review security, deployment, and human oversight.",
+   "guide": "https://code.claude.com/docs/en/agent-sdk/secure-deployment"
+  }
+ ],
+ "variants": {
+  "baseline": "Answer the user question briefly.",
+  "guided": "You are a careful Claude Agent SDK tutor. Answer directly in plain language. Separate verified evidence from suggestions. Use a small example when useful. Never claim a tool or file change without a matching event. End with one concrete check."
+ }
+}

@@ -447,3 +447,23 @@ def test_browser_study_coach_runs_the_selected_coach_implementation(server):
         page.get_by_role("button", name="Inspect saved turn").click()
         page.get_by_text("Reuse the saved answer").wait_for()
         browser.close()
+
+
+def test_browser_evaluation_studio_keeps_a_limited_run_a_failure(server):
+    from playwright.sync_api import sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1280, "height": 1000})
+        page.goto(base + "/studio")
+        page.get_by_role("button", name="Reference").click()
+        page.get_by_text("is at stage 7 of 7").wait_for()
+        page.get_by_label("Prepared scenario").click()
+        page.get_by_role("option", name="Turn limit, then a stream error").click()
+        page.get_by_role("button", name="Run", exact=True).click()
+        page.locator(".q-badge").filter(has_text="error_max_turns").wait_for()
+        page.get_by_text("SDK stream stopped").wait_for()
+        page.get_by_role("button", name="Save review").click()
+        page.get_by_text("needs work").first.wait_for()
+        browser.close()

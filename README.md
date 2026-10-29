@@ -66,6 +66,15 @@ the course app runs your file at http://127.0.0.1:8080/coach, so each finished s
 unlocks a feature. Check your work with `uv run agent-lab coach check`. Start with the
 [project README](mini_projects/study_coach/README.md).
 
+## Milestone project: Agent Evaluation Studio
+
+Evaluate an SDK tutor on 170 cases in 17 sections: honest run summaries, instruction
+variants, bounded live runs with MCP and a specialist reviewer, reviews, evidence export
+and a release decision from regression suites. You implement
+[mini_projects/evaluation_studio/studio.py](mini_projects/evaluation_studio/studio.py); the
+app runs it at http://127.0.0.1:8080/studio. Check with `uv run agent-lab studio check` and
+start with the [project README](mini_projects/evaluation_studio/README.md).
+
 ## Run lessons independently
 
 ```shell
