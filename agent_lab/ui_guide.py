@@ -208,6 +208,19 @@ class LessonGuidePanel:
             "} else if (++tries < 30) requestAnimationFrame(focusGuide); });"
         )
 
+    async def resume_saved(self) -> None:
+        """Explicit dashboard navigation resumes this lesson's own saved section."""
+        self.open()
+        saved = guide_positions().get(self.key)
+        for index, section in enumerate(self.guide.sections):
+            if section.id == saved:
+                await self.show(index)
+                break
+        ui.run_javascript(
+            "const url = new URL(location.href); url.searchParams.delete('resume_guide');"
+            "history.replaceState(null, '', url);"
+        )
+
     def clear_target(self) -> None:
         self.revision += 1
         ui.run_javascript(CLEAR_TARGET.replace("REVISION", str(self.revision)))

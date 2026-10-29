@@ -16,6 +16,7 @@ from agent_lab.exercises import exercise_context, exercise_source, exercise_uses
 from agent_lab.learning import CheckResult, check_evidence, course
 from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
 from agent_lab.models import Event, RunRequest
+from agent_lab.my_learning import workspace_url
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
 from agent_lab.publishing_studio import PublishingService
@@ -41,6 +42,7 @@ from agent_lab.ui_learning import (
     visual_panel,
     walkthrough_panel,
 )
+from agent_lab.ui_my_learning import install_my_learning_pages
 from agent_lab.ui_publish import install_publish_page
 from agent_lab.ui_studio import install_studio_page
 
@@ -60,9 +62,10 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
     install_coach_page(CoachService(runner.settings))
     install_studio_page(StudioService(runner.settings))
     install_publish_page(PublishingService(runner.settings))
+    install_my_learning_pages()
 
     @ui.page("/")
-    async def home(lesson: int = 0, path: str = "") -> None:
+    async def home(lesson: int = 0, path: str = "", resume_guide: bool = False) -> None:
         page_style()
         active_path = route_id(path, lesson) if lesson in LESSONS else ""
         client = ui.context.client
@@ -71,11 +74,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
         drawer: Any
 
         with ui.header().classes("lab-header border-b items-center"):
-            ui.button(icon="menu", on_click=lambda: drawer.toggle()).props("flat color=primary")
+            ui.button(icon="menu", on_click=lambda: drawer.toggle()).props("flat color=primary aria-label='Open lesson navigation'")
             ui.link("Claude Agent SDK Lab", "/").classes(
                 "text-xl font-bold no-underline text-slate-900 min-w-0 flex-1"
             )
             ui.badge("PYTHON EDITION", color="secondary").classes("gt-xs")
+            ui.link("My Learning", workspace_url(active_path)).classes("gt-xs font-bold")
             appearance_controls()
         with (
             ui.left_drawer(value=None)
@@ -83,6 +87,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
             .classes("lesson-menu") as drawer
         ):
             ui.label("75 practical lessons").classes("text-lg font-bold px-2")
+            ui.link("My Learning", workspace_url(active_path)).classes("font-bold px-2")
             search = (
                 ui.input("Find a lesson", placeholder="Sessions, MCP, permissions…")
                 .props("outlined dense clearable")
@@ -388,7 +393,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
 
             with lesson_actions:
                 if tour := learning_guides().get(lesson):
-                    LessonGuidePanel(tour, tabs, active_path)
+                    panel = LessonGuidePanel(tour, tabs, active_path)
+                    if resume_guide:
+                        ui.timer(0.15, panel.resume_saved, once=True)
                 route_name = next((p.title for p in course().paths if p.id == active_path), "All lessons")
                 ui.label(f"Route: {route_name}").classes("text-sm text-slate-500")
                 if target := adjacent_lesson(lesson, 1, active_path):

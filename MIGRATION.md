@@ -36,6 +36,10 @@ project. Feature parity work remains. The pinned TypeScript comparison and the
   Evaluation Studio, Publishing Studio and lesson 33's elicitation callback on
   SDK 0.2.174. These selected checks do not establish all-lesson live parity.
 
+- A dedicated My Learning workspace and Setup page: manual path progress, saved notes,
+  practice quiz feedback, challenge-attempt history, search/filtering and explicit
+  guide-section resume. Existing progress keys and manual completion rules are preserved.
+
 ## Remaining before declaring the whole migration complete
 
 1. Port the original per-lesson controls and comparison scenarios. The current
@@ -57,8 +61,8 @@ project. Feature parity work remains. The pinned TypeScript comparison and the
    checks; executable detection alone does not verify an API response.
 7. Verify browser/native startup on supported operating systems and build
    the container in an environment with Docker.
-8. Complete recorded Python narration, shared navigation,
-   My learning and reference question/excerpt coverage. Supply separate student
+8. Complete recorded Python narration, remaining shared navigation/troubleshooting
+   destinations and reference question/excerpt coverage. Supply separate student
    starter templates alongside the now-completed milestone apps.
 
 ## Legacy cleanup

@@ -37,8 +37,8 @@
   {
    "id": "navigation-and-my-learning",
    "status": "partial",
-   "python": "Home paths, sidebar lesson search, progress and backup/transfer.",
-   "next": "Port the reference's dedicated setup, My learning, troubleshooting and route navigation experience."
+   "python": "Dedicated My Learning and Setup pages, saved-work search and filters, manual path progress, per-lesson quiz feedback and challenge attempts, explicit guide-section resume, and existing progress backup/transfer.",
+   "next": "Complete the reference troubleshooting destinations and shared navigation/tab comparison; conduct student acceptance. Keep account synchronization separate from browser-local progress."
   },
   {
    "id": "workspace-tabs",

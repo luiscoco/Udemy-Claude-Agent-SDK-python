@@ -840,3 +840,212 @@ def test_browser_guide_positions_are_independent_across_lessons_and_finish(serve
         expect(page.get_by_label("Private notes", exact=True)).to_have_value("My lesson 2 notes")
     finally:
         context.close()
+
+
+def _my_learning_seed():
+    from agent_lab.learning import guide
+
+    quiz = guide(5).quiz
+    return {
+        "lessons": {
+            "1": {"checkpoints": [True] * 4, "notes": "Reviewed lesson one"},
+            "3": {"notes": "A scoped workspace"},
+            "5": {
+                "notes": "Validation note\n<script>window.__workspace_xss=1</script>",
+                "draft": "My unsubmitted explanation",
+                "attempts": [{"text": f"Explanation attempt {index}", "hints": index % 3,
+                              "at": "2026-10-29T12:00:00+00:00"} for index in range(7)],
+                "answers": {"0": quiz[0].correct, "1": (quiz[1].correct + 1) % len(quiz[1].options)},
+                "check": {"status": "passed", "detail": "Local evidence meets the criterion."},
+                "last_run": "Saved local run summary",
+            },
+        },
+        "last_lesson": 5,
+        "learning_guide_positions": {"5": "example", "75": "practice"},
+    }
+
+
+def _import_my_learning(page, base, tmp_path, store):
+    from agent_lab.progress import export_progress
+
+    path = tmp_path / "my-learning-progress.json"
+    path.write_bytes(export_progress(store))
+    page.goto(base + "/my-learning")
+    page.locator("input[type=file]").set_input_files(str(path))
+    page.get_by_text("Replace your progress?", exact=True).wait_for()
+    with page.expect_navigation():
+        page.get_by_role("button", name="Replace progress", exact=True).click()
+
+
+def _export_my_learning(page):
+    import json
+
+    with page.expect_download() as downloaded:
+        page.get_by_role("button", name="Export progress", exact=True).click()
+    return json.loads(Path(downloaded.value.path()).read_bytes())["progress"]
+
+
+def test_browser_my_learning_first_visit_setup_and_lesson_navigation(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, _ = server
+    browser = guide_browser_context.browser
+    context = browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        page.goto(base + "/")
+        page.get_by_role("link", name="Open My Learning", exact=True).click()
+        expect(page.get_by_role("heading", name="My Learning", exact=True)).to_be_visible()
+        expect(page.get_by_text("0 of 75 lessons manually reviewed", exact=True)).to_be_visible()
+        initial = _export_my_learning(page)
+        assert initial["lessons"] == {} and initial["last_lesson"] == 0
+        page.get_by_role("button", name="Review setup", exact=True).click()
+        page.wait_for_url("**/setup")
+        expect(page.get_by_text("Prepare your Python learning workspace", exact=True)).to_be_visible()
+        page.get_by_role("link", name="Open My Learning", exact=True).click()
+        assert _export_my_learning(page) == initial
+        page.get_by_role("button", name="Start lesson 1", exact=True).click()
+        page.wait_for_url("**/?lesson=1")
+        expect(page.locator("#lesson-heading")).to_contain_text("1. query()")
+        page.get_by_role("banner").get_by_role("link", name="My Learning", exact=True).click()
+        expect(page.get_by_role("button", name="Continue lesson 1", exact=True)).to_be_visible()
+        expect(page.get_by_text("0 of 75 lessons manually reviewed", exact=True)).to_be_visible()
+    finally:
+        context.close()
+
+
+def test_browser_my_learning_saved_views_resume_and_export_preserve_records(server, guide_browser_context, tmp_path):
+    import json
+
+    from playwright.sync_api import expect
+
+    from agent_lab.progress import export_progress
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        store = _my_learning_seed()
+        expected = json.loads(export_progress(store))["progress"]
+        _import_my_learning(page, base, tmp_path, store)
+        expect(page.get_by_text("1 of 75 lessons manually reviewed", exact=True)).to_be_visible()
+        page.screenshot(path=str(data / "my-learning-desktop-overview.png"))
+        page.get_by_role("button", name="Notes", exact=True).click()
+        page.get_by_label("Find lessons or saved text", exact=True).fill("Validation note")
+        expect(page.get_by_text("1 matching lesson", exact=True)).to_be_visible()
+        expect(page.get_by_text("My unsubmitted explanation", exact=True)).to_be_visible()
+        expect(page.get_by_text("Validation note", exact=False).last).to_contain_text("<script>")
+        page.screenshot(path=str(data / "my-learning-desktop-notes.png"))
+        assert page.evaluate("window.__workspace_xss") is None
+        page.get_by_role("button", name="Quiz results", exact=True).click()
+        expect(page.get_by_text("Review this answer", exact=True)).to_be_visible()
+        expect(page.get_by_text("1 of 75 lessons manually reviewed", exact=True)).to_be_visible()
+        page.get_by_role("button", name="Attempts", exact=True).click()
+        expect(page.get_by_text("Explanation attempt 6", exact=True)).to_be_visible()
+        expect(page.get_by_text("Explanation attempt 0", exact=True)).to_have_count(0)
+        page.get_by_role("button", name="Show more attempts for lesson 5", exact=True).click()
+        expect(page.get_by_text("Explanation attempt 0", exact=True)).to_be_visible()
+        page.get_by_role("button", name="Lessons", exact=True).click()
+        page.get_by_label("Find lessons or saved text", exact=True).fill("")
+        page.get_by_label("Manual / exercise status", exact=True).click()
+        page.get_by_role("option", name="Reviewed", exact=True).click()
+        expect(page.get_by_text("1 matching lesson", exact=True)).to_be_visible()
+        page.get_by_label("Manual / exercise status", exact=True).click()
+        page.get_by_role("option", name="All statuses", exact=True).click()
+        page.get_by_label("Learning path", exact=True).click()
+        page.get_by_role("option", name="Application Developer", exact=True).click()
+        page.wait_for_url("**/my-learning?path=application-developer")
+        page.get_by_role("link", name="Review setup", exact=True).click()
+        page.wait_for_url("**/setup?path=application-developer")
+        page.get_by_role("link", name="Back to My Learning", exact=True).click()
+        page.wait_for_url("**/my-learning?path=application-developer")
+        page.reload()
+        assert _export_my_learning(page) == expected
+        page.get_by_role("button", name="Resume Learning Guide", exact=True).click()
+        page.wait_for_url("**/?lesson=5&path=application-developer")
+        panel = page.get_by_role("region", name="Lesson 5 Learning Guide", exact=True)
+        expect(panel.get_by_text("Section 3 of 7", exact=False)).to_be_visible()
+        assert_guide_target_fits(page)
+        expect(page.get_by_label("Private notes", exact=True)).to_have_value(store["lessons"]["5"]["notes"])
+        from agent_lab.ui_learning import REVIEW_ITEMS
+        for label in REVIEW_ITEMS:
+            expect(page.get_by_role("checkbox", name=label, exact=True)).not_to_be_checked()
+        panel.get_by_role("button", name="Close Learning Guide", exact=True).click()
+        page.get_by_role("banner").get_by_role("link", name="My Learning", exact=True).click()
+        page.wait_for_url("**/my-learning?path=application-developer")
+        assert _export_my_learning(page) == expected
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("dark", [False, True], ids=["light", "dark"])
+def test_browser_my_learning_phone_large_text_empty_and_saved_states(server, guide_browser_context, tmp_path, dark):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 320, "height": 900})
+    try:
+        page = context.new_page()
+        page.goto(base + "/my-learning")
+        page.get_by_role("button", name="Appearance", exact=True).click()
+        page.get_by_role("button", name="Dark" if dark else "Light", exact=True).click()
+        page.get_by_label("Text size", exact=True).click()
+        page.get_by_role("option", name="Extra large", exact=True).click()
+        page.keyboard.press("Escape")
+        page.keyboard.press("Escape")
+        expect(page.locator(".q-menu:visible")).to_have_count(0)
+        page.add_style_tag(content=".q-page-container { zoom: 1.5 !important; }")
+        expect(page.get_by_role("heading", name="My Learning", exact=True)).to_be_visible()
+        assert not page.evaluate("document.documentElement.scrollWidth > innerWidth"), page.evaluate("""() => [...document.querySelectorAll('.my-learning *')]
+            .filter(e => e.getClientRects().length && e.getBoundingClientRect().right > innerWidth + 1)
+            .slice(0, 12).map(e => ({tag:e.tagName, cls:e.className, right:e.getBoundingClientRect().right}))""")
+        page.screenshot(path=str(data / f"my-learning-empty-{dark}.png"), full_page=True)
+        page.screenshot(path=str(data / f"my-learning-empty-viewport-{dark}.png"))
+        for view in ("Notes", "Quiz results", "Attempts"):
+            page.get_by_role("button", name=view, exact=True).click()
+            expect(page.get_by_text("No saved work matches these filters.", exact=True)).to_be_visible()
+            assert not page.evaluate("document.documentElement.scrollWidth > innerWidth"), page.evaluate("""() => [...document.querySelectorAll('.my-learning *')]
+            .filter(e => e.getClientRects().length && e.getBoundingClientRect().right > innerWidth + 1)
+            .slice(0, 12).map(e => ({tag:e.tagName, cls:e.className, right:e.getBoundingClientRect().right}))""")
+        store = _my_learning_seed() | {"theme": "dark" if dark else "light", "text_size": "xlarge"}
+        store["lessons"]["5"]["notes"] += "\n" + "LongSavedText" * 80
+        _import_my_learning(page, base, tmp_path, store)
+        page.add_style_tag(content=".q-page-container { zoom: 1.5 !important; }")
+        page.get_by_role("button", name="Notes", exact=True).click()
+        page.get_by_label("Find lessons or saved text", exact=True).fill("Validation note")
+        expect(page.get_by_text("1 matching lesson", exact=True)).to_be_visible()
+        assert not page.evaluate("document.documentElement.scrollWidth > innerWidth"), page.evaluate("""() => [...document.querySelectorAll('.my-learning *')]
+            .filter(e => e.getClientRects().length && e.getBoundingClientRect().right > innerWidth + 1)
+            .slice(0, 12).map(e => ({tag:e.tagName, cls:e.className, right:e.getBoundingClientRect().right}))""")
+        page.screenshot(path=str(data / f"my-learning-saved-{dark}.png"), full_page=True)
+        page.screenshot(path=str(data / f"my-learning-saved-viewport-{dark}.png"))
+        assert page.evaluate("window.__workspace_xss") is None
+    finally:
+        context.close()
+
+
+def test_browser_my_learning_section_quiz_refresh_does_not_complete_lessons(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    from agent_lab.learning import course
+
+    base, _ = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        page.goto(base + "/my-learning")
+        page.get_by_role("button", name="Quiz results", exact=True).click()
+        quiz = course().section_quizzes[0]
+        page.get_by_role("button", name=f"Open {quiz.topic} section quiz", exact=True).click()
+        dialog = page.get_by_role("dialog")
+        dialog.locator(".quiz-question").first.get_by_role("radio").nth(quiz.questions[0].correct).click()
+        dialog.locator(".feedback-ok").first.wait_for()
+        dialog.get_by_role("button", name="Close", exact=True).click()
+        expect(page.get_by_text(f"{quiz.topic}: 1 correct / {len(quiz.questions)} questions; 1 answered", exact=True)).to_be_visible()
+        expect(page.get_by_text("0 of 75 lessons manually reviewed", exact=True)).to_be_visible()
+        progress = _export_my_learning(page)
+        assert progress["lessons"] == {} and progress["last_lesson"] == 0
+        assert progress["learning_guide_positions"] == {}
+        assert progress["sections"][quiz.id]["0"] == quiz.questions[0].correct
+    finally:
+        context.close()

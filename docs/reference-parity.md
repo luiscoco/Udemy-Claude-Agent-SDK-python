@@ -27,7 +27,7 @@ Preserve the teaching outcomes while using supported Python SDK APIs. Historical
 | recorded-guide-audio (pending) | No packaged Python Learning Guide recordings. | Author Python scripts and transcript/media manifests before recording; keep provider calls explicitly opt-in. |
 | source-learning (partial) | 75 reviewed Python code tours with source hashes and browser Read aloud. | Match excerpt/question coverage and add separately reviewed Python recordings and timing. |
 | maps-and-walkthroughs (adapted) | Python concept infographics and four visual guides; static walkthrough teaching. | Compare supplied media by lesson and kind; adapt TypeScript-specific labels and verify narrated image regions. |
-| navigation-and-my-learning (partial) | Home paths, sidebar lesson search, progress and backup/transfer. | Port the reference's dedicated setup, My learning, troubleshooting and route navigation experience. |
+| navigation-and-my-learning (partial) | Dedicated My Learning and Setup pages, saved-work search and filters, manual path progress, per-lesson quiz feedback and challenge attempts, explicit guide-section resume, and existing progress backup/transfer. | Complete the reference troubleshooting destinations and shared navigation/tab comparison; conduct student acceptance. Keep account synchronization separate from browser-local progress. |
 | workspace-tabs (partial) | Six tabs exist, with Python names and a different order. | Compare the pinned shared tab contract; preserve Learn as the initial tab and keyboard navigation. |
 | assessment-and-workbook (partial) | Four manual checks, notes, challenge, two hints, saved attempts and 2–3 questions per lesson. | Audit question/excerpt coverage; lesson 1's reference contract requires seven explained questions. |
 | progress (present) | Validated per-browser notes, attempts, quizzes, checks, preferences, progress export/import and guide positions. | Continue corruption, reload and compatibility checks; do not claim cross-device account synchronization. |
@@ -122,7 +122,7 @@ All rows are **not yet certified** against every reference scenario. The written
 
 1. Conduct student acceptance of the 75 written guides: seven real targets; explicit Start/Resume; tab-change pause; minimize/close; saved-position recovery; same-lesson Finish; route-aware Next; keyboard and phone readability; no runs, paid calls or completion changes from tour controls.
 2. Match lesson 1's remaining runtime limits, input validation, question/excerpt coverage and tab/navigation contracts. The new guide does not certify those differences as resolved.
-3. Add a separate My learning workspace and the reference navigation destinations. Keep all 75 written guides synchronized with their source teaching content.
+3. Conduct student acceptance of the new My Learning and Setup pages, complete the remaining troubleshooting/navigation destinations, and keep all 75 written guides synchronized with their source teaching content.
 4. Author Python narration scripts and source/transcript/media manifests before any explicit recording run. Audit the Learning Guide, source narration and image narration as separate families.
 5. Complete native session/checkpoint, remote MCP, durable jobs and repository workflow comparisons using the individual lesson contracts. Keep unsupported SDK capabilities visibly adapted.
 6. Deliver starter copies for student practice alongside completed apps, then conduct a fresh-install/student walkthrough and update the release evidence.
@@ -144,3 +144,7 @@ All guides use the same tested panel and seven semantic targets. Lessons 2-75 ar
 ## Maintaining the inventory
 
 Update the Markdown and JSON together when a feature is implemented or a reference commit is advanced. Include actual tests/screenshots and live results separately; do not promote a status solely because a prompt, adapter or UI button exists. `tests/test_lesson_guide.py` verifies coverage of the current 75-lesson curriculum and the written-guide inventory.
+
+## My Learning workspace
+
+The dedicated `/my-learning` workspace adapts the pinned [A11 contract](https://github.com/luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild/blob/777d8479b62fddf5cd62df86fb048d589ed43a7c/docs/prompts/a11-improve-my-learning-workspace.md) to existing Python records. It adds a real `/setup` page, read-only saved-work views and explicit guide resumption without changing persistence keys or completion rules. See [implementation and verification](my-learning.md). The broader navigation feature remains partial while other reference destinations and tab contracts are pending.

@@ -6,6 +6,7 @@ never sent to Claude; clearing the browser's cookies starts a fresh record.
 
 import json
 import re
+from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
@@ -640,7 +641,7 @@ def tutor_panel(lesson_id: int, tutor: TutorService, source: str) -> None:
     ui.timer(0.1, load_models, once=True)
 
 
-def section_quiz_dialog(topic: str) -> None:
+def section_quiz_dialog(topic: str, on_close: Callable[[], None] | None = None) -> None:
     quiz = section_quiz(topic)
     if quiz is None:
         return
@@ -655,6 +656,8 @@ def section_quiz_dialog(topic: str) -> None:
         ui.label(f"{topic} section quiz").classes("text-xl font-bold")
         render_quiz(quiz.questions, answers, save)
         ui.button("Close", on_click=dialog.close)
+    if on_close is not None:
+        dialog.on("hide", on_close)
     dialog.open()
 
 
@@ -748,6 +751,7 @@ def home_page() -> None:
                 "outline" if last in LESSONS else ""
             )
     progress_card()
+    ui.link("Open My Learning", "/my-learning").classes("text-lg font-bold")
     ui.label("Milestone projects").classes("text-xl font-bold mt-4")
     ui.markdown(
         "Three apps you build yourself, in this order: **understand** concepts in the Study "

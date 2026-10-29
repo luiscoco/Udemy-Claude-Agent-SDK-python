@@ -38,7 +38,14 @@ pending. See [Learning Guide maintenance](docs/learning-guides.md) and the
 Workbook entries, quiz answers, check results, saved tutor answers, guide position and appearance
 (Light/Dark/System theme, text size) are stored per browser in `.nicegui/` on
 this machine. They are never sent to Claude and do not sync between browsers.
-Use **Export progress** on the home page to save them as a JSON file, and
+
+Open **My Learning** from the home page or a lesson's navigation to resume your
+saved guide, see checklist progress by learning path, and find notes, practice quiz
+results and challenge attempts. The dashboard reads your existing records; exercise
+checks and quiz scores remain separate from manual review. See the
+[My Learning guide](docs/my-learning.md).
+
+Use **Export progress** on the home page or in My Learning to save them as a JSON file, and
 **Import progress** in another browser to restore them. Imports are validated
 and replace that browser's progress only after you confirm.
 The automatic check covers local evidence only; your self-review stays separate.
