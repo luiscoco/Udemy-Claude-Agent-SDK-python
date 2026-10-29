@@ -163,3 +163,28 @@ async def test_a_failed_live_call_is_uncertain_and_never_retried(tmp_path, monke
     turn = await wait(service, started["turn_id"])
     assert turn["status"] == "uncertain" and len(seen) == 1
     assert load_coach("reference").recover_turn(turn) == "inspect"
+
+
+def test_start_here_cards_are_valid_python_with_answerable_checks():
+    import ast
+
+    from agent_lab.study_coach import INTRO_CONCEPTS
+
+    assert [card["id"] for card in INTRO_CONCEPTS] == ["llm", "agent", "harness", "sdk", "first-query"]
+    for card in INTRO_CONCEPTS:
+        ast.parse(card["code"])
+        check = card["check"]
+        assert 0 <= check["correct"] < len(check["choices"]) and check["why"]
+
+
+def test_every_lesson_cites_its_real_exercise_source():
+    from agent_lab.config import ROOT
+    from agent_lab.curriculum import LESSONS
+    from agent_lab.exercises import exercise_location
+
+    for lesson in LESSONS.values():
+        path, start, end = exercise_location(lesson.exercise)
+        lines = (ROOT / path).read_text(encoding="utf-8").splitlines()[start - 1 : end]
+        assert any(f"def {lesson.exercise}(" in line for line in lines[:3]) or any(
+            line.startswith("@exercise") for line in lines[:3]
+        ), (lesson.id, path, start)

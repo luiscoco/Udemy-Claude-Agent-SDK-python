@@ -53,6 +53,89 @@ SHORTCUTS = {
     "trace": ("Trace evidence", "Walk me through tracing {title} from request to evidence."),
     "practice": ("Practice", "Give me one practice task for {title} and how to check my answer."),
 }
+# "Start here" cards before lesson 1: deliberately simplified teaching snippets.
+INTRO_CONCEPTS: list[dict[str, Any]] = [
+    {
+        "id": "llm",
+        "title": "Understand what an LLM does",
+        "explanation": "A large language model predicts useful text from the prompt and context it "
+        "receives. A fluent answer can still be wrong, so an application must check important claims.",
+        "code": 'def explain(model) -> str:\n    answer = model("Explain one SDK concept")\n'
+        "    return answer  # Text is not proof of correctness.",
+        "check": {
+            "question": "What does fluent model text prove?",
+            "choices": ["Only that text was produced", "That every claim is true", "That a tool ran"],
+            "correct": 0,
+            "why": "Evidence and tool events must be checked separately from the wording.",
+        },
+    },
+    {
+        "id": "agent",
+        "title": "Distinguish an agent from one model call",
+        "explanation": "An agent works toward a goal over several steps: it can request tools, read "
+        "their results and continue before it replies. One model call only answers its input.",
+        "code": 'goal = "Explain a failing test"\nsteps = ["read the test", "run it", "explain the failure"]\n'
+        "# An agent coordinates the steps; your host verifies their effects.",
+        "check": {
+            "question": "What makes a workflow agentic?",
+            "choices": [
+                "It can act on tool results over several steps",
+                "It has a longer prompt",
+                "It runs in a dark theme",
+            ],
+            "correct": 0,
+            "why": "The defining behavior is a controlled loop that acts on observations.",
+        },
+    },
+    {
+        "id": "harness",
+        "title": "Identify the agent harness",
+        "explanation": "The harness is the application around the model: it supplies instructions and "
+        "tools, enforces permissions and limits, and records the result. It is not another model.",
+        "code": "from claude_agent_sdk import ClaudeAgentOptions\n\noptions = ClaudeAgentOptions(\n"
+        '    allowed_tools=["Read"],  # what the agent may use\n'
+        "    max_turns=2,  # how long it may work\n"
+        "    max_budget_usd=0.05,  # how much it may spend\n)",
+        "check": {
+            "question": "Who enforces the tool and budget limits?",
+            "choices": ["The harness around the model", "The model itself", "The prompt wording"],
+            "correct": 0,
+            "why": "Limits live in the harness configuration, outside the model's choices.",
+        },
+    },
+    {
+        "id": "sdk",
+        "title": "Name what the Claude Agent SDK provides",
+        "explanation": "The Python Claude Agent SDK runs Claude's agent loop for you. query() runs one "
+        "task and yields messages; ClaudeSDKClient keeps a conversation you can continue and interrupt.",
+        "code": "from claude_agent_sdk import ClaudeSDKClient, query\n\n"
+        "# query(): one task, an async iterator of messages.\n"
+        "# ClaudeSDKClient: a conversation you can continue, interrupt and close.",
+        "check": {
+            "question": "Which API keeps one conversation open across follow-ups?",
+            "choices": ["ClaudeSDKClient", "query()", "ResultMessage"],
+            "correct": 0,
+            "why": "query() runs one task; the client keeps a session for follow-ups.",
+        },
+    },
+    {
+        "id": "first-query",
+        "title": "Run a first query and read its result",
+        "explanation": "A first query streams messages. The final ResultMessage says how the run ended "
+        "and what it cost; check it before you trust the assistant text.",
+        "code": "import anyio\nfrom claude_agent_sdk import ResultMessage, query\n\n\n"
+        "async def main() -> None:\n"
+        '    async for message in query(prompt="Say hello in five words"):\n'
+        "        if isinstance(message, ResultMessage):\n"
+        "            print(message.subtype, message.total_cost_usd)\n\n\nanyio.run(main)",
+        "check": {
+            "question": "Which message tells you whether the run succeeded?",
+            "choices": ["The final ResultMessage", "The first AssistantMessage", "The prompt"],
+            "correct": 0,
+            "why": "Only the result reports the outcome; text can be partial.",
+        },
+    },
+]
 
 
 def coach_path(implementation: Implementation) -> Path:

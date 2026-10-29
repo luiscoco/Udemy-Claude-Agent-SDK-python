@@ -79,6 +79,11 @@ def preference(name: str, default: str) -> str:
     return str(_store().get(name, default))
 
 
+def stored(name: str, default: Any) -> Any:
+    """A saved value as stored (preference() returns text)."""
+    return _store().get(name, default)
+
+
 def set_preference(name: str, value: Any) -> None:
     _store()[name] = value
 
@@ -677,32 +682,48 @@ def home_page() -> None:
                 "outline" if last in LESSONS else ""
             )
     progress_card()
-    with card("Study Coach", "Milestone project"):
-        ui.label(
-            "Build a study coach in seven stages: validated questions, live conversations that "
-            "resume the SDK session, structured study plans and safe recovery."
-        )
-        ui.button("Open the Study Coach", icon="school", on_click=lambda: ui.navigate.to("/coach"))
-    with card("Agent Evaluation Studio", "Milestone project"):
-        ui.label(
-            "Evaluate an SDK tutor on 170 cases: honest run summaries, instruction variants, "
-            "bounded live runs with MCP, reviews, evidence export and a release decision."
-        )
-        ui.button(
+    ui.label("Milestone projects").classes("text-xl font-bold mt-4")
+    ui.markdown(
+        "Three apps you build yourself, in this order: **understand** concepts in the Study "
+        "Coach, **evaluate** runs in the Evaluation Studio, then **publish** reviewed answers. "
+        "Their counts measure different activities (concept cards, evaluation cases, prompt "
+        "suggestions), so do not add them up. A finished stage is your code passing its checks, "
+        "not a lesson marked complete. The procedure is in `docs/milestone-projects.md`."
+    ).classes("text-slate-600")
+    projects = [
+        (
+            "1 · Understand: Study Coach",
+            "7 stages · 80 concept cards",
+            "Validated questions, live conversations that resume the SDK session, structured "
+            "study plans and safe recovery; start-here cards and recognition checks.",
+            "Open the Study Coach",
+            "school",
+            "/coach",
+        ),
+        (
+            "2 · Evaluate: Agent Evaluation Studio",
+            "7 stages · 170 cases",
+            "Honest run summaries, instruction variants, bounded live runs with MCP, reviews, "
+            "evidence export and a release decision.",
             "Open the Evaluation Studio",
-            icon="fact_check",
-            on_click=lambda: ui.navigate.to("/studio"),
-        )
-    with card("Agent Publishing Studio", "Milestone project"):
-        ui.label(
+            "fact_check",
+            "/studio",
+        ),
+        (
+            "3 · Publish: Agent Publishing Studio",
+            "8 stages · 173 prompts",
             "Turn a saved SDK answer into Word, PDF, SVG and PNG files: consented live answers, "
-            "uploaded sources, validated plans, highlighted code and a PNG style reference."
-        )
-        ui.button(
+            "uploaded sources, validated plans, highlighted code and a PNG style reference.",
             "Open the Publishing Studio",
-            icon="auto_stories",
-            on_click=lambda: ui.navigate.to("/publish"),
-        )
+            "auto_stories",
+            "/publish",
+        ),
+    ]
+    with ui.grid(columns="repeat(auto-fit, minmax(260px, 1fr))").classes("w-full gap-4"):
+        for title, eyebrow, text, button, icon, page in projects:
+            with card(title, eyebrow):
+                ui.label(text).classes("flex-1")
+                ui.button(button, icon=icon, on_click=lambda page=page: ui.navigate.to(page))
 
     ui.label("Learning paths").classes("text-xl font-bold mt-4")
     with ui.grid(columns="repeat(auto-fit, minmax(260px, 1fr))").classes("w-full gap-4"):

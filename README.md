@@ -57,6 +57,9 @@ macOS or Linux:
 .venv/bin/python -m agent_lab serve
 ```
 
+Build the three milestone projects in order (understand, evaluate, publish); the
+[milestone guide](docs/milestone-projects.md) has the procedure and compares their paths.
+
 ## Milestone project: Study Coach
 
 Build a study coach in seven stages: validated questions, live conversations that resume

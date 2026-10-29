@@ -17,6 +17,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
+from agent_lab.config import ROOT
 from agent_lab.hooks import call_hook, lesson_hooks, matches, permission_callback
 from agent_lab.models import Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, inside, redact
@@ -2476,6 +2477,13 @@ async def team(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any
 def exercise_source(name: str) -> str:
     """The host exercise shown in the Python source tab."""
     return inspect.getsource(EXERCISES[name])
+
+
+def exercise_location(name: str) -> tuple[str, int, int]:
+    """Where an exercise lives: a repo-relative path and its first and last line."""
+    lines, start = inspect.getsourcelines(EXERCISES[name])
+    path = Path(inspect.getfile(EXERCISES[name])).resolve().relative_to(ROOT)
+    return path.as_posix(), start, start + len(lines) - 1
 
 
 def exercise_uses(name: str, field: str) -> bool:

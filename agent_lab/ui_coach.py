@@ -6,9 +6,11 @@ from nicegui import ui
 
 from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
+from agent_lab.exercises import exercise_location
 from agent_lab.learning import course, guide
 from agent_lab.models import LessonError
 from agent_lab.study_coach import (
+    INTRO_CONCEPTS,
     SHORTCUTS,
     STAGE_FUNCTIONS,
     CoachService,
@@ -18,7 +20,14 @@ from agent_lab.study_coach import (
     shortcut_question,
     stage_of,
 )
-from agent_lab.ui_learning import appearance_controls, card, page_style, plain, preference
+from agent_lab.ui_learning import (
+    appearance_controls,
+    card,
+    page_style,
+    plain,
+    preference,
+    stored,
+)
 from agent_lab.ui_learning import set_preference as remember
 
 STAGES = {
@@ -127,8 +136,10 @@ def install_coach_page(service: CoachService) -> None:
             # ---------------------------------------------------------- concept browser
             routes = {"all": "All lessons"} | {path.id: path.title for path in course().paths}
             sections = {"all": "All sections"} | {topic: topic for topic in TOPICS}
+            intros = {f"intro:{item['id']}": item for item in INTRO_CONCEPTS}
+            state["concept"] = f"lesson:{state['lesson']}"
 
-            def visible() -> list[int]:
+            def visible_lessons() -> list[int]:
                 ids = list(LESSONS)
                 if route.value != "all":
                     ids = next(p.lessons for p in course().paths if p.id == route.value)
@@ -136,30 +147,92 @@ def install_coach_page(service: CoachService) -> None:
                     ids = [n for n in ids if n in TOPICS[section.value]]
                 return ids or [state["lesson"]]
 
+            def visible() -> list[str]:
+                ids = visible_lessons()
+                # The "Start here" cards lead every view that includes lesson 1.
+                return (list(intros) if 1 in ids else []) + [f"lesson:{n}" for n in ids]
+
+            def title_of(key: str) -> str:
+                if key in intros:
+                    return f"Start here · {intros[key]['title']}"
+                number = int(key.split(":")[1])
+                return f"{number}. {LESSONS[number].title}"
+
             with card("Concept guide", "Choose what to study"):
                 with ui.row().classes("w-full gap-3"):
                     route = ui.select(routes, value="all", label="Route").classes("w-64")
                     section = ui.select(sections, value="all", label="Section").classes("w-64")
-                picker = ui.select({}, label="Lesson").classes("w-full")
+                picker = ui.select({}, label="Concept").classes("w-full")
+
+                @ui.refreshable
+                def score() -> None:
+                    checks = stored("coach_checks", {})
+                    ui.label(
+                        f"Recognition checks: {sum(checks.values())} correct of {len(checks)} "
+                        "answered. Practice only: they never mark a course lesson complete."
+                    ).classes("text-sm text-slate-500")
+
+                score()
 
                 def refresh_picker() -> None:
-                    ids = visible()
-                    picker.set_options({n: f"{n}. {LESSONS[n].title}" for n in ids})
-                    if state["lesson"] not in ids:
-                        state["lesson"] = ids[0]
-                    picker.set_value(state["lesson"])
+                    keys = visible()
+                    picker.set_options({key: title_of(key) for key in keys})
+                    if state["concept"] not in keys:
+                        state["concept"] = keys[0]
+                    picker.set_value(state["concept"])
 
                 def step(offset: int) -> None:
-                    ids = visible()
-                    index = ids.index(state["lesson"]) if state["lesson"] in ids else 0
-                    picker.set_value(ids[(index + offset) % len(ids)])
+                    keys = visible()
+                    index = keys.index(state["concept"]) if state["concept"] in keys else 0
+                    picker.set_value(keys[(index + offset) % len(keys)])
 
                 with ui.row().classes("gap-2"):
                     ui.button("Previous concept", icon="chevron_left", on_click=lambda: step(-1))
                     ui.button("Next concept", icon="chevron_right", on_click=lambda: step(1))
 
+                def recognition(
+                    question: str, choices: list[str], correct: int, why: list[str]
+                ) -> None:
+                    key = state["concept"]
+                    ui.label("Recognition check").classes("font-semibold mt-2")
+                    ui.markdown(question)
+                    previous = stored("coach_checks", {}).get(key)
+                    feedback = ui.markdown(
+                        ""
+                        if previous is None
+                        else f"*Last answer: {'correct' if previous else 'review this'}.*"
+                    )
+
+                    def answer(event: Any) -> None:
+                        right = event.value == correct
+                        feedback.set_content(
+                            ("Correct. " if right else "Review this. ") + why[event.value]
+                        )
+                        remember("coach_checks", stored("coach_checks", {}) | {key: right})
+                        score.refresh()
+
+                    ui.radio(dict(enumerate(choices)), on_change=answer)
+
                 @ui.refreshable
                 def concept() -> None:
+                    key = state["concept"]
+                    if key in intros:
+                        intro = intros[key]
+                        ui.label(f"Start here: {intro['title']}").classes("text-xl font-bold")
+                        ui.markdown(intro["explanation"])
+                        ui.code(intro["code"], language="python").classes("w-full")
+                        ui.label(
+                            "A simplified teaching snippet; lesson 1 runs the real exercise."
+                        ).classes("text-xs text-slate-500")
+                        check = intro["check"]
+                        recognition(
+                            check["question"],
+                            check["choices"],
+                            check["correct"],
+                            [check["why"]] * len(check["choices"]),
+                        )
+                        ui.link("Open lesson 1 in the course", "/?lesson=1")
+                        return
                     number = state["lesson"]
                     item = guide(number)
                     ui.label(f"Lesson {number}: {LESSONS[number].title}").classes(
@@ -168,29 +241,32 @@ def install_coach_page(service: CoachService) -> None:
                     for point in item.concept_points:
                         ui.markdown(f"**{point.title}.** {point.text}")
                     ui.code(item.concept_code, language="python").classes("w-full")
+                    exercise = LESSONS[number].exercise
+                    path, start, end = exercise_location(exercise)
+                    ui.markdown(
+                        f"Lab source: `{path}`, lines {start}-{end} (exercise `{exercise}`); "
+                        "the lesson's Python source tab shows it in full."
+                    ).classes("text-sm text-slate-500")
                     ui.markdown(
                         f"*Common misconception:* {item.misconception.claim} "
                         f"**Not true.** {item.misconception.correction}"
                     )
                     question = item.quiz[0]
-                    ui.label("Recognition check").classes("font-semibold mt-2")
-                    ui.markdown(question.prompt)
-                    feedback = ui.markdown("")
-
-                    def answer(event: Any) -> None:
-                        right = event.value == question.correct
-                        text = question.options[event.value].explanation.removeprefix("Correct. ")
-                        feedback.set_content(("Correct. " if right else "Review this. ") + text)
-
-                    ui.radio(
-                        {i: plain(option.text) for i, option in enumerate(question.options)},
-                        on_change=answer,
+                    recognition(
+                        question.prompt,
+                        [plain(option.text) for option in question.options],
+                        question.correct,
+                        [option.explanation.removeprefix("Correct. ") for option in question.options],
                     )
                     ui.link(f"Open lesson {number} in the course", f"/?lesson={number}")
 
                 def pick(event: Any) -> None:
-                    if event.value in LESSONS:
-                        state["lesson"] = event.value
+                    if event.value:
+                        state["concept"] = event.value
+                        # Intro cards belong to lesson 1, so shortcuts and live context use it.
+                        state["lesson"] = (
+                            1 if event.value in intros else int(event.value.split(":")[1])
+                        )
                         concept.refresh()
 
                 def filters_changed() -> None:
@@ -376,7 +452,7 @@ def install_coach_page(service: CoachService) -> None:
 
                 def prepared(invalid: bool) -> None:
                     plan = fixture_plan(
-                        visible(), int(days.value or 1), int(minutes.value or 5), invalid
+                        visible_lessons(), int(days.value or 1), int(minutes.value or 5), invalid
                     )
                     show_plan(plan, "Prepared invalid plan" if invalid else "Prepared plan")
 
@@ -390,7 +466,7 @@ def install_coach_page(service: CoachService) -> None:
                             )
                         plan_consent.set_value(False)  # consent covers one request
                         plan = await service.live_plan(
-                            visible(), int(days.value or 1), int(minutes.value or 5)
+                            visible_lessons(), int(days.value or 1), int(minutes.value or 5)
                         )
                     except (StageLocked, ValueError, PermissionError, LessonError) as exc:
                         ui.notify(str(exc), type="warning")
