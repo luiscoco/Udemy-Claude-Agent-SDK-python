@@ -43,7 +43,7 @@ async def main(workspace: Path) -> None:
         cwd=workspace,
         setting_sources=["project"],
         skills=["lesson-summary"],
-        tools=["Read"],
+        tools=["Read", "Skill"],  # Skill must be available to call the skill
     )
     prompt = "Use the lesson-summary skill to summarize notes.txt."
     async for message in query(prompt=prompt, options=options):
@@ -59,7 +59,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `project_markdown` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 752); the Python source tab shows it below the concept code. Host contracts
+(line 753); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

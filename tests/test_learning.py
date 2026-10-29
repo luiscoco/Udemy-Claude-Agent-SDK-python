@@ -483,6 +483,35 @@ def test_browser_evaluation_studio_keeps_a_limited_run_a_failure(server):
         browser.close()
 
 
+def test_browser_code_tour_highlights_each_section(server):
+    from playwright.sync_api import sync_playwright
+
+    from agent_lab.learning import code_tour
+
+    base, _ = server
+    sections = code_tour(1)
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 1280, "height": 1000})
+        page.goto(base + "/?lesson=1")
+        page.get_by_role("button", name="Start code tour").click()
+        page.get_by_text(f"Step 1 of {len(sections)}").wait_for()
+        page.get_by_text(sections[0].title, exact=True).wait_for()
+        assert page.locator(".tour-code .hll").count() >= 1
+        page.get_by_role("button", name="Next step").click()
+        page.get_by_text(sections[1].title, exact=True).wait_for()
+        # Every highlighted line must render on its own row, not collapse out of sight.
+        rows = page.evaluate(
+            "new Set([...document.querySelectorAll('.tour-code .hll')]"
+            ".map(e => Math.round(e.getBoundingClientRect().top))).size"
+        )
+        assert rows == sections[1].end - sections[1].start + 1, rows
+        page.get_by_role("button", name="Read aloud").click()
+        page.get_by_role("button", name="End tour").click()
+        page.get_by_role("button", name="Start code tour").wait_for()
+        browser.close()
+
+
 def test_browser_publishing_studio_builds_and_downloads_a_document(server, tmp_path):
     from playwright.sync_api import sync_playwright
 

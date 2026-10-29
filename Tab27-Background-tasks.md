@@ -26,7 +26,12 @@ For the browser lab, run `uv run agent-lab serve`, then open
 import asyncio
 
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
-from claude_agent_sdk import TaskNotificationMessage, TaskStartedMessage
+from claude_agent_sdk import (
+    TERMINAL_TASK_STATUSES,
+    TaskNotificationMessage,
+    TaskStartedMessage,
+    TaskUpdatedMessage,
+)
 
 
 async def heartbeat() -> None:
@@ -50,6 +55,12 @@ async def main() -> None:
                     running.add(message.task_id)
                 elif isinstance(message, TaskNotificationMessage):
                     running.discard(message.task_id)
+                elif (
+                    isinstance(message, TaskUpdatedMessage)
+                    and message.patch.get("status") in TERMINAL_TASK_STATUSES
+                ):
+                    # Some tasks end with only this update, never a notification.
+                    running.discard(message.task_id)
         finally:
             for task_id in running:
                 await client.stop_task(task_id)
@@ -57,7 +68,7 @@ async def main() -> None:
             await asyncio.gather(watcher, return_exceptions=True)
 ```
 
-The host owns both kinds of background work: `watcher.cancel()` then awaiting it via `asyncio.gather(..., return_exceptions=True)` for its asyncio task, and `client.stop_task(task_id)` for agent tasks still in `running`.
+The host owns both kinds of background work: `watcher.cancel()` then awaiting it via `asyncio.gather(..., return_exceptions=True)` for its asyncio task, and `client.stop_task(task_id)` for agent tasks still in `running`; a task ends on a `TaskNotificationMessage` or on a `TaskUpdatedMessage` whose status is in `TERMINAL_TASK_STATUSES`.
 
 ## How the offline lab checks it
 
@@ -65,7 +76,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `background` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1027); the Python source tab shows it below the concept code. Host contracts
+(line 1028); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

@@ -1,0 +1,2237 @@
+{
+ "1": {
+  "source_sha256": "a0c32e5a6f8aded3524634a05d6ed10a25ef7f96a3cab8ea06530fb89c776a26",
+  "sections": [
+   {
+    "title": "The message types we need",
+    "start": 1,
+    "end": 7,
+    "text": "We import query, the options class, and the three message and block types we will tell apart. AssistantMessage and TextBlock carry the reply, while ResultMessage carries the outcome of the whole run."
+   },
+   {
+    "title": "Options and the async loop",
+    "start": 11,
+    "end": 14,
+    "text": "The options cap the run at two turns and ten cents. Calling query returns an async iterator, and nothing happens until the async for loop starts pulling messages from it, one at a time as the agent produces them."
+   },
+   {
+    "title": "Reading reply text from blocks",
+    "start": 15,
+    "end": 18,
+    "text": "An AssistantMessage holds a list of content blocks, and only the TextBlock items contain reply text, so we check each block before printing. When this runs you should see the explanation of an agent loop appear here."
+   },
+   {
+    "title": "The final ResultMessage",
+    "start": 19,
+    "end": 21,
+    "text": "The last message is a ResultMessage, and it is a summary rather than more reply text. Its subtype, session_id and total_cost_usd tell you how the run ended, which session it was, and what it cost."
+   }
+  ]
+ },
+ "2": {
+  "source_sha256": "0e736c4a8050475534cb3528a466b31991efb0eafc94c5299211b6e0b863854d",
+  "sections": [
+   {
+    "title": "A strict request model",
+    "start": 5,
+    "end": 9,
+    "text": "RunRequest describes exactly what a user may send. Extra fields are forbidden, max_turns must sit between one and twenty, and max_budget_usd must be above zero and at most one dollar, so bad limits fail here instead of reaching the SDK."
+   },
+   {
+    "title": "Validate, then see what was chosen",
+    "start": 12,
+    "end": 14,
+    "text": "model_validate rejects invalid input with a validation error before any options object exists. Printing model_fields_set shows which fields the user actually supplied, which is different from fields that simply kept their default."
+   },
+   {
+    "title": "Build options from accepted values",
+    "start": 15,
+    "end": 21,
+    "text": "Only validated values reach ClaudeAgentOptions. Any field still None is not sent to the CLI, so the CLI's own default applies, and setting_sources as an empty list keeps user and project settings files out of the run."
+   },
+   {
+    "title": "Trying it out",
+    "start": 24,
+    "end": 26,
+    "text": "Here the user sets max_turns and max_budget_usd but not model. You should see those two fields listed as set by the user, then three and five cents printed, with model left as None so the CLI picks its default."
+   }
+  ]
+ },
+ "3": {
+  "source_sha256": "7c08038d9cfae67cd5b2c84f4ccf53184d1a4e46d384012933185cd5da77704d",
+  "sections": [
+   {
+    "title": "A read-only tool list",
+    "start": 6,
+    "end": 7,
+    "text": "We name the three built-in tools this agent should have: Read, Glob and Grep. None of them can change files, which is the whole point of this run."
+   },
+   {
+    "title": "Catalog versus pre-approval",
+    "start": 8,
+    "end": 10,
+    "text": "The tools option sets the catalog, so any tool not listed, such as Bash or Write, does not exist for this run. allowed_tools is a separate idea: it lets the listed tools run without a permission prompt, but it never adds tools by itself."
+   },
+   {
+    "title": "Where and with what settings",
+    "start": 11,
+    "end": 13,
+    "text": "cwd points the agent at the seeded workspace, so relative paths like notes.txt resolve there. setting_sources as an empty list keeps user and project settings out, and max_turns bounds the round trips."
+   },
+   {
+    "title": "Reading the summary",
+    "start": 15,
+    "end": 19,
+    "text": "We only print the result field of the final ResultMessage. You should see a summary of notes.txt, produced by the agent reading the file with its restricted tools."
+   }
+  ]
+ },
+ "4": {
+  "source_sha256": "799c1feba882a216441fc25387b4a725a4f7ffd9826a571beccd7ae22562a9a8",
+  "sections": [
+   {
+    "title": "Resolving the workspace",
+    "start": 7,
+    "end": 7,
+    "text": "We resolve the workspace path once, to an absolute path. Every later check compares a requested file against this real location, not against whatever text the model sends."
+   },
+   {
+    "title": "Only the Read tool",
+    "start": 10,
+    "end": 14,
+    "text": "can_use_tool is the host's decision point: it receives the tool name, its input and a context, and must return a permission result. Any tool other than Read gets a PermissionResultDeny with a message the model will see."
+   },
+   {
+    "title": "Checking the real path",
+    "start": 15,
+    "end": 20,
+    "text": "The requested file_path is joined to the workspace and resolved, which collapses any dot dot traversal. If the result escapes the workspace or is a dot env file, the call is denied; otherwise PermissionResultAllow lets it run."
+   },
+   {
+    "title": "Wiring the callback in",
+    "start": 24,
+    "end": 27,
+    "text": "The catalog holds only Read, and the callback is passed as can_use_tool. There is deliberately no allowed_tools, because a pre-approved tool would skip the callback entirely and the host would lose its say."
+   },
+   {
+    "title": "Watching the run",
+    "start": 28,
+    "end": 31,
+    "text": "The prompt asks the agent not to write files, but that is only a request; the catalog and the callback are what enforce it. Printing each message type lets you follow the run through to its final ResultMessage."
+   }
+  ]
+ },
+ "5": {
+  "source_sha256": "1d423b472933387ef992f1cdb00a5635292f74620b3853fc2f81c8a1ac71691d",
+  "sections": [
+   {
+    "title": "The argument model",
+    "start": 8,
+    "end": 11,
+    "text": "Calculation defines what valid arguments look like. Strict mode rejects booleans and strings posing as numbers, extra fields are forbidden, and the bounds plus allow_inf_nan set to False keep out huge values, infinity and NaN."
+   },
+   {
+    "title": "Declaring the tool",
+    "start": 14,
+    "end": 17,
+    "text": "The tool decorator turns this async function into a tool named add, with a description and an input schema generated from the same model. That schema guides the model, but it is advice rather than enforcement."
+   },
+   {
+    "title": "Validating inside the tool",
+    "start": 18,
+    "end": 25,
+    "text": "The function validates the arguments itself. Bad input returns a text block with is_error set to True, so the model learns what went wrong; good input returns the sum as JSON in a text content block."
+   },
+   {
+    "title": "Serving and allowing it",
+    "start": 29,
+    "end": 32,
+    "text": "create_sdk_mcp_server hosts the tool inside this Python process under the server name calc. The model sees it as mcp__calc__add, the exact name pre-approved in allowed_tools, while tools as an empty list removes the built-in tools."
+   },
+   {
+    "title": "Asking for a calculation",
+    "start": 33,
+    "end": 36,
+    "text": "The prompt asks the agent to use the calculator. Printing each message type lets you see the assistant call the tool, the tool result come back, and the run close with a ResultMessage."
+   }
+  ]
+ },
+ "6": {
+  "source_sha256": "8a7c81bee045f45fd740ad7995c0ab62b42adb8bd9af468c06e9d8219206bafb",
+  "sections": [
+   {
+    "title": "Send one turn",
+    "start": 10,
+    "end": 11,
+    "text": "The ask helper runs one turn on an existing client. client.query only sends the prompt; it does not return the reply."
+   },
+   {
+    "title": "Drain until the result",
+    "start": 12,
+    "end": 16,
+    "text": "receive_response yields messages until that turn's ResultMessage, then stops. We join the TextBlock text from each AssistantMessage and print the session id from the result, which should be the same for both turns."
+   },
+   {
+    "title": "One client, one conversation",
+    "start": 20,
+    "end": 21,
+    "text": "The async with block connects the client on entry and disconnects it on exit. Everything inside it shares one open session with the CLI."
+   },
+   {
+    "title": "Two turns that share context",
+    "start": 22,
+    "end": 24,
+    "text": "The first turn plants a label, and the second asks for it back on the same client. Because both turns share one conversation, you should see the agent answer PYTHON-SESSION; two separate standalone query calls would not remember it."
+   }
+  ]
+ },
+ "7": {
+  "source_sha256": "027b10de42bb0b782a646baf8928a1c156bbd5b16d269ab2543d96bb82fb1750",
+  "sections": [
+   {
+    "title": "An audit log",
+    "start": 6,
+    "end": 6,
+    "text": "This list records every decision the hook makes. It is the side effect we can inspect later to see who asked for what and what the host decided."
+   },
+   {
+    "title": "Reading the pending call",
+    "start": 9,
+    "end": 17,
+    "text": "The hook receives the input data before the tool runs. After confirming the event is PreToolUse, it reads the requested file_path from tool_input and denies anything mentioning a dot env file or a dot dot traversal."
+   },
+   {
+    "title": "Recording and deciding",
+    "start": 18,
+    "end": 25,
+    "text": "We append the tool name and decision to the audit log, then return hookSpecificOutput with permissionDecision and permissionDecisionReason. A deny stops the call before it happens, and the reason is reported back to the model."
+   },
+   {
+    "title": "Registering the hook",
+    "start": 29,
+    "end": 32,
+    "text": "A HookMatcher ties the callback to the Read, Glob and Grep tool names, and it is registered under the PreToolUse event in the hooks option."
+   },
+   {
+    "title": "Watching the audit grow",
+    "start": 33,
+    "end": 36,
+    "text": "Each message prints its type and the current audit log length. You should see the count rise as the agent's tool calls pass through the hook."
+   }
+  ]
+ },
+ "8": {
+  "source_sha256": "edef0d6c3c6c547b20ff1db8028fd5a7108f518b85e3af71da4d75c26fcc7b13",
+  "sections": [
+   {
+    "title": "Defining the reviewer",
+    "start": 3,
+    "end": 7,
+    "text": "An AgentDefinition gives the subagent a description, which tells the main agent when to use it, and its own prompt. The tools list scopes it to Read, Glob and Grep, so the reviewer is read-only; without that list it could inherit the parent's tools."
+   },
+   {
+    "title": "Registering the subagent",
+    "start": 11,
+    "end": 12,
+    "text": "The agents option maps the name reviewer to that definition. This is how the main agent learns that a reviewer exists."
+   },
+   {
+    "title": "The Agent tool enables delegation",
+    "start": 13,
+    "end": 17,
+    "text": "Delegation happens through the Agent tool, so it must be in the main agent's catalog alongside the read tools. allowed_tools pre-approves the same set, and max_turns leaves room for the hand-off and the review."
+   },
+   {
+    "title": "Delegating and reading the result",
+    "start": 18,
+    "end": 21,
+    "text": "The prompt asks the main agent to involve the reviewer. The final ResultMessage result should contain the reviewer's suggested improvement to notes.txt, with no file changed."
+   }
+  ]
+ },
+ "9": {
+  "source_sha256": "f1b3d374f0a4749e9c3ac1890fccc88025e5ef3728ecd0720a34e232f7370f63",
+  "sections": [
+   {
+    "title": "A string replaces the default",
+    "start": 3,
+    "end": 6,
+    "text": "Passing a plain string as system_prompt makes it the whole system prompt. Claude Code's default instructions, including its tool and safety guidance, are no longer included."
+   },
+   {
+    "title": "The preset extends it",
+    "start": 8,
+    "end": 15,
+    "text": "Passing a dict with type preset and preset claude_code keeps the Claude Code base instructions. The append text is added after them, so your house rule rides on top of the defaults."
+   },
+   {
+    "title": "Comparing both in one loop",
+    "start": 18,
+    "end": 23,
+    "text": "We ask the same question under both configurations and print each result. The replaced prompt should answer as a terse tutor in short bullets, while the extended one keeps Claude Code's style and leans on Python examples."
+   }
+  ]
+ },
+ "10": {
+  "source_sha256": "0c99cf10c34834b77b10792b72ffaede01c19132813335da1aa419b94fee8b97",
+  "sections": [
+   {
+    "title": "The expected shape",
+    "start": 5,
+    "end": 7,
+    "text": "Summary describes the answer we want: a non-empty summary up to five hundred characters and exactly two next steps. The same model will both generate the schema and validate the result."
+   },
+   {
+    "title": "Requesting structured output",
+    "start": 10,
+    "end": 14,
+    "text": "output_format with type json_schema and the model's JSON schema asks the agent to return structured data. This is a request, not a guarantee."
+   },
+   {
+    "title": "Validate before trusting",
+    "start": 15,
+    "end": 20,
+    "text": "When the ResultMessage carries structured_output, we run it through Summary.model_validate before using it. If the run ends without usable output, the function returns None instead of pretending it succeeded."
+   },
+   {
+    "title": "Interrupting a running turn",
+    "start": 23,
+    "end": 26,
+    "text": "Interrupt is a control request, so it needs a connected ClaudeSDKClient. We start a long essay and then call interrupt to stop that turn."
+   },
+   {
+    "title": "What the interrupted turn returns",
+    "start": 27,
+    "end": 29,
+    "text": "We still drain the response until the ResultMessage. Printing its subtype and is_error shows how the interrupted turn really ended, so you judge the outcome from the result instead of assuming the full essay arrived."
+   }
+  ]
+ },
+ "11": {
+  "source_sha256": "a3db9dd6879749621a5734916479f28b01722ce04eb7209823a9862cdad4fad3",
+  "sections": [
+   {
+    "title": "The SKILL.md contents",
+    "start": 5,
+    "end": 10,
+    "text": "A skill is a markdown file whose frontmatter gives a name and a description. The description tells the model when the skill applies, and the body below the frontmatter holds the instructions it follows."
+   },
+   {
+    "title": "Writing it to the right folder",
+    "start": 14,
+    "end": 16,
+    "text": "The file must live at dot claude, skills, then the skill name, inside the workspace. We create that folder and write SKILL.md there."
+   },
+   {
+    "title": "Opting in to project settings",
+    "start": 17,
+    "end": 22,
+    "text": "setting_sources with only project loads trusted project files from cwd while leaving personal user settings out. skills names lesson-summary, which enables only that skill and pre-approves the Skill tool for it, and tools lists Skill next to Read so the model can actually call it."
+   },
+   {
+    "title": "Using the skill",
+    "start": 23,
+    "end": 26,
+    "text": "The prompt asks for the skill by name. The ResultMessage result should come back as three bullet points summarizing notes.txt, following the skill's instructions."
+   }
+  ]
+ },
+ "12": {
+  "source_sha256": "03343e3a457780e7975964273818c57587119ebf43258561d2c2b0395ec58967",
+  "sections": [
+   {
+    "title": "An async generator of messages",
+    "start": 7,
+    "end": 9,
+    "text": "user_messages is an async generator, which query accepts in place of a string prompt. Nothing is built up front: each item is produced only when the SDK pulls the next one, so input could just as well come from a queue or a socket."
+   },
+   {
+    "title": "The user message shape",
+    "start": 10,
+    "end": 15,
+    "text": "Each item is a user message dict with type, a message holding role and content, parent_tool_use_id and session_id. This is the shape the CLI expects for one queued user turn."
+   },
+   {
+    "title": "Feeding the iterable to query",
+    "start": 19,
+    "end": 21,
+    "text": "Two prompts become two queued turns. Passing the generator as prompt makes this streaming input, which is about how prompts are sent; token-by-token output is the separate include_partial_messages option."
+   },
+   {
+    "title": "Reading each result",
+    "start": 22,
+    "end": 23,
+    "text": "Each answered turn ends with a ResultMessage. Printing num_turns and result lets you see the explanation, then the one-line example that builds on it."
+   }
+  ]
+ },
+ "13": {
+  "source_sha256": "74aca16f5f4455a00d8e44dc9c6f323ec42e0fc98a3d883527a99c52d10810f3",
+  "sections": [
+   {
+    "title": "Describing a stdio server",
+    "start": 8,
+    "end": 15,
+    "text": "The notes entry in mcp_servers tells the CLI how to launch the server: type stdio, the current Python interpreter as command, and arguments that run the notes_mcp module. Nothing needs to be running beforehand; the CLI starts it as a subprocess and speaks JSON-RPC over its stdin and stdout."
+   },
+   {
+    "title": "Strict config and one tool",
+    "start": 16,
+    "end": 18,
+    "text": "strict_mcp_config set to True ignores MCP servers from other configuration files, and tools as an empty list removes the built-in tools. allowed_tools pre-approves mcp__notes__read_note, the server name and tool name joined in the MCP naming pattern."
+   },
+   {
+    "title": "Reading the welcome note",
+    "start": 20,
+    "end": 23,
+    "text": "The prompt asks the agent to use the notes server. The final ResultMessage result should contain the welcome note's content, fetched through the read_note tool."
+   }
+  ]
+ },
+ "14": {
+  "source_sha256": "3c5511f76b203c698ffb9dd59521b73d9a34e215f8c1b668b1585b4781fad739",
+  "sections": [
+   {
+    "title": "Two typed thinking configs",
+    "start": 11,
+    "end": 12,
+    "text": "Thinking is configured with typed dicts. The adaptive config lets the model decide how much to reason, while ThinkingConfigEnabled sets a fixed budget_tokens instead; option names from other SDKs are not valid here."
+   },
+   {
+    "title": "Model, thinking and effort",
+    "start": 15,
+    "end": 16,
+    "text": "model chooses which Claude model runs, while thinking and effort tune how hard it reasons. Effort ranges from low to max, and medium trades some latency and cost for deeper reasoning alongside adaptive thinking."
+   },
+   {
+    "title": "Where reasoning shows up",
+    "start": 17,
+    "end": 25,
+    "text": "Reasoning arrives as ThinkingBlock items inside AssistantMessage content, next to the TextBlock reply. We print only the length of the thinking text, then the answer itself, so you can see whether the model reasoned before replying."
+   }
+  ]
+ },
+ "15": {
+  "source_sha256": "dd2d76de5cec7ab467113554456a14c8e113ff5dd0f24b9fa2412ecd3004226d",
+  "sections": [
+   {
+    "title": "A host-side ledger",
+    "start": 6,
+    "end": 12,
+    "text": "The Ledger tracks a spending limit and what has been spent so far. can_start answers one question before any call: would reserving this amount still fit under the limit."
+   },
+   {
+    "title": "Refusing before the call",
+    "start": 15,
+    "end": 17,
+    "text": "If the ledger cannot cover the reserve, ask raises an error and no run starts at all. This is the host's gate across many calls."
+   },
+   {
+    "title": "A per-run cap",
+    "start": 18,
+    "end": 19,
+    "text": "max_budget_usd caps only this single run, stopping it once its spend crosses the reserve. It knows nothing about earlier runs, which is why the ledger exists."
+   },
+   {
+    "title": "Recording actual cost",
+    "start": 20,
+    "end": 23,
+    "text": "The ResultMessage reports total_cost_usd and usage, the real spend of this run. We add that cost to the ledger, so later calls are refused once the limit is reached."
+   }
+  ]
+ },
+ "16": {
+  "source_sha256": "8b2689a63336361d80189a233540239308fe2a1e56fac85676146a8d2b079596",
+  "sections": [
+   {
+    "title": "A private config folder",
+    "start": 7,
+    "end": 8,
+    "text": "Before building any options, the program creates a run-config folder and resolves it to an absolute path. This folder will become the CLI's whole configuration home for this run, so nothing from your personal Claude Code setup is used."
+   },
+   {
+    "title": "Opting out of settings files",
+    "start": 9,
+    "end": 10,
+    "text": "setting_sources set to an empty list tells the CLI to load none of the user, project or local settings files. Settings are opt-in, so a settings file sitting in the workspace cannot quietly add allow rules to this run."
+   },
+   {
+    "title": "Environment for the CLI",
+    "start": 11,
+    "end": 14,
+    "text": "The env dictionary is passed to the Claude Code process, which is where settings and memory are resolved. CLAUDE_CONFIG_DIR points it at the private folder, so your login, memory and permissions never leak in, and CLAUDE_CODE_DISABLE_AUTO_MEMORY stops it writing automatic memory notes."
+   },
+   {
+    "title": "A small, bounded run",
+    "start": 15,
+    "end": 21,
+    "text": "The run works in the workspace folder with only the Read tool and at most two turns. When it finishes, the ResultMessage carries the summary of notes.txt, produced without any personal settings in play."
+   }
+  ]
+ },
+ "17": {
+  "source_sha256": "105ac2030f4fd8bbfa0709312bbd026d38ee8409e8c7c995b731577eaf157f24",
+  "sections": [
+   {
+    "title": "Turning on checkpoints",
+    "start": 5,
+    "end": 11,
+    "text": "enable_file_checkpointing asks the CLI to track file edits, and the replay-user-messages extra argument makes it stream user messages back with their uuid. Without that uuid you would have nothing to rewind to. Read and Edit are the only tools, so the agent can change notes.txt."
+   },
+   {
+    "title": "One live client session",
+    "start": 12,
+    "end": 13,
+    "text": "The work happens inside a connected ClaudeSDKClient, because rewinding is a control request that needs the same open session that made the edits. The query asks Claude to rewrite notes.txt as a bulleted list."
+   },
+   {
+    "title": "Capturing the checkpoint",
+    "start": 14,
+    "end": 17,
+    "text": "While the response streams, the first UserMessage that carries a uuid is saved as the checkpoint. Each user message is a checkpoint, and this one marks the file state before the edit."
+   },
+   {
+    "title": "Rewinding the files",
+    "start": 18,
+    "end": 20,
+    "text": "rewind_files sends the checkpoint uuid and notes.txt returns to its earlier content. Notice what does not change: the conversation still holds every turn, so the model still remembers making the edit."
+   }
+  ]
+ },
+ "18": {
+  "source_sha256": "f80d1209a541490c8be4f5c9da33341d852ec5ea1fe2830142c0c068a6b61f35",
+  "sections": [
+   {
+    "title": "A path policy callback",
+    "start": 9,
+    "end": 15,
+    "text": "path_policy is a can_use_tool callback. It resolves the file_path argument against the workspace and allows the call only if the target stays inside it, otherwise it returns a PermissionResultDeny with a message. It judges the arguments of a tool call, nothing more."
+   },
+   {
+    "title": "What the policy cannot see",
+    "start": 17,
+    "end": 17,
+    "text": "This comment is the key idea of the lesson. A Bash call has no file_path, so the policy cannot see which files a program started by that command opens later. Only operating system isolation can confine that process."
+   },
+   {
+    "title": "Sandbox settings",
+    "start": 18,
+    "end": 23,
+    "text": "SandboxSettings enables OS-level isolation for Bash commands. allowUnsandboxedCommands set to False closes the escape hatch of asking to run outside the sandbox, autoAllowBashIfSandboxed set to False keeps Bash calls going through permission checks, and the network allowedDomains list limits egress to pypi.org."
+   },
+   {
+    "title": "Both layers together",
+    "start": 24,
+    "end": 29,
+    "text": "The options combine the two layers: can_use_tool decides which Read and Bash calls run, and sandbox limits what the processes those calls start can reach. Each layer covers a gap the other leaves open."
+   }
+  ]
+ },
+ "19": {
+  "source_sha256": "8124185448396d8303dac972ce7c015aaf520ee19ccf2a04ee6e9595c5f6cd15",
+  "sections": [
+   {
+    "title": "Scoping the transcript store",
+    "start": 8,
+    "end": 10,
+    "text": "The session functions read the CLI's transcript files from the config directory named by CLAUDE_CONFIG_DIR, so the function points that variable at the run's own folder first. That is why the comment says to call it in a child process: setting it changes the environment of the whole program."
+   },
+   {
+    "title": "Listing session metadata",
+    "start": 11,
+    "end": 13,
+    "text": "list_sessions with directory set to the project folder returns at most five SDKSessionInfo records, cheap metadata like session_id and summary. get_session_info adds details such as created_at for one session, and may return None, which the print handles."
+   },
+   {
+    "title": "Reading transcript messages",
+    "start": 14,
+    "end": 17,
+    "text": "get_session_messages parses the transcript itself and returns SessionMessage objects, limited here to three. Each line printed shows the message type, user or assistant, and its uuid. All of this is read from disk, with no network call."
+   }
+  ]
+ },
+ "20": {
+  "source_sha256": "9665b6ac411eefcb2af9754bb247ab282d3e6b1964d8c6c5edef444ecfc11749",
+  "sections": [
+   {
+    "title": "The pre-tool guard",
+    "start": 10,
+    "end": 15,
+    "text": "guard_writes ignores any event that is not PreToolUse, then checks whether the file_path in the tool input starts with src. This runs before the tool does, so it is the place where a write can still be stopped."
+   },
+   {
+    "title": "Decision with a reason",
+    "start": 16,
+    "end": 22,
+    "text": "The hook answers with hookSpecificOutput: a permissionDecision of allow or deny, and a permissionDecisionReason. On a denial the reason goes back to Claude, so it can adjust its next step instead of blindly retrying the same write."
+   },
+   {
+    "title": "The post-tool audit",
+    "start": 25,
+    "end": 30,
+    "text": "audit runs after a tool has executed and only observes. It prints the tool_name, the tool_use_id and the size of the tool_response. By this point the tool already ran, so a PostToolUse hook can record but cannot undo."
+   },
+   {
+    "title": "Matchers scope the hooks",
+    "start": 33,
+    "end": 39,
+    "text": "The matcher is a regex on the tool name, so guard_writes fires only for Write or Edit calls. The PostToolUse HookMatcher has no matcher, so audit fires for every tool and you should see one audit line per tool call."
+   }
+  ]
+ },
+ "21": {
+  "source_sha256": "bcc9479a34a39a91b320b211a00d1307275741425e6a3845990f7072f89a39f0",
+  "sections": [
+   {
+    "title": "A command is Markdown",
+    "start": 7,
+    "end": 12,
+    "text": "The program writes lesson-summary.md into the workspace's .claude commands folder. The file body is the prompt template, and the file name becomes the command name, lesson-summary."
+   },
+   {
+    "title": "Opting into project settings",
+    "start": 13,
+    "end": 17,
+    "text": "cwd points at the workspace, and setting_sources includes project. That combination is what makes the CLI scan the commands folder; without it the file is never discovered and the prompt is treated as plain text."
+   },
+   {
+    "title": "Tools still need permission",
+    "start": 18,
+    "end": 20,
+    "text": "The command needs to read notes.txt, so Read is the only tool and it is pre-approved in allowed_tools. A command does not bypass your permission rules, and max_turns keeps the run short."
+   },
+   {
+    "title": "Invoking by prompt",
+    "start": 22,
+    "end": 24,
+    "text": "Sending slash lesson-summary as the prompt runs the command. The ResultMessage should contain three Python-focused bullets summarizing notes.txt, which shows the template was found and used."
+   }
+  ]
+ },
+ "22": {
+  "source_sha256": "251d6671f3846312bbc37937b0bca2d74b3e83565b43e284184d902a0eb3e34c",
+  "sections": [
+   {
+    "title": "Writing the project rules",
+    "start": 7,
+    "end": 12,
+    "text": "The program writes a CLAUDE.md file into the workspace with two standing rules: answer with Python 3.12 examples, and never edit files outside src. This is explicit memory, a file you write and can review."
+   },
+   {
+    "title": "Two switches load it",
+    "start": 13,
+    "end": 16,
+    "text": "CLAUDE.md is read only when setting_sources includes project and the system prompt is the claude_code preset. A plain system prompt string would replace the preset, and the file would be ignored."
+   },
+   {
+    "title": "No automatic memory",
+    "start": 17,
+    "end": 20,
+    "text": "CLAUDE_CODE_DISABLE_AUTO_MEMORY stops the CLI from writing its own notes for later runs, so the file you reviewed stays the only memory. No tools and a single turn keep this a pure question and answer."
+   },
+   {
+    "title": "Seeing the rules applied",
+    "start": 21,
+    "end": 25,
+    "text": "The prompt asks which project rules Claude follows. If loading worked, the ResultMessage should mention the Python 3.12 and src rules, which proves they came from CLAUDE.md and not from the prompt."
+   }
+  ]
+ },
+ "23": {
+  "source_sha256": "74730a7087036637c2402a13d2684bf3a12aa5f2f3a8ea1bf5e25d1686fac9f2",
+  "sections": [
+   {
+    "title": "The plugin folder layout",
+    "start": 8,
+    "end": 10,
+    "text": "A plugin is a folder. The program creates a .claude-plugin folder for the manifest and a commands folder for the plugin's commands, all under one teaching-plugin root."
+   },
+   {
+    "title": "Manifest and command",
+    "start": 11,
+    "end": 17,
+    "text": "plugin.json names the plugin python-teaching with a version, and explain.md is a command template. The manifest name matters, because it becomes the namespace for every command the plugin ships."
+   },
+   {
+    "title": "Loading a trusted plugin",
+    "start": 18,
+    "end": 25,
+    "text": "The SDK loads only plugins you list, here one SdkPluginConfig of type local with the plugin path. Trust is a decision in your code, and the Read tool is still governed by allowed_tools."
+   },
+   {
+    "title": "Calling the namespaced command",
+    "start": 26,
+    "end": 29,
+    "text": "The prompt is slash python-teaching colon explain, the plugin name followed by the command name. The ResultMessage should hold an explanation of notes.txt with a short Python example; a plain slash explain would not reach this plugin command."
+   }
+  ]
+ },
+ "24": {
+  "source_sha256": "64afc9a814e88aa87e99db7e695db65d08426ce4462e78fdc73edbf64afd4b99",
+  "sections": [
+   {
+    "title": "Rules in a Task model",
+    "start": 5,
+    "end": 14,
+    "text": "Task requires at least one file, and the inside_src field validator rejects any file not under src. This is a host rule that a JSON schema alone cannot express, so it lives in Python code."
+   },
+   {
+    "title": "The Plan model",
+    "start": 17,
+    "end": 18,
+    "text": "A Plan must contain at least one Task. Together the two models define exactly what an acceptable proposal looks like."
+   },
+   {
+    "title": "Asking for a structured proposal",
+    "start": 21,
+    "end": 25,
+    "text": "The Plan's JSON schema is passed as output_format, and tools is empty so the model can only propose. The schema shapes the answer, but it does not guarantee your rules are met."
+   },
+   {
+    "title": "Validate before executing",
+    "start": 26,
+    "end": 32,
+    "text": "When a ResultMessage arrives with structured_output, Plan model_validate checks it. A valid plan is returned to the executor; a ValidationError, such as a file outside src, returns None, so a rejected proposal never reaches a worker."
+   }
+  ]
+ },
+ "25": {
+  "source_sha256": "2ec975b9c0f667f174c2b898b8866ba3cfbded8394a902b6cea9559e427b36ff",
+  "sections": [
+   {
+    "title": "A fixed size budget",
+    "start": 7,
+    "end": 7,
+    "text": "LIMIT caps how many characters of the log the tool may return. Bounding the result where it is produced keeps one large log from crowding every later turn."
+   },
+   {
+    "title": "Bounded, marked tool result",
+    "start": 10,
+    "end": 18,
+    "text": "read_log returns the whole build log if it fits, otherwise the first LIMIT characters plus a truncated marker saying how many characters were cut. The marker tells the model data is missing, so it can ask for less instead of guessing."
+   },
+   {
+    "title": "Marking SDK compaction",
+    "start": 21,
+    "end": 28,
+    "text": "before_compact is a PreCompact hook. When the SDK starts summarizing history on its own, it prints the trigger, manual or auto. That is the moment for the host to save its own summary of completed work."
+   },
+   {
+    "title": "Wiring tool and hook",
+    "start": 31,
+    "end": 36,
+    "text": "The tool is served by an in-process MCP server named logs, so its allowed name is mcp__logs__read_log. The PreCompact HookMatcher registers the hook, keeping bounded results and compaction as two separate mechanisms."
+   }
+  ]
+ },
+ "26": {
+  "source_sha256": "995db889e8e596a0d6b651d1e185b179231d5f136c19ff5785bddde0a89cb0e5",
+  "sections": [
+   {
+    "title": "One owning context",
+    "start": 7,
+    "end": 8,
+    "text": "Everything happens inside a single async with block on one ClaudeSDKClient, in one task. The block guarantees the CLI process is cleaned up, and every control call below acts on this same live session."
+   },
+   {
+    "title": "Asking the server",
+    "start": 9,
+    "end": 10,
+    "text": "get_server_info is a control request that returns initialization details from the CLI. The program prints how many commands are available, guarding against a None reply."
+   },
+   {
+    "title": "A first normal turn",
+    "start": 11,
+    "end": 14,
+    "text": "A regular query explains notes.txt, and receive_response streams until the ResultMessage, whose result is printed. This history is what the next steps keep."
+   },
+   {
+    "title": "Changing a live session",
+    "start": 15,
+    "end": 17,
+    "text": "set_model and set_permission_mode change the model and switch to plan mode between turns, without reconnecting. The follow-up query runs in the same conversation, so the earlier explanation is still in context."
+   },
+   {
+    "title": "Interrupt on a deadline",
+    "start": 18,
+    "end": 24,
+    "text": "The second response is read under a sixty second timeout. If it expires, interrupt sends a control request that stops the current turn, instead of leaving the session hanging."
+   }
+  ]
+ },
+ "27": {
+  "source_sha256": "b93f1c7acfb733ef9dd6900ab5dd509d51ef869f53cf1722c5bd5345ac504e07",
+  "sections": [
+   {
+    "title": "A task with cleanup",
+    "start": 12,
+    "end": 16,
+    "text": "heartbeat waits forever until it is cancelled, and its finally block prints heartbeat cleaned up. That line is your evidence that the owner really cancelled and awaited it."
+   },
+   {
+    "title": "Tracking agent tasks",
+    "start": 19,
+    "end": 38,
+    "text": "The host keeps a running set of agent task ids. A TaskStartedMessage adds its task_id; a TaskNotificationMessage removes it, and so does a TaskUpdatedMessage whose status is terminal, because some tasks end with only that update. The set then holds just the work the run might leave behind."
+   },
+   {
+    "title": "Stopping leftover agent tasks",
+    "start": 39,
+    "end": 41,
+    "text": "In the finally block, every task_id still in running is stopped with stop_task on the connected client. This runs even if the loop raised, so no background agent work outlives the session."
+   },
+   {
+    "title": "Cancel, then await",
+    "start": 42,
+    "end": 43,
+    "text": "cancel only requests cancellation. Awaiting the watcher through gather with return_exceptions lets its finally block run and absorbs the CancelledError, so you should see heartbeat cleaned up before the client closes."
+   }
+  ]
+ },
+ "28": {
+  "source_sha256": "c935ccc9c22fcddba9036aab8897f0d26fcb33715f1a471844c18d433e6e6181",
+  "sections": [
+   {
+    "title": "A host-owned record",
+    "start": 7,
+    "end": 7,
+    "text": "applied is the host's record of writes that already happened. It is what makes a repeated refund safe to check."
+   },
+   {
+    "title": "An idempotent refund tool",
+    "start": 10,
+    "end": 19,
+    "text": "The refund tool derives its key from the order id on the host side, not from anything the model invents. If the key is already in applied, the text says already applied, so a retried refund becomes a no-op instead of a double refund."
+   },
+   {
+    "title": "One deadline for everything",
+    "start": 22,
+    "end": 28,
+    "text": "The tool is served by an in-process billing server and pre-approved by name. A single asyncio timeout of 120 seconds wraps the whole loop of up to three attempts, so retries cannot run forever."
+   },
+   {
+    "title": "Retry only transient failures",
+    "start": 29,
+    "end": 35,
+    "text": "Only CLIConnectionError is caught, with a backoff of two to the power of the attempt in seconds. Any other error surfaces at once, because it would fail the same way again; success returns the ResultMessage result."
+   }
+  ]
+ },
+ "29": {
+  "source_sha256": "a37f2172aea2604a06d63d925c85d73fbc09979db60f47a3e494efdf7becdf83",
+  "sections": [
+   {
+    "title": "Check the real bytes",
+    "start": 9,
+    "end": 12,
+    "text": "image_turn reads the file and checks that it starts with the PNG signature. The media type will say image png, so the bytes must really be a PNG; a renamed JPEG raises here instead of being sent."
+   },
+   {
+    "title": "The image content block",
+    "start": 13,
+    "end": 21,
+    "text": "The image becomes a typed content block with a base64 source, the media_type, and the encoded data. It sits in a content list next to a text block asking for a one-sentence description."
+   },
+   {
+    "title": "A streamed user message",
+    "start": 22,
+    "end": 26,
+    "text": "The function yields a user message dictionary carrying that content. Because a plain string prompt holds only text, images travel through an async iterable of user messages like this one."
+   },
+   {
+    "title": "Sending the image",
+    "start": 29,
+    "end": 36,
+    "text": "client query receives the async iterator rather than a string, with no tools and a single turn. The ResultMessage result should be one sentence describing the picture."
+   }
+  ]
+ },
+ "30": {
+  "source_sha256": "2c42ce299e40e005e7090be9fa75d74dfa06fb9c532328ca91f9c38e385c678d",
+  "sections": [
+   {
+    "title": "Transitions and the ledger",
+    "start": 9,
+    "end": 10,
+    "text": "ALLOWED lists the only legal moves: pending to in progress, and in progress to completed. ledger is the host's own record of each task's status, the state you decide to trust."
+   },
+   {
+    "title": "Checking each status change",
+    "start": 13,
+    "end": 24,
+    "text": "The hook reads the todos from the TodoWrite tool input. For every task whose status changed, it compares the ledger's old status, pending by default, with the new one and records a problem if the move is not allowed, such as skipping straight to completed."
+   },
+   {
+    "title": "One task in progress",
+    "start": 25,
+    "end": 29,
+    "text": "A second rule rejects any list with more than one task in progress. Only when there are no problems does the ledger update, so the host record changes only on valid transitions."
+   },
+   {
+    "title": "Denying with reasons",
+    "start": 30,
+    "end": 42,
+    "text": "Otherwise the hook returns a PreToolUse deny with every problem joined into the reason, which goes back to Claude. The HookMatcher scopes the hook to TodoWrite, so other tools are unaffected."
+   }
+  ]
+ },
+ "31": {
+  "source_sha256": "eb9bfef6491780b27347a131701fa0fa1ea9f3eae6e89937aa7c86b484b0898b",
+  "sections": [
+   {
+    "title": "The question shape",
+    "start": 13,
+    "end": 16,
+    "text": "The Question model describes what a valid question looks like: a header of at most thirty characters and between two and four options. Pydantic enforces those limits, so a malformed question raises a validation error instead of being shown to the user."
+   },
+   {
+    "title": "Only one tool allowed",
+    "start": 19,
+    "end": 23,
+    "text": "The can_use_tool callback is where the host gets control. Any tool other than AskUserQuestion is refused with PermissionResultDeny, so the callback stays focused on one job and nothing else slips through."
+   },
+   {
+    "title": "Validate and ask",
+    "start": 24,
+    "end": 29,
+    "text": "Each item in the questions list is validated with the Question model, then shown to the user with its option labels. The input call runs in a thread so the event loop is not blocked, and each answer is stored in a map keyed by the question text."
+   },
+   {
+    "title": "Answers ride the allow result",
+    "start": 30,
+    "end": 30,
+    "text": "This is the key line. The answers go back to the tool as updated_input on PermissionResultAllow, keeping the original input and adding the answers map. Nothing is displayed automatically by the SDK; this callback is what delivers the user's choice."
+   },
+   {
+    "title": "Enable and run",
+    "start": 33,
+    "end": 38,
+    "text": "The options enable AskUserQuestion through tools and register the callback. When you run it, you should see the question appear in your terminal, and after you answer, the printed messages show the agent continuing with your choice."
+   }
+  ]
+ },
+ "32": {
+  "source_sha256": "04680ef31301512288b6140b212274b61badc092836a7c4506a404edb62a6d79",
+  "sections": [
+   {
+    "title": "The plan as data",
+    "start": 10,
+    "end": 12,
+    "text": "The Plan model says a proposal must have a list of steps and a list of files. Treating the plan as structured data means the host can check it before any person is asked to approve it."
+   },
+   {
+    "title": "Collecting the reply",
+    "start": 15,
+    "end": 22,
+    "text": "reply_text drains one turn with receive_response and joins the text blocks from each AssistantMessage. It returns the model's full written answer for that turn, which here should be the JSON plan."
+   },
+   {
+    "title": "Start in plan mode",
+    "start": 25,
+    "end": 31,
+    "text": "permission_mode set to plan is enforced by the CLI, so the agent can read and propose but edits stay blocked. The reply is parsed with Plan.model_validate_json, and a malformed or non JSON answer raises an error before approval is ever asked."
+   },
+   {
+    "title": "Approval gates execution",
+    "start": 32,
+    "end": 37,
+    "text": "The validated steps and files are shown to a person, and anything other than y ends the run. Only after a yes does set_permission_mode switch the same client to acceptEdits, and the second query asks the agent to carry out the approved plan."
+   }
+  ]
+ },
+ "33": {
+  "source_sha256": "1c7d61a93d9b2a3af9514005e6c22bac21d6f74e55112546ff1348919dc68b2c",
+  "sections": [
+   {
+    "title": "The elicitation callback",
+    "start": 8,
+    "end": 12,
+    "text": "on_elicit is called whenever the MCP server asks the client for input. If the request is not a form style request, the safe answer is to decline rather than guess."
+   },
+   {
+    "title": "Three possible answers",
+    "start": 13,
+    "end": 18,
+    "text": "The user picks yes, no or cancel. Cancel means the request was dismissed, anything other than yes is an explicit decline, and only yes returns accept with content. The server still checks that accepted content against its own schema before acting."
+   },
+   {
+    "title": "Wiring the MCP client",
+    "start": 22,
+    "end": 28,
+    "text": "The installed Python Agent SDK has no on_elicitation option, so a plain MCP ClientSession does the answering. It launches the drafts server over standard input and output and registers on_elicit as its elicitation_callback."
+   },
+   {
+    "title": "Triggering the question",
+    "start": 29,
+    "end": 30,
+    "text": "Calling delete_draft makes the server pause and ask for confirmation, which lands in on_elicit. The printed result content shows how the tool reacted to your accept, decline or cancel."
+   }
+  ]
+ },
+ "34": {
+  "source_sha256": "d0e8f5f8f6b2c363b1879db4d22cb84edd52dce32e8c9313e5da6b78b32e037e",
+  "sections": [
+   {
+    "title": "The style file",
+    "start": 5,
+    "end": 10,
+    "text": "An output style is a Markdown file. Its frontmatter gives a name and a description, and the body tells the model how to write its answers, here as a patient tutor with a tiny example and a check question."
+   },
+   {
+    "title": "Installing the style",
+    "start": 13,
+    "end": 19,
+    "text": "install_style writes the file into the project's dot claude output-styles folder and creates settings.json with outputStyle set to teaching. That setting is what selects the style for this project."
+   },
+   {
+    "title": "Opting in to project settings",
+    "start": 22,
+    "end": 28,
+    "text": "The style is only loaded because setting_sources includes project and cwd points at the project folder. allowed_tools still decides what may run; the style changes the wording, never the tool authority."
+   },
+   {
+    "title": "Seeing the result",
+    "start": 29,
+    "end": 31,
+    "text": "The ResultMessage result holds the final answer. If the style loaded, the summary should read like a tutor's explanation ending with a check question."
+   }
+  ]
+ },
+ "35": {
+  "source_sha256": "d258edf91c188fc63f3bd0ff767999943f8dddfc24d04da508c1640547e5fb53",
+  "sections": [
+   {
+    "title": "Loading host data",
+    "start": 12,
+    "end": 13,
+    "text": "load_transcript reads your own JSON file, or starts with an empty list if it does not exist yet. This is application data you own, separate from anything the SDK keeps."
+   },
+   {
+    "title": "Atomic save",
+    "start": 16,
+    "end": 21,
+    "text": "save_transcript writes to a temporary file first, then calls replace to swap it into place. Readers see either the old file or the new one, never a half written transcript, and a crash leaves the previous version intact."
+   },
+   {
+    "title": "The SDK's own store",
+    "start": 25,
+    "end": 29,
+    "text": "session_store with an InMemorySessionStore is the SDK's separate mirror of the CLI's real session state. Your transcript file is never what the SDK resumes from."
+   },
+   {
+    "title": "Recording the turn",
+    "start": 30,
+    "end": 36,
+    "text": "When the ResultMessage arrives, the host records the prompt with its session_id and the assistant's result, then saves atomically. Open transcript dot json afterwards to see the two rows."
+   }
+  ]
+ },
+ "36": {
+  "source_sha256": "5603e30de2cecd915119537d9c2671af1b58f62ffdf1dd1f626318c8f06df4ce",
+  "sections": [
+   {
+    "title": "Launching without a shell",
+    "start": 8,
+    "end": 11,
+    "text": "create_subprocess_exec takes an argument list and passes each argument verbatim, so nothing is parsed as shell syntax. Standard output and standard error are captured through pipes."
+   },
+   {
+    "title": "Bounding the lifetime",
+    "start": 12,
+    "end": 19,
+    "text": "asyncio.timeout limits how long the host waits for the child. The finally block checks returncode, and if the process is still running it is killed and reaped, so no orphan process survives a timeout."
+   },
+   {
+    "title": "Running a Python child",
+    "start": 23,
+    "end": 23,
+    "text": "The demo launches the current Python interpreter with a one line script. You should see the text Python child process printed from the captured output."
+   },
+   {
+    "title": "The SDK spawns too",
+    "start": 24,
+    "end": 28,
+    "text": "query starts the Claude Code CLI as its own child process, and cli_path pins which executable it runs, here the claude found on your path. The ResultMessage result shows the short greeting."
+   }
+  ]
+ },
+ "37": {
+  "source_sha256": "4acc35cfb79cf480889d4c89d39f76317cc7b8c5dfd88dbf80d093d3c4789513",
+  "sections": [
+   {
+    "title": "One async callback",
+    "start": 11,
+    "end": 16,
+    "text": "can_use_tool receives the tool name, its input and a ToolPermissionContext, and must return a PermissionResult. WORKSPACE is resolved once so every path check compares against the same absolute folder."
+   },
+   {
+    "title": "Deny and stop",
+    "start": 17,
+    "end": 18,
+    "text": "Bash is refused with a message the model will see, and interrupt set to true also ends the current turn instead of letting the agent try something else."
+   },
+   {
+    "title": "Allow with corrected input",
+    "start": 19,
+    "end": 25,
+    "text": "For Write, the target path is resolved and must stay inside the workspace, otherwise the call is denied. When it is allowed, updated_input replaces file_path with the resolved path, so the tool runs with the corrected argument."
+   },
+   {
+    "title": "Deny by default",
+    "start": 26,
+    "end": 26,
+    "text": "Any other tool reaching the callback is denied with an explanation. A default deny keeps the callback safe when new tools appear."
+   },
+   {
+    "title": "Wiring it up",
+    "start": 30,
+    "end": 36,
+    "text": "The callback is consulted only for calls no hook, rule or permission mode already decided. As it runs, watch the printed messages for the summary being written into the workspace and for any denial messages."
+   }
+  ]
+ },
+ "38": {
+  "source_sha256": "9db7b5e0dd59ca542325279dde1f2f75b09ec87f757fca3f709f45e79438aaae",
+  "sections": [
+   {
+    "title": "Validated task state",
+    "start": 12,
+    "end": 14,
+    "text": "The Todo model accepts only three statuses: pending, in_progress and completed. Any unknown status fails validation before it can drive a suggestion."
+   },
+   {
+    "title": "Deriving the suggestion",
+    "start": 17,
+    "end": 22,
+    "text": "suggestion prefers finishing the task already in progress, otherwise starting the next pending one, and returns None when nothing is left. Completed work is never suggested."
+   },
+   {
+    "title": "Capturing TodoWrite calls",
+    "start": 26,
+    "end": 37,
+    "text": "The agent is asked to track a checklist with TodoWrite. Each TodoWrite ToolUseBlock in an AssistantMessage is parsed into Todo models, so the host always holds the latest validated list."
+   },
+   {
+    "title": "Host owned next prompt",
+    "start": 39,
+    "end": 39,
+    "text": "The Python SDK has no prompt suggestion API, so the host computes it. You should see a line like Suggested next prompt followed by Finish or Start and a task name."
+   }
+  ]
+ },
+ "39": {
+  "source_sha256": "7d8bc5308dd964ac30ce2847daf14ccf3c27447e733ce51e171e2c778db200ac",
+  "sections": [
+   {
+    "title": "Base and trust list",
+    "start": 5,
+    "end": 6,
+    "text": "BASE is the one folder projects may live in, resolved to an absolute path. TRUSTED names the only projects allowed to load their own settings."
+   },
+   {
+    "title": "Resolve, then contain",
+    "start": 9,
+    "end": 13,
+    "text": "The requested path is resolved under BASE, and anything equal to BASE or not relative to it is refused, which blocks dot dot and absolute path tricks. The first path part then names the project root that becomes the cwd."
+   },
+   {
+    "title": "Trust gates settings",
+    "start": 14,
+    "end": 16,
+    "text": "Trusted projects get setting_sources with project; everyone else gets an empty list. That matters because leaving setting_sources as None would load every filesystem settings source."
+   },
+   {
+    "title": "Trying the requests",
+    "start": 19,
+    "end": 31,
+    "text": "Running the loop, course-app and its src folder both map to the course-app root with project settings, downloaded-repo gets an empty list, and the dot dot secrets and slash etc requests print refused."
+   }
+  ]
+ },
+ "40": {
+  "source_sha256": "f251b6a57c50ed03a94625307d373875f9ef6ff07fe1a582f3ccb27facb90806",
+  "sections": [
+   {
+    "title": "Capturing the session id",
+    "start": 6,
+    "end": 11,
+    "text": "ask runs one query and keeps the session_id from the ResultMessage. That id is the handle the SDK needs to find the recorded session later."
+   },
+   {
+    "title": "One shared config dir",
+    "start": 16,
+    "end": 17,
+    "text": "CLAUDE_CONFIG_DIR is set before anything runs, so the CLI writes its transcripts there and list_sessions reads from the same place. The first call plants the code word and returns its session id."
+   },
+   {
+    "title": "Three ways to reopen",
+    "start": 18,
+    "end": 24,
+    "text": "resume continues that exact session, resume with fork_session starts a new session id from the same history, and continue_conversation picks the most recent session. Each prints the id it ended in, so you can see the fork produce a different one."
+   },
+   {
+    "title": "Listing sessions",
+    "start": 25,
+    "end": 26,
+    "text": "list_sessions reads the CLI's own transcripts from the config dir and prints each session id with its summary. Your application's files are never part of this list."
+   }
+  ]
+ },
+ "41": {
+  "source_sha256": "be3a68eb004834d17a6217a06f7f7bb0d1fdeb9bb8c6e47a2b87feeb7a94ea6d",
+  "sections": [
+   {
+    "title": "Query, then drain",
+    "start": 5,
+    "end": 9,
+    "text": "Each turn sends a prompt with client.query and then drains receive_response, which yields messages until the ResultMessage that ends the turn. The text blocks from each AssistantMessage are printed."
+   },
+   {
+    "title": "One session, two turns",
+    "start": 13,
+    "end": 16,
+    "text": "Entering the async with block connects, and leaving it disconnects. Both turns run in the same session, so the second answer should repeat the role set up in the first."
+   },
+   {
+    "title": "Closed means closed",
+    "start": 17,
+    "end": 20,
+    "text": "After the block exits the client has no connection, so a further query raises CLIConnectionError. You should see client is closed printed with the not connected message."
+   }
+  ]
+ },
+ "42": {
+  "source_sha256": "4c1706501dffc04cef48fe9c651b59e1a7b455f2ab2e6e828529cfb5c9cc6faa",
+  "sections": [
+   {
+    "title": "Tools and the rule",
+    "start": 8,
+    "end": 9,
+    "text": "WEB_TOOLS names the two built in web tools, and RULE tells the model that anything they return is untrusted evidence, never instructions to follow."
+   },
+   {
+    "title": "Enable explicitly",
+    "start": 13,
+    "end": 15,
+    "text": "The web tools are listed in tools to make them available and in allowed_tools so they run without a prompt. The rule goes in as the system prompt, which helps resist injected text."
+   },
+   {
+    "title": "Labelling retrieved content",
+    "start": 21,
+    "end": 28,
+    "text": "Fetched results come back as ToolResultBlocks inside a UserMessage. Each one is trimmed and stored with the label untrusted retrieved content, so the host keeps it as data rather than treating it as instructions."
+   },
+   {
+    "title": "Reviewing the evidence",
+    "start": 29,
+    "end": 30,
+    "text": "After the turn, every stored item prints with its label. This is what you inspect to see what the web tools actually brought back."
+   }
+  ]
+ },
+ "43": {
+  "source_sha256": "67a2d5595a5eff46f1d74721a9c7a56afd11a7df69e4c5745aa1ebbacdd969f5",
+  "sections": [
+   {
+    "title": "One URL, one session",
+    "start": 10,
+    "end": 13,
+    "text": "streamable_http_client sends JSON RPC to a single endpoint and tracks an MCP session id. After initialize, the printed id shows the server has opened a session for this client."
+   },
+   {
+    "title": "Listing both kinds",
+    "start": 14,
+    "end": 19,
+    "text": "list_tools and list_resources show the two different things a server offers. You should see tool names in one list and resource URIs in the other."
+   },
+   {
+    "title": "Data versus action",
+    "start": 20,
+    "end": 26,
+    "text": "read_resource fetches data addressed by a URI, here notes welcome, with no side effects implied. call_tool runs a named action with arguments. Printing both shows the same note reached two different ways."
+   },
+   {
+    "title": "Handing it to the agent",
+    "start": 28,
+    "end": 29,
+    "text": "The same endpoint is given to the agent through mcp_servers as an http server entry with its URL, so the agent can use the server's tools during a run."
+   }
+  ]
+ },
+ "44": {
+  "source_sha256": "ebece8abd8b660b07f21d33a28bb9bfe417a2df314c93688d4d95a788f2890cf",
+  "sections": [
+   {
+    "title": "Export only when configured",
+    "start": 6,
+    "end": 9,
+    "text": "telemetry_env looks for an OTLP endpoint in the environment. Without one it returns an empty dictionary, so no telemetry leaves the machine."
+   },
+   {
+    "title": "The exporter settings",
+    "start": 10,
+    "end": 17,
+    "text": "With an endpoint, these variables turn on Claude Code telemetry and send metrics and logs over OTLP. OTEL_RESOURCE_ATTRIBUTES tags the exported data with lesson id and run mode so you can filter it in your backend."
+   },
+   {
+    "title": "Passing them to the CLI",
+    "start": 21,
+    "end": 24,
+    "text": "The env option hands those variables to the CLI process. The ResultMessage prints the session id, duration in milliseconds and total cost, useful facts to line up with your traces."
+   }
+  ]
+ },
+ "45": {
+  "source_sha256": "bb45fdb70301c3f3439d9474221ce1472a5870494bfb87666389fd70a3439fc4",
+  "sections": [
+   {
+    "title": "Provider flags",
+    "start": 5,
+    "end": 9,
+    "text": "Each environment flag routes the CLI to one cloud: Bedrock, Vertex AI or Foundry. The map only gives each flag a readable name; it holds no credentials."
+   },
+   {
+    "title": "At most one flag",
+    "start": 12,
+    "end": 17,
+    "text": "selected_provider collects every flag set to 1. Two or more is ambiguous, so the host fails fast with an error before any run starts; exactly one returns that provider's name."
+   },
+   {
+    "title": "Direct API fallback",
+    "start": 18,
+    "end": 20,
+    "text": "With no flag set, the direct Anthropic API is used, which needs ANTHROPIC_API_KEY. The code only checks that it is present and never reads the secret into a variable."
+   },
+   {
+    "title": "Inherited environment",
+    "start": 24,
+    "end": 30,
+    "text": "The chosen provider is printed, then query runs with plain options. The CLI inherits the environment, so the cloud identity or API key never appears in code or prompts."
+   }
+  ]
+ },
+ "46": {
+  "source_sha256": "d8e3e8cced1dc36c82ec293752a1f11e35422b74cefb0086828e2deb1bfdd251",
+  "sections": [
+   {
+    "title": "Measuring the cache hit rate",
+    "start": 6,
+    "end": 10,
+    "text": "The helper cache_read_ratio turns raw token counts into a measured hit rate: cache-read tokens divided by uncached input plus cache-read tokens. It guards against an empty usage dict by returning zero, so you always get a number instead of a guess about savings."
+   },
+   {
+    "title": "A stable prompt prefix",
+    "start": 15,
+    "end": 18,
+    "text": "The long system prompt is the part that stays identical between runs, and an identical prefix is what the API can serve from cache. If you change this prompt or the tool set, the prefix changes and the next run is billed at the normal rate."
+   },
+   {
+    "title": "Reading usage from the result",
+    "start": 19,
+    "end": 22,
+    "text": "Only the ResultMessage carries the usage dict, so the loop waits for it. Cache writes, cache_creation_input_tokens, are what you pay to store the prefix; cache reads, cache_read_input_tokens, are the cheaper reuse you should see grow on repeated runs."
+   },
+   {
+    "title": "Ratio next to real cost",
+    "start": 23,
+    "end": 24,
+    "text": "Printing the hit rate beside total_cost_usd lets you compare a first run, which mostly writes the cache, with a later run that reads from it. Those two numbers, not an assumption, tell you whether caching actually saved money."
+   }
+  ]
+ },
+ "47": {
+  "source_sha256": "eb6b5d8507827c390f0173f17fe73c1bf2bda9f0330f916dbf29caaf93680a4c",
+  "sections": [
+   {
+    "title": "Declaring the reviewer subagent",
+    "start": 5,
+    "end": 9,
+    "text": "AgentDefinition only describes a subagent: its description, its prompt and the tools it may use. It says nothing about when it runs or in what order; that is the host's job."
+   },
+   {
+    "title": "Waves encode dependencies",
+    "start": 10,
+    "end": 13,
+    "text": "WAVES is the plan your Python code owns. Everything in the second wave depends on the first, so the second list only starts after every task in the first wave has finished."
+   },
+   {
+    "title": "One bounded task",
+    "start": 16,
+    "end": 28,
+    "text": "Each task first acquires the shared semaphore, so only a limited number of agent runs are in flight at once. The options register the reviewer under agents and allow the Agent tool so the model can delegate to it, and the task returns the result text from the ResultMessage."
+   },
+   {
+    "title": "Running the waves",
+    "start": 31,
+    "end": 36,
+    "text": "The semaphore of two caps parallel runs, and a TaskGroup runs one wave concurrently, finishing only when all its tasks end. If one task raises, the group cancels its siblings and the error propagates, so later waves never start. On success you see a dictionary of file paths to the first part of each review."
+   }
+  ]
+ },
+ "48": {
+  "source_sha256": "ecfc81a55c75bac6496a6b9890d473a8a9f0f2801474c49a9f357e48e2550b26",
+  "sections": [
+   {
+    "title": "Workspace, tools and protected names",
+    "start": 16,
+    "end": 20,
+    "text": "Three constants define the policy: the resolved workspace folder, the only tools allowed to run, and names that must never be touched, such as .env and .git. Keeping them in one place means every gate checks the same rules."
+   },
+   {
+    "title": "One decide function",
+    "start": 23,
+    "end": 36,
+    "text": "The decide function resolves the requested path inside the workspace, so a path with dot dot segments is normalised before it is checked. It refuses any tool not listed, any path that escapes the workspace, and any path containing a protected name, and returns a reason you can show or log."
+   },
+   {
+    "title": "The permission callback gate",
+    "start": 39,
+    "end": 43,
+    "text": "The can_use_tool callback simply asks decide and translates the answer into PermissionResultAllow or PermissionResultDeny with the reason as its message. When a call is refused, the model receives that message instead of the tool running."
+   },
+   {
+    "title": "The PreToolUse hook gate",
+    "start": 46,
+    "end": 58,
+    "text": "The hook reads tool_name and tool_input from the hook input and calls the very same decide function. It answers with a PreToolUse permission decision of allow or deny plus the reason, so both gates enforce identical rules and cannot drift apart."
+   },
+   {
+    "title": "Wiring the layers together",
+    "start": 61,
+    "end": 66,
+    "text": "The options set cwd to the workspace and use tools to expose only Read, Grep and Glob, so other built-in tools do not exist for this agent at all. Then both the callback and the hook matcher are registered, giving two host checks that run regardless of what the prompt says."
+   }
+  ]
+ },
+ "49": {
+  "source_sha256": "de1fc648fa88d9d3375aabfb4a530dd56f217ca85717bae7f3482bf6eb50d62b",
+  "sections": [
+   {
+    "title": "Options that never wait",
+    "start": 8,
+    "end": 13,
+    "text": "A CI job has nobody to answer a permission prompt, so tools exposes only read-only tools and allowed_tools pre-approves them. max_turns and max_budget_usd cap how long and how expensive the run can get."
+   },
+   {
+    "title": "Result becomes an exit code",
+    "start": 14,
+    "end": 18,
+    "text": "The run prints the result text and then maps the ResultMessage is_error flag to an exit code: zero for success, one for failure. That number, not the printed text, is what decides whether the CI job is green."
+   },
+   {
+    "title": "SDK failures also fail",
+    "start": 19,
+    "end": 21,
+    "text": "If the SDK itself raises a ClaudeSDKError, the message goes to standard error and the function falls through to return one. A run that never produced a result is therefore treated as a failure, never as a silent pass."
+   },
+   {
+    "title": "Usage errors exit with two",
+    "start": 24,
+    "end": 28,
+    "text": "The cli function checks its arguments before any agent starts and exits with code two on bad usage, which you can test without an API key. Otherwise it runs the agent and passes the return value of run to sys.exit, so the process status carries the outcome."
+   }
+  ]
+ },
+ "50": {
+  "source_sha256": "53bd25c72447b4d28111b6a45b5c25d840f90e12b3e077278b0d680dc28d2682",
+  "sections": [
+   {
+    "title": "An approval record",
+    "start": 8,
+    "end": 12,
+    "text": "An Approval ties a refund to one customer, one amount and an expiry time. Staff create these on the host side; the model can only use one that already exists."
+   },
+   {
+    "title": "Identity from the session",
+    "start": 15,
+    "end": 24,
+    "text": "support_server receives customer_id from the signed-in session and the tools close over it. That is why list_orders has an empty input schema: the model has no argument it could use to ask about someone else's orders."
+   },
+   {
+    "title": "Checking the exact approval",
+    "start": 26,
+    "end": 43,
+    "text": "The refund tool looks up the approval for the order and refuses if it is missing, expired, or does not match both the session's customer and the requested amount. The refusal comes back with is_error set and a clear reason, so the model sees why no money moved."
+   },
+   {
+    "title": "Single use, then the server",
+    "start": 44,
+    "end": 54,
+    "text": "Only after every check passes is the approval deleted and the refund confirmed, so the same approval cannot be used twice. Finally create_sdk_mcp_server bundles both tools into an in-process server named support for the agent's options."
+   }
+  ]
+ },
+ "51": {
+  "source_sha256": "2ed3d8b40f237ed6100623870ba85dc759c71c6843a82dc752498bc6852d13df",
+  "sections": [
+   {
+    "title": "Consumer of any stream",
+    "start": 6,
+    "end": 16,
+    "text": "collect accepts any async iterator of Message, so it does not care whether messages come from query or from a fixture. It gathers TextBlock text from each AssistantMessage and takes total_cost_usd from the ResultMessage."
+   },
+   {
+    "title": "A fake run with real types",
+    "start": 19,
+    "end": 31,
+    "text": "fake_run yields genuine AssistantMessage, TextBlock and ResultMessage objects from the SDK, filled with fixture values. Because they are the real dataclasses, the isinstance checks in collect behave exactly as they would in a live run."
+   },
+   {
+    "title": "The test and its limits",
+    "start": 34,
+    "end": 36,
+    "text": "The test feeds the fixture to collect and expects the joined text and a cost of zero. No CLI process starts and no API call is made, so a pass proves your parsing logic only, not what the model would actually answer."
+   }
+  ]
+ },
+ "52": {
+  "source_sha256": "434d20af22d478d5d98f91770f7f6e0287ba4fa5f75d6cbc424a2a2f95c46866",
+  "sections": [
+   {
+    "title": "Documents, cases and baseline",
+    "start": 5,
+    "end": 14,
+    "text": "DOCS is the tiny policy corpus, and CASES pairs each query with the section it should return, including a lunar rover query that should match nothing. BASELINE is the stored pass rate a release must not fall below."
+   },
+   {
+    "title": "The function that ships",
+    "start": 17,
+    "end": 22,
+    "text": "retrieve scores each document by the words it shares with the query and returns the best section id, or None when nothing overlaps. This is the component the eval measures."
+   },
+   {
+    "title": "The tool reuses retrieve",
+    "start": 25,
+    "end": 35,
+    "text": "The search_policy tool calls the very same retrieve function and returns its id, or a no matching section message. Because the eval scores this exact code rather than a copy, a passing eval says something about what the agent really uses."
+   },
+   {
+    "title": "Pass rate against baseline",
+    "start": 38,
+    "end": 46,
+    "text": "run_evals counts how many cases match their expected outcome and divides by the number of cases. If the pass rate drops below BASELINE it exits with a regression message, so a quality drop becomes a failing check instead of something you might miss."
+   }
+  ]
+ },
+ "53": {
+  "source_sha256": "8a6aae72029b7ffed60793e47e6f00f9d605c746a6c31b8de6e40d00ca0ff9da",
+  "sections": [
+   {
+    "title": "Patterns for secrets",
+    "start": 7,
+    "end": 8,
+    "text": "Two patterns define what counts as secret: key names mentioning token, secret, password, api key or authorization, and values that look like an sk-ant key or a Bearer token."
+   },
+   {
+    "title": "Recursive redaction",
+    "start": 11,
+    "end": 19,
+    "text": "redact walks dictionaries and lists, replaces the whole value of any secret-looking key, and masks secret-looking text inside strings. Anything else passes through unchanged, so the trace stays useful while the secrets disappear."
+   },
+   {
+    "title": "One run id everywhere",
+    "start": 23,
+    "end": 28,
+    "text": "A fresh run_id is created once, and the stderr callback tags every line the CLI writes to standard error with it. That lets you line up CLI output with the messages from the same run."
+   },
+   {
+    "title": "Tagging events and the result",
+    "start": 29,
+    "end": 39,
+    "text": "Every message becomes an event with the run_id and its type name. The ResultMessage adds session_id, subtype and errors, which tell you how the run ended and which session to inspect."
+   },
+   {
+    "title": "Only redacted output leaves",
+    "start": 40,
+    "end": 40,
+    "text": "The whole trace goes through redact before it is printed, so the bundle you would paste into a bug report has its secrets masked."
+   }
+  ]
+ },
+ "54": {
+  "source_sha256": "dd5e039ae5dac329cdab8c55fd732c8a8ec6ef0104e9f1007feef16efc986769",
+  "sections": [
+   {
+    "title": "A strict, bounded schema",
+    "start": 7,
+    "end": 10,
+    "text": "AddInput is a Pydantic model that forbids extra fields and bounds both numbers, each with a description. It is the single source of the rules: it produces the JSON Schema the model sees and validates what the model sends."
+   },
+   {
+    "title": "Errors that teach",
+    "start": 13,
+    "end": 17,
+    "text": "feedback turns each validation error into the field name, the problem and a concrete fix. The model can read that text and correct its next call instead of guessing."
+   },
+   {
+    "title": "Description and schema together",
+    "start": 20,
+    "end": 24,
+    "text": "The tool description says what add does and when to use it, arithmetic rather than counting text. The input schema comes straight from model_json_schema on AddInput, so the model sees the same bounds the handler enforces."
+   },
+   {
+    "title": "Returning is_error, not raising",
+    "start": 25,
+    "end": 33,
+    "text": "The handler validates the arguments and, on failure, returns the feedback with is_error set instead of letting an exception escape. On success it returns the exact sum as text."
+   }
+  ]
+ },
+ "55": {
+  "source_sha256": "8de8cbc0da97dc6e61b523d39f32f9371afd6d85298c32c6529652ce93c45866",
+  "sections": [
+   {
+    "title": "The exact pin",
+    "start": 6,
+    "end": 7,
+    "text": "The comment records the upgrade discipline: an exact pin in pyproject, a lockfile for the whole tree, and a locked sync in CI. PIN repeats that version so the code can check it."
+   },
+   {
+    "title": "What the app relies on",
+    "start": 8,
+    "end": 27,
+    "text": "These three lists name the public interfaces this app actually calls: top-level exports, ClaudeSDKClient methods such as interrupt, and ClaudeAgentOptions fields such as max_budget_usd. The gate checks only what you use, not the whole SDK."
+   },
+   {
+    "title": "Checking the installed version",
+    "start": 30,
+    "end": 39,
+    "text": "compatibility_problems reads the installed version from package metadata and reports a mismatch with the pin. It then reports any listed export that is missing from the claude_agent_sdk package."
+   },
+   {
+    "title": "Methods and option fields",
+    "start": 40,
+    "end": 48,
+    "text": "It checks that the client class still has each method and inspects the ClaudeAgentOptions signature for each field. An empty list means the gate passes; any entry names exactly what a new version renamed or removed."
+   }
+  ]
+ },
+ "56": {
+  "source_sha256": "1932d81f3332c1b8bea49aa895898d511820bcc0edb7e4cbbe25cb827c70bb4a",
+  "sections": [
+   {
+    "title": "A bounded note",
+    "start": 5,
+    "end": 8,
+    "text": "Every message is a Note that records its sender and recipient, and its text is limited to 600 characters. Pydantic rejects a longer note, so no single message can flood a teammate."
+   },
+   {
+    "title": "The host-owned board",
+    "start": 11,
+    "end": 14,
+    "text": "The Board belongs to the host. It knows the team members, a per-sender message limit, and the list of notes sent so far."
+   },
+   {
+    "title": "Checks before delivery",
+    "start": 16,
+    "end": 23,
+    "text": "send refuses when the sender or recipient is not a team member, or when the sender has already used up its message allowance, raising a PermissionError with the reason. Only then is the note stored with its provenance."
+   },
+   {
+    "title": "Inbox as untrusted data",
+    "start": 26,
+    "end": 37,
+    "text": "run_member wraps each note for this member in a message tag that names the sender and marks it untrusted. The system prompt says text inside those tags is data, never instructions, so relayed text is not presented as orders. The member's answer is the result text of the ResultMessage."
+   }
+  ]
+ },
+ "57": {
+  "source_sha256": "533163e29052740e82fec51907e14acebed1b2f002184f5cf4ea045381e517f8",
+  "sections": [
+   {
+    "title": "Serializing shared git state",
+    "start": 6,
+    "end": 14,
+    "text": "Commands like worktree add change the shared .git directory, so the git helper holds one asyncio Lock while it runs. It also gives each command a timeout and raises if git exits with a nonzero status."
+   },
+   {
+    "title": "One worktree per worker",
+    "start": 17,
+    "end": 19,
+    "text": "Each worker gets its own folder next to the repository and its own agent branch, created with git worktree add through the locked helper. Parallel workers therefore never edit the same checkout."
+   },
+   {
+    "title": "cwd scopes the agent",
+    "start": 20,
+    "end": 26,
+    "text": "The options point cwd at the worker's own worktree, so its file tools operate there, and allowed_tools pre-approves reading, editing and searching. The worker returns the result text from the ResultMessage."
+   },
+   {
+    "title": "Running workers in parallel",
+    "start": 29,
+    "end": 32,
+    "text": "A TaskGroup starts two workers concurrently on different tasks. Their agent runs overlap, while the git commands that touch shared repository state still take turns behind the lock."
+   }
+  ]
+ },
+ "58": {
+  "source_sha256": "2285fa4341de587e06e870a22d5533d17ee5f9aca4b4fa8094a2c59135c312df",
+  "sections": [
+   {
+    "title": "Building catalog tools",
+    "start": 6,
+    "end": 17,
+    "text": "make_tool wraps a simple handler with the tool decorator so each catalog entry is a real SdkMcpTool with a name and description. CATALOG stands in for a large library of tools the host can choose from."
+   },
+   {
+    "title": "Scoring against the request",
+    "start": 20,
+    "end": 24,
+    "text": "options_for splits the request into words, and score counts how many of them appear in each tool's description. That count is the host's own relevance signal; it is not the SDK's native tool search."
+   },
+   {
+    "title": "Keep the top matches only",
+    "start": 26,
+    "end": 31,
+    "text": "The catalog is sorted by score, cut to the limit, and any tool with a score of zero is dropped rather than used as filler. Only the selected tools are registered in an in-process server named shop."
+   },
+   {
+    "title": "Hide built-ins, approve the subset",
+    "start": 32,
+    "end": 36,
+    "text": "Setting tools to an empty list removes the built-in tools, so the model sees only the chosen shop tools. allowed_tools then pre-approves exactly those mcp__shop__ names; it skips the permission prompt but does not hide anything by itself."
+   }
+  ]
+ },
+ "59": {
+  "source_sha256": "5a82ef0904d7aec2bb2065a6804d11733b07e061e8f5e29f6cadc2f9763401f3",
+  "sections": [
+   {
+    "title": "Signals of a complex task",
+    "start": 5,
+    "end": 5,
+    "text": "SIGNALS lists the words that mark a task as complex, such as refactor, debug or security. Keeping them as data makes the routing rule explicit and easy to test."
+   },
+   {
+    "title": "A route carries its limits",
+    "start": 8,
+    "end": 13,
+    "text": "A Route bundles the model with its own max_turns and max_budget_usd, plus the reason for the choice. Limits travel with the model, so a cheap tier also gets tight limits."
+   },
+   {
+    "title": "Deterministic routing rules",
+    "start": 16,
+    "end": 21,
+    "text": "route sends a task to sonnet with more turns and budget when it contains a signal word or is longer than 400 characters, and to haiku with tight limits otherwise. The same task always routes the same way, so you can unit-test it."
+   },
+   {
+    "title": "From route to options",
+    "start": 24,
+    "end": 31,
+    "text": "options_for logs which model was chosen and why, then passes the model, max_turns and max_budget_usd straight into ClaudeAgentOptions. That logged reason is what you review later when checking cost and quality."
+   }
+  ]
+ },
+ "60": {
+  "source_sha256": "bbd416eebd1d05677fc79fceed3f7d298405fae4175338bc049dec4d61586f91",
+  "sections": [
+   {
+    "title": "Reading finished steps",
+    "start": 8,
+    "end": 18,
+    "text": "The Journal is a file with one JSON line per finished step. completed reads every line and returns the set of idempotency keys, or an empty set when the file does not exist yet."
+   },
+   {
+    "title": "Durable appends",
+    "start": 20,
+    "end": 24,
+    "text": "append only ever adds a line with the key and the session_id. flush and os.fsync push it to disk, so the record survives a crash or restart."
+   },
+   {
+    "title": "Skipping finished work",
+    "start": 27,
+    "end": 31,
+    "text": "Each step gets a key made from the job id and the step name. On a restart, any step whose key is already journaled is skipped, so its side effects are never repeated and the job resumes at the first unfinished step."
+   },
+   {
+    "title": "Journal only on success",
+    "start": 32,
+    "end": 36,
+    "text": "A step is journaled only when a ResultMessage arrives without is_error, together with its session_id. A failed or interrupted step leaves no record and runs again next time; SDK session resume alone would not tell you which side effects already happened."
+   }
+  ]
+ },
+ "61": {
+  "source_sha256": "f05d8a730dd8465df18e7c9b115a135a498da77aa16e7a487dcb2ee560f24a34",
+  "sections": [
+   {
+    "title": "An MCP server shell",
+    "start": 1,
+    "end": 4,
+    "text": "We import query and ResultMessage from the Agent SDK, and FastMCP from the official MCP package. The FastMCP server named python-agent is the outer layer: it is what an MCP client connects to, and it knows nothing yet about agents."
+   },
+   {
+    "title": "One typed tool",
+    "start": 7,
+    "end": 9,
+    "text": "The server tool decorator turns explain_python_agent into an MCP tool. FastMCP builds its input schema from the single prompt string parameter, so prompt is the only thing an outer client can ever send. The docstring becomes the tool description the client sees."
+   },
+   {
+    "title": "Limits fixed in the handler",
+    "start": 10,
+    "end": 17,
+    "text": "Inside the handler we build ClaudeAgentOptions ourselves: no tools, no setting sources, max_turns of one, a five cent budget and the dontAsk permission mode, which denies anything not pre-approved. None of these values come from the client, so no argument it sends can widen the inner run."
+   },
+   {
+    "title": "Run the inner agent",
+    "start": 18,
+    "end": 24,
+    "text": "The handler runs a full Agent SDK loop with query and keeps the final ResultMessage. If there is none, or is_error is true, it raises instead of returning a half answer. Otherwise the client receives a plain dictionary with the answer and total_cost_usd, data rather than a live session."
+   }
+  ]
+ },
+ "62": {
+  "source_sha256": "87eadf1ec8ef3ae8fffde94722360fef85db23404fa477f7dd4591be2f961583",
+  "sections": [
+   {
+    "title": "A tiny policy corpus",
+    "start": 12,
+    "end": 14,
+    "text": "POLICIES stands in for the document store. Each passage carries an id, refunds number one, so every answer can cite exactly where its evidence came from."
+   },
+   {
+    "title": "Retrieval as a tool",
+    "start": 17,
+    "end": 21,
+    "text": "The tool decorator declares search_policy with a description and a schema of one query string. The model can ask for evidence, but the host decides how the search works and what comes back."
+   },
+   {
+    "title": "Bounded, labelled results",
+    "start": 22,
+    "end": 29,
+    "text": "The handler matches query words against each passage, keeps at most three hits and stamps each one with a trust label saying it is source evidence, not instructions. An unrelated query returns an empty list rather than a weak match, and the hits travel back as JSON inside a tool result."
+   },
+   {
+    "title": "Serve and allow one tool",
+    "start": 32,
+    "end": 40,
+    "text": "create_sdk_mcp_server serves the tool in process under the name lesson, and allowed_tools permits only mcp__lesson__search_policy, with built-in tools switched off. The system prompt tells the model to answer from search results, cite ids, and treat them as evidence, never instructions."
+   },
+   {
+    "title": "Ask and watch the messages",
+    "start": 41,
+    "end": 44,
+    "text": "ClaudeSDKClient sends the refund question and prints each message type as it arrives. When it runs, you should see the assistant call the search tool, a user message carrying the tool result, and a final ResultMessage whose answer cites refunds number one."
+   }
+  ]
+ },
+ "63": {
+  "source_sha256": "1e92979aca2f263b5cbca8473952b48834981b6cd5f511e5fa17a09e62ded9e0",
+  "sections": [
+   {
+    "title": "A read tool with no arguments",
+    "start": 9,
+    "end": 13,
+    "text": "build_options receives the database path and the tenant from the host, and defines list_orders inside it. The schema is an empty dictionary, so the model cannot pass SQL, table names, filters or a tenant. It can only ask for the signed-in customer's orders."
+   },
+   {
+    "title": "A parameterized query",
+    "start": 14,
+    "end": 19,
+    "text": "The query uses a question mark placeholder and passes the tenant separately, so sqlite3 never splices the value into the SQL text. A name like alice quote OR one equals one is just an unmatched tenant. The result is capped at ten rows and returned as JSON in a tool result."
+   },
+   {
+    "title": "Expose only that tool",
+    "start": 21,
+    "end": 24,
+    "text": "The tool is served by an in-process MCP server named db, built-in tools are disabled, and allowed_tools lists only mcp__db__list_orders. That single read tool is the agent's entire reach into the database."
+   },
+   {
+    "title": "Writes need approval",
+    "start": 27,
+    "end": 32,
+    "text": "cancel_order is not an agent tool at all. The model can only propose a cancellation, and the host calls this function after a human decides. Without approved set to true it raises PermissionError before touching the database."
+   },
+   {
+    "title": "Versioned update",
+    "start": 33,
+    "end": 39,
+    "text": "The update matches tenant, order id, the version the proposal saw and a pending status, then bumps the version. If anything changed since the proposal, no row matches, rowcount is zero and the function returns false instead of overwriting newer data."
+   }
+  ]
+ },
+ "64": {
+  "source_sha256": "19001568d53924c2b5525aaba3026df0ec708459f4f6dcfa60bf1dd9956a942c",
+  "sections": [
+   {
+    "title": "No built-in tools",
+    "start": 6,
+    "end": 8,
+    "text": "Setting tools to an empty list removes Bash, Read, Write and every other built-in tool. Whatever the agent does on the web must go through the browser service declared next, because there is no shell to fall back on."
+   },
+   {
+    "title": "A stdio browser service",
+    "start": 9,
+    "end": 16,
+    "text": "The browser entry tells the SDK to launch a stdio MCP server, using the current Python interpreter to run the course's browser module. The allowed origin is passed in the server's env as LAB_BROWSER_ORIGIN, so the host sets it and the service itself checks scheme, host and port on every request."
+   },
+   {
+    "title": "Strict, single permission",
+    "start": 17,
+    "end": 19,
+    "text": "strict_mcp_config set to true makes the run ignore other MCP configuration such as a project mcp json file, so only the declared browser server loads. allowed_tools pre-approves just mcp__browser__inspect_page, and max_turns of four keeps the run short."
+   },
+   {
+    "title": "Inspect a page",
+    "start": 21,
+    "end": 24,
+    "text": "The prompt asks for the title of a page on the allowed origin. The loop prints the result field of the final ResultMessage, which should report the title that inspect_page returned. A URL on another origin would be refused by the service, not by the model's judgement."
+   }
+  ]
+ },
+ "65": {
+  "source_sha256": "f1eb8653e923d6de58a0b1e517773000cac4a42b8db2ab59d1344300790a4c36",
+  "sections": [
+   {
+    "title": "A frozen action",
+    "start": 15,
+    "end": 21,
+    "text": "Refund is a Pydantic model that forbids extra fields and is frozen, so it cannot change after creation. fingerprint hashes its JSON with SHA-256, which means a different order id or amount produces a different fingerprint."
+   },
+   {
+    "title": "Where approvals live",
+    "start": 24,
+    "end": 26,
+    "text": "APPROVED maps each token to a fingerprint and an expiry time. It starts empty and is only ever filled by approve, never by the agent or by a chat message."
+   },
+   {
+    "title": "Issuing an approval",
+    "start": 29,
+    "end": 34,
+    "text": "approve runs when a human actually clicks approve; Slack, Teams or email only deliver the notice. It creates a random token with secrets token_urlsafe and binds it to that refund's fingerprint with a deadline 120 seconds away on the monotonic clock."
+   },
+   {
+    "title": "The permission gate",
+    "start": 37,
+    "end": 42,
+    "text": "gate is a can_use_tool callback. For mcp__shop__refund it validates the tool arguments as a Refund and computes the fingerprint the agent is asking for; any other tool gets an empty fingerprint and can never match."
+   },
+   {
+    "title": "Match, expire, consume",
+    "start": 43,
+    "end": 47,
+    "text": "The gate looks for a token whose fingerprint matches, compared with hmac compare_digest, and whose deadline has not passed. On a match it deletes the token and returns PermissionResultAllow, so it works once. Otherwise the agent sees a PermissionResultDeny saying there is no live approval for this exact action."
+   }
+  ]
+ },
+ "66": {
+  "source_sha256": "730ba977badbc774c6f45ce394796e38e6060d5aab6d89d0749f92f983b34a9e",
+  "sections": [
+   {
+    "title": "A typed request",
+    "start": 10,
+    "end": 12,
+    "text": "RunRequest defines the only message a browser may send first: a prompt between one and two thousand characters, with extra fields forbidden."
+   },
+   {
+    "title": "Validate before running",
+    "start": 15,
+    "end": 22,
+    "text": "The endpoint accepts the socket, reads the first JSON frame and validates it with RunRequest. If validation fails, the socket closes with code 1008, policy violation, and no agent run ever starts."
+   },
+   {
+    "title": "Stream events as they come",
+    "start": 24,
+    "end": 28,
+    "text": "stream runs query with no tools and max_turns of two, and sends a small JSON event naming each message type the moment it arrives. The browser sees SystemMessage, AssistantMessage and ResultMessage events while the run is in progress, not after it ends."
+   },
+   {
+    "title": "Run and listen together",
+    "start": 30,
+    "end": 34,
+    "text": "Two tasks start side by side: the run, and a listener waiting on receive_text, which finishes when the browser disconnects. asyncio wait with FIRST_COMPLETED returns as soon as either one ends."
+   },
+   {
+    "title": "Cancel and await",
+    "start": 35,
+    "end": 37,
+    "text": "Whichever task is still going is cancelled, then gather awaits both and swallows their exceptions. If the tab closed mid-run, this is what stops the query task, so no agent keeps calling the model and spending money for nobody."
+   }
+  ]
+ },
+ "67": {
+  "source_sha256": "01011295a13b4db14e2f413037f9415ef8860a5d3d3e1bf02dd2e479d4cca4f3",
+  "sections": [
+   {
+    "title": "Tenant from host state",
+    "start": 13,
+    "end": 13,
+    "text": "SESSIONS maps session ids to tenants and is written by the login flow. It is the only source of tenant identity in this service, never the prompt and never a tool argument."
+   },
+   {
+    "title": "A tool bound to one tenant",
+    "start": 16,
+    "end": 23,
+    "text": "options_for closes over the tenant, and list_orders has an empty schema, so a smuggled tenant field has nowhere to go. Every query filters with tenant equals a placeholder, bound to the host's value, so the tool can only ever return this tenant's rows."
+   },
+   {
+    "title": "A server per request",
+    "start": 25,
+    "end": 28,
+    "text": "Each call builds its own in-process MCP server named shop around that tenant's tool, with built-in tools off and only mcp__shop__list_orders allowed. Tool calls in one run cannot reach another tenant's server."
+   },
+   {
+    "title": "Authenticate, then run",
+    "start": 31,
+    "end": 38,
+    "text": "handle looks the tenant up from the session id and raises PermissionError for an unknown session before any agent starts. A known session gets a ClaudeSDKClient built for that tenant alone; even if the prompt names bob, a run for alice only sees alice's orders."
+   }
+  ]
+ },
+ "68": {
+  "source_sha256": "f7d5264be8a6589b8a12a1e911340218d3ddbbf8445eb611f20f774b09144990",
+  "sections": [
+   {
+    "title": "Remember triggers and jobs",
+    "start": 6,
+    "end": 9,
+    "text": "The Dispatcher keeps two sets: seen holds every trigger id already accepted, and jobs holds the background tasks it owns. In production seen should be persisted so a restart does not forget it."
+   },
+   {
+    "title": "Ignore redeliveries",
+    "start": 11,
+    "end": 14,
+    "text": "Schedulers and webhooks deliver at least once, so the same trigger can arrive twice. receive checks seen first and returns false for a repeat; a new id is recorded before any work starts, so a duplicate cannot start a second paid run."
+   },
+   {
+    "title": "Own the background task",
+    "start": 15,
+    "end": 18,
+    "text": "The run is started with asyncio create_task and stored in jobs, and a done callback removes it when it finishes. Keeping the reference means the task is neither garbage-collected nor forgotten."
+   },
+   {
+    "title": "A bounded run",
+    "start": 20,
+    "end": 24,
+    "text": "Each run uses no tools, two turns and a ten cent budget. When it finishes, the ResultMessage prints its subtype, for example success or error_max_budget_usd, and total_cost_usd."
+   },
+   {
+    "title": "Graceful shutdown",
+    "start": 26,
+    "end": 28,
+    "text": "shutdown waits for every in-flight job, up to a deadline of thirty seconds by default, instead of abandoning runs halfway through."
+   }
+  ]
+ },
+ "69": {
+  "source_sha256": "991e94da706657a5abbaacdd8c3f39080e50da8b258a886d22e200e05291f0f2",
+  "sections": [
+   {
+    "title": "The one service",
+    "start": 5,
+    "end": 12,
+    "text": "explain is the single lesson service. It runs query with no tools, one turn and a five cent budget, and returns the result text from the final ResultMessage. Every front end calls this coroutine, so limits and fixes live in one place."
+   },
+   {
+    "title": "The HTTP route",
+    "start": 15,
+    "end": 17,
+    "text": "A FastAPI style post route at api slash explain awaits the same explain coroutine and returns its answer as JSON. NiceGUI's app object is a FastAPI app, so this API exists in both browser and desktop mode."
+   },
+   {
+    "title": "The page and button",
+    "start": 20,
+    "end": 28,
+    "text": "The NiceGUI page has an input, a markdown output and an Ask button. Its async click handler awaits explain directly on the same event loop, no threads needed, and puts the answer into the markdown element."
+   },
+   {
+    "title": "Browser or window",
+    "start": 31,
+    "end": 32,
+    "text": "launch only decides the shell. With native set to true, ui run opens the same app inside a pywebview window of twelve hundred by eight hundred; otherwise it serves it to a browser. Routes, runs and limits are identical either way."
+   }
+  ]
+ },
+ "70": {
+  "source_sha256": "533f77b5ef1508fe2e226655ae2fc69f135719c8860c4772163d245c07da7e46",
+  "sections": [
+   {
+    "title": "Native imports",
+    "start": 3,
+    "end": 9,
+    "text": "Everything comes straight from the claude_agent_sdk package: the options class, the client, the tool decorator, the server factory and the SdkMcpTool type."
+   },
+   {
+    "title": "Define a tool",
+    "start": 12,
+    "end": 14,
+    "text": "The tool decorator names the tool add, gives it a description and a schema of two floats. The handler returns MCP content: a list holding one text block with the sum."
+   },
+   {
+    "title": "Test without a model",
+    "start": 17,
+    "end": 20,
+    "text": "The decorator returns an SdkMcpTool, which the first assertion confirms. Awaiting its handler with a plain dictionary of twenty and twenty-two should give the text 42, with no model, no API key and no agent run."
+   },
+   {
+    "title": "Serve it in process",
+    "start": 23,
+    "end": 29,
+    "text": "create_sdk_mcp_server serves the tool inside this Python process under the name calc, so Claude sees it as mcp__calc__add. Built-in tools are off, only that tool is allowed, and max_turns is three."
+   },
+   {
+    "title": "Use it from the client",
+    "start": 30,
+    "end": 33,
+    "text": "ClaudeSDKClient asks the agent to add the numbers with the calculator and prints each message type. Expect an assistant message with a tool call, a user message with the tool result, then a ResultMessage."
+   }
+  ]
+ },
+ "71": {
+  "source_sha256": "6339eee372f2b6409c16a4818cb518d787440d22c108c1fe5b3a61a55a413631",
+  "sections": [
+   {
+    "title": "Exact sums in Python",
+    "start": 10,
+    "end": 15,
+    "text": "totals_with_ledger reads the CSV with DictReader and adds each amount to its region using Decimal, so totals are exact and never depend on the model's arithmetic."
+   },
+   {
+    "title": "Record every step",
+    "start": 16,
+    "end": 22,
+    "text": "Every addition is written to the ledger as region, amount added and running total. The function returns the totals as strings plus that ledger, so any reader can trace a total back to the rows behind it."
+   },
+   {
+    "title": "A tool with no arguments",
+    "start": 25,
+    "end": 36,
+    "text": "analyze_sales has an empty schema: the model cannot choose a file or alter the input. The host already fixed the CSV path, and the tool returns the computed totals and ledger as JSON in a tool result."
+   },
+   {
+    "title": "The model only explains",
+    "start": 38,
+    "end": 45,
+    "text": "The tool is served in process as mcp__lesson__analyze_sales and is the only allowed tool. The system prompt tells the model to explain the totals and never recompute or alter a number, so the final answer should quote the tool's figures."
+   }
+  ]
+ },
+ "72": {
+  "source_sha256": "5242a46439649aba29ce0c9ab5941dcc796673bdeb0644fc9dfa9a09effc683a",
+  "sections": [
+   {
+    "title": "The exact build command",
+    "start": 7,
+    "end": 7,
+    "text": "BUILD is the one command the skill's workflow runs: the skill's python-docx script turning the JSON spec into a Word file. The host pins it as an exact string."
+   },
+   {
+    "title": "Gate the skill workflow",
+    "start": 10,
+    "end": 14,
+    "text": "gate is the can_use_tool callback. Skill and Read are allowed so the agent can load the skill and its reference files when it applies, and Bash is allowed only when the command equals BUILD exactly."
+   },
+   {
+    "title": "Write only the spec",
+    "start": 15,
+    "end": 22,
+    "text": "A Write is allowed only when the target file is named incident spec json, the content the model owns. Every other request gets a PermissionResultDeny, so the skill cannot be used as a door to run other commands."
+   },
+   {
+    "title": "Load the project skill",
+    "start": 25,
+    "end": 34,
+    "text": "cwd points at the work folder holding the dot claude skills atmira-docx folder. The skills option enables just that skill; only its name and description load up front, and SKILL.md is read when it applies. The four tools are listed and every call passes through gate."
+   },
+   {
+    "title": "Run the request",
+    "start": 35,
+    "end": 40,
+    "text": "The client asks for a post-incident review document and prints each message type. A successful run should show the Skill and Read calls, the spec write, the build command, and finally a ResultMessage, with the Word file in the out folder."
+   }
+  ]
+ },
+ "73": {
+  "source_sha256": "1641347adfe8bd9b04570767757756996b69576521f15ad60a963e94224577a9",
+  "sections": [
+   {
+    "title": "Findings as a schema",
+    "start": 9,
+    "end": 17,
+    "text": "Finding describes one claimed fix: a path, a line, the old text and the new text. Review is a list of them. These models define what the reviewer may return and let the host validate it."
+   },
+   {
+    "title": "Ask for structured output",
+    "start": 20,
+    "end": 27,
+    "text": "review passes the diff as the prompt with no tools and an output_format built from the Review JSON schema. The final ResultMessage carries structured_output, which the host validates with Review model_validate before trusting any of it."
+   },
+   {
+    "title": "Scope by changed lines",
+    "start": 28,
+    "end": 31,
+    "text": "Findings are claims. Only those whose line is among the lines this PR changed, in a file listed as approved, survive; a finding on a CI file or an untouched line is silently dropped."
+   },
+   {
+    "title": "Apply and prove",
+    "start": 34,
+    "end": 43,
+    "text": "The host applies the patch itself, replacing the old text once with the new text, then runs pytest in a subprocess inside the repo. The fix counts only if the test process exits with code zero; confidence alone never publishes anything."
+   }
+  ]
+ },
+ "74": {
+  "source_sha256": "bfc40536a61a8969bd90acbf43bffd429861d2acefa550c1a88b8edd1364e9a7",
+  "sections": [
+   {
+    "title": "Labelled attack cases",
+    "start": 11,
+    "end": 18,
+    "text": "CASES lists five attacks, each with a name, the tool call it would produce and whether the host should allow it. Only the normal read is expected to pass; traversal, the env file, a piped shell command and a write must all be blocked."
+   },
+   {
+    "title": "A deterministic boundary",
+    "start": 21,
+    "end": 26,
+    "text": "decide rejects any tool that is not Read, Glob or Grep, then resolves the requested path against the workspace root. The target must stay inside the root and must not touch a dot env file, whatever text a prompt injection contains."
+   },
+   {
+    "title": "Measure the pass rate",
+    "start": 29,
+    "end": 32,
+    "text": "pass_rate runs every case through decide and counts how often the outcome matches the label. A result of 1.0 means every attack was handled as expected, and it does not depend on whether the model refused."
+   },
+   {
+    "title": "Same check in production",
+    "start": 35,
+    "end": 48,
+    "text": "gate wraps the very same decide as the can_use_tool callback, returning PermissionResultAllow or a deny saying blocked by host policy. build_options wires it in with read-only tools and the workspace as cwd, so the tested rule is the live boundary."
+   }
+  ]
+ },
+ "75": {
+  "source_sha256": "4007eb96b7ed606b18677bc342ef7e60900e3440fd8df8cb9a4657aee388c6c9",
+  "sections": [
+   {
+    "title": "Tasks with dependencies",
+    "start": 5,
+    "end": 8,
+    "text": "A Task has an id, at least one file it owns, and a depends_on list. The host uses those dependencies to run tasks in waves, starting with tasks that depend on nothing."
+   },
+   {
+    "title": "Plan ownership rules",
+    "start": 11,
+    "end": 21,
+    "text": "A Plan holds one to four tasks. Its after validator collects every owned file and rejects the plan if any file has two owners or sits outside src. A lead's proposal that breaks these rules fails validation before any developer starts."
+   },
+   {
+    "title": "Every role proposes",
+    "start": 24,
+    "end": 30,
+    "text": "propose is generic over a Pydantic schema. Each role, lead, developer or reviewer, runs through query with no tools, two turns, its own budget and an output_format built from that schema's JSON schema."
+   },
+   {
+    "title": "Validate the proposal",
+    "start": 31,
+    "end": 38,
+    "text": "The host keeps the ResultMessage objects and raises if there is none, if the last one is an error, or if structured_output is missing. Otherwise it validates structured_output against the schema, so a Plan proposal also passes the ownership check."
+   },
+   {
+    "title": "The host release gate",
+    "start": 41,
+    "end": 45,
+    "text": "release_gate ships only when acceptance tests passed, the review approved and spending stayed within the limit. Agents propose; this host function, which no agent can call or skip, makes the release decision."
+   }
+  ]
+ }
+}

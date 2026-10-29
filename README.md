@@ -20,7 +20,7 @@ with their quizzes, your progress and the visual guides. Each lesson has six tab
 
 | Tab | What you do there |
 |---|---|
-| **Learn** | Prepare the lesson, read the concept and Python tutorial, complete the workbook (review checklist, private notes, challenge with small and detailed hints, reference explanation, saved attempts) and answer the knowledge check. |
+| **Learn** | Prepare the lesson, read the concept, follow its **code tour** (each step highlights lines of the concept code; **Read aloud** uses your browser's voice) and the Python tutorial, complete the workbook (review checklist, private notes, challenge with small and detailed hints, reference explanation, saved attempts) and answer the knowledge check. |
 | **Lab walkthrough** | Follow five steps, see what evidence to inspect, the expected result and recovery tips. |
 | **Visual guide** | Study the related course infographic with zoom, fit and scroll-to-pan. |
 | **Run the exercise** | Run offline or live; the **Automatic check** compares the local evidence with the lesson criterion. |
@@ -238,8 +238,11 @@ appearance controls and the four visual guides (`public/visual-guides/`) follow
 [Udemy-Claude-Agent-SDK-Student-Rebuild](https://github.com/luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild).
 Lesson guides and quizzes were rewritten for the Python exercises in this
 repository; every automatic check is tested against the actual offline evidence.
-The Rebuild's per-lesson infographics, narrated audio and TypeScript code tours
-are not included because they describe its TypeScript implementation.
+The Rebuild's TypeScript code tours are replaced by Python code tours
+(`agent_lab/content/code_tours.json`): 3 to 5 reviewed steps per lesson, bound to the
+SHA-256 of the concept code, so a test fails and the tour is hidden when the code changes
+without a review. Its recorded narration (a paid TTS service) is not included; Read aloud
+uses the browser's built-in speech instead.
 
 ## References
 

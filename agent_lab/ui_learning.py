@@ -18,6 +18,7 @@ from agent_lab.learning import (
     CheckResult,
     Question,
     VisualGuide,
+    code_tour,
     course,
     guide,
     section_quiz,
@@ -212,12 +213,70 @@ def lesson_header(lesson_id: int, live_enabled: bool) -> None:
             ui.link(f"Lesson {number}", f"/?lesson={number}").classes("text-sm")
 
 
+def tour_code_html(code: str, start: int, end: int) -> str:
+    """The concept code with line numbers and the current section's lines highlighted."""
+    from pygments import highlight
+    from pygments.formatters import HtmlFormatter
+    from pygments.lexers import PythonLexer
+
+    formatter = HtmlFormatter(
+        cssclass="tour-code", linenos="inline", hl_lines=list(range(start, end + 1))
+    )
+    return highlight(code, PythonLexer(stripnl=False), formatter)
+
+
 def concept_code_card(lesson_id: int) -> None:
     """The SDK code for this lesson's concept, as a developer would write it."""
     item = guide(lesson_id)
+    sections = code_tour(lesson_id)
+    step: dict[str, int | None] = {"index": None}
     with card("The concept in code", "Python SDK"):
-        ui.code(item.concept_code, language="python").classes("w-full")
-        ui.markdown(item.code_focus)
+
+        @ui.refreshable
+        def view() -> None:
+            index = step["index"]
+            if index is None:
+                ui.code(item.concept_code, language="python").classes("w-full")
+                ui.markdown(item.code_focus)
+                if sections:
+                    ui.button(
+                        "Start code tour", icon="route", on_click=lambda: go(0)
+                    ).props("outline")
+                return
+            section = sections[index]
+            ui.html(tour_code_html(item.concept_code, section.start, section.end), sanitize=False)
+            with ui.column().classes("tour-step w-full gap-1"):
+                ui.label(
+                    f"Step {index + 1} of {len(sections)} · lines {section.start}-{section.end}"
+                ).classes("eyebrow")
+                ui.label(section.title).classes("text-lg font-bold")
+                ui.label(section.text)
+            with ui.row().classes("gap-2 items-center"):
+                ui.button("Previous step", icon="chevron_left", on_click=lambda: go(index - 1)).props(
+                    "flat" + (" disable" if index == 0 else "")
+                )
+                if index < len(sections) - 1:
+                    ui.button("Next step", icon="chevron_right", on_click=lambda: go(index + 1))
+                ui.button(
+                    "Read aloud",
+                    icon="volume_up",
+                    on_click=lambda: ui.run_javascript(
+                        "speechSynthesis.cancel();"
+                        f"speechSynthesis.speak(new SpeechSynthesisUtterance({json.dumps(section.text)}));"
+                    ),
+                ).props("flat")
+                ui.button("End tour", icon="close", on_click=lambda: go(None)).props("flat")
+            ui.label(
+                "Read aloud uses your browser's voice. The tour explains reviewed code; it does "
+                "not show that the code ran."
+            ).classes("text-xs text-slate-500")
+
+        def go(index: int | None) -> None:
+            ui.run_javascript("window.speechSynthesis && speechSynthesis.cancel()")
+            step["index"] = index
+            view.refresh()
+
+        view()
 
 
 def learn_panel(lesson_id: int, tutorial: str, open_run: Any) -> None:
@@ -865,10 +924,24 @@ BASE_CSS = """
 """
 
 
+def tour_css() -> str:
+    """Pygments colors for the code tour; the code box stays light in both themes."""
+    from pygments.formatters import HtmlFormatter
+
+    return HtmlFormatter(style="default").get_style_defs(".tour-code") + """
+    .tour-code { background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 12px;
+                 padding: 12px; overflow-x: auto; max-width: 100%; }
+    .tour-code pre { margin: 0; font-size: 0.9rem; line-height: 1.5; background: transparent; }
+    .tour-code .hll { background: #fde68a; }
+    .tour-code .linenos { color: #64748b; background: transparent; padding-right: 0.75rem; user-select: none; }
+    .tour-step { border-left: 4px solid #f59e0b; padding-left: 0.75rem; }
+    """
+
+
 def page_style() -> None:
     """Colors and styles shared by every page of the course."""
     ui.colors(primary="#7c3aed", secondary="#0f766e", accent="#f59e0b")
-    ui.add_css(BASE_CSS + APPEARANCE_CSS)
+    ui.add_css(BASE_CSS + APPEARANCE_CSS + tour_css())
 
 
 def appearance_controls() -> None:

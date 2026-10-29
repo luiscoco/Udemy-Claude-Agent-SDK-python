@@ -167,6 +167,56 @@ def guide(lesson_id: int) -> LessonGuide:
         raise ValueError(f"Unknown lesson: {lesson_id}") from exc
 
 
+class TourSection(Strict):
+    title: str = Field(min_length=1, max_length=60)
+    start: int = Field(ge=1)
+    end: int = Field(ge=1)
+    text: str = Field(min_length=1, max_length=450)
+
+
+class CodeTour(Strict):
+    """A reviewed walkthrough of one lesson's concept code, bound to that exact code."""
+
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    sections: list[TourSection] = Field(min_length=3, max_length=5)
+
+
+def code_sha256(code: str) -> str:
+    import hashlib
+
+    return hashlib.sha256(code.replace("\r\n", "\n").encode("utf-8")).hexdigest()
+
+
+@cache
+def code_tours() -> dict[int, CodeTour]:
+    import json
+
+    path = CONTENT / "code_tours.json"
+    rows = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+    return {int(key): CodeTour.model_validate(value) for key, value in rows.items()}
+
+
+def tour_problems(lesson_id: int) -> list[str]:
+    """Why a lesson's tour cannot be shown; an empty list means it matches the code."""
+    tour = code_tours().get(lesson_id)
+    if tour is None:
+        return ["no reviewed tour"]
+    code = guide(lesson_id).concept_code
+    if tour.source_sha256 != code_sha256(code):
+        return ["the concept code changed after the tour was reviewed"]
+    count, problems, last = len(code.replace("\r\n", "\n").split("\n")), [], 0
+    for section in tour.sections:
+        if not last < section.start <= section.end <= count:
+            problems.append(f"{section.title}: lines {section.start}-{section.end} are out of order")
+        last = section.end
+    return problems
+
+
+def code_tour(lesson_id: int) -> list[TourSection]:
+    """Sections to narrate, or none: a stale tour must never describe different code."""
+    return [] if tour_problems(lesson_id) else list(code_tours()[lesson_id].sections)
+
+
 def section_quiz(topic: str) -> SectionQuiz | None:
     return next((quiz for quiz in course().section_quizzes if quiz.topic == topic), None)
 
