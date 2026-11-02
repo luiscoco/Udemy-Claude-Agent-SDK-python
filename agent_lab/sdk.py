@@ -118,6 +118,11 @@ async def run_sdk(
     from agent_lab.models import lesson_request
 
     request = lesson_request(lesson.id, request)
+    if lesson.id == 12:
+        from agent_lab.streaming import StreamSession, execute_stream
+
+        await execute_stream(StreamSession(work.parent.name), request, work, config, settings, emit)
+        return
     foundation = None
     if 2 <= lesson.id <= 11:
         from agent_lab.foundations import Evidence

@@ -1,4 +1,4 @@
-"""Bounded SDK experiments for lessons 2–11, with independently correlated evidence.
+"""Bounded SDK experiments for lessons 2–12, with independently correlated evidence.
 
 Offline records explicitly combine real local host effects with recorded SDK identities.
 Live records are collected from the actual stream and registered callbacks.
@@ -891,6 +891,10 @@ async def run_local(
     root: Path, request: RunRequest, lesson: Lesson, ask: Ask | None = None
 ) -> dict[str, Any]:
     request = lesson_request(lesson.id, request)
+    if lesson.id == 12:
+        from agent_lab.streaming import local_streaming
+
+        return await local_streaming(root, request)
     selected = inputs(lesson.id, request.lesson_options).model_dump()
     evidence = Evidence(
         lesson.id,
@@ -956,7 +960,9 @@ async def run_local(
 
 
 def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
-    function = LOCAL_EXPERIMENTS[lesson_id]
+    from agent_lab.streaming import local_streaming
+
+    function = local_streaming if lesson_id == 12 else LOCAL_EXPERIMENTS[lesson_id]
     lines, start = inspect.getsourcelines(function)
     path = Path(inspect.getfile(function)).relative_to(Path(__file__).resolve().parent.parent)
     return path.as_posix(), "".join(lines), start
@@ -966,23 +972,48 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
     from agent_lab.skills import configure_skills
 
     sections = []
-    for title, function, question in (
+    functions: tuple[tuple[str, Callable[..., Any], str], ...] = (
         (
-            "Actual SDK configuration",
-            configure_skills if lesson_id == 11 else configure,
-            "Which selected values become actual SDK options?",
-        ),
-        (
-            "Selected local experiment",
-            LOCAL_EXPERIMENTS[lesson_id],
-            "Which host operation executes, and which evidence is a labelled fixture?",
-        ),
-        (
-            "Bounded evidence evaluator",
-            Evidence.report,
-            "Which identities and terminal evidence does this lesson require?",
-        ),
-    ):
+            (
+                "Actual SDK configuration",
+                configure_skills if lesson_id == 11 else configure,
+                "Which selected values become actual SDK options?",
+            ),
+            (
+                "Selected local experiment",
+                LOCAL_EXPERIMENTS[lesson_id],
+                "Which host operation executes, and which evidence is a labelled fixture?",
+            ),
+            (
+                "Bounded evidence evaluator",
+                Evidence.report,
+                "Which identities and terminal evidence does this lesson require?",
+            ),
+        )
+        if lesson_id != 12
+        else ()
+    )
+    if lesson_id == 12:
+        from agent_lab.streaming import StreamSession, execute_stream, stream_report
+
+        functions = (
+            (
+                "Wakeable input queue",
+                StreamSession.messages,
+                "How does closing an idle queue wake the generator?",
+            ),
+            (
+                "One owned SDK connection",
+                execute_stream,
+                "Which observations establish a yielded input, a terminal result and complete closure?",
+            ),
+            (
+                "Bounded evidence evaluator",
+                stream_report,
+                "Why are application handles and SDK identities checked separately?",
+            ),
+        )
+    for title, function, question in functions:
         lines, start = inspect.getsourcelines(function)
         sections.append(
             {

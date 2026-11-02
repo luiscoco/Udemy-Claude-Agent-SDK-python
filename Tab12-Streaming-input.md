@@ -48,7 +48,7 @@ async def main() -> None:
             print(message.num_turns, message.result)
 ```
 
-`user_messages()` is an async generator yielding user-message dicts, and `query(prompt=user_messages(prompts), ...)` consumes it as a series of queued turns.
+The compact concept example streams a finite iterable. The expanded experiment in agent_lab/streaming.py keeps a wakeable queue open, records acknowledged controls and checks complete closure; inspect its three exact excerpts below the standard example.
 
 ## How the offline lab checks it
 

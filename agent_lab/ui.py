@@ -17,7 +17,7 @@ from agent_lab.foundation_models import SCENARIOS
 from agent_lab.foundations import source_sections
 from agent_lab.learning import CheckResult, check_evidence, course
 from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
-from agent_lab.models import Event, RunRequest
+from agent_lab.models import Event, LessonError, RunRequest
 from agent_lab.my_learning import workspace_url
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
@@ -173,7 +173,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 11:
+                        if 2 <= lesson <= 12:
                             for section in source_sections(lesson):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
@@ -184,7 +184,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     ui.code(section["code"], language="python").classes("w-full")
                                     ui.label(section["question"]).classes("font-semibold")
                             ui.link(
-                                "Read the shared evidence evaluator", "/agent_lab/foundations.py"
+                                "Read the shared evidence evaluator", "/agent_lab/streaming.py" if lesson == 12 else "/agent_lab/foundations.py"
                             )
                         ui.label(
                             "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
@@ -204,12 +204,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         prompt = (
                             ui.textarea(
                                 "Prompt"
-                                if lesson <= 11
+                                if lesson <= 12
                                 else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
-                                value=current.prompt if lesson <= 11 else "",
+                                value=current.prompt if lesson <= 12 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -217,7 +217,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if lesson <= 11:
+                        if lesson <= 12:
                             ui.label(
                                 "Offline experiments validate your prompt and run local host code with labelled SDK fixtures; they do not call Claude."
                             ).classes("text-sm text-slate-600")
@@ -227,7 +227,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             ).classes("text-sm text-slate-500")
                         follow_up = (
                             ui.input(
-                                "Follow-up for conversation lessons", value=RunRequest().follow_up
+                                "Script follow-up" if lesson == 12 else "Follow-up for conversation lessons", value=RunRequest().follow_up
                             )
                             .props("outlined")
                             .classes("w-full")
@@ -235,7 +235,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
-                        if lesson <= 11 and lesson != 6:
+                        if lesson <= 12 and lesson not in {6, 12}:
                             follow_up.set_visibility(False)
                         read_lesson_options = experiment_controls(lesson, mode)
                         scenario = (
@@ -255,7 +255,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             .classes("w-full")
                         )
                         scenario.bind_visibility_from(
-                            mode, "value", lambda value: lesson <= 11 and value == "offline"
+                            mode, "value", lambda value: lesson <= 12 and value == "offline"
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (
@@ -291,6 +291,44 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             cancel_button = ui.button("Cancel", icon="stop", color="secondary")
                             cancel_button.disable()
                             status = ui.label("Ready")
+                        stream_buttons = []
+                        if lesson == 12:
+                            with ui.column().classes("w-full gap-3 stream-session-controls"):
+                                ui.label("Open input session").classes("text-lg font-bold")
+                                stream_status = ui.label("Choose manual mode above, then Run exercise to open a session.").classes("break-words w-full")
+                                stream_lifecycle = ui.label().classes("font-semibold w-full")
+                                stream_identity = ui.label().classes("text-sm font-mono whitespace-pre-wrap break-all w-full")
+                                stream_settings = ui.label().classes("text-sm break-words w-full")
+                                stream_message = ui.textarea("Message to queue", value=RunRequest().follow_up).props("outlined rows=3 maxlength=10000").classes("w-full")
+
+                                async def stream_action(action: str, value: str = "") -> None:
+                                    if handle is None or runner.active.get(handle.id) is not handle or handle.input_stream is None:
+                                        ui.notify("Open a new manual input session first.", type="warning")
+                                        return
+                                    session = handle.input_stream
+                                    try:
+                                        if not session.ready or session.input_closed or not session.manual_mode:
+                                            raise LessonError("This session is no longer open for input.")
+                                        if action == "send":
+                                            session.push(stream_message.value or "")
+                                        elif action == "end":
+                                            session.end()
+                                        else:
+                                            await session.command(action, value)
+                                        await session.publish()
+                                    except LessonError as exc:
+                                        ui.notify(str(exc), type="warning")
+
+                                with ui.row().classes("w-full gap-2"):
+                                    stream_buttons.append(ui.button("Queue message", icon="queue", on_click=lambda: stream_action("send")))
+                                    stream_buttons.append(ui.button("End input", icon="done_all", on_click=lambda: stream_action("end")))
+                                stream_model = ui.select({"haiku": "haiku", "sonnet": "sonnet"}, value="haiku", label="Runtime model").props("outlined").classes("w-full")
+                                stream_buttons.append(ui.button("Apply runtime model", on_click=lambda: stream_action("model", stream_model.value)))
+                                stream_permission = ui.select({"default": "Default", "plan": "Plan"}, value="default", label="Runtime permission mode").props("outlined").classes("w-full")
+                                stream_buttons.append(ui.button("Apply permission mode", on_click=lambda: stream_action("permission", stream_permission.value)))
+                                ui.label("These controls target this page's active run only. End input drains the queue; Cancel aborts. Acknowledgement is separate from model behavior or permission effects.").classes("text-sm text-slate-600")
+                                for button in stream_buttons:
+                                    button.disable()
                     with ui.card().classes("course-card w-full p-6 guide-evidence-context"):
                         evidence_view = ui.column().classes(
                             "w-full gap-3 guide-evidence-target guide-scroll-target"
@@ -382,6 +420,16 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     )
                                     if event.kind == "question":
                                         await show_question(event.data)
+                                    if event.kind == "input_stream" and lesson == 12:
+                                        state = event.data
+                                        stream_status.set_text(
+                                            f"Submitted {state['submitted_count']} · Yielded {state['yielded_count']} · Successful results {state['successful_results']} · Queued {state['queued_count']}"
+                                        )
+                                        stream_lifecycle.set_text(f"Input {'closed' if state['input_closed'] else 'open'} · Connection {'closed' if state['connection_closed'] else 'open'}")
+                                        stream_identity.set_text(f"Application handle: {state['application_handle']}\nSDK identity: {state['sdk_identity'] or 'not observed'}")
+                                        stream_settings.set_text(f"Acknowledged model: {state['acknowledged_settings'].get('model', 'no runtime change')} · Acknowledged permission mode: {state['acknowledged_settings'].get('permission', 'no runtime change')}")
+                                        for button in stream_buttons:
+                                            button.set_enabled(state["ready"] and state["manual_mode"])
                                     if output_state.apply(event):
                                         output.refresh()
                                     if event.kind == "done":
@@ -390,6 +438,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             finally:
                                 run_button.enable()
                                 cancel_button.disable()
+                                for button in stream_buttons:
+                                    button.disable()
 
                         async def run() -> None:
                             nonlocal handle, consumer, output_state

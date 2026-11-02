@@ -32,14 +32,20 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     for name in ("mcp", "httpx"):
         logging.getLogger(name).setLevel(logging.WARNING)
     runner = service or RunService()
+    from agent_lab.api_streaming import StreamRegistry, install_stream_routes
+
+    streams = StreamRegistry(runner)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         yield
+        await streams.close()
         await runner.close()
 
     app = FastAPI(title="Python Claude Agent SDK Lab", lifespan=lifespan)
     app.state.runner = runner
+    app.state.input_streams = streams
+    install_stream_routes(app, streams)
     tutor = app.state.tutor = TutorService(runner.settings)
 
     @app.get("/api/health")

@@ -59,7 +59,7 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
     """Validate before creating a task; omitted fields get the lesson's defaults."""
     data = value.model_dump(exclude_unset=True) if isinstance(value, RunRequest) else value
     parsed: RunRequest
-    if 2 <= lesson_id <= 11:
+    if 2 <= lesson_id <= 12:
         from agent_lab.curriculum import get_lesson
         from agent_lab.foundation_models import SCENARIOS, inputs
 
@@ -71,8 +71,10 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             raise LessonError("Choose a scenario offered by this lesson.")
         if parsed.mode == "live" and parsed.scenario != "success":
             raise LessonError("Recorded negative scenarios are offline experiments only.")
-        if lesson_id == 6 and not parsed.follow_up:
+        if lesson_id in {6, 12} and not parsed.follow_up:
             raise LessonError("Enter a nonempty follow-up for the session experiment.")
+        if lesson_id == 12 and parsed.lesson_options["interactive"] and parsed.scenario != "success":
+            raise LessonError("Recorded negative scenarios use the scripted session only.")
         return parsed
     parsed = (QueryRunRequest if lesson_id == 1 else RunRequest).model_validate(data)
     if parsed.lesson_options:

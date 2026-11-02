@@ -14,6 +14,7 @@ from agent_lab.config import Settings
 from agent_lab.curriculum import get_lesson
 from agent_lab.exercises import run_exercise, seed_workspace
 from agent_lab.models import Event, LessonError, RunRequest, lesson_request
+from agent_lab.streaming import StreamSession
 
 
 class BusyError(Exception):
@@ -27,6 +28,7 @@ class RunHandle:
     queue: asyncio.Queue[Event]
     task: asyncio.Task[None] | None = None
     questions: dict[str, asyncio.Future[dict[str, Any]]] = field(default_factory=dict)
+    input_stream: StreamSession | None = None
 
 
 class RunService:
@@ -47,6 +49,8 @@ class RunService:
         if len(self.active) >= self.settings.max_concurrent_runs:
             raise BusyError("All lesson run slots are occupied.")
         handle = RunHandle(uuid.uuid4().hex, secrets.token_urlsafe(24), asyncio.Queue(maxsize=128))
+        if lesson_id == 12:
+            handle.input_stream = StreamSession(handle.id, request.lesson_options["max_messages"])
         self.active[handle.id] = handle
         handle.task = asyncio.create_task(self._produce(handle, lesson.id, request))
         return handle
@@ -85,14 +89,20 @@ class RunService:
             )
             async with asyncio.timeout(self.settings.timeout_seconds):
                 seed_workspace(work, lesson)
+                if lesson.id == 12:
+                    from agent_lab.streaming import execute_stream
+
+                    assert handle.input_stream is not None
+                    await execute_stream(handle.input_stream, request, work, run_dir / "config", self.settings, emit)
+                    return
                 evidence = (
                     {}
-                    if 1 <= lesson.id <= 11 and request.mode == "live"
+                    if 1 <= lesson.id <= 12 and request.mode == "live"
                     else await run_exercise(work, request, lesson, ask=ask)
-                    if 2 <= lesson.id <= 11
+                    if 2 <= lesson.id <= 12
                     else await run_exercise(work, request, lesson)
                 )
-                if not (1 <= lesson.id <= 11 and request.mode == "live"):
+                if not (1 <= lesson.id <= 12 and request.mode == "live"):
                     await emit(
                         Event(
                             kind="evidence",

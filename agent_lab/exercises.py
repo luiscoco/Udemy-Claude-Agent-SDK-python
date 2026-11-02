@@ -2554,13 +2554,13 @@ def exercise_context(name: str) -> str:
 
 
 async def run_exercise(root: Path, request: RunRequest, lesson: Lesson, *, ask: Any = None) -> dict[str, Any]:
-    if 2 <= lesson.id <= 11:
+    if 2 <= lesson.id <= 12:
         request = lesson_request(lesson.id, request)
     function = EXERCISES[lesson.exercise]
     result = function(root, request, lesson)
     if inspect.isawaitable(result):
         result = await result
-    if 2 <= lesson.id <= 11:
+    if 2 <= lesson.id <= 12:
         from agent_lab.foundations import run_local
 
         result.update(await run_local(root, request, lesson, ask))

@@ -63,10 +63,29 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
 
     monkeypatch.setattr(sdk, "ClaudeSDKClient", Client)
     monkeypatch.setattr(sdk, "query", query)
+    if lesson_id == 12:
+        from claude_agent_sdk import ClaudeSDKClient as RealClient
+
+        import agent_lab.streaming as streaming
+
+        class StreamingClient(RealClient):
+            def __init__(self, options, transport=None):
+                captured.append(options)
+                super().__init__(options=options, transport=streaming.StreamingFixture([["First"], ["Second"]]))
+
+            async def connect(self, prompt=None):
+                owners.append(asyncio.current_task())
+                await super().connect(prompt=prompt)
+
+            async def disconnect(self):
+                owners.append(asyncio.current_task())
+                await super().disconnect()
+
+        monkeypatch.setattr(streaming, "ClaudeSDKClient", StreamingClient)
     current = LESSONS[lesson_id]
     request = RunRequest(mode="live")
     seed_workspace(tmp_path / "work", current)
-    evidence = await run_exercise(tmp_path / "work", request, current)
+    evidence = {} if lesson_id == 12 else await run_exercise(tmp_path / "work", request, current)
     events = []
 
     async def emit(event):
@@ -97,12 +116,12 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
         assert options.max_turns == 1
     assert options.env["CLAUDE_CONFIG_DIR"] == str(tmp_path / "config")
     # The shared policy and audit hooks that the offline hook lessons exercise.
-    assert set(options.hooks) == {"PreToolUse", "PostToolUse"} | (
+    assert set(options.hooks or {}) == (set() if lesson_id == 12 else {"PreToolUse", "PostToolUse"}) | (
         {"Elicitation"} if lesson_id == 33 else set()
     )
     # Pre-approving tools would skip can_use_tool; the PreToolUse hook decides instead.
     assert options.allowed_tools == []
-    assert events[-1].kind == ("evidence" if lesson_id <= 11 else "result")
+    assert events[-1].kind == ("evidence" if lesson_id <= 12 else "result")
 
 
 async def test_missing_live_credential_fails_before_client_connect(tmp_path, monkeypatch):

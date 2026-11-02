@@ -49,8 +49,8 @@
   {
    "id": "assessment-and-workbook",
    "status": "partial",
-   "python": "Seven explained questions per lesson for lessons 1-11, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
-   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 12-20; keep shared navigation, media and runtime adaptations separately tracked."
+   "python": "Seven explained questions per lesson for lessons 1-12, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
+   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 13-20; keep shared navigation, media and runtime adaptations separately tracked."
   },
   {
    "id": "progress",
@@ -281,14 +281,14 @@
    "title": "Streaming input",
    "exercise": "streaming",
    "live_profile": "streaming",
-   "adaptation": "",
+   "adaptation": "Uses ClaudeSDKClient.connect(prompt=one_async_iterator) with one connection owner and a response pump. Offline runs use the official client with a scripted transport; queue timing, recall and per-message completion are not certified.",
    "python_line": 860,
    "reference_contract": "docs/prompts/l12-lesson-12-streaming-input.md",
    "reference_blob_sha": "9624bd5235fbb29102256438d0e12d944d1dd722",
    "foundation_component": "src/concepts/Concept12StreamingInput.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "gap": "Owned streaming sessions, queued/yielded input inspection, acknowledged model/permission controls, graceful end, scoped session/send/model/permission-mode/context/end/script routes, correlated closure checks, three source excerpts and seven questions are implemented. Paid model acceptance, authored media and full reference certification remain pending.",
    "written_guide_content": "lesson-content"
   },
   {

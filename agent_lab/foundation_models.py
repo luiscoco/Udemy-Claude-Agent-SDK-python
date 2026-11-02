@@ -84,6 +84,13 @@ class SkillsInputs(Inputs):
     load_support: bool = False
 
 
+class StreamingInputs(Inputs):
+    interactive: bool = False
+    queue_timing: Literal["immediate", "after-result"] = "immediate"
+    runtime_control: Literal["none", "model", "permission"] = "none"
+    max_messages: int = Field(default=2, ge=2, le=4)
+
+
 INPUT_MODELS: dict[int, type[Inputs]] = {
     2: OptionsInputs,
     3: ToolsInputs,
@@ -95,6 +102,7 @@ INPUT_MODELS: dict[int, type[Inputs]] = {
     9: PromptInputs,
     10: StructuredInputs,
     11: SkillsInputs,
+    12: StreamingInputs,
 }
 
 SCENARIOS: dict[int, dict[str, str]] = {
@@ -106,6 +114,7 @@ SCENARIOS: dict[int, dict[str, str]] = {
     for number in INPUT_MODELS
 }
 SCENARIOS[2]["limit-error"] = "Recorded limit error"
+SCENARIOS[12]["interrupted"] = "Interrupted input queue"
 SCENARIOS[5].update(
     {
         "invalid-arguments": "Rejected handler arguments",

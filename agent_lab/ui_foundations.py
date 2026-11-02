@@ -1,4 +1,4 @@
-"""Small, accessible controls for the first nine lesson-specific experiments."""
+"""Accessible controls for lesson-specific SDK experiments."""
 
 import json
 from collections.abc import Callable
@@ -219,6 +219,33 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
                 "The skill filter is not a filesystem sandbox."
             ).classes("text-sm text-slate-600")
 
+        elif lesson == 12:
+            tick("interactive", "Keep session open for manual messages", False)
+            select(
+                "queue_timing",
+                "Script follow-up timing",
+                {"immediate": "Queue both messages", "after-result": "Wait for the first result"},
+                "immediate",
+            )
+            select(
+                "runtime_control",
+                "Script runtime control",
+                {"none": "No change", "model": "Request haiku", "permission": "Request plan mode"},
+                "none",
+            )
+            for key in ("queue_timing", "runtime_control"):
+                values[key].bind_enabled_from(
+                    values["interactive"], "value", lambda value: not value
+                )
+            values["max_messages"] = (
+                ui.number("Authorized message limit", value=2, min=2, max=4, precision=0)
+                .props("outlined")
+                .classes("w-full")
+            )
+            ui.label(
+                "Run exercise opens one connection. In manual mode, queue messages and then choose End input to drain and close. Cancel aborts. Runtime controls require an SDK acknowledgement; submitted messages are not completed turns."
+            ).classes("text-sm text-slate-600")
+
     def read() -> dict[str, Any]:
         if mode.value == "live" and lesson in {5, 10}:
             return {}  # Offline-only drafts must not become live tool arguments.
@@ -234,6 +261,8 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
                 result.pop("context")
         if lesson == 10:
             result["payload"] = json.loads(result["payload"])
+        if lesson == 12:
+            result["max_messages"] = int(result["max_messages"])
         return result
 
     return read

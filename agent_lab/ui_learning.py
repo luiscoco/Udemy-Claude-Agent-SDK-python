@@ -506,7 +506,7 @@ def check_card(lesson_id: int, result: CheckResult | None) -> None:
         ui.markdown(result.detail)
         ui.label(
             "The automatic check covers the stream outcome only. Your own review in the Learn tab stays separate."
-            if lesson_id <= 11 else
+            if lesson_id <= 12 else
             "The automatic check covers local evidence only. Your own review in the Learn tab stays separate."
         ).classes("text-xs text-slate-500")
 

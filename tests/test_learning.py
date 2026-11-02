@@ -1102,7 +1102,7 @@ def test_browser_my_learning_section_quiz_refresh_does_not_complete_lessons(serv
         context.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 12))
+@pytest.mark.parametrize("lesson", range(2, 13))
 def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server, guide_browser_context, lesson):
     from playwright.sync_api import expect
 
@@ -1210,5 +1210,56 @@ def test_browser_skills_variants_keep_invocation_check_distinct(server, guide_br
         page.locator(".foundation-controls").screenshot(path=str(data / "skills-phone-controls.png"))
         page.set_viewport_size({"width": 1440, "height": 1000})
         page.locator(".foundation-controls").screenshot(path=str(data / "skills-desktop-controls.png"))
+    finally:
+        context.close()
+
+
+def test_browser_manual_stream_queue_controls_end_and_cancel(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=12")
+        page.get_by_role("tab", name="Run the exercise").click()
+        manual = page.get_by_role("checkbox", name="Keep session open for manual messages", exact=True)
+        manual.click()
+        expect(manual).to_be_checked()
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        session = page.locator(".stream-session-controls")
+        expect(session.get_by_role("button", name="Queue message", exact=True)).to_be_enabled(timeout=15000)
+        expect(session.get_by_text("Successful results 1", exact=False)).to_be_visible(timeout=15000)
+        session.get_by_role("button", name="Apply runtime model", exact=True).click()
+        expect(session.get_by_text("Acknowledged model: haiku", exact=False)).to_be_visible()
+        session.get_by_label("Runtime permission mode", exact=True).click()
+        page.get_by_role("option", name="Plan", exact=True).click()
+        session.get_by_role("button", name="Apply permission mode", exact=True).click()
+        expect(session.get_by_text("Acknowledged permission mode: plan", exact=False)).to_be_visible()
+        session.get_by_label("Message to queue", exact=True).fill("Explain the difference between queued and completed.")
+        session.get_by_role("button", name="Queue message", exact=True).click()
+        expect(session.get_by_text("Submitted 2", exact=False)).to_be_visible()
+        session.get_by_role("button", name="End input", exact=True).click()
+        expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=15000)
+        expect(page.get_by_text("Check passed", exact=True)).to_be_visible()
+        expect(session.get_by_text("Connection closed", exact=False)).to_be_visible()
+        expect(session.get_by_role("button", name="Queue message", exact=True)).to_be_disabled()
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        session.evaluate("e => e.scrollIntoView({block:'start'})")
+        page.evaluate("window.scrollBy(0, -120)")
+        page.screenshot(path=str(data / "stream-session-phone-upper.png"))
+        session.get_by_label("Runtime permission mode", exact=True).evaluate("e => e.scrollIntoView({block:'center'})")
+        page.screenshot(path=str(data / "stream-session-phone-lower.png"))
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        session.screenshot(path=str(data / "stream-session-desktop.png"))
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(session.get_by_role("button", name="Queue message", exact=True)).to_be_enabled(timeout=15000)
+        page.get_by_role("button", name="Cancel", exact=True).click()
+        expect(page.get_by_text("Cancelled", exact=True)).to_be_visible()
+        expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
+        expect(session.get_by_role("button", name="Queue message", exact=True)).to_be_disabled()
+        assert not errors
     finally:
         context.close()

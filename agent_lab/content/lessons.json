@@ -2307,11 +2307,12 @@
    1,
    6
   ],
-  "concept_brief": "`query()` accepts an async iterable instead of a string. Each item is a user-message dict (`type`, `message`, `parent_tool_use_id`, `session_id`), produced lazily; the CLI answers each one as a queued turn. Token streaming of the reply is the separate `include_partial_messages` option.",
-  "lab_brief": "The `streaming` exercise builds user messages with the `user_messages` async generator and streams them through the SDK's real `query()` to the scripted CLI, which answers each message as its own turn. Live runs use the same generator. The offline run uses the real SDK client code against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
+  "concept_brief": "Streaming input supplies user messages through one open asynchronous iterator. An empty queue waits; closing it wakes the generator and ends input. The application handle locates the owned connection, while SDK initialization supplies a separate session identity. Queuing or yielding a message does not prove that its turn completed. Concept-map brief: draw application handle -> input queue -> one SDK connection -> terminal results, with SDK identity on a separate lane and explicit input/output/connection closure.",
+  "lab_brief": "The selected experiment uses the official client with a scripted CLI offline, or an explicitly selected live connection. Compare queuing both inputs with sending a follow-up after a result; optionally request a model or permission-mode change. Manual mode keeps the same input iterator open for Queue message, runtime controls and End input. Lab-walkthrough brief: show controls beside queued/yielded inputs, acknowledged settings and terminal results, ending in separate closure indicators.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 12 (or run `uv run agent-lab lesson 12`).",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run streams your prompt and the follow-up as two turns."
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run streams your prompt and the follow-up as two turns.",
+   "Keep the default scripted session for the first run. For manual controls, enable Keep session open for manual messages before choosing Run exercise. The authorized message limit includes the initial prompt."
   ],
   "steps": [
    {
@@ -2320,52 +2321,49 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `user_messages` and `streaming` in the source."
+    "text": "Inspect the wakeable queue, owner connection and evaluator in the three Python source excerpts. Keep the application handle distinct from the SDK identity; neither is an input-message UUID."
    },
    {
     "title": "Run one example",
-    "text": "Run the offline exercise; type your own prompt if you like."
+    "text": "Run the default offline script. Compare Queue both messages with Wait for the first result, then try the scripted runtime controls. Offline uses the real SDK client with a scripted transport and makes no model call."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare `input_messages`, `messages_the_cli_received` and `turns_completed`."
+    "text": "Compare submitted_count, yielded_count, successful_results, input IDs and SDK initialization identity. Confirm input_closed, iterator_closed, output_closed and connection_closed. A queued message or one successful result alone cannot establish complete closure."
    },
    {
     "title": "Try the challenge",
-    "text": "Stream a third message."
+    "text": "Open manual mode with a message limit of 3. Queue a follow-up while the input session remains open, apply a runtime control and choose End input. Compare this graceful drain with Cancel, which aborts and needs review."
    }
   ],
-  "inspect": "`input_messages` (the dicts the generator yields), `messages_the_cli_received`, `replies`, `turns_completed` and `lifecycle`.",
-  "expected": "Two user messages, your prompt (or the example) then the follow-up, reach the CLI in order; `turns_completed` is 2; `lifecycle` ends with input closed and process stopped.",
-  "evidence_criterion": "The check confirms both streamed messages reached the CLI and each completed a turn.",
+  "inspect": "Inspect experiment.input_stream: application_handle, sdk_identity, input UUIDs, submitted/yielded counts, separate terminal_results, acknowledged_settings and the timeline. Compare all four closure flags; context inspection makes no model call.",
+  "expected": "The default offline script records two submitted and yielded messages, two successful scripted results under one initialized SDK identity, and full closure. Missing evidence, wrong identity and interruption scenarios need review. Manual sessions remain Running while input is open; End input drains and closes before the bounded check can pass.",
+  "evidence_criterion": "An input-stream session receives matching pushed/yielded messages, reports SDK success under its initialized identity and closes input, output and connection completely. Queue timing, recall and per-message completion are not graded.",
   "evidence_checks": [
    {
-    "key": "turns_completed",
-    "rule": "equals",
-    "value": 2
-   },
-   {
-    "key": "messages_the_cli_received",
+    "key": "experiment_passed",
     "rule": "truthy"
    }
   ],
-  "challenge": "In `streaming`, add a third text to `texts`, run again and confirm `turns_completed` is 3. The third reply is `(no scripted reply)` because the fixture has two answers.",
+  "challenge": "Choose manual mode with a message limit of 3. Start the first prompt, queue another message while the connection stays open, inspect an acknowledged runtime setting and end input. Explain why queued input, successful results and complete closure are separate observations.",
   "hints": [
-   "Each yielded dict becomes one queued turn.",
-   "The generator yields three messages, the CLI answers each in order, and the fixture's fallback text fills the missing third reply."
+   "Enable manual mode before Run exercise. The initial prompt consumes one authorized message; increasing the limit does not send anything automatically.",
+   "Queue message adds to the existing input iterator. End input wakes an idle generator and drains queued inputs; Cancel aborts. Compare the application handle with sdk_identity, then inspect all four closure flags."
   ],
-  "reference": "An async iterable lets your application produce input over time, for example from a queue or a user typing. The SDK writes each message as it arrives and closes input when the iterable ends, after which the CLI finishes its queued turns and exits.",
+  "reference": "The host stores the connection and queue under an application handle, checks its control token and validates every action. The SDK session ID identifies the model conversation and is observed separately. The queue suspends while empty, and end() wakes it without treating idle time as closure. Runtime controls count as acknowledged only after the SDK returns; this does not prove a change in answer quality or permission effects. The owner connects and disconnects in one task, while a response pump keeps control acknowledgements and multiple turns flowing. Offline messages and results come from the official client talking to a scripted transport. Successful results are separate from the submitted/yielded lists; the check does not assign an unproven completion to each input or grade recall. Reading context, hints, questions and source never calls a model.",
   "recovery": [
    "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials.",
+   "If a manual session remains Running, choose End input before the host deadline. Cancel aborts and intentionally needs review. Closed or stale handles cannot accept more messages; open a new run.",
+   "A control acknowledgement reports SDK acceptance, not model availability for every account. Preserve a rejected-control observation and inspect the first runtime error; no automatic paid retry is made."
   ],
   "quiz": [
    {
     "prompt": "What does each item of the async iterable represent?",
     "options": [
      {
-      "text": "One user message, answered as a queued turn.",
-      "explanation": "Correct. Items are user-message dicts."
+      "text": "One user message submitted through the existing input stream.",
+      "explanation": "Correct. Yielding submits a user message; a later SDK result is separate evidence of a completed turn."
      },
      {
       "text": "One token of the model's reply.",
@@ -2387,7 +2385,7 @@
      },
      {
       "text": "When the iterable ends and input is closed.",
-      "explanation": "Correct. Then it finishes its turns and exits."
+      "explanation": "Correct. Ending the iterator closes input; results and output must still drain, followed by connection cleanup."
      },
      {
       "text": "Never; it waits forever.",
@@ -2395,10 +2393,80 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "The queue is empty and the session is Running. Is the input stream closed?",
+    "options": [
+     {
+      "text": "Yes, an empty queue is a closed stream.",
+      "explanation": "An open generator can wait for a later message."
+     },
+     {
+      "text": "No; it waits until a message arrives or end wakes it.",
+      "explanation": "Correct. Idle and closed are distinct states."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "The application handle and SDK session ID differ. What should the host do?",
+    "options": [
+     {
+      "text": "Keep their roles separate and validate controls using the owned handle/token.",
+      "explanation": "Correct. The application handle locates host objects; SDK identity correlates model results."
+     },
+     {
+      "text": "Replace the SDK identity with the application handle.",
+      "explanation": "Rewriting identity would hide mismatched or missing evidence."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "A runtime model request is sent, but the SDK rejects it. What may the timeline claim?",
+    "options": [
+     {
+      "text": "The selected model definitely ran.",
+      "explanation": "A submitted control request is not proof of acceptance or model behavior."
+     },
+     {
+      "text": "The control was rejected; no acknowledgement or applied-behavior claim.",
+      "explanation": "Correct. Preserve the failure rather than manufacturing a successful switch."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "In the concept map, which arrow must not be treated as proof that a turn completed?",
+    "options": [
+     {
+      "text": "Queue -> yielded input.",
+      "explanation": "Correct. This establishes input delivery; terminal results are a separate lane."
+     },
+     {
+      "text": "The SDK terminal-result observation.",
+      "explanation": "A successful result is relevant evidence, although the full closure criterion still requires more."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "In the lab timeline, results succeeded but the input iterator and connection remain open. Should the final closure check pass?",
+    "options": [
+     {
+      "text": "Yes; one successful result closes everything.",
+      "explanation": "An interactive session may remain open after successful results."
+     },
+     {
+      "text": "No; explicitly end input and observe output and connection closure.",
+      "explanation": "Correct. The bounded check requires all closure observations, and manual review remains separate."
+     }
+    ],
+    "correct": 1
    }
   ],
   "concept_code": "from collections.abc import AsyncIterator\nfrom typing import Any\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\n\nasync def user_messages(prompts: list[str]) -> AsyncIterator[dict[str, Any]]:\n    for text in prompts:\n        # Produced lazily: each dict is built only when the SDK pulls the next item.\n        yield {\n            \"type\": \"user\",\n            \"message\": {\"role\": \"user\", \"content\": text},\n            \"parent_tool_use_id\": None,\n            \"session_id\": \"default\",\n        }\n\n\nasync def main() -> None:\n    prompts = [\"Explain an async iterator.\", \"Now give a one-line example.\"]\n    options = ClaudeAgentOptions(tools=[], max_turns=4)\n    async for message in query(prompt=user_messages(prompts), options=options):\n        if isinstance(message, ResultMessage):\n            print(message.num_turns, message.result)",
-  "code_focus": "`user_messages()` is an async generator yielding user-message dicts, and `query(prompt=user_messages(prompts), ...)` consumes it as a series of queued turns.",
+  "code_focus": "The compact concept example streams a finite iterable. The expanded experiment in agent_lab/streaming.py keeps a wakeable queue open, records acknowledged controls and checks complete closure; inspect its three exact excerpts below the standard example.",
   "concept_points": [
    {
     "title": "Prompt as an iterable",
@@ -2409,13 +2477,13 @@
     "text": "Each item has type, message (role and content), `parent_tool_use_id` and `session_id`."
    },
    {
-    "title": "Lazy production",
-    "text": "The generator yields only when the SDK pulls the next item, so input can come from a queue, socket or user."
+    "title": "Idle is not closed",
+    "text": "An empty open queue waits for later inputs. End input wakes the iterator; successful results, output closure and connection cleanup remain separate observations."
    }
   ],
   "misconception": {
-   "claim": "Streaming input means the reply comes back token by token.",
-   "correction": "Streaming input is about how prompts are sent. Token-by-token output is the separate `include_partial_messages` option."
+   "claim": "Queuing a message or seeing one result proves every input completed and the session closed.",
+   "correction": "Inspect submitted/yielded identities, separate SDK results and all closure flags. Queue timing, recall and per-message completion are not graded."
   }
  },
  {
