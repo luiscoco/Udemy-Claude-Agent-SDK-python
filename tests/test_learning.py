@@ -346,7 +346,7 @@ def test_browser_enables_the_prompt_only_for_offline_exercises_that_read_it(serv
         page.get_by_role("button", name="Run exercise").click()
         page.get_by_text("Check passed", exact=True).wait_for(timeout=15000)
         assert page.get_by_text("sales.analyze").count() >= 1
-        page.goto(base + "/?lesson=5")
+        page.goto(base + "/?lesson=51")
         page.get_by_role("tab", name="Run the exercise").click()
         assert page.get_by_label("Agent prompt (live mode)").is_disabled()
         browser.close()
