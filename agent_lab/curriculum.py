@@ -107,7 +107,7 @@ ROWS = [
         13,
         "MCP servers",
         "Expose typed tools over the official MCP Python SDK's stdio transport.",
-        "Use the notes MCP server to read the welcome note.",
+        "Inspect the owned MCP inventory and explain the selected tool's result.",
         "mcp",
         "mcp",
     ),

@@ -246,6 +246,48 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
                 "Run exercise opens one connection. In manual mode, queue messages and then choose End input to drain and close. Cancel aborts. Runtime controls require an SDK acknowledgement; submitted messages are not completed turns."
             ).classes("text-sm text-slate-600")
 
+        elif lesson == 13:
+            select(
+                "transport",
+                "MCP server transport",
+                {
+                    "sdk": "In-process SDK server",
+                    "stdio": "Child process (stdio)",
+                    "http": "Loopback HTTP server",
+                },
+                "sdk",
+            )
+            select(
+                "tool",
+                "Permitted inventory tool",
+                {"stock": "Inspect stock", "reserve": "Reserve inventory"},
+                "reserve",
+            )
+            select("sku", "Inventory item", {"notebook": "notebook", "pen": "pen"}, "notebook")
+            values["quantity"] = (
+                ui.number("Reservation quantity", value=2, min=1, max=5, precision=0)
+                .props("outlined")
+                .classes("w-full")
+            )
+            for key in ("sku", "quantity"):
+                values[key].bind_enabled_from(
+                    values["tool"], "value", lambda value: value == "reserve"
+                )
+            tick("enabled", "Configure the inventory MCP server")
+            select(
+                "lifecycle",
+                "MCP lifecycle comparison",
+                {
+                    "none": "Inspect status and call",
+                    "toggle": "Disable then enable",
+                    "reconnect": "Reconnect before calling",
+                },
+                "none",
+            )
+            ui.label(
+                "Offline uses real owned MCP transports with recorded agent identities. Live uses actual SDK status, lifecycle controls and tool events. Configuration alone never passes the check. Agent reservations are limited to one authorized write per run."
+            ).classes("text-sm text-slate-600")
+
     def read() -> dict[str, Any]:
         if mode.value == "live" and lesson in {5, 10}:
             return {}  # Offline-only drafts must not become live tool arguments.
@@ -263,6 +305,10 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
             result["payload"] = json.loads(result["payload"])
         if lesson == 12:
             result["max_messages"] = int(result["max_messages"])
+        if lesson == 13:
+            if result["quantity"] != int(result["quantity"]):
+                raise ValueError("Choose a whole reservation quantity.")
+            result["quantity"] = int(result["quantity"])
         return result
 
     return read

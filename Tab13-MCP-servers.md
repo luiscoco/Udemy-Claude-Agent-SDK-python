@@ -48,7 +48,7 @@ async def main() -> None:
             print(message.result)
 ```
 
-The `mcp_servers={"notes": {"type": "stdio", "command": ..., "args": [...]}}` entry tells the CLI how to launch the server, and `allowed_tools=["mcp__notes__read_note"]` exposes one tool.
+The compact source example shows a stdio MCP server. The expanded inventory experiment adds owned HTTP and SDK servers, runtime status/lifecycle observations and correlated checks; inspect its exact excerpts below the separate standard example.
 
 ## How the offline lab checks it
 
@@ -71,7 +71,7 @@ uv run agent-lab lesson 13 --live
 
 Suggested prompt:
 
-> Use the notes MCP server to read the welcome note.
+> Inspect the owned MCP inventory and explain the selected tool's result.
 
 The live profile is `mcp`. Its tools and configuration are in
 [agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP

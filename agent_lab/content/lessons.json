@@ -2491,11 +2491,12 @@
   "prerequisites": [
    5
   ],
-  "concept_brief": "An MCP server exposes typed tools over a transport. With stdio, the client starts the server as a subprocess and exchanges JSON-RPC messages on its stdin and stdout; `ClaudeAgentOptions.mcp_servers` takes the same command for live runs.",
-  "lab_brief": "The `mcp_stdio` exercise launches `agent_lab.integrations.notes_mcp` as a real subprocess, initializes an MCP `ClientSession` over stdio, lists its tools and calls `read_note` once with a valid and once with an invalid name.",
+  "concept_brief": "MCP separates server configuration, transport connection, tool discovery and actual tool execution. Compare a stdio child process, a loopback HTTP server and an in-process SDK server. Configuring a server does not prove a tool ran. Concept-map brief: draw the three transports converging on typed tool discovery, then a separate agent call -> matching result -> parent outcome lane; keep host inventory snapshots separate.",
+  "lab_brief": "The selected experiment discovers a real owned inventory server, reads stock and optionally reserves units through MCP. Offline uses actual MCP transports and inventory changes with explicitly recorded agent identities. Live mode configures the real SDK, observes its MCP status and calls, and can toggle or reconnect the configured server before one query. The separate no-model workshop lets you inspect, disable/enable, reconnect, change owned transports and reset its own stock. Lab-walkthrough brief: show transport/tool controls beside status, available stock and call/result IDs, with a disabled-call guard and transport-close observation.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 13 (or run `uv run agent-lab lesson 13`).",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. Live runs pass the same command in `mcp_servers` and allow `mcp__notes__read_note`."
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. Live runs pass the same command in `mcp_servers` and allow `mcp__notes__read_note`.",
+   "Choose a transport and permitted tool in Run the exercise. Keep the server enabled and Reserve selected for the passing inventory-change example. The separate MCP workshop never calls a model."
   ],
   "steps": [
    {
@@ -2504,48 +2505,41 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `mcp_stdio` and `build_server` in `agent_lab/integrations/notes_mcp.py`."
+    "text": "Inspect the owned server configuration, real transport experiment and evaluator in the three Python source excerpts. The browser cannot provide arbitrary commands, URLs, headers or file paths."
    },
    {
     "title": "Run one example",
-    "text": "Run the offline exercise; it starts and stops a real server process."
+    "text": "Run the default in-process SDK-server experiment, then compare Child process and Loopback HTTP. Try Disable then enable and Reconnect before calling. Offline agent identities are labelled fixtures; MCP requests and inventory changes really execute."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare `valid_call` and `invalid_call`, and read the tool's `input_schema`."
+    "text": "Compare configured servers, permitted tool names, discovered schemas, call/result identity and parent success. Inspect local stock before and after. A valid configuration or successful handshake alone cannot satisfy the agent-tool criterion."
    },
    {
     "title": "Try the challenge",
-    "text": "Change the invalid call and watch `is_error` change."
+    "text": "Open the separate no-model workshop. Check status, disable the server and attempt a reservation; stock must remain unchanged. Enable it, reserve units, reconnect, and end the workshop. These observations do not complete the automatic agent check."
    }
   ],
-  "inspect": "`transport`, `server_command`, the `tools` list with its `input_schema`, `valid_call`, `invalid_call` and the `sdk_config` you would pass to `mcp_servers`.",
-  "expected": "`server` is `python-notes`, the only tool is `read_note`, `valid_call` returns the refunds note with `is_error` false, and `invalid_call` returns `is_error` true with the message `Unknown note. Choose welcome or refunds.`",
-  "evidence_criterion": "The check confirms a real stdio session: the valid call succeeded and the invalid call was reported as a tool error.",
+  "inspect": "Inspect configured.mcp_servers and allowed_tools, matching calls/results and terminal_results. Offline local_effects contains discovered tools, before/after stock and the lifecycle timeline. Live mcp_status_history contains actual SDK status observations; local_stock is independently read by the host.",
+  "expected": "The default owned notebook inventory falls from 12 to 10 after one successful MCP reservation. The recorded agent call/result pair and parent outcome satisfy the offline bounded check; live proof must come from the actual SDK stream. Disabled configuration, missing evidence, mismatched identities and the reservation-error scenario need review.",
+  "evidence_criterion": "An MCP tool has one successful matching call/result pair, its server and permitted tool were configured, and the parent succeeds. Remote service correctness is not certified.",
   "evidence_checks": [
    {
-    "key": "transport",
-    "rule": "equals",
-    "value": "stdio"
-   },
-   {
-    "key": "tools",
-    "rule": "truthy"
-   },
-   {
-    "key": "valid_call",
+    "key": "experiment_passed",
     "rule": "truthy"
    }
   ],
-  "challenge": "Change the invalid call's name from `salaries` to `welcome` in `mcp_stdio`, run again and confirm `invalid_call.is_error` becomes false with the welcome note as text.",
+  "challenge": "Compare all three transports with the same reservation. In the separate workshop, disable the server and verify a blocked reservation changes no stock; enable it and inspect a successful call. Explain why a connection probe, a host inventory effect and an agent invocation are separate evidence.",
   "hints": [
-   "The server validates the name itself and raises for unknown notes.",
-   "A raised error in an MCP tool becomes a result with `isError` true, so the client and the model see the message instead of a crash."
+   "The selected experiment and the no-model workshop use separate owned inventory files. Open a workshop and Check MCP status before reading its tools and stock.",
+   "Disable MCP server blocks before any new transport starts. The workshop closes each operation's transport, so Last probe connected is historical. For the automatic check, follow the agent call ID to exactly one successful result and inspect the parent terminal result."
   ],
-  "reference": "stdio keeps the server in its own process: the client owns its lifetime and talks to it with JSON-RPC over pipes. Tool errors are part of the protocol, so a bad argument produces an error result the model can read, not a broken session.",
+  "reference": "A stdio client starts an owned subprocess; HTTP connects to a host-created loopback service; the SDK variant runs a server in-process. Tool discovery establishes available schemas, not invocation. The offline experiment makes real MCP calls and reads host inventory before/after, while its agent call/result identities are explicitly recorded fixtures. Live mode uses actual SDK status, toggle/reconnect methods and observed tool events. Only the chosen inventory tool is permitted; a live agent reservation is limited to one write with the authorized item and quantity. Python SDK handlers return is_error, which the SDK maps to MCP isError; a textual error with a false flag must never pass as a successful reservation. The workshop stores enablement and inventory under a token-scoped handle, opens/closes a transport per action and makes no model call. It does not represent a persistent agent conversation or certify a remote service.",
   "recovery": [
    "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials.",
+   "If the server is disabled, enable it before probing or calling tools. A closed or expired workshop requires a new handle; its own stock remains inspectable with its token.",
+   "For the inventory-error scenario, keep an enabled Reserve tool selected. Inspect the error flag and confirm stock was not changed. Authentication/model access errors in live mode are preserved as failures; no host retry is made."
   ],
   "quiz": [
    {
@@ -2583,14 +2577,84 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "The server configuration is valid, but no tool call appears. What does that prove?",
+    "options": [
+     {
+      "text": "The tool and parent automatically succeeded.",
+      "explanation": "A configuration cannot establish an invocation or terminal outcome."
+     },
+     {
+      "text": "Setup evidence only; inspect connection status and call/result events.",
+      "explanation": "Correct. Configuration, discovery and actual invocation are distinct observations."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "An MCP call has ID A and the only successful result has ID B. Should the check pass?",
+    "options": [
+     {
+      "text": "No; call and result identities must match.",
+      "explanation": "Correct. An unrelated success cannot satisfy this invocation."
+     },
+     {
+      "text": "Yes, if the assistant claims success.",
+      "explanation": "Assistant prose cannot replace correlated tool evidence."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "The SDK tool returns an error message but its error flag is false. What needs fixing?",
+    "options": [
+     {
+      "text": "Nothing; all text containing error is automatically a failure.",
+      "explanation": "The protocol does not infer an error flag from prose."
+     },
+     {
+      "text": "Return the SDK handler's is_error flag and inspect MCP isError.",
+      "explanation": "Correct. The installed SDK maps its snake-case handler flag to the MCP wire flag; errors must remain explicit."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "In the concept map, where should inventory snapshots appear?",
+    "options": [
+     {
+      "text": "As host observations alongside the tool trace and parent result.",
+      "explanation": "Correct. Actual stock changes are independent evidence and do not replace invocation identity."
+     },
+     {
+      "text": "As a replacement for all tool and terminal records.",
+      "explanation": "A changed file alone does not establish a successful agent run."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "In the workshop timeline, Last probe connected is true and Connection open is false. Is that contradictory?",
+    "options": [
+     {
+      "text": "Yes; the UI should invent a permanent connection.",
+      "explanation": "The workshop deliberately owns a transport only for each operation."
+     },
+     {
+      "text": "No; the probe succeeded and its transport then closed.",
+      "explanation": "Correct. Historical connection evidence is separate from the current resource lifecycle."
+     }
+    ],
+    "correct": 1
    }
   ],
   "concept_code": "import sys\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\n\nasync def main() -> None:\n    options = ClaudeAgentOptions(\n        mcp_servers={\n            # The CLI starts this command as a subprocess and speaks JSON-RPC on stdin/stdout.\n            \"notes\": {\n                \"type\": \"stdio\",\n                \"command\": sys.executable,\n                \"args\": [\"-m\", \"notes_mcp\"],\n            }\n        },\n        strict_mcp_config=True,\n        tools=[],\n        allowed_tools=[\"mcp__notes__read_note\"],\n    )\n    prompt = \"Use the notes MCP server to read the welcome note.\"\n    async for message in query(prompt=prompt, options=options):\n        if isinstance(message, ResultMessage):\n            print(message.result)",
-  "code_focus": "The `mcp_servers={\"notes\": {\"type\": \"stdio\", \"command\": ..., \"args\": [...]}}` entry tells the CLI how to launch the server, and `allowed_tools=[\"mcp__notes__read_note\"]` exposes one tool.",
+  "code_focus": "The compact source example shows a stdio MCP server. The expanded inventory experiment adds owned HTTP and SDK servers, runtime status/lifecycle observations and correlated checks; inspect its exact excerpts below the separate standard example.",
   "concept_points": [
    {
-    "title": "A transport, not a library",
-    "text": "An MCP server is a separate program that offers typed tools over a transport such as stdio."
+    "title": "Three server configurations",
+    "text": "A stdio child, a running HTTP service and an in-process SDK server expose MCP tools through different owned transports."
    },
    {
     "title": "stdio means subprocess",
@@ -2602,8 +2666,8 @@
    }
   ],
   "misconception": {
-   "claim": "A stdio MCP server must already be running before the agent starts.",
-   "correction": "With stdio the client launches the server itself from the configured command and args, and stops it when the session ends."
+   "claim": "Configuring or connecting an MCP server proves that the agent used its tools correctly.",
+   "correction": "Inspect discovery, a successful matching tool call/result and parent completion separately. Compare real host effects; remote service correctness and prose still require review."
   }
  },
  {

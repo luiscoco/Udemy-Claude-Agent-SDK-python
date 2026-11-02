@@ -173,7 +173,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 12:
+                        if 2 <= lesson <= 13:
                             for section in source_sections(lesson):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
@@ -204,12 +204,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         prompt = (
                             ui.textarea(
                                 "Prompt"
-                                if lesson <= 12
+                                if lesson <= 13
                                 else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
-                                value=current.prompt if lesson <= 12 else "",
+                                value=current.prompt if lesson <= 13 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -217,7 +217,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if lesson <= 12:
+                        if lesson <= 13:
                             ui.label(
                                 "Offline experiments validate your prompt and run local host code with labelled SDK fixtures; they do not call Claude."
                             ).classes("text-sm text-slate-600")
@@ -235,7 +235,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
-                        if lesson <= 12 and lesson not in {6, 12}:
+                        if lesson <= 13 and lesson not in {6, 12}:
                             follow_up.set_visibility(False)
                         read_lesson_options = experiment_controls(lesson, mode)
                         scenario = (
@@ -255,7 +255,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             .classes("w-full")
                         )
                         scenario.bind_visibility_from(
-                            mode, "value", lambda value: lesson <= 12 and value == "offline"
+                            mode, "value", lambda value: lesson <= 13 and value == "offline"
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (
@@ -291,6 +291,10 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             cancel_button = ui.button("Cancel", icon="stop", color="secondary")
                             cancel_button.disable()
                             status = ui.label("Ready")
+                        if lesson == 13:
+                            from agent_lab.ui_mcp import mcp_workshop_controls
+
+                            mcp_workshop_controls(application.state.mcp_workshops, client)
                         stream_buttons = []
                         if lesson == 12:
                             with ui.column().classes("w-full gap-3 stream-session-controls"):

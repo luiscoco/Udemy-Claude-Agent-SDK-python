@@ -373,6 +373,21 @@ class Evidence:
                 )
             )
             explanation = "A visible prepared Skill call needs one successful matching result and successful parent completion. Discovery and host preload alone do not pass. Generated files and answer quality are not certified."
+        elif self.lesson == 13:
+            configured = self.configured.get("mcp_servers", {})
+            allowed = set(self.configured.get("allowed_tools", []))
+            passed = (
+                success
+                and bool(self.initialized)
+                and bool(configured)
+                and any(
+                    call["name"].startswith("mcp__inventory__")
+                    and call["name"] in allowed
+                    and not call.get("parent_tool_use_id")
+                    for call in paired
+                )
+            )
+            explanation = "A configured, permitted MCP tool needs one successful result with the same call/run identity and successful parent completion. Inventory snapshots and connection probes are separate evidence; remote service correctness is not certified."
         return {
             "source": self.source,
             "run": self.run_id,
@@ -891,6 +906,10 @@ async def run_local(
     root: Path, request: RunRequest, lesson: Lesson, ask: Ask | None = None
 ) -> dict[str, Any]:
     request = lesson_request(lesson.id, request)
+    if lesson.id == 13:
+        from agent_lab.mcp_lab import local_mcp
+
+        return await local_mcp(root, request)
     if lesson.id == 12:
         from agent_lab.streaming import local_streaming
 
@@ -960,9 +979,16 @@ async def run_local(
 
 
 def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
+    from agent_lab.mcp_lab import local_mcp
     from agent_lab.streaming import local_streaming
 
-    function = local_streaming if lesson_id == 12 else LOCAL_EXPERIMENTS[lesson_id]
+    function = (
+        local_mcp
+        if lesson_id == 13
+        else local_streaming
+        if lesson_id == 12
+        else LOCAL_EXPERIMENTS[lesson_id]
+    )
     lines, start = inspect.getsourcelines(function)
     path = Path(inspect.getfile(function)).relative_to(Path(__file__).resolve().parent.parent)
     return path.as_posix(), "".join(lines), start
@@ -990,7 +1016,7 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 "Which identities and terminal evidence does this lesson require?",
             ),
         )
-        if lesson_id != 12
+        if lesson_id not in {12, 13}
         else ()
     )
     if lesson_id == 12:
@@ -1013,7 +1039,28 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 "Why are application handles and SDK identities checked separately?",
             ),
         )
+    if lesson_id == 13:
+        from agent_lab.mcp_lab import local_mcp, server_config
+
+        functions = (
+            (
+                "Owned server configuration",
+                server_config,
+                "Which values select a child process, loopback server or SDK server?",
+            ),
+            (
+                "Real transport and inventory experiment",
+                local_mcp,
+                "Which effects really execute and which agent identities are recorded?",
+            ),
+            (
+                "Bounded evidence evaluator",
+                Evidence.report,
+                "Why is a configured server alone insufficient?",
+            ),
+        )
     for title, function, question in functions:
+        function = inspect.unwrap(function)
         lines, start = inspect.getsourcelines(function)
         sections.append(
             {

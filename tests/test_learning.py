@@ -1102,7 +1102,7 @@ def test_browser_my_learning_section_quiz_refresh_does_not_complete_lessons(serv
         context.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 13))
+@pytest.mark.parametrize("lesson", range(2, 14))
 def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server, guide_browser_context, lesson):
     from playwright.sync_api import expect
 
@@ -1260,6 +1260,57 @@ def test_browser_manual_stream_queue_controls_end_and_cancel(server, guide_brows
         expect(page.get_by_text("Cancelled", exact=True)).to_be_visible()
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
         expect(session.get_by_role("button", name="Queue message", exact=True)).to_be_disabled()
+        assert not errors
+    finally:
+        context.close()
+
+
+def test_browser_mcp_workshop_real_stock_disable_reconnect_and_end(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=13")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Run the exercise").click()
+        workshop = page.locator(".mcp-workshop")
+        workshop.get_by_role("button", name="Open MCP workshop", exact=True).click()
+        expect(workshop.get_by_text("Last probe connected: True", exact=False)).to_be_visible(timeout=15000)
+        expect(workshop.get_by_role("cell", name="12", exact=True)).to_be_visible()
+        workshop.get_by_role("button", name="Disable MCP server", exact=True).click()
+        expect(workshop.get_by_text("Enabled: False", exact=False)).to_be_visible()
+        workshop.get_by_role("button", name="Reserve inventory", exact=True).click()
+        expect(workshop.get_by_text("The inventory server is disabled; no transport or tool was started.", exact=True)).to_be_visible()
+        expect(workshop.get_by_role("cell", name="12", exact=True)).to_be_visible()
+        workshop.get_by_role("button", name="Enable MCP server", exact=True).click()
+        expect(workshop.get_by_text("Enabled: True", exact=False)).to_be_visible()
+        workshop.get_by_role("button", name="Reserve inventory", exact=True).click()
+        expect(workshop.get_by_role("cell", name="10", exact=True)).to_be_visible(timeout=15000)
+        workshop.get_by_role("button", name="Reconnect MCP server", exact=True).click()
+        expect(workshop.get_by_text("A fresh connection and handshake succeeded; transport closed.", exact=True)).to_be_visible()
+        workshop.get_by_role("button", name="Reset workshop inventory", exact=True).click()
+        expect(workshop.get_by_role("cell", name="12", exact=True)).to_be_visible()
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        workshop.evaluate("e => e.scrollIntoView({block:'start'})")
+        page.evaluate("window.scrollBy(0, -120)")
+        page.screenshot(path=str(data / "mcp-workshop-phone-upper.png"))
+        workshop.get_by_role("button", name="End MCP workshop", exact=True).evaluate("e => e.scrollIntoView({block:'center'})")
+        page.screenshot(path=str(data / "mcp-workshop-phone-lower.png"))
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        page.wait_for_function("""() => {
+            const target = document.querySelector('.mcp-workshop');
+            const drawer = document.querySelector('.q-drawer');
+            return target && (!drawer || target.getBoundingClientRect().left >= drawer.getBoundingClientRect().right - 1);
+        }""")
+        page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "mcp-workshop-desktop.png"))
+        workshop.get_by_role("button", name="End MCP workshop", exact=True).click()
+        expect(workshop.get_by_text("Workshop closed: True", exact=False)).to_be_visible()
+        expect(workshop.get_by_role("button", name="Reserve inventory", exact=True)).to_be_disabled()
         assert not errors
     finally:
         context.close()

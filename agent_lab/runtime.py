@@ -97,12 +97,12 @@ class RunService:
                     return
                 evidence = (
                     {}
-                    if 1 <= lesson.id <= 12 and request.mode == "live"
+                    if 1 <= lesson.id <= 13 and request.mode == "live"
                     else await run_exercise(work, request, lesson, ask=ask)
-                    if 2 <= lesson.id <= 12
+                    if 2 <= lesson.id <= 13
                     else await run_exercise(work, request, lesson)
                 )
-                if not (1 <= lesson.id <= 12 and request.mode == "live"):
+                if not (1 <= lesson.id <= 13 and request.mode == "live"):
                     await emit(
                         Event(
                             kind="evidence",

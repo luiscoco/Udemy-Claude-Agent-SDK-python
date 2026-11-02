@@ -57,6 +57,8 @@ Lesson 11 adds project/plugin skill discovery, invocation and host-preload compa
 supporting resources and correlated Skill evidence. See the [Skills lab guide](docs/lesson-11-skills.md).
 Lesson 12 adds one open input queue, manual messages, acknowledged runtime controls,
 token-scoped session APIs and closure checks. See the [Streaming input guide](docs/lesson-12-streaming.md).
+Lesson 13 adds real inventory MCP transports, lifecycle workshops, scoped APIs and
+correlated agent evidence. See the [MCP servers guide](docs/lesson-13-mcp.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

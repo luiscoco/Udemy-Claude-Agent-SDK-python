@@ -45,6 +45,10 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
         async def query(self, prompt):
             owners.append(asyncio.current_task())
 
+        async def get_mcp_status(self):
+            owners.append(asyncio.current_task())
+            return {"mcpServers": [{"name": "inventory", "status": "connected"}]}
+
         async def receive_response(self):
             owners.append(asyncio.current_task())
             yield AssistantMessage(
@@ -85,7 +89,7 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     current = LESSONS[lesson_id]
     request = RunRequest(mode="live")
     seed_workspace(tmp_path / "work", current)
-    evidence = {} if lesson_id == 12 else await run_exercise(tmp_path / "work", request, current)
+    evidence = {} if lesson_id in {12, 13} else await run_exercise(tmp_path / "work", request, current)
     events = []
 
     async def emit(event):
@@ -119,9 +123,9 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     assert set(options.hooks or {}) == (set() if lesson_id == 12 else {"PreToolUse", "PostToolUse"}) | (
         {"Elicitation"} if lesson_id == 33 else set()
     )
-    # Pre-approving tools would skip can_use_tool; the PreToolUse hook decides instead.
-    assert options.allowed_tools == []
-    assert events[-1].kind == ("evidence" if lesson_id <= 12 else "result")
+    # Lesson 13 sends one exact MCP allow rule and retains its PreToolUse guard.
+    assert options.allowed_tools == (["mcp__inventory__reserve"] if lesson_id == 13 else [])
+    assert events[-1].kind == ("evidence" if lesson_id <= 13 else "result")
 
 
 async def test_missing_live_credential_fails_before_client_connect(tmp_path, monkeypatch):

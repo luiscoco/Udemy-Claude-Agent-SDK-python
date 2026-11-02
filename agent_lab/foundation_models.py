@@ -91,6 +91,15 @@ class StreamingInputs(Inputs):
     max_messages: int = Field(default=2, ge=2, le=4)
 
 
+class McpInputs(Inputs):
+    transport: Literal["stdio", "http", "sdk"] = "sdk"
+    tool: Literal["stock", "reserve"] = "reserve"
+    sku: Literal["notebook", "pen"] = "notebook"
+    quantity: int = Field(default=2, ge=1, le=5)
+    enabled: bool = True
+    lifecycle: Literal["none", "toggle", "reconnect"] = "none"
+
+
 INPUT_MODELS: dict[int, type[Inputs]] = {
     2: OptionsInputs,
     3: ToolsInputs,
@@ -103,6 +112,7 @@ INPUT_MODELS: dict[int, type[Inputs]] = {
     10: StructuredInputs,
     11: SkillsInputs,
     12: StreamingInputs,
+    13: McpInputs,
 }
 
 SCENARIOS: dict[int, dict[str, str]] = {
@@ -115,6 +125,7 @@ SCENARIOS: dict[int, dict[str, str]] = {
 }
 SCENARIOS[2]["limit-error"] = "Recorded limit error"
 SCENARIOS[12]["interrupted"] = "Interrupted input queue"
+SCENARIOS[13]["tool-error"] = "Inventory server rejects the reservation"
 SCENARIOS[5].update(
     {
         "invalid-arguments": "Rejected handler arguments",

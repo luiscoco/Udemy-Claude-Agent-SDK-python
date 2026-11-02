@@ -49,8 +49,8 @@
   {
    "id": "assessment-and-workbook",
    "status": "partial",
-   "python": "Seven explained questions per lesson for lessons 1-12, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
-   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 13-20; keep shared navigation, media and runtime adaptations separately tracked."
+   "python": "Seven explained questions per lesson for lessons 1-13, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
+   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 14-20; keep shared navigation, media and runtime adaptations separately tracked."
   },
   {
    "id": "progress",
@@ -296,14 +296,14 @@
    "title": "MCP servers",
    "exercise": "mcp",
    "live_profile": "mcp",
-   "adaptation": "",
+   "adaptation": "Workshop handles persist inventory and enablement, not a live agent conversation. Each direct MCP action opens/closes its owned transport. Live agent lifecycle controls run before one bounded query; dynamic set-servers selects the next workshop connection.",
    "python_line": 895,
    "reference_contract": "docs/prompts/l13-lesson-13-mcp-servers.md",
    "reference_blob_sha": "ca491755aa0f32f961fb457a3d488f19f36256f0",
    "foundation_component": "src/concepts/Concept13McpServers.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "gap": "Owned inventory MCP over stdio, loopback HTTP and SDK transports; scoped workshop routes/controls; actual stock effects; live SDK status/toggle/reconnect; correlated checks; three source excerpts and seven questions are implemented. Persistent live-agent MCP sessions, arbitrary remote/authenticated services, recorded media and full reference certification remain pending.",
    "written_guide_content": "lesson-content"
   },
   {
