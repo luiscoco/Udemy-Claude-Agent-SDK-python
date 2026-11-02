@@ -87,10 +87,12 @@ class RunService:
                 seed_workspace(work, lesson)
                 evidence = (
                     {}
-                    if lesson.id == 1 and request.mode == "live"
+                    if 1 <= lesson.id <= 10 and request.mode == "live"
+                    else await run_exercise(work, request, lesson, ask=ask)
+                    if 2 <= lesson.id <= 10
                     else await run_exercise(work, request, lesson)
                 )
-                if not (lesson.id == 1 and request.mode == "live"):
+                if not (1 <= lesson.id <= 10 and request.mode == "live"):
                     await emit(
                         Event(
                             kind="evidence",

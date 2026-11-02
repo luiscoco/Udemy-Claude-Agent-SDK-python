@@ -91,7 +91,7 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     assert options.strict_mcp_config
     assert options.cwd == str(tmp_path / "work")
     assert "Bash" not in options.tools
-    assert "Write" not in options.tools
+    assert ("Write" in options.tools) is (lesson_id == 4)
     assert options.max_budget_usd == (0.05 if lesson_id == 1 else 0.1)
     if lesson_id == 1:
         assert options.max_turns == 1
@@ -102,7 +102,7 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     )
     # Pre-approving tools would skip can_use_tool; the PreToolUse hook decides instead.
     assert options.allowed_tools == []
-    assert events[-1].kind == ("evidence" if lesson_id == 1 else "result")
+    assert events[-1].kind == ("evidence" if lesson_id <= 10 else "result")
 
 
 async def test_missing_live_credential_fails_before_client_connect(tmp_path, monkeypatch):
@@ -179,6 +179,8 @@ async def test_401_stops_stream_and_closes_sdk_connection(tmp_path, monkeypatch,
     monkeypatch.setattr(sdk, "ClaudeSDKClient", Client)
 
     async def callback(*args):
+        if args[0].kind == "options":
+            return
         raise AssertionError("Must report authentication failure instead of retry events")
 
     with pytest.raises(PermissionError, match="HTTP 401"):

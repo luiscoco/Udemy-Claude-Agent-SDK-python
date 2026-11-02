@@ -19,7 +19,7 @@ from pydantic import ValidationError
 
 from agent_lab.config import ROOT
 from agent_lab.hooks import call_hook, lesson_hooks, matches, permission_callback
-from agent_lab.models import Lesson, LessonError, RunRequest
+from agent_lab.models import Lesson, LessonError, RunRequest, lesson_request
 from agent_lab.policy import decide, inside, redact
 from agent_lab.services import (
     Approval,
@@ -621,7 +621,7 @@ def options(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
         "built_options": {name: getattr(built, name) for name in fields},
         "sdk_defaults": {name: getattr(ClaudeAgentOptions(), name) for name in fields},
         "note": "None in sdk_defaults means the option is not sent and the CLI decides. "
-        "The lab always sends explicit limits.",
+        "The standard example sends explicit limits; the selected experiment supports SDK limit omission.",
     }
 
 
@@ -2529,6 +2529,8 @@ def exercise_uses(name: str, field: str) -> bool:
     # The testing alias reuses the producer but ignores lesson 1's student inputs.
     if name == "testing":
         return False
+    if field == "prompt" and name in {"options", "workspace", "permissions", "calculator", "sessions", "hooks", "subagents", "system_prompts", "structured"}:
+        return True  # The foundation wrapper validates and records this input.
     return f"request.{field}" in exercise_source(name)
 
 
@@ -2551,9 +2553,15 @@ def exercise_context(name: str) -> str:
     return source + "".join(blocks)
 
 
-async def run_exercise(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
+async def run_exercise(root: Path, request: RunRequest, lesson: Lesson, *, ask: Any = None) -> dict[str, Any]:
+    if 2 <= lesson.id <= 10:
+        request = lesson_request(lesson.id, request)
     function = EXERCISES[lesson.exercise]
     result = function(root, request, lesson)
     if inspect.isawaitable(result):
         result = await result
+    if 2 <= lesson.id <= 10:
+        from agent_lab.foundations import run_local
+
+        result.update(await run_local(root, request, lesson, ask))
     return result

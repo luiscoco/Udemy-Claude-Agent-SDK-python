@@ -51,6 +51,8 @@ and replace that browser's progress only after you confirm.
 Automatic checks cover exercise evidence; your self-review stays separate.
 Lesson 1 checks terminal stream success and includes three recorded outcome scenarios,
 seven explained questions and bounded request validation. See the [Lesson 1 guide](docs/lesson-1-query.md).
+Lessons 2–10 also include seven explained questions, lesson-specific experiment controls,
+correlated evidence checks and three exact source excerpts. See the [SDK experiments guide](docs/foundations-2-10.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

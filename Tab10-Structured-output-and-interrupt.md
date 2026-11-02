@@ -24,12 +24,13 @@ For the browser lab, run `uv run agent-lab serve`, then open
 
 ```python
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage, query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Summary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     summary: str = Field(min_length=1, max_length=500)
-    next_steps: list[str] = Field(min_length=2, max_length=2)
+    next_steps: list[str] = Field(min_length=1, max_length=4)
 
 
 async def structured() -> Summary | None:
@@ -54,7 +55,7 @@ async def interrupted() -> None:
                 print(message.subtype, message.is_error)
 ```
 
-`output_format={"type": "json_schema", ...}` requests structured data, `Summary.model_validate(message.structured_output)` checks it, and `client.interrupt()` stops the running turn.
+output_format requests structured data, Summary.model_validate checks the returned structured_output, and client.interrupt() requests interruption. Inspect the terminal outcome separately.
 
 ## How the offline lab checks it
 

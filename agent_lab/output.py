@@ -21,6 +21,7 @@ class OutputState:
     error: str = ""
     cost: float = 0
     turns: int = 0
+    options: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def response_texts(self) -> list[str]:
@@ -35,6 +36,8 @@ class OutputState:
             self.status = "running"
         elif event.kind == "evidence":
             self.evidence = data["result"]
+        elif event.kind == "options":
+            self.options.append(data)
         elif event.kind == "message" and not data.get("parent_tool_use_id"):
             if data.get("message_class") == "AssistantMessage":
                 # Complete blocks replace streamed previews; thinking/tool calls are traces.
@@ -178,6 +181,10 @@ def render_output(state: OutputState, exercise: str, run_id: str | None) -> None
         ):
             ui.icon("error_outline")
             ui.label(state.error).classes("break-words min-w-0")
+    if state.options:
+        with ui.expansion("Actual SDK options", value=state.status == "failed").classes("w-full"):
+            for entry in state.options:
+                render_value(entry)
     if state.mode == "live":
         for number, text in enumerate(state.response_texts, 1):
             ui.label(f"Claude response {number}").classes("font-semibold text-purple-700")
@@ -197,7 +204,14 @@ def render_output(state: OutputState, exercise: str, run_id: str | None) -> None
         ui.label(
             "Computed locally or recorded as a teaching fixture. Your prompt was not sent to Claude."
         ).classes("text-sm text-slate-500")
-        render_value(state.evidence)
+        if isinstance(state.evidence.get("experiment"), dict):
+            render_value(state.evidence["experiment"], "Selected lesson experiment")
+            baseline = {key: value for key, value in state.evidence.items() if key not in {"experiment", "experiment_passed"}}
+            if baseline:
+                with ui.expansion("Standard Python example (separate reference run)").classes("w-full"):
+                    render_value(baseline)
+        else:
+            render_value(state.evidence)
     for title, value in state.results:
         with ui.card().classes("course-card w-full p-4"):
             render_value(value, title)
@@ -216,7 +230,7 @@ def render_output(state: OutputState, exercise: str, run_id: str | None) -> None
                 "Download generated image", f"/api/runs/{run_id}/artifacts/pixel.png", new_tab=True
             )
     if state.mode == "live" and state.evidence is not None:
-        with ui.expansion("Local exercise results (separate from Claude’s response)").classes(
+        with ui.expansion("SDK execution evidence" if "experiment" in state.evidence else "Local exercise results (separate from Claude’s response)").classes(
             "w-full"
         ):
             render_value(state.evidence)

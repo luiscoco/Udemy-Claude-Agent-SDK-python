@@ -64,16 +64,12 @@ async def test_automatic_check_passes_on_actual_offline_evidence(lesson_id, tmp_
 
 
 def test_automatic_check_reports_failures_without_grading_the_student():
-    key = guide(5).evidence_checks[0].key
     assert check_evidence(5, {}, status="completed").status == "needs-review"
-    assert key in check_evidence(5, {}, status="completed").detail
+    assert "missing" in check_evidence(5, {}, status="completed").detail.lower()
     assert check_evidence(5, None, status="failed").detail.startswith("The run ended as failed")
     evidence = {check.key: check.value or "x" for check in guide(5).evidence_checks}
     assert check_evidence(5, evidence, status="completed", mode="live").status == "needs-review"
-    assert (
-        check_evidence(5, evidence, status="completed", mode="live", responded=True).status
-        == "passed"
-    )
+    assert check_evidence(5, evidence, status="completed", mode="live", responded=True).status == "needs-review"
 
 
 @pytest.mark.parametrize("intent", TUTOR_INTENTS)
@@ -1102,5 +1098,84 @@ def test_browser_my_learning_section_quiz_refresh_does_not_complete_lessons(serv
         assert progress["lessons"] == {} and progress["last_lesson"] == 0
         assert progress["learning_guide_positions"] == {}
         assert progress["sections"][quiz.id]["0"] == quiz.questions[0].correct
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("lesson", range(2, 11))
+def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server, guide_browser_context, lesson):
+    from playwright.sync_api import expect
+
+    from agent_lab.ui_learning import REVIEW_ITEMS
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + f"/?lesson={lesson}")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Run the exercise").click()
+        expect(page.locator(".foundation-controls")).to_be_visible()
+        expect(page.get_by_label("Prompt", exact=True)).to_be_enabled()
+        for index, (scenario, label) in enumerate([
+            ("success", "Passing example"), ("missing-evidence", "Missing required evidence"), ("wrong-identity", "Mismatched identity"),
+        ]):
+            if index == 1:
+                page.locator(".foundation-controls").screenshot(path=str(data / f"foundation-{lesson}-desktop-controls.png"))
+                page.set_viewport_size({"width": 390, "height": 844})
+            page.get_by_label("Recorded scenario", exact=True).click()
+            page.get_by_role("option", name=label, exact=True).click()
+            page.get_by_role("button", name="Run exercise", exact=True).click()
+            expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
+            expect(page.get_by_role("button", name="Run exercise", exact=True)).to_be_enabled()
+            expect(page.locator(".guide-evidence-target").get_by_text(scenario, exact=True).first).to_be_visible()
+            expect(page.get_by_text("Check passed" if scenario == "success" else "Needs review", exact=True)).to_be_visible()
+        page.locator(".foundation-controls").screenshot(path=str(data / f"foundation-{lesson}-phone-controls.png"))
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.get_by_role("tab", name="Python source").click()
+        page.get_by_text("How the offline lab checks this concept", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        page.get_by_role("tab", name="Learn").click()
+        question = page.locator(".quiz-question").last
+        question.get_by_role("radio").nth(guide(lesson).quiz[-1].correct).click()
+        expect(question.locator(".feedback-ok")).to_be_visible()
+        draft = f"Lesson {lesson}: correlate the actual operation and terminal evidence."
+        page.get_by_label("Your explanation and evidence", exact=True).fill(draft)
+        page.get_by_role("button", name="Save attempt", exact=True).click()
+        expect(page.get_by_text("1 saved attempts", exact=False)).to_be_visible()
+        page.reload()
+        expect(page.get_by_label("Your explanation and evidence", exact=True)).to_have_value(draft)
+        expect(page.locator(".quiz-question").last.get_by_role("radio").nth(guide(lesson).quiz[-1].correct)).to_be_checked()
+        for label in REVIEW_ITEMS:
+            expect(page.get_by_role("checkbox", name=label, exact=True)).not_to_be_checked()
+        assert not errors
+    finally:
+        context.close()
+
+
+def test_browser_foundation_permission_dialog_denial_and_cancellation(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        page.goto(base + "/?lesson=4")
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_label("Permission decision", exact=True).click()
+        page.get_by_role("option", name="Ask me in a permission dialog", exact=True).click()
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        dialog = page.get_by_role("dialog")
+        expect(dialog.get_by_text("Write draft.txt: allow, deny or redirect to approved.txt?", exact=True)).to_be_visible()
+        dialog.get_by_role("radio", name="Deny", exact=True).click()
+        dialog.get_by_role("button", name="Send answer", exact=True).click()
+        expect(page.get_by_text("Check passed", exact=True)).to_be_visible(timeout=15000)
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(dialog).to_be_visible()
+        dialog.get_by_role("button", name="Cancel run", exact=True).click()
+        expect(page.get_by_text("Cancelled", exact=True)).to_be_visible()
+        expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
     finally:
         context.close()

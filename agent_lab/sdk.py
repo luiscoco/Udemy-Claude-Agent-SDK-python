@@ -19,7 +19,7 @@ from claude_agent_sdk import (
     query,
     tool,
 )
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from agent_lab.config import ROOT, Settings
 from agent_lab.doctor import resolve_cli_path
@@ -118,6 +118,27 @@ async def run_sdk(
     from agent_lab.models import lesson_request
 
     request = lesson_request(lesson.id, request)
+    foundation = None
+    if 2 <= lesson.id <= 10:
+        from agent_lab.foundations import Evidence
+
+        foundation = Evidence(
+            lesson.id,
+            work.parent.name,
+            work,
+            dict(request.lesson_options),
+            "live SDK stream and actual host callbacks",
+            requested_turns=request.max_turns,
+            requested_budget=request.max_budget_usd,
+        )
+        original_emit = emit
+
+        async def record(event: Event) -> None:
+            if foundation is not None:
+                foundation.observe(event)
+            await original_emit(event)
+
+        emit = record
     require_live_access(settings)
     await asyncio.to_thread(config.mkdir, parents=True, exist_ok=True)
     options = ClaudeAgentOptions(
@@ -159,7 +180,17 @@ async def run_sdk(
                 else Calculation.model_validate(arguments)
             )
             value = parsed.a + parsed.b
-            await emit(Event(kind="tool", data={"name": "add", "sum": value}))
+            await emit(
+                Event(
+                    kind="tool",
+                    data={
+                        "name": "add",
+                        "sum": value,
+                        "arguments": parsed.model_dump(),
+                        "server": "lesson",
+                    },
+                )
+            )
             return ok({"sum": value})
 
         tools_to_expose.append(add)
@@ -292,6 +323,10 @@ async def run_sdk(
     options.include_partial_messages = profile in {"options", "streaming"}
 
     def permitted(name: str, arguments: dict[str, Any]) -> tuple[bool, str]:
+        if lesson.id == 3:
+            from agent_lab.foundations import tool_policy
+
+            return tool_policy(request, work, name, arguments)
         if name in allowed_custom or name == "StructuredOutput" and profile == "structured":
             return True, "Host-scoped lesson tool."
         if (
@@ -320,6 +355,22 @@ async def run_sdk(
             HookMatcher(hooks=[demo_elicitation_hook(ask, audit)], timeout=65)
         ]
 
+    if foundation is not None:
+        from agent_lab.foundations import configure, experiment_hooks, live_permission
+
+        foundation.configured = configure(options, lesson, request, work)
+        if lesson.id in {4, 7}:
+            options.hooks = experiment_hooks(foundation, emit)
+        if lesson.id == 4:
+            options.can_use_tool = live_permission(foundation, request, ask)
+        if lesson.id == 7:
+            (work / "alternate.txt").write_text("An alternate owned fixture.\n", encoding="utf-8")
+        await emit(
+            Event(
+                kind="options", data={"lesson_id": lesson.id, "sdk_options": foundation.configured}
+            )
+        )
+
     async def consume(messages: Any) -> None:
         terminal: ResultMessage | None = None
         session_id: str | None = None
@@ -345,13 +396,21 @@ async def run_sdk(
             if isinstance(message, ResultMessage):
                 terminal = message
                 if message.is_error:
+                    if lesson.id == 2:
+                        raise LessonError("The SDK returned a terminal error. Inspect its subtype and echoed options; an omitted SDK limit is different from the host's draft limit.")
                     if lesson.id == 1:
                         raise LessonError(
                             "The SDK returned a failed terminal result. Inspect the subtype and keep lesson 1 within one turn and a 0.05 USD threshold."
                         )
                     raise LessonError(failure_message(message, request))
                 if profile == "structured" and message.structured_output is not None:
-                    parsed = Summary.model_validate(message.structured_output)
+                    try:
+                        parsed = Summary.model_validate(message.structured_output)
+                    except ValidationError as exc:
+                        issues = exc.errors(include_context=False, include_input=False)
+                        await emit(Event(kind="validation_error", data={"issues": issues}))
+                        detail = "; ".join(f'{".".join(str(part) for part in issue["loc"])}: {issue["msg"]}' for issue in issues[:4])
+                        raise LessonError("Structured output failed the course schema: " + detail) from exc
                     await emit(Event(kind="validated", data=parsed.model_dump()))
         if lesson.id == 1:
             if (
@@ -391,7 +450,33 @@ async def run_sdk(
         async with ClaudeSDKClient(options=options) as client:
             await client.query(prompt)
             await consume(client.receive_response())
-            if profile == "conversation":
+            if profile == "conversation" and (
+                lesson.id != 6 or request.lesson_options["strategy"] == "same-client"
+            ):
+                if lesson.id == 6 and foundation is not None:
+                    previous = foundation.terminals[-1] if foundation.terminals else {}
+                    if previous.get("subtype") != "success" or previous.get("is_error") is not False or not previous.get("session_id"):
+                        raise LessonError("A successful first session is required before a follow-up.")
+                await client.query(request.follow_up)
+                await consume(client.receive_response())
+        if (
+            lesson.id == 6
+            and foundation is not None
+            and request.lesson_options["strategy"] != "same-client"
+        ):
+            first = foundation.terminals[-1] if foundation.terminals else {}
+            if (
+                first.get("subtype") != "success"
+                or first.get("is_error") is not False
+                or not first.get("session_id")
+            ):
+                raise LessonError("A successful first session is required before a follow-up.")
+            options.resume = (
+                first["session_id"] if request.lesson_options["strategy"] == "resume" else None
+            )
+            foundation.sent_sessions.append(options.resume)
+            await emit(Event(kind="options", data={"phase": "follow-up", "resume": options.resume}))
+            async with ClaudeSDKClient(options=options) as client:
                 await client.query(request.follow_up)
                 await consume(client.receive_response())
     else:
@@ -408,3 +493,18 @@ async def run_sdk(
             stream = query(prompt=prompt, options=options)
         async with aclosing(stream):  # type: ignore[type-var]
             await consume(stream)
+    if foundation is not None:
+        report = foundation.report()
+        await emit(
+            Event(
+                kind="evidence",
+                data={
+                    "source": "live SDK experiment",
+                    "lesson_id": lesson.id,
+                    "result": {
+                        "experiment": report,
+                        "experiment_passed": report["experiment_passed"],
+                    },
+                },
+            )
+        )

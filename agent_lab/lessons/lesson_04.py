@@ -1,6 +1,6 @@
 """Lesson 4: Permissions.
 
-Reject paths outside the workspace and tools outside the host's allowlist.
+Approve, deny or redirect fixture file operations through a host permission callback.
 """
 import asyncio
 

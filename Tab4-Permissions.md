@@ -1,6 +1,6 @@
 # Lesson 4: Permissions
 
-Reject paths outside the workspace and tools outside the host's allowlist.
+Approve, deny or redirect fixture file operations through a host permission callback.
 
 This lesson is part of **Permissions and security**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -79,7 +79,7 @@ uv run agent-lab lesson 4 --live
 
 Suggested prompt:
 
-> Read notes.txt. Do not write files or execute commands.
+> Write a short note to draft.txt, then report whether permission was granted. Do not use shell commands.
 
 The live profile is `read`. Its tools and configuration are in
 [agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP

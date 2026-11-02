@@ -29,13 +29,13 @@
   ]
  },
  "2": {
-  "source_sha256": "0e736c4a8050475534cb3528a466b31991efb0eafc94c5299211b6e0b863854d",
+  "source_sha256": "7a551edbfc66349eba50aa43d1b961512ec681f2e238845ab0f47b960155ae76",
   "sections": [
    {
     "title": "A strict request model",
     "start": 5,
     "end": 9,
-    "text": "RunRequest describes exactly what a user may send. Extra fields are forbidden, max_turns must sit between one and twenty, and max_budget_usd must be above zero and at most one dollar, so bad limits fail here instead of reaching the SDK."
+    "text": "RunRequest describes exactly what a user may send. Extra fields are forbidden, max_turns must sit between one and twelve, and max_budget_usd must be above zero and at most one dollar, so bad limits fail here instead of reaching the SDK."
    },
    {
     "title": "Validate, then see what was chosen",
@@ -273,36 +273,36 @@
   ]
  },
  "10": {
-  "source_sha256": "0c99cf10c34834b77b10792b72ffaede01c19132813335da1aa419b94fee8b97",
+  "source_sha256": "b38d26d7cd1def38ddb92771a0e59de9f15b535401e3ca59078f0b14116a63a8",
   "sections": [
    {
     "title": "The expected shape",
     "start": 5,
-    "end": 7,
-    "text": "Summary describes the answer we want: a non-empty summary up to five hundred characters and exactly two next steps. The same model will both generate the schema and validate the result."
+    "end": 8,
+    "text": "Summary forbids unexpected fields and requires a non-empty summary of at most five hundred characters plus one to four next steps. The same model generates the schema and validates the returned value."
    },
    {
     "title": "Requesting structured output",
-    "start": 10,
-    "end": 14,
+    "start": 11,
+    "end": 15,
     "text": "output_format with type json_schema and the model's JSON schema asks the agent to return structured data. This is a request, not a guarantee."
    },
    {
     "title": "Validate before trusting",
-    "start": 15,
-    "end": 20,
+    "start": 16,
+    "end": 21,
     "text": "When the ResultMessage carries structured_output, we run it through Summary.model_validate before using it. If the run ends without usable output, the function returns None instead of pretending it succeeded."
    },
    {
     "title": "Interrupting a running turn",
-    "start": 23,
-    "end": 26,
+    "start": 24,
+    "end": 27,
     "text": "Interrupt is a control request, so it needs a connected ClaudeSDKClient. We start a long essay and then call interrupt to stop that turn."
    },
    {
     "title": "What the interrupted turn returns",
-    "start": 27,
-    "end": 29,
+    "start": 28,
+    "end": 30,
     "text": "We still drain the response until the ResultMessage. Printing its subtype and is_error shows how the interrupted turn really ended, so you judge the outcome from the result instead of assuming the full essay arrived."
    }
   ]

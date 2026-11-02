@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import json
+from pathlib import Path
 
 from agent_lab.config import Settings
 from agent_lab.curriculum import LESSONS
@@ -76,8 +77,10 @@ def main() -> None:
     lesson.add_argument("id", type=int, choices=range(1, 76))
     lesson.add_argument("--live", action="store_true")
     lesson.add_argument("--prompt", default=None)
+    lesson.add_argument("--follow-up", default=None)
+    lesson.add_argument("--lesson-options-file", default=None, help="JSON file with this lesson's experiment options")
     lesson.add_argument(
-        "--scenario", choices=["success", "error", "missing-result"], default="success"
+        "--scenario", default="success", help="An offline scenario offered by the selected lesson"
     )
     subcommands.add_parser("list", help="List the curriculum")
     subcommands.add_parser("doctor", help="Check SDK and CLI installation without a model call")
@@ -103,6 +106,17 @@ def main() -> None:
         for item in LESSONS.values():
             print(f"{item.id:2}. {item.title}")
     elif arguments.command == "lesson":
+        options = {}
+        if arguments.lesson_options_file:
+            try:
+                options_path = Path(arguments.lesson_options_file)
+                if options_path.stat().st_size > 20000:
+                    raise ValueError("Lesson options file is too large.")
+                options = json.loads(options_path.read_text(encoding="utf-8-sig"))
+                if not isinstance(options, dict):
+                    raise ValueError("Use a JSON object for lesson options.")
+            except (OSError, ValueError) as exc:
+                parser.error(f"Cannot load lesson options: {exc}")
         raise SystemExit(
             asyncio.run(
                 run_lesson(
@@ -111,8 +125,12 @@ def main() -> None:
                         mode="live" if arguments.live else "offline",
                         prompt=arguments.prompt
                         if arguments.prompt is not None
-                        else LESSONS[arguments.id].prompt if arguments.id == 1 else "",
+                        else LESSONS[arguments.id].prompt
+                        if arguments.id <= 10
+                        else "",
                         scenario=arguments.scenario,
+                        lesson_options=options,
+                        follow_up=arguments.follow_up if arguments.follow_up is not None else RunRequest().follow_up,
                         max_turns=LESSONS[arguments.id].max_turns,
                         max_budget_usd=LESSONS[arguments.id].max_budget_usd,
                     ),

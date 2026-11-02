@@ -211,7 +211,7 @@
    1
   ],
   "concept_brief": "`ClaudeAgentOptions` configures a run: model, `max_turns`, `max_budget_usd`, tools and settings sources. Validate what users send first, then build options only from accepted values. An option left as `None` is not sent, so the CLI default applies.",
-  "lab_brief": "The `options` exercise validates six requests with the `RunRequest` Pydantic model, shows which fields the student actually set versus defaults, and builds a `ClaudeAgentOptions` next to the SDK's own defaults.",
+  "lab_brief": "Change one SDK option at a time: omitted or explicit model, system prompt mode, partial messages and SDK limit omission. The experiment echoes the actual constructed options. Offline identities and terminal states are recorded fixtures, not a model run.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 2 (or run `uv run agent-lab lesson 2`).",
    "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app."
@@ -223,47 +223,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `options` and the `RunRequest` model in `agent_lab/models.py`."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Run the offline exercise."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Change one SDK option at a time: omitted or explicit model, system prompt mode, partial messages and SDK limit omission. The experiment echoes the actual constructed options. Offline identities and terminal states are recorded fixtures, not a model run."
    },
    {
     "title": "Verify the evidence",
-    "text": "Compare `set_by_student` in `accepted`, read each `rejected` problem, then compare `built_options` with `sdk_defaults`."
+    "text": "Compare configured, initialization and terminal_results. An omitted SDK limit appears as None; a positive host input is different from the omission checkbox. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Send a value just past a limit."
+    "text": "Run the same question with custom and preset system instructions. Then omit one SDK limit and explain the difference between an absent SDK option, the host deadline and a recorded limit error."
    }
   ],
-  "inspect": "`accepted` (with `set_by_student`), `rejected` (`field` and `problem`), `built_options`, `sdk_defaults` and the `note`.",
-  "expected": "`omitted values` shows `(none)` set but still gets 4 turns and 0.1 USD; `explicit values` lists both fields. Four requests are rejected: zero turns, NaN budget, a budget above 1 and the unknown `cwd`. `sdk_defaults` are all null while `built_options` are explicit.",
-  "evidence_criterion": "The check confirms valid requests were accepted, invalid ones rejected, and options were built from validated values.",
+  "inspect": "Compare configured, initialization and terminal_results. An omitted SDK limit appears as None; a positive host input is different from the omission checkbox.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Compare configured, initialization and terminal_results. An omitted SDK limit appears as None; a positive host input is different from the omission checkbox.",
+  "evidence_criterion": "The selected options match the request, initialization is observed and the stream completes successfully. This does not grade answer quality or enforce a billing guarantee.",
   "evidence_checks": [
    {
-    "key": "accepted",
-    "rule": "truthy"
-   },
-   {
-    "key": "rejected",
-    "rule": "truthy"
-   },
-   {
-    "key": "built_options",
-    "rule": "truthy"
+    "key": "experiment_passed",
+    "rule": "equals",
+    "value": true
    }
   ],
-  "challenge": "Add `\"thirteen turns\": {\"max_turns\": 13}` to `invalid`, run again and read its problem (`Input should be less than or equal to 12`).",
+  "challenge": "Run the same question with custom and preset system instructions. Then omit one SDK limit and explain the difference between an absent SDK option, the host deadline and a recorded limit error.",
   "hints": [
-   "`RunRequest` declares `max_turns` with `ge=1, le=12`.",
-   "Pydantic rejects 13 before any option is built, so a bad request can never reach the SDK."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Compare configured, initialization and terminal_results. An omitted SDK limit appears as None; a positive host input is different from the omission checkbox."
   ],
-  "reference": "Validation is the gate and options are the result. `model_fields_set` tells you what the student chose, while defaults fill the rest. Leaving an SDK option as `None` delegates to the CLI, so the lab always sends explicit limits.",
+  "reference": "Change one SDK option at a time: omitted or explicit model, system prompt mode, partial messages and SDK limit omission. The experiment echoes the actual constructed options. Offline identities and terminal states are recorded fixtures, not a model run. The selected options match the request, initialization is observed and the stream completes successfully. This does not grade answer quality or enforce a billing guarantee. Compare configured, initialization and terminal_results. An omitted SDK limit appears as None; a positive host input is different from the omission checkbox. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -301,9 +294,109 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "An omitted SDK limit is shown below. What does it mean?",
+    "code": "options.max_turns = None\n# The host still owns a deadline.",
+    "options": [
+     {
+      "text": "The run is guaranteed to cost nothing.",
+      "explanation": "Omitting an SDK budget threshold is not a billing cap or a free model call."
+     },
+     {
+      "text": "The SDK limit is omitted; this does not remove the host deadline.",
+      "explanation": "Correct. None is not an explicit positive limit, and a host deadline is a separate boundary."
+     },
+     {
+      "text": "The model has exactly zero turns.",
+      "explanation": "Zero is invalid as a positive turn limit; None means the option is omitted."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The options echo looks correct, but no initialization arrived. Does this pass?",
+    "code": "configured = {\"max_turns\": 2}\ninitialization = []\nterminal_results = []",
+    "options": [
+     {
+      "text": "No: configuration alone does not establish a run outcome.",
+      "explanation": "Correct. This criterion also requires observed initialization and successful completion."
+     },
+     {
+      "text": "Yes: a valid options object proves the model ran.",
+      "explanation": "Constructing options is local configuration work, not evidence that a query executed."
+     },
+     {
+      "text": "Yes: the prompt sounds easy.",
+      "explanation": "Prompt wording cannot replace missing initialization and terminal evidence."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "How should a terminal limit error be interpreted?",
+    "code": "subtype = \"error_max_turns\"\nis_error = True",
+    "options": [
+     {
+      "text": "The request was rejected before query started.",
+      "explanation": "A terminal SDK result means the stream ran; request validation rejection is a different boundary."
+     },
+     {
+      "text": "The answer must be factually wrong.",
+      "explanation": "A limit error describes run completion, not the factual accuracy of partial text."
+     },
+     {
+      "text": "The bounded run did not finish successfully; inspect the selected limits.",
+      "explanation": "Correct. The terminal result is an outcome, not a browser validation alert or an answer-quality grade."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read this options map. Which branch preserves the named base instructions?",
+    "code": "# System mode\n# omitted -> None\n# custom  -> supplied text\n# preset  -> claude_code + append",
+    "options": [
+     {
+      "text": "Every branch sends identical instructions.",
+      "explanation": "The map describes three different SDK representations."
+     },
+     {
+      "text": "The preset branch.",
+      "explanation": "Correct. The preset branch appends to the named base instructions; custom text replaces them."
+     },
+     {
+      "text": "The custom branch.",
+      "explanation": "A custom string is the replacement representation, not preset-plus-append."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the walkthrough: what remains after validation succeeds?",
+    "code": "# Validate -> Build actual options -> Initialize -> Consume -> Terminal check",
+    "options": [
+     {
+      "text": "Observe initialization and the terminal result.",
+      "explanation": "Correct. Passing input validation permits a run to start; it does not certify the later outcome."
+     },
+     {
+      "text": "Automatically mark manual review complete.",
+      "explanation": "The four manual review checkboxes are independent of request and run checks."
+     },
+     {
+      "text": "Skip consuming the stream.",
+      "explanation": "Without consumption, the lesson has no streamed execution evidence to inspect."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
    }
   ],
-  "concept_code": "from claude_agent_sdk import ClaudeAgentOptions\nfrom pydantic import BaseModel, ConfigDict, Field\n\n\nclass RunRequest(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\")\n    max_turns: int | None = Field(default=None, ge=1, le=20)\n    max_budget_usd: float | None = Field(default=None, gt=0, le=1.0)\n    model: str | None = None\n\n\ndef build_options(raw: dict[str, object]) -> ClaudeAgentOptions:\n    request = RunRequest.model_validate(raw)\n    print(\"set by the user:\", sorted(request.model_fields_set))\n    # A field left as None is not sent, so the CLI default applies.\n    return ClaudeAgentOptions(\n        max_turns=request.max_turns,\n        max_budget_usd=request.max_budget_usd,\n        model=request.model,\n        setting_sources=[],\n    )\n\n\ndef main() -> None:\n    options = build_options({\"max_turns\": 3, \"max_budget_usd\": 0.05})\n    print(options.max_turns, options.max_budget_usd, options.model)",
+  "concept_code": "from claude_agent_sdk import ClaudeAgentOptions\nfrom pydantic import BaseModel, ConfigDict, Field\n\n\nclass RunRequest(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\", strict=True)\n    max_turns: int | None = Field(default=None, ge=1, le=12)\n    max_budget_usd: float | None = Field(default=None, gt=0, le=1.0)\n    model: str | None = None\n\n\ndef build_options(raw: dict[str, object]) -> ClaudeAgentOptions:\n    request = RunRequest.model_validate(raw)\n    print(\"set by the user:\", sorted(request.model_fields_set))\n    # A field left as None is not sent, so the CLI default applies.\n    return ClaudeAgentOptions(\n        max_turns=request.max_turns,\n        max_budget_usd=request.max_budget_usd,\n        model=request.model,\n        setting_sources=[],\n    )\n\n\ndef main() -> None:\n    options = build_options({\"max_turns\": 3, \"max_budget_usd\": 0.05})\n    print(options.max_turns, options.max_budget_usd, options.model)",
   "code_focus": "`RunRequest.model_validate(raw)` rejects bad input, `model_fields_set` shows what the user chose, and only accepted values reach `ClaudeAgentOptions(...)`.",
   "concept_points": [
    {
@@ -327,10 +420,11 @@
  {
   "id": 3,
   "prerequisites": [
+   1,
    2
   ],
   "concept_brief": "Built-in tools such as `Read`, `Glob` and `Grep` are selected with `ClaudeAgentOptions(tools=[...])` and pre-approved with `allowed_tools`; `cwd` sets the workspace and `setting_sources=[]` keeps user and project settings out.",
-  "lab_brief": "The offline exercise `workspace` seeds a lesson folder, lists its files and reads notes.txt through the host's `inside()` path check. It shows what a read-only tool catalog can reach before you let a model use it.",
+  "lab_brief": "Select Read, Glob, Grep or the fixed python --version command. The local host really reads, lists, searches or runs that fixed command in this run's fixture workspace. SDK call/result identities are explicitly recorded offline.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
@@ -342,48 +436,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open the Python source tab and note that notes.txt is read via `inside(root, \"notes.txt\")`, the same check the live permission policy uses."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Select Read, Glob, Grep or the fixed python --version command. The local host really reads, lists, searches or runs that fixed command in this run's fixture workspace. SDK call/result identities are explicitly recorded offline."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `files` lists only the seeded files, `notes` contains the text of notes.txt and `setting_sources` is an empty list."
+    "text": "Compare configured.tools, initialization.tools, calls and results by ID. Turn the host permission checkbox off and observe that the local operation does not execute. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "In a scratch script, call `inside()` with a protected path and confirm it raises."
+    "text": "Keep the selected tool unchanged, deny it through the host policy and predict the result. Explain why an available tool is not the same thing as a permitted call or a filesystem sandbox."
    }
   ],
-  "inspect": "Look at `cwd`, `files`, `notes` and `setting_sources`.",
-  "expected": "`cwd` is a temporary folder ending in `work`, `files` is [\"notes.txt\", \"sales.csv\"], `notes` is \"Python agents combine an SDK, host tools, permissions and sessions.\" and `setting_sources` is [].",
-  "evidence_criterion": "The check confirms the seeded workspace was listed and notes.txt was read with the expected text.",
+  "inspect": "Compare configured.tools, initialization.tools, calls and results by ID. Turn the host permission checkbox off and observe that the local operation does not execute.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Compare configured.tools, initialization.tools, calls and results by ID. Turn the host permission checkbox off and observe that the local operation does not execute.",
+  "evidence_criterion": "At least one configured built-in tool has exactly one successful result with the same call ID, and the stream completes successfully. This does not grade prose or independently verify file changes.",
   "evidence_checks": [
    {
-    "key": "files",
-    "rule": "truthy"
-   },
-   {
-    "key": "notes",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": "Python agents combine an SDK, host tools, permissions and sessions.\n"
-   },
-   {
-    "key": "setting_sources",
-    "rule": "present"
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, import `inside` from `agent_lab.policy` and call it on a temporary folder with \".env\" and \"../outside.txt\". Verify both raise `ValueError: Path is outside the permitted workspace.` while \"notes.txt\" returns a path.",
+  "challenge": "Keep the selected tool unchanged, deny it through the host policy and predict the result. Explain why an available tool is not the same thing as a permitted call or a filesystem sandbox.",
   "hints": [
-   "`inside` resolves the path and rejects anything outside the root or under .git, .env, .venv, config or .claude.",
-   "Use `tempfile.mkdtemp()` for the root, write a notes.txt into it, then wrap each `inside(Path(root), name)` call in try/except ValueError and print the result."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Compare configured.tools, initialization.tools, calls and results by ID. Turn the host permission checkbox off and observe that the local operation does not execute."
   ],
-  "reference": "The exercise shows the exact view a read-only catalog gets: two seeded files in an isolated working directory and no inherited settings. In live mode the profile exposes only `Glob`, `Grep` and `Read`, and the host policy still checks every call. The tool list limits what the model may ask for; the path check limits what it can actually read.",
+  "reference": "Select Read, Glob, Grep or the fixed python --version command. The local host really reads, lists, searches or runs that fixed command in this run's fixture workspace. SDK call/result identities are explicitly recorded offline. At least one configured built-in tool has exactly one successful result with the same call ID, and the stream completes successfully. This does not grade prose or independently verify file changes. Compare configured.tools, initialization.tools, calls and results by ID. Turn the host permission checkbox off and observe that the local operation does not execute. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -421,6 +507,106 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "The call and result have different IDs. Is this a matched execution?",
+    "code": "call = {\"id\": \"A\", \"name\": \"Read\"}\nresult = {\"id\": \"B\", \"is_error\": False}",
+    "options": [
+     {
+      "text": "No: join by call ID before claiming a successful tool execution.",
+      "explanation": "Correct. A tool name and a successful result from another call do not establish the required correlation."
+     },
+     {
+      "text": "Yes: the result reports no error.",
+      "explanation": "That result belongs to B, while the inspected call is A."
+     },
+     {
+      "text": "Yes: Read is a familiar tool name.",
+      "explanation": "A familiar name proves neither a matched result nor successful execution."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read is available, but the host policy denies it. What executes?",
+    "code": "tools = [\"Read\"]\npermit_tool = False",
+    "options": [
+     {
+      "text": "Read automatically executes because it is listed.",
+      "explanation": "Availability is not a permission grant."
+     },
+     {
+      "text": "The SDK silently turns it into a shell command.",
+      "explanation": "The host exposes and checks the selected operation; it does not substitute an arbitrary command."
+     },
+     {
+      "text": "The selected local read does not execute.",
+      "explanation": "Correct. Inventory and permission answer different questions; the experiment records the denial and no successful read result."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "One tool succeeded, but the final SDK result failed. Does the bounded check pass?",
+    "code": "tool_result = {\"id\": \"A\", \"is_error\": False}\nterminal = {\"subtype\": \"error_max_turns\", \"is_error\": True}",
+    "options": [
+     {
+      "text": "Yes: the assistant claimed the file was correct.",
+      "explanation": "Assistant prose is not the completion or file-effect evidence checked here."
+     },
+     {
+      "text": "No: successful stream completion is also required.",
+      "explanation": "Correct. Tool execution and parent run completion are separate required observations."
+     },
+     {
+      "text": "Yes: any tool success is sufficient.",
+      "explanation": "The criterion also requires terminal success."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read this authority map. Which item is a complete filesystem security policy?",
+    "code": "# tools -> inventory\n# host callback -> permission decision\n# cwd -> working directory",
+    "options": [
+     {
+      "text": "None of those labels alone is a complete OS filesystem sandbox.",
+      "explanation": "Correct. The host confines this experiment; cwd alone does not create a complete security boundary."
+     },
+     {
+      "text": "cwd alone.",
+      "explanation": "A working directory is not a complete filesystem access policy."
+     },
+     {
+      "text": "The tool's display name.",
+      "explanation": "A display name is neither permission enforcement nor OS isolation."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Where should the call/result join happen in this walkthrough?",
+    "code": "# Init inventory -> call A -> result A -> terminal success",
+    "options": [
+     {
+      "text": "Between arbitrary adjacent text chunks.",
+      "explanation": "Text chunk order does not establish tool identity."
+     },
+     {
+      "text": "Only after a student checks the manual checklist.",
+      "explanation": "Manual review and the automatic evidence join are independent."
+     },
+     {
+      "text": "Between the specific call and its result, using A.",
+      "explanation": "Correct. Identity links the operation to its outcome before the terminal result is evaluated."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "from pathlib import Path\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\n\nasync def main(workspace: Path) -> None:\n    read_only = [\"Read\", \"Glob\", \"Grep\"]\n    options = ClaudeAgentOptions(\n        tools=read_only,\n        allowed_tools=read_only,\n        cwd=workspace,\n        setting_sources=[],\n        max_turns=4,\n    )\n    async for message in query(\n        prompt=\"Read notes.txt and summarize it.\", options=options\n    ):\n        if isinstance(message, ResultMessage):\n            print(message.result)",
@@ -450,7 +636,7 @@
    3
   ],
   "concept_brief": "The host decides tool permissions: a `can_use_tool` callback returns `PermissionResultAllow` or `PermissionResultDeny`, and `tools`/`allowed_tools` set the allowlist; a model's request is input, not authority.",
-  "lab_brief": "The offline exercise `permission_cases` runs five tool requests through the host `decide()` policy (a normal read, path traversal, a .env read, Bash and Write) and records whether each decision matches the expected one. It also shows secrets being redacted from logged data.",
+  "lab_brief": "Choose Deny, Allow, Redirect or Ask me for a Write to an owned fixture target. The host callback applies that decision; allowed offline writes really change disposable files. Denied operations capture file hashes or absence at denial and completion.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
@@ -462,48 +648,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `decide()` and `inside()` in `agent_lab/policy.py` and predict which of the five cases are allowed."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Choose Deny, Allow, Redirect or Ask me for a Write to an owned fixture target. The host callback applies that decision; allowed offline writes really change disposable files. Denied operations capture file hashes or absence at denial and completion."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check each row in `decisions`: only \"normal read\" has `allowed` true, every row has `passed` true, and `pass_rate` is 1.0."
+    "text": "Compare permission_decisions.run_id and call_id with calls, hash_at_decision and final_hash, then inspect local_effects.files_after. Redirect writes approved.txt rather than the original target. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Call `decide()` from a scratch script with a new case and confirm the outcome you predicted."
+    "text": "Run Deny, Allow and Redirect separately against draft.txt. Explain why only a correctly correlated denial meets the denied-write criterion. Then choose Ask me and deny in the dialog."
    }
   ],
-  "inspect": "Look at `decisions` (case, tool, allowed, expected, passed, reason), `pass_rate` and `redacted`.",
-  "expected": "Five decisions: \"normal read\" is allowed with reason \"Read-only workspace access.\", the traversal and secret reads are denied, Bash and Write are denied with \"This tool is not available in the read-only lesson policy.\", `pass_rate` is 1.0 and `redacted` shows [REDACTED] for both values.",
-  "evidence_criterion": "The check confirms every permission case matched its expected decision and the fixture secrets were redacted.",
+  "inspect": "Compare permission_decisions.run_id and call_id with calls, hash_at_decision and final_hash, then inspect local_effects.files_after. Redirect writes approved.txt rather than the original target.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Compare permission_decisions.run_id and call_id with calls, hash_at_decision and final_hash, then inspect local_effects.files_after. Redirect writes approved.txt rather than the original target.",
+  "evidence_criterion": "Denied Write/Edit targets must be supported fixture paths, match run and call identity, and have unchanged hashes or absence at denial and completion. Unsupported targets need review; intermediate activity is not observed.",
   "evidence_checks": [
    {
-    "key": "pass_rate",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": 1.0
-   },
-   {
-    "key": "decisions",
-    "rule": "truthy"
-   },
-   {
-    "key": "redacted",
-    "rule": "truthy"
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, call `decide(root, \"Grep\", {\"path\": \"..\"})` and `decide(root, \"Read\", {\"file_path\": \".claude/settings.json\"})` from `agent_lab.policy`. Verify both return `False` with the read-only reason, then pass an absolute path to a file inside root and confirm it is allowed.",
+  "challenge": "Run Deny, Allow and Redirect separately against draft.txt. Explain why only a correctly correlated denial meets the denied-write criterion. Then choose Ask me and deny in the dialog.",
   "hints": [
-   "`decide` only allows `Read`, `Glob` and `Grep`, and only for paths that pass `inside()`.",
-   "Create the root with `tempfile.mkdtemp()`, write notes.txt into it, and pass `str(Path(root) / \"notes.txt\")` as the absolute `file_path`; absolute paths are made relative to root before checking."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Compare permission_decisions.run_id and call_id with calls, hash_at_decision and final_hash, then inspect local_effects.files_after. Redirect writes approved.txt rather than the original target."
   ],
-  "reference": "Host code decides each case, so the result does not depend on how persuasive a model's request is. Traversal and protected files fail the path check, and tools outside the allowlist are denied by name. In live mode the same `decide()` runs inside `can_use_tool` and the PreToolUse hook, so a denial becomes a `PermissionResultDeny` message the model sees.",
+  "reference": "Choose Deny, Allow, Redirect or Ask me for a Write to an owned fixture target. The host callback applies that decision; allowed offline writes really change disposable files. Denied operations capture file hashes or absence at denial and completion. Denied Write/Edit targets must be supported fixture paths, match run and call identity, and have unchanged hashes or absence at denial and completion. Unsupported targets need review; intermediate activity is not observed. Compare permission_decisions.run_id and call_id with calls, hash_at_decision and final_hash, then inspect local_effects.files_after. Redirect writes approved.txt rather than the original target. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`. If a row shows `passed` false, compare its `reason` with `decide()` before changing anything.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -541,6 +719,106 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "What does this denied-write snapshot establish?",
+    "code": "hash_at_decision = None\nfinal_hash = None\n# Same supported target, run ID and call ID.",
+    "options": [
+     {
+      "text": "The file could never have existed at any instant.",
+      "explanation": "Two snapshots do not observe intermediate activity."
+     },
+     {
+      "text": "The model's entire answer is correct.",
+      "explanation": "The check covers a correlated denied write, not answer quality."
+     },
+     {
+      "text": "The file was absent at both observed points.",
+      "explanation": "Correct. Absence can be compared just like a hash; this does not observe every intermediate moment."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The denial and call refer to different runs. Can their hashes be used together?",
+    "code": "denial = {\"run_id\": \"old\", \"call_id\": \"A\"}\ncall = {\"run_id\": \"current\", \"id\": \"A\"}",
+    "options": [
+     {
+      "text": "Yes: both files are text files.",
+      "explanation": "File type does not establish execution identity."
+     },
+     {
+      "text": "No: the run identity must match as well as the call identity.",
+      "explanation": "Correct. A reused-looking call ID does not connect evidence across different runs."
+     },
+     {
+      "text": "Yes: the call IDs look the same.",
+      "explanation": "Call identity without matching run identity can attach stale evidence to a new operation."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "What should Redirect do to the actual operation?",
+    "code": "requested_target = \"draft.txt\"\nupdated_target = \"approved.txt\"",
+    "options": [
+     {
+      "text": "Apply updated input to approved.txt and inspect the files separately.",
+      "explanation": "Correct. An update decision changes the operation's target; the original target is not silently approved."
+     },
+     {
+      "text": "Write both targets without inspection.",
+      "explanation": "The decision redirects one operation, not an unrestricted second write."
+     },
+     {
+      "text": "Treat an unsupported outside path as a passing denial snapshot.",
+      "explanation": "Unsupported paths require review; the bounded hash check covers only displayed fixture targets."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the permission map: what carries authority to perform the write?",
+    "code": "# Model proposal -> Host callback -> Allow / Deny / Updated input -> Effect",
+    "options": [
+     {
+      "text": "The model's confidence.",
+      "explanation": "Confidence is neither a permission decision nor a path boundary."
+     },
+     {
+      "text": "The file extension alone.",
+      "explanation": "A .txt extension does not make an arbitrary path an authorized target."
+     },
+     {
+      "text": "The host decision and validated target boundary.",
+      "explanation": "Correct. A model proposal is input to the host's policy, not execution authority."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the denial walkthrough: which observations are compared?",
+    "code": "# Deny A -> snapshot target -> finish same run -> snapshot same target",
+    "options": [
+     {
+      "text": "Every intermediate filesystem event.",
+      "explanation": "This experiment intentionally makes a bounded two-point observation."
+     },
+     {
+      "text": "Identity and state at denial and completion.",
+      "explanation": "Correct. The check connects the supported target to the same run/call and compares the two snapshots."
+     },
+     {
+      "text": "Only the final assistant sentence.",
+      "explanation": "The final sentence is not a file snapshot or permission correlation."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "from pathlib import Path\nfrom typing import Any\n\nfrom claude_agent_sdk import ClaudeAgentOptions, PermissionResult, PermissionResultAllow\nfrom claude_agent_sdk import PermissionResultDeny, ToolPermissionContext, query\n\nWORKSPACE = Path(\"workspace\").resolve()\n\n\nasync def can_use_tool(\n    name: str, tool_input: dict[str, Any], context: ToolPermissionContext\n) -> PermissionResult:\n    if name != \"Read\":\n        return PermissionResultDeny(message=f\"{name} is not allowed in this lesson.\")\n    target = (WORKSPACE / str(tool_input.get(\"file_path\", \"\"))).resolve()\n    if not target.is_relative_to(WORKSPACE) or target.name == \".env\":\n        return PermissionResultDeny(\n            message=\"That path is outside the readable workspace.\"\n        )\n    return PermissionResultAllow()\n\n\nasync def main() -> None:\n    # No allowed_tools: a pre-approval rule would skip can_use_tool entirely.\n    options = ClaudeAgentOptions(\n        tools=[\"Read\"], cwd=WORKSPACE, can_use_tool=can_use_tool\n    )\n    async for message in query(\n        prompt=\"Read notes.txt. Do not write files.\", options=options\n    ):\n        print(type(message).__name__)",
@@ -567,10 +845,11 @@
  {
   "id": 5,
   "prerequisites": [
-   2
+   3,
+   4
   ],
   "concept_brief": "Custom tools are Python functions decorated with `@tool(name, description, input_schema)` and served in-process with `create_sdk_mcp_server()`; the model calls them as `mcp__<server>__<tool>`, and the function should validate its arguments itself.",
-  "lab_brief": "The offline exercise `calculator` validates the input 19 + 23 with the strict Pydantic model `Calculation` and rejects three malformed inputs (a boolean, NaN and an extra `shell` field). It shows why host validation must not depend on the model respecting the schema.",
+  "lab_brief": "Change the offline calculator arguments and run the server-owned Calculation validator before arithmetic. Trace the handler event by name and arguments, then pair its recorded call/result ID. Live mode uses the real SDK MCP calculator; its arguments come from the agent's call.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
@@ -582,48 +861,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open `Calculation` in `agent_lab/services.py`: `extra=\"forbid\"`, `strict=True`, bounds of plus or minus 1,000,000 and `allow_inf_nan=False`."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Change the offline calculator arguments and run the server-owned Calculation validator before arithmetic. Trace the handler event by name and arguments, then pair its recorded call/result ID. Live mode uses the real SDK MCP calculator; its arguments come from the agent's call."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `sum` is 42.0, `input` is {a: 19.0, b: 23.0}, `schema` has `additionalProperties: false`, and `rejected` has three entries."
+    "text": "Inspect local_effects.handler_sum, handler_count, calls, handler_events and results. Invalid arguments must produce zero handler executions; duplicate identical handler events are ambiguous. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Feed more malformed inputs to `Calculation.model_validate` and predict which are rejected."
+    "text": "Try new numbers, then compare Rejected handler arguments and Ambiguous handler match. Explain why a schema definition alone proves neither host execution nor a successful SDK result."
    }
   ],
-  "inspect": "Look at `schema` (the JSON schema passed to `@tool` in live mode), `input`, `sum` and `rejected`.",
-  "expected": "`sum` is 42.0, `input` is {\"a\": 19.0, \"b\": 23.0}, `schema` requires `a` and `b` with minimum -1000000 and maximum 1000000, and `rejected` lists \"Invalid calculator arguments rejected by host validation.\" three times.",
-  "evidence_criterion": "The check confirms the calculator returned 42.0 and that the invalid argument sets were rejected.",
+  "inspect": "Inspect local_effects.handler_sum, handler_count, calls, handler_events and results. Invalid arguments must produce zero handler executions; duplicate identical handler events are ambiguous.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Inspect local_effects.handler_sum, handler_count, calls, handler_events and results. Invalid arguments must produce zero handler executions; duplicate identical handler events are ambiguous.",
+  "evidence_criterion": "One configured custom handler uniquely matches a call by name and arguments, that call has a successful result with the same ID, and the stream finishes successfully. Ambiguous matches need review.",
   "evidence_checks": [
    {
-    "key": "sum",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": 42.0
-   },
-   {
-    "key": "rejected",
-    "rule": "truthy"
-   },
-   {
-    "key": "schema",
-    "rule": "truthy"
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, call `Calculation.model_validate` with {\"a\": \"19\", \"b\": 23} and {\"a\": 2000000, \"b\": 1}. Verify both raise `ValidationError` (a string is not a number in strict mode; 2,000,000 is out of range), while {\"a\": 19, \"b\": 23} is accepted as floats.",
+  "challenge": "Try new numbers, then compare Rejected handler arguments and Ambiguous handler match. Explain why a schema definition alone proves neither host execution nor a successful SDK result.",
   "hints": [
-   "Strict mode refuses strings and booleans for a float field, but plain integers are still accepted.",
-   "`from agent_lab.services import Calculation`, then wrap each call in `try/except pydantic.ValidationError as exc: print(exc.errors()[0][\"type\"])`."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Inspect local_effects.handler_sum, handler_count, calls, handler_events and results. Invalid arguments must produce zero handler executions; duplicate identical handler events are ambiguous."
   ],
-  "reference": "The schema tells the model what to send, but the host cannot assume it will comply, so the tool re-validates with Pydantic. Booleans, NaN and unknown fields are refused before any arithmetic runs. In live mode the same model backs the `add` tool on the in-process `lesson` server, exposed as `mcp__lesson__add`.",
+  "reference": "Change the offline calculator arguments and run the server-owned Calculation validator before arithmetic. Trace the handler event by name and arguments, then pair its recorded call/result ID. Live mode uses the real SDK MCP calculator; its arguments come from the agent's call. One configured custom handler uniquely matches a call by name and arguments, that call has a successful result with the same ID, and the stream finishes successfully. Ambiguous matches need review. Inspect local_effects.handler_sum, handler_count, calls, handler_events and results. Invalid arguments must produce zero handler executions; duplicate identical handler events are ambiguous. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. In live mode the only custom tool is `mcp__lesson__add`."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -679,6 +950,86 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "Two identical handler events match one call. What is the evidence verdict?",
+    "code": "handler_events = [\"add(19, 23)\", \"add(19, 23)\"]\ncall_id = \"A\"",
+    "options": [
+     {
+      "text": "Automatically complete the student checklist.",
+      "explanation": "Handler correlation never completes the separate manual checklist."
+     },
+     {
+      "text": "Needs review because the handler match is ambiguous.",
+      "explanation": "Correct. The criterion requires a unique name-and-arguments match before joining the result ID."
+     },
+     {
+      "text": "Passed because both sums might be 42.",
+      "explanation": "A plausible arithmetic result does not establish unique execution identity."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The handler executed, but its call has an error result. Is this sufficient?",
+    "code": "handler = {\"name\": \"mcp__lesson__add\", \"arguments\": {\"a\": 19, \"b\": 23}}\nresult = {\"id\": \"A\", \"is_error\": True}",
+    "options": [
+     {
+      "text": "No: require a uniquely matched call, successful result and terminal success.",
+      "explanation": "Correct. Host execution is one observation; the corresponding result and run outcome must also meet the criterion."
+     },
+     {
+      "text": "Yes: a handler log proves the whole agent run succeeded.",
+      "explanation": "A handler log does not prove the matching result or terminal outcome."
+     },
+     {
+      "text": "Yes: the tool's schema was displayed.",
+      "explanation": "A displayed schema describes accepted input; it does not prove execution or success."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the custom-tool map: where are arguments enforced?",
+    "code": "# Tool schema -> Model call -> Server validator -> Handler effect -> Result",
+    "options": [
+     {
+      "text": "Only in the model's instructions.",
+      "explanation": "Instructions do not replace host validation."
+     },
+     {
+      "text": "Only in a browser label.",
+      "explanation": "A label does not enforce the handler input boundary."
+     },
+     {
+      "text": "At the server validator before the effect.",
+      "explanation": "Correct. The host validates independently even when a schema was supplied to the model."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read this execution join. Which links are required?",
+    "code": "# handler(name, args) -> unique call A -> successful result A -> parent success",
+    "options": [
+     {
+      "text": "Only the server's display name.",
+      "explanation": "A name without arguments, result identity and terminal success is insufficient."
+     },
+     {
+      "text": "All three links.",
+      "explanation": "Correct. Unique semantic matching and call-ID correlation establish bounded execution evidence; answer quality remains separate."
+     },
+     {
+      "text": "Only matching final numbers.",
+      "explanation": "The same number can arise from different calls or no verified handler at all."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "import json\nfrom typing import Any\n\nfrom claude_agent_sdk import ClaudeAgentOptions, create_sdk_mcp_server, query, tool\nfrom pydantic import BaseModel, ConfigDict, Field, ValidationError\n\n\nclass Calculation(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\", strict=True)\n    a: float = Field(ge=-1_000_000, le=1_000_000, allow_inf_nan=False)\n    b: float = Field(ge=-1_000_000, le=1_000_000, allow_inf_nan=False)\n\n\n@tool(\n    \"add\", \"Add two finite numbers. Returns their sum.\", Calculation.model_json_schema()\n)\nasync def add(args: dict[str, Any]) -> dict[str, Any]:\n    try:\n        # The schema is a hint to the model; this check is what the host enforces.\n        parsed = Calculation.model_validate(args)\n    except ValidationError as error:\n        return {\"content\": [{\"type\": \"text\", \"text\": str(error)}], \"is_error\": True}\n    return {\n        \"content\": [{\"type\": \"text\", \"text\": json.dumps({\"sum\": parsed.a + parsed.b})}]\n    }\n\n\nasync def main() -> None:\n    calc = create_sdk_mcp_server(name=\"calc\", tools=[add])\n    options = ClaudeAgentOptions(\n        mcp_servers={\"calc\": calc}, tools=[], allowed_tools=[\"mcp__calc__add\"]\n    )\n    async for message in query(\n        prompt=\"Use the calculator to add 19 and 23.\", options=options\n    ):\n        print(type(message).__name__)",
@@ -708,7 +1059,7 @@
    1
   ],
   "concept_brief": "`ClaudeSDKClient` keeps one conversation open: inside `async with ClaudeSDKClient(options=...) as client` you call `await client.query(...)`, consume `client.receive_response()`, then send the next turn on the same client so context is retained.",
-  "lab_brief": "The offline exercise `sessions` builds the ordered two-turn plan (the lesson prompt, then the follow-up) and lists the client lifecycle the live run follows. It makes the turn order and connection ownership explicit before any model is involved.",
+  "lab_brief": "Compare same-client continuation, a new client with the previous successful session ID, and a fresh client. Offline mode uses the official ClaudeSDKClient with scripted transports and explicitly recorded identity evidence. No answer is generated or recalled by a model.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears.",
@@ -721,48 +1072,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the `live_lifecycle` order in the Python source tab and match each line to the `async with` block in `agent_lab/sdk.py`."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Compare same-client continuation, a new client with the previous successful session ID, and a fresh client. Offline mode uses the official ClaudeSDKClient with scripted transports and explicitly recorded identity evidence. No answer is generated or recalled by a model."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `planned_turns` has the label prompt first and the follow-up second, and `source` says there is no model response."
+    "text": "Inspect previous_session, sent_sessions, initialization and both terminal_results. Explicit resume sends the previous ID to a new client; same-client continuation is a different lifecycle. Fresh sessions should not pass the continuation criterion. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Change the first turn from the command line and confirm the plan follows your input."
+    "text": "Run all three strategies with the same first question and follow-up. Compare IDs before judging recall. Save an explanation of the difference between continuing one client, explicitly resuming and starting fresh."
    }
   ],
-  "inspect": "Look at `planned_turns`, `live_lifecycle` and `source`.",
-  "expected": "`planned_turns` contains \"Remember this label for the next turn: PYTHON-SESSION.\" then \"Summarize your previous answer in one sentence.\", `live_lifecycle` has six steps ending with \"disconnect in the same owning task\", and `source` is \"host conversation plan; no model response\".",
-  "evidence_criterion": "The check confirms the host produced an ordered two-turn plan and labelled it as having no model response.",
+  "inspect": "Inspect previous_session, sent_sessions, initialization and both terminal_results. Explicit resume sends the previous ID to a new client; same-client continuation is a different lifecycle. Fresh sessions should not pass the continuation criterion. The session_identity fields display both IDs directly.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Inspect previous_session, sent_sessions, initialization and both terminal_results. Explicit resume sends the previous ID to a new client; same-client continuation is a different lifecycle. Fresh sessions should not pass the continuation criterion.",
+  "evidence_criterion": "A follow-up retains the previous successful session identity. Explicit resume additionally sends that ID and observes it in the next initialization. Recall and answer quality require manual review; cross-browser persistence is separate.",
   "evidence_checks": [
    {
-    "key": "planned_turns",
-    "rule": "truthy"
-   },
-   {
-    "key": "live_lifecycle",
-    "rule": "truthy"
-   },
-   {
-    "key": "source",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": "host conversation plan; no model response"
+    "value": true
    }
   ],
-  "challenge": "Type `Remember this label: MY-LABEL.` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 6 --prompt \"Remember this label: MY-LABEL.\"`), then verify the evidence event shows your text as the first planned turn. With live mode enabled, set the follow-up to \"What label did I give you?\" and check that Claude response 2 names the label.",
+  "challenge": "Run all three strategies with the same first question and follow-up. Compare IDs before judging recall. Save an explanation of the difference between continuing one client, explicitly resuming and starting fresh.",
   "hints": [
-   "The first turn comes from `request.prompt`, falling back to the lesson prompt when it is empty.",
-   "The CLI prints JSON events; look for the event whose `kind` is `evidence` and read `planned_turns[0].content`. In live mode both turns run on the same client, which is why turn two can recall the label."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Inspect previous_session, sent_sessions, initialization and both terminal_results. Explicit resume sends the previous ID to a new client; same-client continuation is a different lifecycle. Fresh sessions should not pass the continuation criterion."
   ],
-  "reference": "The exercise shows the plan, not an answer: two user turns in a fixed order and the lifecycle that keeps them on one connection. Because the second `client.query()` runs on the same `ClaudeSDKClient`, the model sees the first turn when answering it. Opening and closing the client in the same task avoids leaked connections.",
+  "reference": "Compare same-client continuation, a new client with the previous successful session ID, and a fresh client. Offline mode uses the official ClaudeSDKClient with scripted transports and explicitly recorded identity evidence. No answer is generated or recalled by a model. A follow-up retains the previous successful session identity. Explicit resume additionally sends that ID and observes it in the next initialization. Recall and answer quality require manual review; cross-browser persistence is separate. Inspect previous_session, sent_sessions, initialization and both terminal_results. Explicit resume sends the previous ID to a new client; same-client continuation is a different lifecycle. Fresh sessions should not pass the continuation criterion. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -800,6 +1143,106 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "A new client omits resume. What comparison should the learner make?",
+    "code": "options = ClaudeAgentOptions(resume=None)\n# A new client, not continuation on the existing object.",
+    "options": [
+     {
+      "text": "Treat it as a fresh-session experiment and compare actual IDs.",
+      "explanation": "Correct. A new client without resume does not establish continuity from the previous successful session."
+     },
+     {
+      "text": "Assume a matching variable name preserves context.",
+      "explanation": "A Python variable name is not a session identity."
+     },
+     {
+      "text": "Grade recall from the configuration alone.",
+      "explanation": "Recall and response quality require observing actual answers separately."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Explicit resume sends A, but initialization reports B. Does it pass?",
+    "code": "sent_resume = \"A\"\nnext_init_session = \"B\"",
+    "options": [
+     {
+      "text": "Yes: both IDs are nonempty.",
+      "explanation": "Nonempty identifiers can still refer to different sessions."
+     },
+     {
+      "text": "Yes: the answer sounds familiar.",
+      "explanation": "Plausible recall does not repair an identity mismatch."
+     },
+     {
+      "text": "No: outgoing and observed identities differ.",
+      "explanation": "Correct. The intent to resume is not evidence that the next initialization used the intended session."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Two turns share an ID but the second terminal result fails. Is continuity enough?",
+    "code": "session_ids = [\"A\", \"A\"]\nsecond_result = {\"subtype\": \"error_max_turns\", \"is_error\": True}",
+    "options": [
+     {
+      "text": "The manual review should be marked automatically.",
+      "explanation": "The student still reviews recall and their explanation independently."
+     },
+     {
+      "text": "No: a successful follow-up outcome is also required.",
+      "explanation": "Correct. Session identity and run success are distinct observations."
+     },
+     {
+      "text": "Yes: identical IDs prove every turn succeeded.",
+      "explanation": "An identifier links context; it is not a success flag."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read this lifecycle map. Which path uses explicit resume?",
+    "code": "# Same client -> query -> query\n# New client + previous ID -> resume\n# New client + no ID -> fresh",
+    "options": [
+     {
+      "text": "New client with the previous successful session ID.",
+      "explanation": "Correct. Same-client continuation and explicit resume are different lifecycle mechanisms."
+     },
+     {
+      "text": "Any second query, regardless of client or options.",
+      "explanation": "A second query alone says nothing about the intended identity."
+     },
+     {
+      "text": "A browser refresh with no stored session state.",
+      "explanation": "Refreshing the browser does not by itself send an SDK session ID."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the follow-up walkthrough. What must remain a manual observation?",
+    "code": "# Previous success -> send ID -> observe init ID -> terminal success -> review answer",
+    "options": [
+     {
+      "text": "Whether two displayed IDs are equal.",
+      "explanation": "The bounded checker can compare identity evidence."
+     },
+     {
+      "text": "Whether a terminal success record exists.",
+      "explanation": "Terminal evidence is part of the automatic outcome check."
+     },
+     {
+      "text": "Whether the answer actually recalls useful context.",
+      "explanation": "Correct. Identity and terminal checks do not grade recall or factual quality."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "from claude_agent_sdk import (\n    AssistantMessage,\n    ClaudeAgentOptions,\n    ClaudeSDKClient,\n    ResultMessage,\n    TextBlock,\n)\n\n\nasync def ask(client: ClaudeSDKClient, prompt: str) -> None:\n    await client.query(prompt)\n    async for message in client.receive_response():\n        if isinstance(message, AssistantMessage):\n            print(\"\".join(b.text for b in message.content if isinstance(b, TextBlock)))\n        elif isinstance(message, ResultMessage):\n            print(\"session:\", message.session_id)\n\n\nasync def main() -> None:\n    options = ClaudeAgentOptions(tools=[], max_turns=2)\n    async with ClaudeSDKClient(options=options) as client:\n        await ask(client, \"Remember this label for the next turn: PYTHON-SESSION.\")\n        # Same client, same conversation: the second turn sees the first.\n        await ask(client, \"What label did I ask you to remember?\")",
@@ -826,10 +1269,11 @@
  {
   "id": 7,
   "prerequisites": [
-   4
+   4,
+   5
   ],
   "concept_brief": "A `PreToolUse` hook is an async callback registered with `HookMatcher` in `ClaudeAgentOptions.hooks`. It receives the tool name and input before the tool runs and can return `permissionDecision` `allow` or `deny` with a reason.",
-  "lab_brief": "The `hooks` exercise builds the exact hook configuration that live runs use (`agent_lab/hooks.py`) and calls its `PreToolUse` callback with five CLI-shaped tool calls. No tool runs; you see each decision and the audit log the hook wrote.",
+  "lab_brief": "Enable or disable PreToolUse and PostToolUse independently. Select Observe, Block or Rewrite. The offline experiment invokes the actual registered callbacks and performs the resulting local Read; SDK call/result identities are recorded fixtures. The host path guard remains registered independently of the teaching pre-hook toggle.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 7 (or run `uv run agent-lab lesson 7`).",
    "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. In live mode the same hook emits `hook` events, visible under Diagnostics."
@@ -841,48 +1285,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open the Python source tab and find `lesson_hooks` and `pre_tool` in `agent_lab/hooks.py`."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Run the offline exercise and open the `decisions` table."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Enable or disable PreToolUse and PostToolUse independently. Select Observe, Block or Rewrite. The offline experiment invokes the actual registered callbacks and performs the resulting local Read; SDK call/result identities are recorded fixtures."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm one `allow` (normal read) and four `deny` rows, and one audit entry per call in `audit_log`."
+    "text": "Compare registered_events, pre_use_output, actual_input, read_result and post_use_hooks. With rewriting enabled, the actual read targets alternate.txt. A disabled pre hook must not rewrite anything. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Add a case to `TOOL_CALLS` and predict its decision before running."
+    "text": "Disable the post hook, then block a read, then rewrite it. Explain which cases satisfy the post-use correlation criterion and inspect the actual read text separately."
    }
   ],
-  "inspect": "`registered_events` (PreToolUse and PostToolUse), the `decisions` table with each `decision` and `reason`, the `denied` count and the `audit_log`.",
-  "expected": "`decisions` shows `allow` for the normal read of notes.txt and `deny` for path traversal, the .env read, Bash and Write. `denied` is 4 and `audit_log` has five `hook` entries.",
-  "evidence_criterion": "The check confirms that both hook events are registered and the PreToolUse hook denied exactly four of the five tool calls.",
+  "inspect": "Compare registered_events, pre_use_output, actual_input, read_result and post_use_hooks. With rewriting enabled, the actual read targets alternate.txt. A disabled pre hook must not rewrite anything.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Compare registered_events, pre_use_output, actual_input, read_result and post_use_hooks. With rewriting enabled, the actual read targets alternate.txt. A disabled pre hook must not rewrite anything.",
+  "evidence_criterion": "An enabled PostToolUse hook matches a successful tool call/result by ID and name, and the stream finishes successfully. This does not independently certify a pre-use guard or rewritten file contents.",
   "evidence_checks": [
    {
-    "key": "registered_events",
-    "rule": "truthy"
-   },
-   {
-    "key": "denied",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": 4
-   },
-   {
-    "key": "audit_log",
-    "rule": "truthy"
+    "value": true
    }
   ],
-  "challenge": "Add `(\"glob search\", \"Glob\", {\"path\": \".\"})` to `TOOL_CALLS` in `agent_lab/exercises.py`, run again and explain why the hook allows it while `denied` stays 4.",
+  "challenge": "Disable the post hook, then block a read, then rewrite it. Explain which cases satisfy the post-use correlation criterion and inspect the actual read text separately.",
   "hints": [
-   "The hook does not decide by itself: it calls `permitted`, which wraps `policy.decide`.",
-   "`decide` allows Read, Glob and Grep when the path stays inside the workspace, so a Glob of `.` is allowed and only the four original risky calls are denied."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Compare registered_events, pre_use_output, actual_input, read_result and post_use_hooks. With rewriting enabled, the actual read targets alternate.txt. A disabled pre hook must not rewrite anything."
   ],
-  "reference": "The hook is the host's enforcement point: the model can request any tool, but the PreToolUse callback returns `deny` with a reason before execution. Because offline and live runs share `lesson_hooks`, the decisions you see here are the decisions a live agent meets.",
+  "reference": "Enable or disable PreToolUse and PostToolUse independently. Select Observe, Block or Rewrite. The offline experiment invokes the actual registered callbacks and performs the resulting local Read; SDK call/result identities are recorded fixtures. An enabled PostToolUse hook matches a successful tool call/result by ID and name, and the stream finishes successfully. This does not independently certify a pre-use guard or rewritten file contents. Compare registered_events, pre_use_output, actual_input, read_result and post_use_hooks. With rewriting enabled, the actual read targets alternate.txt. A disabled pre hook must not rewrite anything. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -920,6 +1356,106 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "PostToolUse is disabled. Can a pre-hook log satisfy this check?",
+    "code": "pre_hook = True\npost_hook = False",
+    "options": [
+     {
+      "text": "Yes: any hook name is sufficient.",
+      "explanation": "The required lifecycle stage, call ID and tool name must match."
+     },
+     {
+      "text": "Yes: registration always proves an effect.",
+      "explanation": "Registering a hook does not prove it executed or that the tool succeeded."
+     },
+     {
+      "text": "No: the enabled post-use hook evidence is required.",
+      "explanation": "Correct. A log before execution does not establish the selected post-use correlation criterion."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "A post-hook names Read but uses another call ID. What happens?",
+    "code": "call = {\"id\": \"A\", \"name\": \"Read\"}\npost = {\"id\": \"B\", \"name\": \"Read\"}",
+    "options": [
+     {
+      "text": "The host should change B to A after the run.",
+      "explanation": "Changing recorded identities would fabricate correlation rather than verify it."
+     },
+     {
+      "text": "Needs review: both name and identity must match.",
+      "explanation": "Correct. The same tool may run more than once; its name alone cannot identify a specific invocation."
+     },
+     {
+      "text": "Passed because the names match.",
+      "explanation": "The hook could belong to another Read invocation."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The rewrite control is selected but PreToolUse is off. Which file should be read?",
+    "code": "behavior = \"rewrite\"\npre_hook = False\nrequested_path = \"notes.txt\"",
+    "options": [
+     {
+      "text": "notes.txt, because no enabled pre-hook applies the rewrite.",
+      "explanation": "Correct. A selected behavior is not an executed hook; inspect actual_input and the actual read text."
+     },
+     {
+      "text": "alternate.txt merely because the selector says rewrite.",
+      "explanation": "The configuration must register and execute the hook for a rewrite to occur."
+     },
+     {
+      "text": "An arbitrary file outside the workspace.",
+      "explanation": "The host's path policy remains in force independently of hook toggles."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the hook map. Where can an input rewrite take effect?",
+    "code": "# Proposed call -> PreToolUse -> Actual tool input -> Result -> PostToolUse",
+    "options": [
+     {
+      "text": "After a completed tool result, retroactively.",
+      "explanation": "A post-use observation cannot rewrite an already executed operation."
+     },
+     {
+      "text": "Only in the role description.",
+      "explanation": "Role text does not implement a hook callback."
+     },
+     {
+      "text": "Before the tool, through an enabled PreToolUse output.",
+      "explanation": "Correct. The learner then inspects actual input and result rather than assuming the rewrite happened."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the check walkthrough. What is excluded from its conclusion?",
+    "code": "# Call A + successful result A + post-hook A/name + parent success -> bounded pass",
+    "options": [
+     {
+      "text": "The terminal run outcome.",
+      "explanation": "Successful completion is explicitly required."
+     },
+     {
+      "text": "Independent certification of every guard decision or rewritten file content.",
+      "explanation": "Correct. Those effects require their own observations; the check is deliberately about correlated post-use evidence."
+     },
+     {
+      "text": "The identity of the post-hook invocation.",
+      "explanation": "Identity is explicitly part of the required evidence."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "from typing import Literal\n\nfrom claude_agent_sdk import ClaudeAgentOptions, HookContext, HookInput, HookJSONOutput\nfrom claude_agent_sdk import HookMatcher, query\n\naudit_log: list[dict[str, str]] = []\n\n\nasync def pre_tool_use(\n    input_data: HookInput, tool_use_id: str | None, context: HookContext\n) -> HookJSONOutput:\n    if input_data[\"hook_event_name\"] != \"PreToolUse\":\n        return {}\n    path = str(input_data[\"tool_input\"].get(\"file_path\", \"\"))\n    decision: Literal[\"allow\", \"deny\"] = (\n        \"deny\" if \".env\" in path or \"..\" in path else \"allow\"\n    )\n    audit_log.append({\"tool\": input_data[\"tool_name\"], \"decision\": decision})\n    return {\n        \"hookSpecificOutput\": {\n            \"hookEventName\": \"PreToolUse\",\n            \"permissionDecision\": decision,\n            \"permissionDecisionReason\": f\"Host policy: {decision}\",\n        }\n    }\n\n\nasync def main() -> None:\n    matcher = HookMatcher(matcher=\"Read|Glob|Grep\", hooks=[pre_tool_use])\n    options = ClaudeAgentOptions(\n        tools=[\"Read\", \"Glob\", \"Grep\"], hooks={\"PreToolUse\": [matcher]}\n    )\n    async for message in query(\n        prompt=\"Read notes.txt and summarize it.\", options=options\n    ):\n        print(type(message).__name__, len(audit_log))",
@@ -946,11 +1482,11 @@
  {
   "id": 8,
   "prerequisites": [
-   3,
-   4
+   5,
+   7
   ],
   "concept_brief": "Subagents are named `AgentDefinition(description, prompt, tools=[...])` entries in `ClaudeAgentOptions(agents={...})`; the main agent delegates with the `Agent` tool, and the subagent's `tools` list scopes what it can use.",
-  "lab_brief": "The offline exercise `subagents` builds a read-only reviewer `AgentDefinition` and shows it as a dict, including every unset field. It lets you inspect the tool scope you are granting before any delegation happens.",
+  "lab_brief": "Choose the reviewer's tool scope and model independently of the parent's tools. Inspect the actual AgentDefinition. Offline mode runs a small local reviewer function with recorded delegation identities; it does not launch a model worker.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
@@ -962,48 +1498,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open the Python source tab and read the `AgentDefinition(...)` call; note that only `description`, `prompt` and `tools` are set."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Choose the reviewer's tool scope and model independently of the parent's tools. Inspect the actual AgentDefinition. Offline mode runs a small local reviewer function with recorded delegation identities; it does not launch a model worker."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `reviewer.tools` is Read, Glob and Grep, the other fields are null, and `delegation_tool` is \"Agent\"."
+    "text": "Compare configured.agents, the parent Agent call, its result ID and message_groups.parent_tool_use_id. A child report belongs to its parent delegation; a role definition alone does not start a worker. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Build your own `AgentDefinition` with a narrower tool list and a model, and compare its dict."
+    "text": "Remove the reviewer's file tools and compare its local limitation report. Explain why a successful delegation result does not prove the worker's answer is useful or that a role prompt grants tool authority."
    }
   ],
-  "inspect": "Look at `reviewer` (description, prompt, tools and the null fields such as `model`, `maxTurns`, `permissionMode`), `delegation_tool` and `host_authority`.",
-  "expected": "`reviewer.description` is \"Read-only Python lesson reviewer\", `reviewer.tools` is [\"Read\", \"Glob\", \"Grep\"], fields such as `model`, `disallowedTools` and `permissionMode` are null, `delegation_tool` is \"Agent\" and `host_authority` says a role description does not override tool permissions.",
-  "evidence_criterion": "The check confirms a reviewer definition was produced and that delegation goes through the `Agent` tool.",
+  "inspect": "Compare configured.agents, the parent Agent call, its result ID and message_groups.parent_tool_use_id. A child report belongs to its parent delegation; a role definition alone does not start a worker.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Compare configured.agents, the parent Agent call, its result ID and message_groups.parent_tool_use_id. A child report belongs to its parent delegation; a role definition alone does not start a worker.",
+  "evidence_criterion": "An Agent/Task delegation has a successful result with the same call ID and the parent stream succeeds. Worker report quality and file access observations remain manual.",
   "evidence_checks": [
    {
-    "key": "reviewer",
-    "rule": "truthy"
-   },
-   {
-    "key": "delegation_tool",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": "Agent"
-   },
-   {
-    "key": "host_authority",
-    "rule": "truthy"
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, create `AgentDefinition(description=\"Reader\", prompt=\"Read notes.txt.\", tools=[\"Read\"], model=\"haiku\")` and print `dataclasses.asdict(...)`. Verify `tools` is only [\"Read\"] and `model` is \"haiku\", while the unset fields stay `None`.",
+  "challenge": "Remove the reviewer's file tools and compare its local limitation report. Explain why a successful delegation result does not prove the worker's answer is useful or that a role prompt grants tool authority.",
   "hints": [
-   "`AgentDefinition` is a dataclass in `claude_agent_sdk`, so `dataclasses.asdict` works on it.",
-   "Its other optional fields include `disallowedTools`, `maxTurns`, `effort` and `permissionMode`; leaving them unset means they inherit or use defaults."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Compare configured.agents, the parent Agent call, its result ID and message_groups.parent_tool_use_id. A child report belongs to its parent delegation; a role definition alone does not start a worker."
   ],
-  "reference": "The reviewer is configuration, not a running agent: a description the main agent uses to choose it, a prompt, and a tool list. Restricting `tools` to Read, Glob and Grep is what keeps it read-only, not the words \"Do not edit files\". In live mode the definition is passed in `agents` and the main agent needs the `Agent` tool to delegate to it, while the host policy still checks every call.",
+  "reference": "Choose the reviewer's tool scope and model independently of the parent's tools. Inspect the actual AgentDefinition. Offline mode runs a small local reviewer function with recorded delegation identities; it does not launch a model worker. An Agent/Task delegation has a successful result with the same call ID and the parent stream succeeds. Worker report quality and file access observations remain manual. Compare configured.agents, the parent Agent call, its result ID and message_groups.parent_tool_use_id. A child report belongs to its parent delegation; a role definition alone does not start a worker. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. In live mode the subagent appears only if the main agent chooses to call the `Agent` tool."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -1041,6 +1569,106 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "A reviewer is defined but no Agent/Task call is observed. Did delegation occur?",
+    "code": "agents = {\"reviewer\": AgentDefinition(description=\"Review\", prompt=\"Inspect notes\") }\ncalls = []",
+    "options": [
+     {
+      "text": "Yes: any parent answer proves a worker report exists.",
+      "explanation": "A parent answer is not evidence of an actual delegation."
+     },
+     {
+      "text": "It was configured, but delegation execution was not established.",
+      "explanation": "Correct. AgentDefinition describes a role; only a matched delegation call/result provides execution evidence."
+     },
+     {
+      "text": "Yes: creating the dictionary launches a worker.",
+      "explanation": "Role configuration alone does not start a model worker."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The worker has no file tools. What authority does its prompt grant?",
+    "code": "worker_tools = []\nworker_prompt = \"Read notes.txt\"",
+    "options": [
+     {
+      "text": "The prompt does not grant a missing file tool.",
+      "explanation": "Correct. Tool scope is configured separately from the worker's role instruction."
+     },
+     {
+      "text": "Unlimited file access because the prompt asks for it.",
+      "explanation": "A prompt does not create tools or bypass the host's authority boundary."
+     },
+     {
+      "text": "The right to silently run Bash instead.",
+      "explanation": "A missing Read tool does not authorize another tool."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "A worker message belongs to delegation A. How should it be grouped?",
+    "code": "message = {\"parent_tool_use_id\": \"A\", \"text\": \"worker report\"}",
+    "options": [
+     {
+      "text": "As a new unrelated parent session.",
+      "explanation": "parent_tool_use_id is a correlation back to the parent delegation."
+     },
+     {
+      "text": "As automatic proof that the worker's answer is correct.",
+      "explanation": "Message grouping establishes provenance, not answer quality."
+     },
+     {
+      "text": "With delegation A, separate from the parent's main-answer text.",
+      "explanation": "Correct. Keeping parent identity prevents forwarded child text from being mistaken for the parent's final answer."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the delegation map. What closes the required call/result link?",
+    "code": "# Parent -> Agent call A -> Child messages(parent=A) -> Result A -> Parent success",
+    "options": [
+     {
+      "text": "An unrelated result B.",
+      "explanation": "Different call IDs do not establish the required identity."
+     },
+     {
+      "text": "The successful result with ID A and successful parent completion.",
+      "explanation": "Correct. Child prose alone does not close the delegation result and parent-outcome checks."
+     },
+     {
+      "text": "The worker's description text.",
+      "explanation": "A description is configuration, not a successful tool result."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the scope diagram. Which observation proves report quality?",
+    "code": "# Parent inventory | Worker inventory | Host permission policy\n# Delegation evidence -> manual review of report",
+    "options": [
+     {
+      "text": "The learner's review of the actual report.",
+      "explanation": "Correct. A bounded delegation pass does not grade usefulness, correctness or completeness of worker prose."
+     },
+     {
+      "text": "A successful Agent result by itself.",
+      "explanation": "The result establishes the checked delegation outcome, not report quality."
+     },
+     {
+      "text": "The model alias alone.",
+      "explanation": "A model choice does not prove the content is accurate."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, ResultMessage, query\n\nreviewer = AgentDefinition(\n    description=\"Reviews lesson notes without editing them.\",\n    prompt=\"Read notes.txt and suggest one improvement. Never modify files.\",\n    tools=[\"Read\", \"Glob\", \"Grep\"],\n)\n\n\nasync def main() -> None:\n    options = ClaudeAgentOptions(\n        agents={\"reviewer\": reviewer},\n        # The main agent needs the Agent tool to delegate at all.\n        tools=[\"Agent\", \"Read\", \"Glob\", \"Grep\"],\n        allowed_tools=[\"Agent\", \"Read\", \"Glob\", \"Grep\"],\n        max_turns=6,\n    )\n    prompt = \"Ask the reviewer subagent to inspect notes.txt.\"\n    async for message in query(prompt=prompt, options=options):\n        if isinstance(message, ResultMessage):\n            print(message.result)",
@@ -1067,10 +1695,11 @@
  {
   "id": 9,
   "prerequisites": [
+   1,
    2
   ],
   "concept_brief": "`ClaudeAgentOptions(system_prompt=...)` accepts either a custom string, which replaces the default prompt, or a preset dict `{\"type\": \"preset\", \"preset\": \"claude_code\", \"append\": \"...\"}`, which keeps Claude Code's base instructions and adds yours.",
-  "lab_brief": "The offline exercise `system_prompts` returns a custom prompt, a `claude_code` preset with an appended instruction, and the difference between them. It helps you choose between replacing and extending the default instructions.",
+  "lab_brief": "Keep the user question fixed while changing the omitted, custom, preset, dynamic-boundary or owned-project system instruction. The experiment displays the actual SDK representation. Only the project variant writes an owned CLAUDE.md and opts into project settings.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
@@ -1082,47 +1711,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read the two shapes in the Python source tab and predict which one keeps Claude Code's built-in instructions."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Keep the user question fixed while changing the omitted, custom, preset, dynamic-boundary or owned-project system instruction. The experiment displays the actual SDK representation. Only the project variant writes an owned CLAUDE.md and opts into project settings."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `custom` is a plain string, `preset` is a dict with `type`, `preset` and `append`, and read `difference`."
+    "text": "Compare configured.system_prompt and setting_sources. Inspect local_effects.project_file for the project variant. Offline usage is unavailable; the boundary marker does not establish caching. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Build `ClaudeAgentOptions` with each form and print `system_prompt`."
+    "text": "Use the same question under all five variants. Explain replacement versus preset append, then distinguish a dynamic-boundary configuration from measured usage evidence."
    }
   ],
-  "inspect": "Look at `custom`, `preset` (type, preset, append) and `difference`.",
-  "expected": "`custom` is \"Teach Python agents using concise explanations.\", `preset` is {\"type\": \"preset\", \"preset\": \"`claude_code`\", \"append\": \"Use Python examples.\"} and `difference` is \"A custom prompt replaces the default; a preset retains its base instructions.\"",
-  "evidence_criterion": "The check confirms both prompt forms and their difference were produced.",
+  "inspect": "Compare configured.system_prompt and setting_sources. Inspect local_effects.project_file for the project variant. Offline usage is unavailable; the boundary marker does not establish caching.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Compare configured.system_prompt and setting_sources. Inspect local_effects.project_file for the project variant. Offline usage is unavailable; the boundary marker does not establish caching.",
+  "evidence_criterion": "The echoed system-prompt representation and project-setting selection match the selected variant, and the stream succeeds. Prompt adherence, caching and answer quality are not graded.",
   "evidence_checks": [
    {
-    "key": "custom",
-    "rule": "truthy"
-   },
-   {
-    "key": "preset",
-    "rule": "truthy"
-   },
-   {
-    "key": "difference",
-    "rule": "truthy"
+    "key": "experiment_passed",
+    "rule": "equals",
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, create `ClaudeAgentOptions(system_prompt=\"Answer in one sentence.\")` and `ClaudeAgentOptions(system_prompt={\"type\": \"preset\", \"preset\": \"claude_code\", \"append\": \"Use Python examples.\"})` and print each `system_prompt`. If live mode is available, run the lesson and check whether Claude's answer follows the appended \"Teach using Python examples.\" instruction.",
+  "challenge": "Use the same question under all five variants. Explain replacement versus preset append, then distinguish a dynamic-boundary configuration from measured usage evidence.",
   "hints": [
-   "A string means replace; a dict with `type: \"preset\"` means keep the preset and append.",
-   "`from claude_agent_sdk import ClaudeAgentOptions`; the live `system` profile in `agent_lab/sdk.py` sets the preset with `append` \"Teach using Python examples.\"."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Compare configured.system_prompt and setting_sources. Inspect local_effects.project_file for the project variant. Offline usage is unavailable; the boundary marker does not establish caching."
   ],
-  "reference": "A custom string becomes the whole system prompt, so you lose Claude Code's default behaviour and must state everything you need. The preset form keeps those base instructions and adds your `append` text at the end. Neither form grants tools or permissions; those still come from options and host policy.",
+  "reference": "Keep the user question fixed while changing the omitted, custom, preset, dynamic-boundary or owned-project system instruction. The experiment displays the actual SDK representation. Only the project variant writes an owned CLAUDE.md and opts into project settings. The echoed system-prompt representation and project-setting selection match the selected variant, and the stream succeeds. Prompt adherence, caching and answer quality are not graded. Compare configured.system_prompt and setting_sources. Inspect local_effects.project_file for the project variant. Offline usage is unavailable; the boundary marker does not establish caching. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -1160,6 +1782,106 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Which representation replaces the default system instructions?",
+    "code": "system_prompt = \"Be a concise Python tutor.\"",
+    "options": [
+     {
+      "text": "This custom string representation.",
+      "explanation": "Correct. A plain custom string is distinct from the named preset-plus-append representation."
+     },
+     {
+      "text": "A preset dictionary with append.",
+      "explanation": "The preset branch retains the named base instructions rather than replacing them with only this string."
+     },
+     {
+      "text": "An omitted None value.",
+      "explanation": "None omits the explicit SDK option; it is not this supplied custom text."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The boundary marker is present. What does this prove about caching?",
+    "code": "instruction = \"Stable text\\nSYSTEM_PROMPT_DYNAMIC_BOUNDARY\\nDynamic context\"",
+    "options": [
+     {
+      "text": "Every subsequent run is cached for free.",
+      "explanation": "Actual provider usage and billing must be observed; a string marker cannot guarantee either."
+     },
+     {
+      "text": "The answer must obey every instruction.",
+      "explanation": "An options echo does not grade prompt adherence."
+     },
+     {
+      "text": "Only the selected configuration is established; inspect actual usage to assess caching.",
+      "explanation": "Correct. A marker in text is not a measured cache hit or a cost-saving guarantee."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The project variant is selected. Which source should be inspected?",
+    "code": "setting_sources = [\"project\"]\n# Dedicated run workspace contains its owned CLAUDE.md.",
+    "options": [
+     {
+      "text": "Only the assistant's self-description.",
+      "explanation": "The assistant's claim is not the configuration or file evidence."
+     },
+     {
+      "text": "The displayed owned project file and actual echoed settings.",
+      "explanation": "Correct. Explicit project opt-in is different from assuming every run inherits personal or project instructions."
+     },
+     {
+      "text": "Any personal settings file on the computer.",
+      "explanation": "The lab uses an isolated configuration and does not select personal settings as a project experiment."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the variant map. Which variable should stay fixed for comparison?",
+    "code": "# Same user question -> omitted / custom / preset / boundary / owned project",
+    "options": [
+     {
+      "text": "The user question.",
+      "explanation": "Correct. Keeping the question fixed makes the selected instruction representation the intended variable."
+     },
+     {
+      "text": "Every system instruction must stay identical.",
+      "explanation": "The purpose of the experiment is to vary the system representation."
+     },
+     {
+      "text": "The unmeasured claim that all variants save money.",
+      "explanation": "Cost and usage are observations, not assumptions to hold as facts."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the walkthrough. What does a passing configuration check exclude?",
+    "code": "# Select variant -> Echo actual representation -> Terminal success -> Review behavior",
+    "options": [
+     {
+      "text": "Whether the selected representation matched.",
+      "explanation": "Matching the representation is explicitly part of this check."
+     },
+     {
+      "text": "Whether the run finished successfully.",
+      "explanation": "Successful completion is explicitly part of the criterion."
+     },
+     {
+      "text": "A guarantee of adherence, factual accuracy or cache savings.",
+      "explanation": "Correct. Configuration and terminal outcome are bounded evidence; behavior and usage need separate inspection."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
    }
   ],
   "concept_code": "from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\n# A plain string replaces the default Claude Code instructions entirely.\nreplaced = ClaudeAgentOptions(\n    system_prompt=\"You are a terse Python tutor. Answer in at most three bullet points.\",\n)\n\n# The preset keeps the Claude Code base instructions and appends yours.\nextended = ClaudeAgentOptions(\n    system_prompt={\n        \"type\": \"preset\",\n        \"preset\": \"claude_code\",\n        \"append\": \"Teach using Python examples.\",\n    },\n)\n\n\nasync def main() -> None:\n    prompt = \"Explain your response format briefly.\"\n    for options in (replaced, extended):\n        async for message in query(prompt=prompt, options=options):\n            if isinstance(message, ResultMessage):\n                print(message.result)",
@@ -1186,11 +1908,11 @@
  {
   "id": 10,
   "prerequisites": [
-   5,
-   9
+   1,
+   2
   ],
   "concept_brief": "Structured output is validated against a Pydantic model before you trust it. `ClaudeSDKClient.interrupt()` sends a control request that stops the current turn; the turn then ends with an error result instead of the full reply.",
-  "lab_brief": "The `structured` exercise validates a good and a bad `Summary`, then streams a six-chunk reply through the real client and calls `interrupt()` after the second chunk. The offline run uses the real `ClaudeSDKClient` against `ScriptedCLI` (`agent_lab/scripted_cli.py`), a scripted stand-in for the Claude Code process: no model is called.",
+  "lab_brief": "Validate an editable offline JSON value against the course Summary schema, independently of assistant prose. Then use the separate Stop comparison scenario with the official client and a scripted transport to compare interruption/continuation with closing the client.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 10 (or run `uv run agent-lab lesson 10`).",
    "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live `structured` profile requests JSON matching the `Summary` schema."
@@ -1202,43 +1924,40 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `structured` and `ScriptedCLI` in the source."
+    "text": "Open Run the exercise and inspect the Lesson experiment controls. Then open Python source to read the exact configuration, selected host experiment and shared evidence evaluator excerpts."
    },
    {
     "title": "Run one example",
-    "text": "Run the offline exercise."
+    "text": "Keep Offline Python exercise selected and use the default nonempty prompt and Passing example. Choose Run exercise yourself; opening the guide never starts a run. Validate an editable offline JSON value against the course Summary schema, independently of assistant prose. Then use the separate Stop comparison scenario with the official client and a scripted transport to compare interruption/continuation with closing the client."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `invalid_answer` and the `interrupt` block."
+    "text": "Inspect accepted_structured_value or schema_errors alongside terminal_results. Stop comparison shows control_requests, lifecycle and continued; it deliberately does not pass the structured-output check. Compare the two negative identity/evidence scenarios before returning to Passing example."
    },
    {
     "title": "Try the challenge",
-    "text": "Interrupt later and count the chunks."
+    "text": "Try an empty summary, an empty step list and an unexpected field. Then compare interrupt-and-continue with abort. Explain why a control receipt is separate from a later terminal result and a schema-valid value may still be inaccurate."
    }
   ],
-  "inspect": "`validated`, `invalid_answer`, and in `interrupt`: `chunks_planned`, `chunks_received`, `result_subtype` and `control_requests`.",
-  "expected": "`invalid_answer` is `rejected: 2 validation errors`. The interrupt block shows 2 of 6 chunks, `result_subtype` `error_during_execution`, and control requests `initialize` then `interrupt`.",
-  "evidence_criterion": "The check confirms the structured answer validated and the interrupt stopped the turn early.",
+  "inspect": "Inspect accepted_structured_value or schema_errors alongside terminal_results. Stop comparison shows control_requests, lifecycle and continued; it deliberately does not pass the structured-output check.",
+  "expected": "With the default lesson controls, Passing example meets the bounded criterion on labelled fixtures. Missing required evidence and Mismatched identity must need review. Inspect accepted_structured_value or schema_errors alongside terminal_results. Stop comparison shows control_requests, lifecycle and continued; it deliberately does not pass the structured-output check.",
+  "evidence_criterion": "The server Summary validator accepts structured_output and the stream ends with a successful SDK result. This checks structure, not factual accuracy or the separate interrupt/abort experiment.",
   "evidence_checks": [
    {
-    "key": "validated",
-    "rule": "truthy"
-   },
-   {
-    "key": "interrupt",
-    "rule": "truthy"
+    "key": "experiment_passed",
+    "rule": "equals",
+    "value": true
    }
   ],
-  "challenge": "Change `if received == 2` to `if received == 4` in `structured`, run again and confirm `chunks_received` becomes 4.",
+  "challenge": "Try an empty summary, an empty step list and an unexpected field. Then compare interrupt-and-continue with abort. Explain why a control receipt is separate from a later terminal result and a schema-valid value may still be inaccurate.",
   "hints": [
-   "The interrupt is a control request; the CLI stops sending chunks once it arrives.",
-   "Interrupting after the fourth chunk lets four through, and the result subtype is still `error_during_execution` because the turn did not finish."
+   "Start with the default controls. Inspect the experiment's actual configuration, operation evidence and final result separately; a description or a plausible answer is not execution evidence.",
+   "Inspect accepted_structured_value or schema_errors alongside terminal_results. Stop comparison shows control_requests, lifecycle and continued; it deliberately does not pass the structured-output check."
   ],
-  "reference": "Validation turns model output into trusted data or a clear rejection. Interrupt is a control message on the same connection: the client keeps the session, and the turn ends with an explicit error result you must check before using any partial text.",
+  "reference": "Validate an editable offline JSON value against the course Summary schema, independently of assistant prose. Then use the separate Stop comparison scenario with the official client and a scripted transport to compare interruption/continuation with closing the client. The server Summary validator accepts structured_output and the stream ends with a successful SDK result. This checks structure, not factual accuracy or the separate interrupt/abort experiment. Inspect accepted_structured_value or schema_errors alongside terminal_results. Stop comparison shows control_requests, lifecycle and continued; it deliberately does not pass the structured-output check. Offline replay success is not a live model call. Quizzes, guides, configuration inspection and saved explanations make no paid call and do not mark manual review complete. The standard Python example remains available separately from the selected experiment.",
   "recovery": [
-   "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+   "A rejected prompt or invalid lesson option starts no run. Correct the field first. Negative scenarios intentionally need review; return to the default controls and Passing example for the positive case.",
+   "For a live run, inspect actual callbacks and terminal evidence. If a required call, initialization or result is absent, do not infer success from assistant text. Live model behavior and factual content need separate manual inspection."
   ],
   "quiz": [
    {
@@ -1276,14 +1995,114 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Assistant prose contains JSON, but structured_output is absent. Is it accepted structured data?",
+    "code": "assistant_text = '{\"summary\":\"hello\",\"next_steps\":[\"review\"]}'\nstructured_output = None",
+    "options": [
+     {
+      "text": "Yes: any braces in text prove schema validation.",
+      "explanation": "A text shape does not prove that the server validator accepted a structured value."
+     },
+     {
+      "text": "Yes: the student can skip terminal inspection.",
+      "explanation": "Terminal success remains a separate required observation."
+     },
+     {
+      "text": "No: the host must validate the actual structured_output value.",
+      "explanation": "Correct. JSON-looking prose is not the accepted structured-output channel or a server validation event."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "The server accepts the structure. What remains unchecked?",
+    "code": "validated = {\"summary\":\"A claim\",\"next_steps\":[\"Inspect evidence\"]}",
+    "options": [
+     {
+      "text": "Whether the supplied value has a valid shape.",
+      "explanation": "Shape is the purpose of the server schema validation."
+     },
+     {
+      "text": "The factual accuracy and usefulness of the content.",
+      "explanation": "Correct. Structural constraints do not establish factual truth."
+     },
+     {
+      "text": "Whether summary is a field.",
+      "explanation": "The schema validator already checks required structure."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "An interrupt request was accepted. Is that receipt a final successful result?",
+    "code": "control_receipt = {\"action\":\"interrupt\", \"accepted\":True}\n# The stream outcome has not arrived yet.",
+    "options": [
+     {
+      "text": "No: inspect subsequent events and the terminal outcome.",
+      "explanation": "Correct. Accepting a control request is distinct from observing its eventual effect."
+     },
+     {
+      "text": "Yes: accepted always means completed successfully.",
+      "explanation": "A control receipt is not a terminal run result."
+     },
+     {
+      "text": "Yes: it automatically certifies structured-output validation.",
+      "explanation": "The separate stop experiment cannot satisfy the structured-output check."
+     }
+    ],
+    "correct": 0,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the stop map. Which fixture path can continue on the same open client?",
+    "code": "# interrupt -> finish current response -> send follow-up\n# abort -> close client -> no continuation on that client",
+    "options": [
+     {
+      "text": "The closed-client abort path.",
+      "explanation": "Closing the client ends that client's lifecycle."
+     },
+     {
+      "text": "Both paths certify factual accuracy.",
+      "explanation": "Neither stopping mechanism grades the generated content."
+     },
+     {
+      "text": "The interrupt-and-continue path.",
+      "explanation": "Correct. The scripted experiment explicitly sends a follow-up before closing; abort closes the client."
+     }
+    ],
+    "correct": 2,
+    "source": "agent_lab/foundations.py"
+   },
+   {
+    "prompt": "Read the validation walkthrough. What is the bounded passing path?",
+    "code": "# structured_output -> server schema accepted -> final result/success\n# stop comparison -> separate control evidence",
+    "options": [
+     {
+      "text": "Only a displayed schema definition.",
+      "explanation": "A schema definition must actually validate the returned value, and the stream must succeed."
+     },
+     {
+      "text": "Accepted structured value plus terminal success.",
+      "explanation": "Correct. The interrupt/abort comparison is deliberately kept outside this structured-output criterion."
+     },
+     {
+      "text": "Any partial text followed by Cancel.",
+      "explanation": "Partial text and cancellation do not establish an accepted structured value and successful result."
+     }
+    ],
+    "correct": 1,
+    "source": "agent_lab/foundations.py"
    }
   ],
-  "concept_code": "from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage, query\nfrom pydantic import BaseModel, Field\n\n\nclass Summary(BaseModel):\n    summary: str = Field(min_length=1, max_length=500)\n    next_steps: list[str] = Field(min_length=2, max_length=2)\n\n\nasync def structured() -> Summary | None:\n    schema = Summary.model_json_schema()\n    options = ClaudeAgentOptions(\n        output_format={\"type\": \"json_schema\", \"schema\": schema}\n    )\n    async for message in query(\n        prompt=\"Summarize learning Python agents.\", options=options\n    ):\n        if isinstance(message, ResultMessage) and message.structured_output is not None:\n            return Summary.model_validate(message.structured_output)\n    return None\n\n\nasync def interrupted() -> None:\n    async with ClaudeSDKClient(options=ClaudeAgentOptions(tools=[])) as client:\n        await client.query(\"Write a long essay about asyncio.\")\n        await client.interrupt()\n        async for message in client.receive_response():\n            if isinstance(message, ResultMessage):\n                print(message.subtype, message.is_error)",
-  "code_focus": "`output_format={\"type\": \"json_schema\", ...}` requests structured data, `Summary.model_validate(message.structured_output)` checks it, and `client.interrupt()` stops the running turn.",
+  "concept_code": "from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage, query\nfrom pydantic import BaseModel, ConfigDict, Field\n\n\nclass Summary(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\")\n    summary: str = Field(min_length=1, max_length=500)\n    next_steps: list[str] = Field(min_length=1, max_length=4)\n\n\nasync def structured() -> Summary | None:\n    schema = Summary.model_json_schema()\n    options = ClaudeAgentOptions(\n        output_format={\"type\": \"json_schema\", \"schema\": schema}\n    )\n    async for message in query(\n        prompt=\"Summarize learning Python agents.\", options=options\n    ):\n        if isinstance(message, ResultMessage) and message.structured_output is not None:\n            return Summary.model_validate(message.structured_output)\n    return None\n\n\nasync def interrupted() -> None:\n    async with ClaudeSDKClient(options=ClaudeAgentOptions(tools=[])) as client:\n        await client.query(\"Write a long essay about asyncio.\")\n        await client.interrupt()\n        async for message in client.receive_response():\n            if isinstance(message, ResultMessage):\n                print(message.subtype, message.is_error)",
+  "code_focus": "output_format requests structured data, Summary.model_validate checks the returned structured_output, and client.interrupt() requests interruption. Inspect the terminal outcome separately.",
   "concept_points": [
    {
     "title": "Ask for a schema",
-    "text": "`output_format` with a JSON schema makes the agent return `structured_output` on the ResultMessage."
+    "text": "output_format requests structured_output under the supplied JSON schema. Inspect the terminal result to see whether usable structured data arrived."
    },
    {
     "title": "Validate before trusting",
@@ -1291,7 +2110,7 @@
    },
    {
     "title": "Interrupt needs a client",
-    "text": "interrupt() is a control request on a connected ClaudeSDKClient; the turn then ends with an error result."
+    "text": "interrupt() sends a control request on a connected ClaudeSDKClient. Observe later messages and the terminal result before deciding how the turn ended."
    }
   ],
   "misconception": {

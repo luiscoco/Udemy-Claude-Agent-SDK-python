@@ -28,8 +28,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class RunRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    max_turns: int | None = Field(default=None, ge=1, le=20)
+    model_config = ConfigDict(extra="forbid", strict=True)
+    max_turns: int | None = Field(default=None, ge=1, le=12)
     max_budget_usd: float | None = Field(default=None, gt=0, le=1.0)
     model: str | None = None
 

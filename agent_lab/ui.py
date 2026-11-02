@@ -13,6 +13,8 @@ from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, TOPICS
 from agent_lab.evaluation_studio import StudioService
 from agent_lab.exercises import exercise_context, exercise_source, exercise_uses
+from agent_lab.foundation_models import SCENARIOS
+from agent_lab.foundations import source_sections
 from agent_lab.learning import CheckResult, check_evidence, course
 from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
 from agent_lab.models import Event, RunRequest
@@ -24,6 +26,7 @@ from agent_lab.runtime import RunHandle, RunService
 from agent_lab.study_coach import CoachService
 from agent_lab.tutor import TutorService
 from agent_lab.ui_coach import install_coach_page
+from agent_lab.ui_foundations import experiment_controls
 from agent_lab.ui_guide import INITIAL_LESSON_START, LessonGuidePanel
 from agent_lab.ui_learning import (
     appearance_controls,
@@ -170,6 +173,19 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
+                        if 2 <= lesson <= 10:
+                            for section in source_sections(lesson):
+                                with ui.expansion(section["title"]).classes(
+                                    "w-full foundation-source-excerpt"
+                                ):
+                                    ui.label(
+                                        f"{section['path']}: {section['start']}–{section['end']}"
+                                    ).classes("font-semibold")
+                                    ui.code(section["code"], language="python").classes("w-full")
+                                    ui.label(section["question"]).classes("font-semibold")
+                            ui.link(
+                                "Read the shared evidence evaluator", "/agent_lab/foundations.py"
+                            )
                         ui.label(
                             "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
                         ).classes("text-sm text-slate-500")
@@ -188,12 +204,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         prompt = (
                             ui.textarea(
                                 "Prompt"
-                                if lesson == 1
+                                if lesson <= 10
                                 else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
-                                value=current.prompt if lesson == 1 else "",
+                                value=current.prompt if lesson <= 10 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -201,9 +217,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if lesson == 1:
+                        if lesson <= 10:
                             ui.label(
-                                "Offline scenarios validate your prompt but replay recorded messages; they do not call Claude."
+                                "Offline experiments validate your prompt and run local host code with labelled SDK fixtures; they do not call Claude."
                             ).classes("text-sm text-slate-600")
                         elif offline_prompt:
                             ui.label(
@@ -219,15 +235,19 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
-                        if lesson == 1:
+                        if lesson <= 10 and lesson != 6:
                             follow_up.set_visibility(False)
+                        read_lesson_options = experiment_controls(lesson, mode)
                         scenario = (
                             ui.select(
-                                {
-                                    "success": "Success",
-                                    "error": "SDK error",
-                                    "missing-result": "Missing final result",
-                                },
+                                SCENARIOS.get(
+                                    lesson,
+                                    {
+                                        "success": "Success",
+                                        "error": "SDK error",
+                                        "missing-result": "Missing final result",
+                                    },
+                                ),
                                 value="success",
                                 label="Recorded scenario",
                             )
@@ -235,7 +255,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             .classes("w-full")
                         )
                         scenario.bind_visibility_from(
-                            mode, "value", lambda value: lesson == 1 and value == "offline"
+                            mode, "value", lambda value: lesson <= 10 and value == "offline"
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (
@@ -340,6 +360,13 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     dialog.close()
 
                                 ui.button("Send answer", on_click=submit)
+
+                                async def cancel_question() -> None:
+                                    if handle:
+                                        await runner.cancel(handle)
+                                    dialog.close()
+
+                                ui.button("Cancel run", icon="stop", on_click=cancel_question).props("outline")
                             dialog.open()
 
                         async def consume() -> None:
@@ -376,6 +403,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     follow_up=follow_up.value or "",
                                     max_turns=turns.value,
                                     max_budget_usd=budget.value,
+                                    lesson_options=read_lesson_options(),
                                     scenario=scenario.value
                                     if mode.value == "offline"
                                     else "success",

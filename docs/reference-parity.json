@@ -1,7 +1,7 @@
 {
  "format": "python-reference-parity",
  "version": 1,
- "date": "2026-10-29",
+ "date": "2026-11-02",
  "reference": {
   "repository": "luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild",
   "commit": "777d8479b62fddf5cd62df86fb048d589ed43a7c",
@@ -49,8 +49,8 @@
   {
    "id": "assessment-and-workbook",
    "status": "partial",
-   "python": "Seven explained questions in lesson 1; 2?3 in the other lessons. Four manual checks, notes, two hints and saved challenge attempts remain separate from automatic outcome checks.",
-   "next": "Apply individually reviewed question and scenario coverage to lessons 2?10, then continue the remaining lessons."
+   "python": "Seven explained questions per lesson for lessons 1-10, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
+   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 11-20; keep shared navigation, media and runtime adaptations separately tracked."
   },
   {
    "id": "progress",
@@ -111,8 +111,11 @@
    "foundation_component": "src/concepts/Concept02Options.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Options, omission controls, init/terminal checks and seven explained questions added. Shared navigation/routes and independently recorded media remain separate.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 3,
@@ -126,8 +129,11 @@
    "foundation_component": "src/concepts/Concept03Tools.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Read/Glob/Grep and fixed version-command experiments with call/result correlation added. Arbitrary shell/write scenarios and broader sandbox exploration are not included.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 4,
@@ -141,8 +147,11 @@
    "foundation_component": "src/concepts/Concept04Permissions.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Owned-target deny/allow/redirect/question callbacks, snapshots and cancellation added. Unsupported targets require review; reference route aliases and broader approval workflows remain separate.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 5,
@@ -156,8 +165,11 @@
    "foundation_component": "src/concepts/Concept05CustomTools.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Calculator handler validation, identity/ambiguity checks and seven questions added. This adapts the reference task-file tools to the Python course calculator.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 6,
@@ -171,8 +183,11 @@
    "foundation_component": "src/concepts/Concept06Sessions.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Same-client, explicit-resume and fresh-client comparisons added within one owned run. Durable cross-run/browser session ownership remains pending.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 7,
@@ -186,8 +201,11 @@
    "foundation_component": "src/concepts/Concept07Hooks.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Configurable teaching hooks, actual local read effects and post-use identity checks added. The immutable host guard is independent; check scope does not certify every policy/content effect.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 8,
@@ -201,8 +219,11 @@
    "foundation_component": "src/concepts/Concept08Subagents.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Reviewer scope/model controls and parent/child delegation correlation added. Actual model worker quality still needs manual observation.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 9,
@@ -216,8 +237,11 @@
    "foundation_component": "src/concepts/Concept09SystemPrompts.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Five supported prompt/project variants, actual option echoes and seven questions added. Unsupported content-block variants and measured caching/adherence remain separate.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 10,
@@ -231,8 +255,11 @@
    "foundation_component": "src/concepts/Concept10StructuredInterrupt.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
-   "written_guide_content": "lesson-content"
+   "gap": "Course Summary validation and a scripted interrupt/abort comparison added. Persistent live interrupt/send/end controls and reference schema variants remain pending.",
+   "written_guide_content": "lesson-content",
+   "assessment_questions": 7,
+   "experiment_source": "agent_lab/foundations.py",
+   "experiment_upgrade": "python-adapted"
   },
   {
    "id": 11,
@@ -1209,5 +1236,6 @@
    "gap": "Bounded source-proposal team fixture does not implement the complete worktree/merge/recovery/PR pipeline.",
    "written_guide_content": "lesson-content"
   }
- ]
+ ],
+ "source_inventory_date": "2026-10-29"
 }

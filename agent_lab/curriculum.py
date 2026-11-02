@@ -34,8 +34,8 @@ ROWS = [
     (
         4,
         "Permissions",
-        "Reject paths outside the workspace and tools outside the host's allowlist.",
-        "Read notes.txt. Do not write files or execute commands.",
+        "Approve, deny or redirect fixture file operations through a host permission callback.",
+        "Write a short note to draft.txt, then report whether permission was granted. Do not use shell commands.",
         "permissions",
         "read",
     ),

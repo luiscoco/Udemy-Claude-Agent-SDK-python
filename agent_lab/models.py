@@ -15,7 +15,8 @@ class RunRequest(BaseModel):
     )
     max_turns: int = Field(default=4, ge=1, le=12)
     max_budget_usd: float = Field(default=0.10, gt=0, le=1, allow_inf_nan=False)
-    scenario: Literal["success", "error", "missing-result"] = "success"
+    scenario: str = Field(default="success", min_length=1, max_length=40)
+    lesson_options: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("prompt", "follow_up")
     @classmethod
@@ -32,6 +33,7 @@ class QueryRunRequest(RunRequest):
     )
     max_turns: int = Field(default=1, ge=1, le=1)
     max_budget_usd: float = Field(default=0.05, gt=0, le=0.05, allow_inf_nan=False)
+    scenario: Literal["success", "error", "missing-result"] = "success"
 
     @field_validator("prompt", mode="before")
     @classmethod
@@ -43,10 +45,38 @@ class QueryRunRequest(RunRequest):
         return value
 
 
+class FoundationRunRequest(RunRequest):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    prompt: str = Field(min_length=1, max_length=10000)
+
+    @field_validator("prompt", "follow_up", mode="before")
+    @classmethod
+    def trim(cls, value: Any) -> Any:
+        return value.strip() if isinstance(value, str) else value
+
+
 def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunRequest:
     """Validate before creating a task; omitted fields get the lesson's defaults."""
     data = value.model_dump(exclude_unset=True) if isinstance(value, RunRequest) else value
+    parsed: RunRequest
+    if 2 <= lesson_id <= 10:
+        from agent_lab.curriculum import get_lesson
+        from agent_lab.foundation_models import SCENARIOS, inputs
+
+        data = dict(data)
+        data.setdefault("prompt", get_lesson(lesson_id).prompt)
+        parsed = FoundationRunRequest.model_validate(data)
+        parsed.lesson_options = inputs(lesson_id, parsed.lesson_options).model_dump()
+        if parsed.scenario not in SCENARIOS[lesson_id]:
+            raise LessonError("Choose a scenario offered by this lesson.")
+        if parsed.mode == "live" and parsed.scenario != "success":
+            raise LessonError("Recorded negative scenarios are offline experiments only.")
+        if lesson_id == 6 and not parsed.follow_up:
+            raise LessonError("Enter a nonempty follow-up for the session experiment.")
+        return parsed
     parsed = (QueryRunRequest if lesson_id == 1 else RunRequest).model_validate(data)
+    if parsed.lesson_options:
+        raise LessonError("This lesson does not accept lesson-specific options.")
     if parsed.scenario != "success" and (lesson_id != 1 or parsed.mode != "offline"):
         raise LessonError("Recorded scenarios are available only in lesson 1 offline mode.")
     return parsed

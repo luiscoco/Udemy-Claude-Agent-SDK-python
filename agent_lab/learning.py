@@ -248,6 +248,18 @@ def check_evidence(
             status="needs-review",
             detail="A final successful SDK result was not established. Inspect the terminal subtype and is_error; assistant text alone does not prove success. The recorded error and missing-result scenarios intentionally need review.",
         )
+    if 2 <= lesson_id <= 10:
+        experiment = evidence.get("experiment", {})
+        passed = evidence.get("experiment_passed") is True and isinstance(experiment, dict) and experiment.get("experiment_passed") is True
+        if mode == "live" and isinstance(experiment, dict) and experiment.get("source") != "live SDK stream and actual host callbacks":
+            passed = False
+        return CheckResult(
+            status="passed" if passed else "needs-review",
+            detail=("Live SDK evidence. " if mode == "live" else "Local experiment with labelled SDK fixtures. ")
+            + (experiment.get("check_scope", "Required experiment evidence is missing.") if isinstance(experiment, dict) else "Required experiment evidence is missing.")
+            + (" The bounded criterion passed." if passed else " The bounded criterion was not established; inspect the evidence.")
+            + " Your manual review remains separate.",
+        )
     failures = []
     for check in guide(lesson_id).evidence_checks:
         if check.key not in evidence:
