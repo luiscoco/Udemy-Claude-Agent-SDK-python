@@ -1129,6 +1129,14 @@ def test_browser_thinking_comparison_unknown_metrics_and_prompt_free_metadata(se
         page.evaluate("window.scrollBy(0, -120)")
         page.screenshot(path=str(data / "thinking-comparison-desktop.png"))
         page.set_viewport_size({"width": 390, "height": 844})
+        # Quasar updates its drawer/page padding after the browser resize event.
+        # Check the settled phone layout, not the intermediate desktop transition.
+        page.wait_for_function("""() => {
+            const lanes = [...document.querySelectorAll('.thinking-lane')];
+            return lanes.length === 2 &&
+                lanes[1].getBoundingClientRect().top >= lanes[0].getBoundingClientRect().bottom &&
+                document.documentElement.scrollWidth <= innerWidth + 1;
+        }""")
         lanes.nth(0).evaluate("e => e.scrollIntoView({block:'center'})")
         page.screenshot(path=str(data / "thinking-comparison-phone.png"))
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
