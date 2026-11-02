@@ -376,6 +376,15 @@ async def execute_stream(
                 Event(kind="result" if isinstance(message, ResultMessage) else "message", data=data)
             )
             if (
+                request.mode == "live"
+                and isinstance(message, ResultMessage)
+                and (message.is_error or message.subtype != "success")
+            ):
+                session.end()
+                raise LessonError(
+                    "The SDK turn did not succeed. Inspect the terminal result and account/model access. No automatic retry was made."
+                )
+            if (
                 request.scenario == "interrupted"
                 and not interrupted
                 and data.get("message_class") == "AssistantMessage"

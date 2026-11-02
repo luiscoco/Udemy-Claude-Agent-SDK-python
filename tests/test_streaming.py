@@ -16,6 +16,54 @@ from agent_lab.runtime import RunService
 from agent_lab.streaming import StreamSession, local_streaming, stream_report
 
 
+async def test_live_sdk_error_preserves_terminal_evidence_fails_and_does_not_send_follow_up(
+    tmp_path, monkeypatch
+):
+    from claude_agent_sdk import ClaudeSDKClient as RealClient
+
+    import agent_lab.sdk as sdk
+    import agent_lab.streaming as streaming
+
+    class FailingFixture(streaming.StreamingFixture):
+        async def _reply(self):
+            await self._outbox.put(
+                {
+                    "type": "result",
+                    "subtype": "error_during_execution",
+                    "is_error": True,
+                    "duration_ms": 0,
+                    "duration_api_ms": 0,
+                    "num_turns": 1,
+                    "session_id": self.session_id,
+                    "total_cost_usd": 0,
+                    "result": "Recorded account/model failure",
+                }
+            )
+
+    class Client(RealClient):
+        def __init__(self, options, transport=None):
+            super().__init__(options=options, transport=FailingFixture([]))
+
+    monkeypatch.setattr(streaming, "ClaudeSDKClient", Client)
+    monkeypatch.setattr(sdk, "require_live_access", lambda settings: None)
+    monkeypatch.setattr(sdk, "resolve_cli_path", lambda settings: "fixture-cli")
+    runner = RunService(Settings(data_dir=tmp_path, enable_live=True))
+    handle = runner.start(
+        12, RunRequest(mode="live", lesson_options={"queue_timing": "after-result"})
+    )
+    events = [event async for event in runner.events(handle)]
+    assert events[-1].data["status"] == "failed"
+    assert any(event.kind == "result" and event.data["is_error"] for event in events)
+    assert any(
+        event.kind == "error" and "No automatic retry" in event.data["message"] for event in events
+    )
+    proof = next(event.data["result"] for event in events if event.kind == "evidence")
+    assert not proof["experiment_passed"]
+    assert proof["experiment"]["source"] == "live SDK stream and actual host callbacks"
+    assert handle.input_stream.connection_closed and len(handle.input_stream.submitted) == 1
+    assert not runner.active
+
+
 @pytest.mark.parametrize("timing", ["immediate", "after-result"])
 @pytest.mark.parametrize("control", ["none", "model", "permission"])
 async def test_script_uses_one_real_sdk_connection_and_closes_every_stream(
