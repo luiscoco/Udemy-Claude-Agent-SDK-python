@@ -2858,68 +2858,64 @@
   "id": 15,
   "prerequisites": [
    1,
-   2
+   14
   ],
-  "concept_brief": "Each run ends with a `ResultMessage` whose `total_cost_usd` and `usage` report actual spend; `ClaudeAgentOptions(max_budget_usd=...)` stops one run at a threshold, while a host ledger decides whether a new call may start at all.",
-  "lab_brief": "The offline exercise `budget` uses the host `Budget` ledger with a 0.10 USD limit: it records a fixture cost of 0.08, then refuses a new call that reserves 0.03. It shows cost control as a host decision made before a call, based on recorded actual cost.",
+  "concept_brief": "Separate intermediate assistant-message usage, final usage, per-model aggregates and reported cumulative cost. Missing values stay unknown; thresholds and planning guidance do not predict a price.",
+  "lab_brief": "Run the recorded usage producer, compare missing and limit outcomes, then use a separate four-message session meter. The meter subtracts comparable cumulative costs before updating its baseline. No model is called offline.",
   "preparation": [
-   "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears.",
-   "Live runs incur real API cost; keep the Budget threshold low (the default is 0.10 USD)."
+   "Open lesson 15 after lessons 1 and 14. Keep Offline Python exercise selected to use recorded usage without a model call.",
+   "Read the difference between intermediate message usage, final usage and per-model aggregates. A dollar threshold is not an exact final price.",
+   "Live is optional and paid. Keep conservative limits; session opening and each live message need explicit authorization."
   ],
   "steps": [
    {
     "title": "Understand the goal",
-    "text": "Account for actual result cost and reject a new call when the host ledger is exhausted."
+    "text": "Distinguish intermediate message usage from final reported usage and cumulative cost."
    },
    {
     "title": "Prepare your exercise",
-    "text": "Open `Budget` in `agent_lab/services.py`: `before_call(reserve)` raises if spent plus reserve reaches the limit, and `record(actual)` adds a non-negative cost."
+    "text": "Keep the default limits. Optionally select bounded planning-token guidance; understand that it does not enforce a stop."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run the recorded usage example, then try a recorded limit stop and the separate session meter."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `fixture_cost_usd` is 0.08 and `next_call` is the exhaustion message, because 0.08 + 0.03 reaches the 0.10 limit."
+    "text": "Inspect final cost and input/output tokens, root identity, terminal subtype and connection closure. Compare grouped messages and per-model usage separately."
    },
    {
     "title": "Try the challenge",
-    "text": "Replay a different spending sequence with `Budget` and predict where it stops."
+    "text": "Explain why an intermediate usage value is not the final total, then account for two cumulative session samples without double counting."
    }
   ],
-  "inspect": "Look at `fixture_cost_usd`, `next_call` and `note`; in live mode also read the model turns and reported cost line under Claude's response.",
-  "expected": "`fixture_cost_usd` is 0.08, `next_call` is \"Host budget exhausted; no new call may start.\" and `note` is \"SDK `max_budget_usd` is a threshold, not an exact billing guarantee.\"",
-  "evidence_criterion": "The check confirms the ledger recorded 0.08 USD and refused the next call.",
+  "inspect": "Inspect grouped message IDs and block types, intermediate usage, final usage, model_usage, total_cost_usd, terminal subtype and meter delta. Context inspection sends no user message.",
+  "expected": "The passing recorded run reports final cost 0.01 USD and final input/output counts 10/4, while intermediate message counts are 3/1. Those are labelled fixtures. Limit and missing-evidence scenarios need review.",
+  "evidence_criterion": "A successful final result reports finite nonnegative cost and input/output token counts. Future billing and cache savings are not predicted.",
   "evidence_checks": [
    {
-    "key": "fixture_cost_usd",
+    "key": "experiment_passed",
     "rule": "equals",
-    "value": 0.08
-   },
-   {
-    "key": "next_call",
-    "rule": "equals",
-    "value": "Host budget exhausted; no new call may start."
+    "value": true
    }
   ],
-  "challenge": "In a scratch script, create `Budget(limit=0.10)`, record 0.05, call `before_call(0.03)` (it passes), record 0.03, then call `before_call(0.03)` again. Verify the second check raises `ValueError: Host budget exhausted; no new call may start.` and that `record(-1)` raises `Invalid actual cost.`.",
+  "challenge": "Explain why an intermediate usage value is not the final total. Then send two recorded session messages: explain why cumulative 0.010 and 0.025 imply new costs 0.010 and 0.015, and why a missing sample must remain unknown.",
   "hints": [
-   "`from agent_lab.services import Budget`; the rule is `spent + reserve >= limit` means no new call.",
-   "After recording 0.05 and 0.03, `spent` is 0.08, so reserving 0.03 reaches 0.11, which is at or above 0.10."
+   "Group blocks by the SDK message ID. The last intermediate usage observation is not a successful final ResultMessage.",
+   "Compute delta from the previous comparable total before updating the baseline. Missing, decreasing or unrelated totals break the comparison; do not replace them with zero."
   ],
-  "reference": "The ledger checks before each call and records the actual cost after it, so spending is decided by the host, not by the model. With 0.08 spent, reserving 0.03 would reach the 0.10 limit, so the next call is refused. In live mode the actual cost comes from `ResultMessage.total_cost_usd`, and `max_budget_usd` only stops a single run once crossed.",
+  "reference": "Assistant-message usage can arrive with individual blocks and is not necessarily final output usage. Group identified messages without counting blocks as calls. Compare the successful final usage and per-model aggregates separately. The meter subtracts 0.010 from 0.025 before storing its new baseline, so new spend is 0.015. Unknown cost is not zero. The host ledger example refuses a later call based on reservations, while SDK turn/dollar thresholds stop a run and task_budget only guides planning.",
   "recovery": [
-   "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
-   "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. If a live run ends with a budget error, raise Budget threshold (USD) slightly or shorten the prompt."
+   "Missing final counters or a mismatched identity intentionally needs review. Switch back to Passing example to compare the evidence.",
+   "For error_max_turns or error_max_budget_usd, inspect the terminal subtype. A limit stop is not successful completion; task_budget is only planning guidance.",
+   "If a live SDK call fails, inspect setup/account access. End the session before opening another; the host makes no automatic retry."
   ],
   "quiz": [
    {
     "prompt": "Why does the ledger refuse the next call in this exercise?",
     "options": [
      {
-      "text": "Because 0.08 spent plus a 0.03 reserve reaches the 0.10 limit.",
+      "text": "Because 0.08 spent plus a 0.03 reserve exceeds the 0.10 host limit.",
       "explanation": "Correct. `before_call` raises when `spent + reserve >= limit`."
      },
      {
@@ -2942,7 +2938,7 @@
      },
      {
       "text": "In the first `AssistantMessage`.",
-      "explanation": "Assistant messages hold content; cost arrives at the end of the run."
+      "explanation": "Intermediate message usage is distinct from the final reported cost."
      },
      {
       "text": "In `ResultMessage.total_cost_usd`.",
@@ -2968,27 +2964,99 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "Why does counting every streamed content block overstate calls?",
+    "correct": 1,
+    "options": [
+     {
+      "text": "Each block is a new API call.",
+      "explanation": "Blocks may share one message ID."
+     },
+     {
+      "text": "Several blocks can share one assistant message ID.",
+      "explanation": "Correct. Group identified messages; do not infer calls from block count."
+     },
+     {
+      "text": "Grouping makes missing usage equal zero.",
+      "explanation": "Missing values remain unknown."
+     }
+    ]
+   },
+   {
+    "prompt": "What should a missing final input-token count display?",
+    "correct": 2,
+    "options": [
+     {
+      "text": "Zero.",
+      "explanation": "Absence is not a measured zero."
+     },
+     {
+      "text": "The intermediate count.",
+      "explanation": "Intermediate usage is not the final count."
+     },
+     {
+      "text": "Unknown, with the final-usage check incomplete.",
+      "explanation": "Correct. The required measurement was not established."
+     }
+    ]
+   },
+   {
+    "prompt": "Which comparison correctly meters cumulative costs of 0.010 and 0.025?",
+    "correct": 0,
+    "options": [
+     {
+      "text": "New deltas 0.010 and 0.015.",
+      "explanation": "Correct. Subtract the previous comparable total before updating its baseline."
+     },
+     {
+      "text": "New deltas 0.010 and 0.025.",
+      "explanation": "That counts earlier work twice."
+     },
+     {
+      "text": "An exact future bill of 0.025.",
+      "explanation": "Observed cost does not predict future charges."
+     }
+    ]
+   },
+   {
+    "prompt": "In the limits diagram, which arrow represents planning guidance?",
+    "correct": 0,
+    "options": [
+     {
+      "text": "task_budget.total toward agent planning.",
+      "explanation": "Correct. Planning guidance is separate from enforced terminal limit subtypes."
+     },
+     {
+      "text": "A successful final result into a guaranteed bill.",
+      "explanation": "The lesson makes no future billing guarantee."
+     },
+     {
+      "text": "Missing usage into zero.",
+      "explanation": "Unknown is not zero."
+     }
+    ]
    }
   ],
-  "concept_code": "from dataclasses import dataclass\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\n\n@dataclass\nclass Ledger:\n    limit_usd: float\n    spent_usd: float = 0.0\n\n    def can_start(self, reserve_usd: float) -> bool:\n        return self.spent_usd + reserve_usd <= self.limit_usd\n\n\nasync def ask(ledger: Ledger, prompt: str, reserve_usd: float = 0.03) -> None:\n    if not ledger.can_start(reserve_usd):\n        raise RuntimeError(\"Budget exhausted: the host refuses to start a new call.\")\n    # max_budget_usd only stops this one run; the ledger decides whether it may start.\n    options = ClaudeAgentOptions(tools=[], max_budget_usd=reserve_usd)\n    async for message in query(prompt=prompt, options=options):\n        if isinstance(message, ResultMessage):\n            ledger.spent_usd += message.total_cost_usd or 0.0\n            print(message.total_cost_usd, message.usage)",
-  "code_focus": "`ledger.can_start(reserve_usd)` refuses a call before it starts, `max_budget_usd` caps the single run, and `message.total_cost_usd` from the ResultMessage updates the ledger.",
+  "concept_code": "import math\nfrom dataclasses import dataclass\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\n\n@dataclass\nclass Ledger:\n    limit_usd: float\n    spent_usd: float = 0.0\n\n    def can_start(self, reserve_usd: float) -> bool:\n        return self.spent_usd + reserve_usd <= self.limit_usd\n\n\nasync def ask(ledger: Ledger, prompt: str, reserve_usd: float = 0.03) -> None:\n    if not ledger.can_start(reserve_usd):\n        raise RuntimeError(\"The host refuses a new call: reservation exceeds budget.\")\n    # A threshold is not an exact billing cap; task_budget only guides planning.\n    options = ClaudeAgentOptions(tools=[], max_budget_usd=reserve_usd)\n    async for message in query(prompt=prompt, options=options):\n        if isinstance(message, ResultMessage):\n            actual = message.total_cost_usd\n            if actual is None or not math.isfinite(actual) or actual < 0:\n                raise ValueError(\"Actual cost is unknown or invalid; do not record zero.\")\n            ledger.spent_usd += actual\n            print(message.subtype, actual, message.usage, message.model_usage)",
+  "code_focus": "The ledger example rejects unknown or invalid actual cost. The expanded usage experiment groups message IDs, compares final fields, demonstrates limit outcomes and meters cumulative totals; inspect its three exact source excerpts.",
   "concept_points": [
    {
-    "title": "Actual cost at the end",
-    "text": "Each ResultMessage reports `total_cost_usd` and usage, the real spend of that run."
+    "title": "Separate observations",
+    "text": "Group assistant blocks by message ID; compare intermediate usage, final usage and per-model aggregates separately."
    },
    {
-    "title": "Per-run threshold",
-    "text": "`max_budget_usd` stops one run once its spend crosses the threshold; it knows nothing about earlier runs."
+    "title": "Limits and guidance",
+    "text": "SDK turn and dollar thresholds produce terminal stop subtypes. task_budget is planning guidance; thresholds are not exact prices."
    },
    {
-    "title": "Host ledger gates calls",
-    "text": "Your own ledger records actual costs and decides, before calling, whether a new run may start at all."
+    "title": "Meter cumulative cost",
+    "text": "Subtract the previous comparable cumulative total before updating its baseline. Unknown or unrelated samples cannot establish a new cost."
    }
   ],
   "misconception": {
-   "claim": "`max_budget_usd` limits the total spend across all of an app's calls.",
-   "correction": "It applies to one run only. Spend across runs is tracked by the host, which must refuse new calls once its ledger is exhausted."
+   "claim": "Every content block is a call, missing usage is zero, and a budget predicts the final price.",
+   "correction": "Group identified messages, keep unknown values unknown, inspect successful final usage and treat thresholds separately from reported spend."
   }
  },
  {

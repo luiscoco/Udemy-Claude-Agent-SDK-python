@@ -62,6 +62,8 @@ correlated agent evidence. See the [MCP servers guide](docs/lesson-13-mcp.md).
 Lesson 14 compares requested model/thinking/effort with observed Stop evidence,
 keeps missing metrics unknown and offers a separate prompt-free metadata probe.
 See the [Thinking, effort and models guide](docs/lesson-14-thinking.md).
+Lesson 15 adds final usage checks, message grouping, limit scenarios and a separate
+session cost meter. See the [Cost and usage guide](docs/lesson-15-usage.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

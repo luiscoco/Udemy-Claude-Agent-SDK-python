@@ -248,7 +248,7 @@ def check_evidence(
             status="needs-review",
             detail="A final successful SDK result was not established. Inspect the terminal subtype and is_error; assistant text alone does not prove success. The recorded error and missing-result scenarios intentionally need review.",
         )
-    if 2 <= lesson_id <= 14:
+    if 2 <= lesson_id <= 15:
         experiment = evidence.get("experiment", {})
         passed = evidence.get("experiment_passed") is True and isinstance(experiment, dict) and experiment.get("experiment_passed") is True
         if mode == "live" and isinstance(experiment, dict) and experiment.get("source") != "live SDK stream and actual host callbacks":

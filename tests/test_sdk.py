@@ -126,12 +126,12 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
         assert options.max_turns == 1
     assert options.env["CLAUDE_CONFIG_DIR"] == str(tmp_path / "config")
     # The shared policy and audit hooks that the offline hook lessons exercise.
-    assert set(options.hooks or {}) == (set() if lesson_id == 12 else {"Stop"} if lesson_id == 14 else {"PreToolUse", "PostToolUse"}) | (
+    assert set(options.hooks or {}) == (set() if lesson_id in {12, 15} else {"Stop"} if lesson_id == 14 else {"PreToolUse", "PostToolUse"}) | (
         {"Elicitation"} if lesson_id == 33 else set()
     )
     # Lesson 13 sends one exact MCP allow rule and retains its PreToolUse guard.
     assert options.allowed_tools == (["mcp__inventory__reserve"] if lesson_id == 13 else [])
-    assert events[-1].kind == ("evidence" if lesson_id <= 14 else "result")
+    assert events[-1].kind == ("evidence" if lesson_id <= 15 else "result")
 
 
 async def test_missing_live_credential_fails_before_client_connect(tmp_path, monkeypatch):

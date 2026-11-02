@@ -170,6 +170,10 @@ def render_value(value: Any, label: str = "", depth: int = 0) -> None:
 
 
 def render_output(state: OutputState, exercise: str, run_id: str | None) -> None:
+    if exercise == "budget" and state.evidence and isinstance(state.evidence.get("experiment"), dict):
+        from agent_lab.ui_usage import usage_cards
+
+        usage_cards(state.evidence["experiment"])
     if exercise == "thinking" and state.evidence and isinstance(state.evidence.get("experiment"), dict):
         from agent_lab.ui_thinking import comparison_cards
 

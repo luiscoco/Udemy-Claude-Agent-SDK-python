@@ -173,7 +173,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 14:
+                        if 2 <= lesson <= 15:
                             for section in source_sections(lesson):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
@@ -184,7 +184,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     ui.code(section["code"], language="python").classes("w-full")
                                     ui.label(section["question"]).classes("font-semibold")
                             ui.link(
-                                "Read the shared evidence evaluator", "/agent_lab/streaming.py" if lesson == 12 else "/agent_lab/thinking.py" if lesson == 14 else "/agent_lab/foundations.py"
+                                "Read the shared evidence evaluator", "/agent_lab/streaming.py" if lesson == 12 else "/agent_lab/thinking.py" if lesson == 14 else "/agent_lab/usage.py" if lesson == 15 else "/agent_lab/foundations.py"
                             )
                         ui.label(
                             "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
@@ -204,12 +204,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         prompt = (
                             ui.textarea(
                                 "Prompt"
-                                if lesson <= 14
+                                if lesson <= 15
                                 else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
-                                value=current.prompt if lesson <= 14 else "",
+                                value=current.prompt if lesson <= 15 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -217,7 +217,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if lesson <= 14:
+                        if lesson <= 15:
                             ui.label(
                                 "Offline experiments validate your prompt and run local host code with labelled SDK fixtures; they do not call Claude."
                             ).classes("text-sm text-slate-600")
@@ -235,7 +235,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
-                        if lesson <= 14 and lesson not in {6, 12}:
+                        if lesson <= 15 and lesson not in {6, 12}:
                             follow_up.set_visibility(False)
                         read_lesson_options = experiment_controls(lesson, mode)
                         scenario = (
@@ -255,7 +255,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             .classes("w-full")
                         )
                         scenario.bind_visibility_from(
-                            mode, "value", lambda value: lesson <= 14 and value == "offline"
+                            mode, "value", lambda value: lesson <= 15 and value == "offline"
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (
@@ -299,6 +299,14 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             from agent_lab.ui_thinking import model_inspector
 
                             model_inspector(application.state.thinking_sessions)
+                        if lesson == 15:
+                            from agent_lab.ui_usage import usage_session_controls
+
+                            usage_session_controls(application.state.usage_sessions, client, lambda: {
+                                "mode": mode.value, "prompt": prompt.value,
+                                "max_turns": int(turns.value), "max_budget_usd": budget.value,
+                                "scenario": scenario.value, "lesson_options": read_lesson_options(),
+                            })
                         stream_buttons = []
                         if lesson == 12:
                             with ui.column().classes("w-full gap-3 stream-session-controls"):

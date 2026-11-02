@@ -1154,7 +1154,58 @@ def test_browser_thinking_comparison_unknown_metrics_and_prompt_free_metadata(se
         context.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 15))
+def test_browser_usage_accounting_limits_and_separate_session_meter(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=15")
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
+        expect(page.get_by_text("Check passed", exact=True)).to_be_visible()
+        accounting = page.locator(".usage-accounting")
+        expect(accounting.get_by_text("Final input tokens: 10", exact=True)).to_be_visible()
+        expect(accounting.get_by_text("Final output tokens: 4", exact=True)).to_be_visible()
+        accounting.evaluate("e => e.scrollIntoView({block:'start'})")
+        page.evaluate("window.scrollBy(0,-120)")
+        page.screenshot(path=str(data / "usage-desktop.png"))
+        for label, expected in (("Missing final token counts", "Final input tokens: Unknown"), ("Recorded budget threshold stop", "Terminal subtype: error_max_budget_usd")):
+            page.get_by_label("Recorded scenario", exact=True).click()
+            page.get_by_role("option", name=label, exact=True).click()
+            page.get_by_role("button", name="Run exercise", exact=True).click()
+            expect(accounting.get_by_text(expected, exact=True)).to_be_visible(timeout=20000)
+            expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
+        page.get_by_label("Recorded scenario", exact=True).click()
+        page.get_by_role("option", name="Passing example", exact=True).click()
+        meter = page.locator(".usage-session")
+        meter.get_by_role("button", name="Open usage session", exact=True).click()
+        expect(meter.get_by_text("Mode: offline | Messages: 0/4 | Connection closed: False", exact=True)).to_be_visible(timeout=15000)
+        for count in (1, 2):
+            meter.get_by_role("button", name="Send meter message", exact=True).click()
+            expect(meter.get_by_text(f"Mode: offline | Messages: {count}/4 | Connection closed: False", exact=True)).to_be_visible(timeout=15000)
+        expect(meter.get_by_text("0.015", exact=True).first).to_be_visible()
+        meter.get_by_role("button", name="Inspect session context", exact=True).click()
+        expect(meter.get_by_text("recorded context fixture", exact=True)).to_be_visible()
+        meter.get_by_role("button", name="Inspect session usage", exact=True).click()
+        expect(meter.get_by_text("0.015", exact=True).first).to_be_visible()
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
+        meter.get_by_label("Meter message", exact=True).evaluate("e => e.scrollIntoView({block:'center'})")
+        page.screenshot(path=str(data / "usage-session-phone.png"))
+        meter.get_by_role("button", name="End usage session", exact=True).click()
+        expect(meter.get_by_text("Mode: offline | Messages: 2/4 | Connection closed: True", exact=True)).to_be_visible()
+        expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
+        assert not errors
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("lesson", range(2, 16))
 def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server, guide_browser_context, lesson):
     from playwright.sync_api import expect
 

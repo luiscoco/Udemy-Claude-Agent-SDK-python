@@ -100,6 +100,13 @@ class McpInputs(Inputs):
     lifecycle: Literal["none", "toggle", "reconnect"] = "none"
 
 
+class UsageInputs(Inputs):
+    omit_turn_limit: bool = False
+    omit_budget_limit: bool = False
+    task_tokens: int | None = Field(default=None, ge=1, le=100000)
+    allow_agent: bool = False
+
+
 class ThinkingInputs(Inputs):
     model: str | None = Field(
         default=None, min_length=1, max_length=100, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
@@ -131,6 +138,7 @@ INPUT_MODELS: dict[int, type[Inputs]] = {
     12: StreamingInputs,
     13: McpInputs,
     14: ThinkingInputs,
+    15: UsageInputs,
 }
 
 SCENARIOS: dict[int, dict[str, str]] = {
@@ -142,6 +150,13 @@ SCENARIOS: dict[int, dict[str, str]] = {
     for number in INPUT_MODELS
 }
 SCENARIOS[2]["limit-error"] = "Recorded limit error"
+SCENARIOS[15].update({
+    "missing-usage": "Missing final token counts",
+    "invalid-usage": "Invalid final counters",
+    "turn-limit": "Recorded turn limit stop",
+    "budget-limit": "Recorded budget threshold stop",
+    "interrupted": "Recorded interrupted usage run",
+})
 SCENARIOS[12]["interrupted"] = "Interrupted input queue"
 SCENARIOS[13]["tool-error"] = "Inventory server rejects the reservation"
 SCENARIOS[14].update(

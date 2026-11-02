@@ -59,7 +59,7 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
     """Validate before creating a task; omitted fields get the lesson's defaults."""
     data = value.model_dump(exclude_unset=True) if isinstance(value, RunRequest) else value
     parsed: RunRequest
-    if 2 <= lesson_id <= 14:
+    if 2 <= lesson_id <= 15:
         from agent_lab.curriculum import get_lesson
         from agent_lab.foundation_models import SCENARIOS, inputs
 

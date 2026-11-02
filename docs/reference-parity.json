@@ -49,8 +49,8 @@
   {
    "id": "assessment-and-workbook",
    "status": "partial",
-   "python": "Seven explained questions per lesson for lessons 1-14, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
-   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 15-20; keep shared navigation, media and runtime adaptations separately tracked."
+   "python": "Seven explained questions per lesson for lessons 1-15, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
+   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 16-20; keep shared navigation, media and runtime adaptations separately tracked."
   },
   {
    "id": "progress",
@@ -326,14 +326,14 @@
    "title": "Cost and usage",
    "exercise": "budget",
    "live_profile": "query",
-   "adaptation": "",
+   "adaptation": "Public Python message_id, usage, model_usage, task_budget and get_context_usage; one-task session ownership; completed-result meter rather than per-block cost estimates.",
    "python_line": 1017,
    "reference_contract": "docs/prompts/l15-lesson-15-cost-usage.md",
    "reference_blob_sha": "be043f4ce5be9a97f24c69f4b155dc19bc46c81a",
    "foundation_component": "src/concepts/Concept15CostUsage.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "gap": "Typed usage controls, grouped message IDs, final accounting checks, negative/limit scenarios, scoped session/context/usage routes, cumulative meter, exact excerpts and seven questions are implemented. Paid account acceptance, recorded media and full reference certification remain pending.",
    "written_guide_content": "lesson-content"
   },
   {

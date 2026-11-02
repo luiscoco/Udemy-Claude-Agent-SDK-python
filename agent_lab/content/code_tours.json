@@ -412,31 +412,31 @@
   ]
  },
  "15": {
-  "source_sha256": "dd2d76de5cec7ab467113554456a14c8e113ff5dd0f24b9fa2412ecd3004226d",
+  "source_sha256": "e719e55cfcdfd46d71882558a64c12d8229eb489c936d44e2aa2a19eba43bcd3",
   "sections": [
    {
-    "title": "A host-side ledger",
-    "start": 6,
-    "end": 12,
-    "text": "The Ledger tracks a spending limit and what has been spent so far. can_start answers one question before any call: would reserving this amount still fit under the limit."
+    "title": "SDK results and finite measurements",
+    "start": 1,
+    "end": 4,
+    "text": "Import the SDK result type and math checks so missing or nonfinite cost cannot silently become zero."
    },
    {
-    "title": "Refusing before the call",
-    "start": 15,
-    "end": 17,
-    "text": "If the ledger cannot cover the reserve, ask raises an error and no run starts at all. This is the host's gate across many calls."
+    "title": "Host reservation gate",
+    "start": 7,
+    "end": 13,
+    "text": "The ledger decides whether another call may start from known recorded spend and the proposed reservation. It does not predict the actual final price."
    },
    {
-    "title": "A per-run cap",
-    "start": 18,
-    "end": 19,
-    "text": "max_budget_usd caps only this single run, stopping it once its spend crosses the reserve. It knows nothing about earlier runs, which is why the ledger exists."
+    "title": "One bounded query",
+    "start": 16,
+    "end": 21,
+    "text": "Check the host gate before starting. The dollar option is a threshold for this query, while task budget would only guide planning."
    },
    {
-    "title": "Recording actual cost",
-    "start": 20,
-    "end": 23,
-    "text": "The ResultMessage reports total_cost_usd and usage, the real spend of this run. We add that cost to the ledger, so later calls are refused once the limit is reached."
+    "title": "Reported final accounting",
+    "start": 22,
+    "end": 27,
+    "text": "Read the actual result cost, reject unknown or invalid measurements, then update the ledger and inspect terminal subtype, final usage and per-model aggregates separately."
    }
   ]
  },

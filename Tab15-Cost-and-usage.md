@@ -23,6 +23,7 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
+import math
 from dataclasses import dataclass
 
 from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
@@ -39,16 +40,19 @@ class Ledger:
 
 async def ask(ledger: Ledger, prompt: str, reserve_usd: float = 0.03) -> None:
     if not ledger.can_start(reserve_usd):
-        raise RuntimeError("Budget exhausted: the host refuses to start a new call.")
-    # max_budget_usd only stops this one run; the ledger decides whether it may start.
+        raise RuntimeError("The host refuses a new call: reservation exceeds budget.")
+    # A threshold is not an exact billing cap; task_budget only guides planning.
     options = ClaudeAgentOptions(tools=[], max_budget_usd=reserve_usd)
     async for message in query(prompt=prompt, options=options):
         if isinstance(message, ResultMessage):
-            ledger.spent_usd += message.total_cost_usd or 0.0
-            print(message.total_cost_usd, message.usage)
+            actual = message.total_cost_usd
+            if actual is None or not math.isfinite(actual) or actual < 0:
+                raise ValueError("Actual cost is unknown or invalid; do not record zero.")
+            ledger.spent_usd += actual
+            print(message.subtype, actual, message.usage, message.model_usage)
 ```
 
-`ledger.can_start(reserve_usd)` refuses a call before it starts, `max_budget_usd` caps the single run, and `message.total_cost_usd` from the ResultMessage updates the ledger.
+The ledger example rejects unknown or invalid actual cost. The expanded usage experiment groups message IDs, compares final fields, demonstrates limit outcomes and meters cumulative totals; inspect its three exact source excerpts.
 
 ## How the offline lab checks it
 

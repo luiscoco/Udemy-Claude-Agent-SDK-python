@@ -906,6 +906,10 @@ async def run_local(
     root: Path, request: RunRequest, lesson: Lesson, ask: Ask | None = None
 ) -> dict[str, Any]:
     request = lesson_request(lesson.id, request)
+    if lesson.id == 15:
+        from agent_lab.usage import local_usage
+
+        return await local_usage(root, request)
     if lesson.id == 14:
         from agent_lab.thinking import local_thinking
 
@@ -986,9 +990,12 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
     from agent_lab.mcp_lab import local_mcp
     from agent_lab.streaming import local_streaming
     from agent_lab.thinking import local_thinking
+    from agent_lab.usage import local_usage
 
     function = (
-        local_thinking
+        local_usage
+        if lesson_id == 15
+        else local_thinking
         if lesson_id == 14
         else local_mcp
         if lesson_id == 13
@@ -1023,7 +1030,7 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 "Which identities and terminal evidence does this lesson require?",
             ),
         )
-        if lesson_id not in {12, 13, 14}
+        if lesson_id not in {12, 13, 14, 15}
         else ()
     )
     if lesson_id == 12:
@@ -1085,6 +1092,14 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 Lane.report,
                 "Why is unknown effort or usage different from a measured zero?",
             ),
+        )
+    if lesson_id == 15:
+        from agent_lab.usage import UsageMeter, UsageObservation, usage_options
+
+        functions = (
+            ("Requested limits and planning guidance", usage_options, "Which fields stop a run, and which only guide planning?"),
+            ("Cumulative cost meter", UsageMeter.observe, "Why subtract before updating the baseline?"),
+            ("Final accounting criterion", UsageObservation.report, "Why are intermediate usage and unknown counters insufficient?"),
         )
     for title, function, question in functions:
         function = inspect.unwrap(function)

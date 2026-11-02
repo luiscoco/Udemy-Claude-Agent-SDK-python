@@ -370,10 +370,21 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
                 "The same prompt is sent to fresh connections. Valid SDK shapes do not prove model support. Stop observations may differ from requested effort; that alone does not establish fallback. Offline model latency and usage remain unknown."
             ).classes("text-sm text-slate-600")
 
+        if lesson == 15:
+            tick("omit_turn_limit", "Omit SDK turn limit (host deadline still applies)", False)
+            tick("omit_budget_limit", "Omit SDK dollar threshold (not a billing guarantee)", False)
+            tick("allow_agent", "Permit the restricted Agent helper tool", False)
+            values["task_tokens"] = ui.number("Planning token guidance (blank = omitted)", value=None, min=1, max=100000, precision=0).props("outlined clearable").classes("w-full")
+            ui.label("task_budget guides planning; terminal error_max_turns and error_max_budget_usd show enforced stops. Final usage is observed, not predicted.").classes("text-sm text-slate-600")
+
     def read() -> dict[str, Any]:
         if mode.value == "live" and lesson in {5, 10}:
             return {}  # Offline-only drafts must not become live tool arguments.
         result = {key: element.value for key, element in values.items()}
+        if lesson == 15 and result["task_tokens"] is not None:
+            if result["task_tokens"] != int(result["task_tokens"]):
+                raise ValueError("Choose a whole planning-token value.")
+            result["task_tokens"] = int(result["task_tokens"])
         if lesson == 2:
             result["model"] = (result["model"] or "").strip() or None
             if result["system_mode"] == "default":
