@@ -1102,7 +1102,7 @@ def test_browser_my_learning_section_quiz_refresh_does_not_complete_lessons(serv
         context.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 11))
+@pytest.mark.parametrize("lesson", range(2, 12))
 def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server, guide_browser_context, lesson):
     from playwright.sync_api import expect
 
@@ -1177,5 +1177,35 @@ def test_browser_foundation_permission_dialog_denial_and_cancellation(server, gu
         dialog.get_by_role("button", name="Cancel run", exact=True).click()
         expect(page.get_by_text("Cancelled", exact=True)).to_be_visible()
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
+    finally:
+        context.close()
+
+
+def test_browser_skills_variants_keep_invocation_check_distinct(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        page.goto(base + "/?lesson=11")
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_label("Skill source", exact=True).click()
+        page.get_by_role("option", name="Local plugin", exact=True).click()
+        for loading, passes in (("Discovery only", False), ("Host preload", False), ("Explicit invocation", True)):
+            page.get_by_label("Skill loading", exact=True).click()
+            page.get_by_role("option", name=loading, exact=True).click()
+            page.get_by_role("button", name="Run exercise", exact=True).click()
+            expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
+            expect(page.get_by_role("button", name="Run exercise", exact=True)).to_be_enabled()
+            expect(page.get_by_text("Check passed" if passes else "Needs review", exact=True)).to_be_visible()
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.get_by_role("checkbox", name="Include the prepared skill in the SDK filter", exact=True).uncheck()
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
+        expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
+        page.locator(".foundation-controls").screenshot(path=str(data / "skills-phone-controls.png"))
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        page.locator(".foundation-controls").screenshot(path=str(data / "skills-desktop-controls.png"))
     finally:
         context.close()

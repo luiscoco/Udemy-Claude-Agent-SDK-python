@@ -51,7 +51,7 @@ async def main(workspace: Path) -> None:
             print(message.result)
 ```
 
-The SKILL.md frontmatter (`name`, `description`) defines the skill, and `setting_sources=["project"]` plus `skills=["lesson-summary"]` opt in to loading exactly that skill.
+The concept example opts into a named project skill. The experiment in agent_lab/skills.py separately exposes project/plugin discovery, filtering and an explicit host-preload adaptation; its exact excerpts appear below the original source example.
 
 ## How the offline lab checks it
 

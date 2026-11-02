@@ -191,6 +191,34 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
                 "Choose the Stop comparison scenario to use the official client with a scripted transport. Live Cancel aborts the run. This separate experiment never passes the structured-output check."
             ).classes("text-sm text-slate-600")
 
+        elif lesson == 11:
+            select(
+                "loading",
+                "Skill loading",
+                {
+                    "invoke": "Explicit invocation",
+                    "discovery": "Discovery only",
+                    "preload": "Host preload",
+                },
+                "invoke",
+            )
+            select(
+                "discovery",
+                "Skill source",
+                {"project": "Project directory", "plugin": "Local plugin"},
+                "project",
+            )
+            tick("visible", "Include the prepared skill in the SDK filter")
+            values["visible"].bind_enabled_from(
+                values["loading"], "value", lambda value: value != "preload"
+            )
+            tick("load_support", "Also load the supporting checklist", False)
+            ui.label(
+                "Preload places prepared instructions in the system appendix and hides the Skill listing. "
+                "Discovery and preload alone do not pass the invocation check. Offline calls are labelled fixtures. "
+                "The skill filter is not a filesystem sandbox."
+            ).classes("text-sm text-slate-600")
+
     def read() -> dict[str, Any]:
         if mode.value == "live" and lesson in {5, 10}:
             return {}  # Offline-only drafts must not become live tool arguments.

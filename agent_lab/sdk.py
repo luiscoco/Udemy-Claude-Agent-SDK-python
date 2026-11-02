@@ -119,7 +119,7 @@ async def run_sdk(
 
     request = lesson_request(lesson.id, request)
     foundation = None
-    if 2 <= lesson.id <= 10:
+    if 2 <= lesson.id <= 11:
         from agent_lab.foundations import Evidence
 
         foundation = Evidence(
@@ -323,6 +323,10 @@ async def run_sdk(
     options.include_partial_messages = profile in {"options", "streaming"}
 
     def permitted(name: str, arguments: dict[str, Any]) -> tuple[bool, str]:
+        if lesson.id == 11:
+            from agent_lab.skills import skill_policy
+
+            return skill_policy(work, request.lesson_options, name, arguments)
         if lesson.id == 3:
             from agent_lab.foundations import tool_policy
 
@@ -440,6 +444,10 @@ async def run_sdk(
             )
 
     prompt = request.prompt or lesson.prompt
+    if lesson.id == 11:
+        from agent_lab.skills import skill_prompt
+
+        prompt = skill_prompt(request)
     # Interactive custom-tool, permission and session lifecycles stay in this task.
     if (
         profile in {"conversation", "structured", "questions"}

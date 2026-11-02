@@ -46,7 +46,7 @@ async def recorded_live_run(
             yield SystemMessage(
                 subtype="init", data={"session_id": session, "tools": configuration.tools}
             )
-            tool_name = {3: "Read", 4: "Write", 5: "mcp__lesson__add", 7: "Read", 8: "Agent"}.get(
+            tool_name = {3: "Read", 4: "Write", 5: "mcp__lesson__add", 7: "Read", 8: "Agent", 11: "Skill"}.get(
                 lesson
             )
             arguments = {"file_path": "notes.txt"}
@@ -56,6 +56,9 @@ async def recorded_live_run(
                 arguments = {"a": 19, "b": 23}
             elif lesson == 8:
                 arguments = {"subagent_type": "reviewer", "prompt": "Inspect the fixture"}
+            if lesson == 11:
+                from agent_lab.skills import skill_name
+                arguments = {"skill": skill_name(options or {"discovery": "project"})}
             if tool_name:
                 yield AssistantMessage(
                     content=[ToolUseBlock(id="call-A", name=tool_name, input=arguments)],
@@ -208,7 +211,7 @@ async def recorded_live_run(
         await runner.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 11))
+@pytest.mark.parametrize("lesson", range(2, 12))
 async def test_live_foundation_proofs_use_actual_stream_and_callbacks(
     tmp_path, monkeypatch, lesson
 ):
@@ -229,7 +232,7 @@ async def test_live_foundation_proofs_use_actual_stream_and_callbacks(
         assert evidence["experiment"]["session_identity"]["outgoing_resume"] is None
 
 
-@pytest.mark.parametrize("lesson", range(2, 11))
+@pytest.mark.parametrize("lesson", range(2, 12))
 async def test_live_missing_terminal_never_passes(tmp_path, monkeypatch, lesson):
     events, evidence, _, closed, _ = await recorded_live_run(tmp_path, monkeypatch, lesson, missing=True)
     if lesson == 6:
@@ -243,7 +246,7 @@ async def test_live_missing_terminal_never_passes(tmp_path, monkeypatch, lesson)
     )
 
 
-@pytest.mark.parametrize("lesson", range(2, 11))
+@pytest.mark.parametrize("lesson", range(2, 12))
 async def test_live_mismatched_identity_needs_review(tmp_path, monkeypatch, lesson):
     events, evidence, *_ = await recorded_live_run(tmp_path, monkeypatch, lesson, mismatch=True)
     assert evidence is not None and not evidence["experiment_passed"]

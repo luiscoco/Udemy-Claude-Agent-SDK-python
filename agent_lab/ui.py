@@ -173,7 +173,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 10:
+                        if 2 <= lesson <= 11:
                             for section in source_sections(lesson):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
@@ -204,12 +204,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         prompt = (
                             ui.textarea(
                                 "Prompt"
-                                if lesson <= 10
+                                if lesson <= 11
                                 else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
-                                value=current.prompt if lesson <= 10 else "",
+                                value=current.prompt if lesson <= 11 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -217,7 +217,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if lesson <= 10:
+                        if lesson <= 11:
                             ui.label(
                                 "Offline experiments validate your prompt and run local host code with labelled SDK fixtures; they do not call Claude."
                             ).classes("text-sm text-slate-600")
@@ -235,7 +235,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
-                        if lesson <= 10 and lesson != 6:
+                        if lesson <= 11 and lesson != 6:
                             follow_up.set_visibility(False)
                         read_lesson_options = experiment_controls(lesson, mode)
                         scenario = (
@@ -255,7 +255,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             .classes("w-full")
                         )
                         scenario.bind_visibility_from(
-                            mode, "value", lambda value: lesson <= 10 and value == "offline"
+                            mode, "value", lambda value: lesson <= 11 and value == "offline"
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (

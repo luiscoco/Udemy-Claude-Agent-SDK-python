@@ -49,8 +49,8 @@
   {
    "id": "assessment-and-workbook",
    "status": "partial",
-   "python": "Seven explained questions per lesson for lessons 1-10, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
-   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 11-20; keep shared navigation, media and runtime adaptations separately tracked."
+   "python": "Seven explained questions per lesson for lessons 1-11, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
+   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 12-20; keep shared navigation, media and runtime adaptations separately tracked."
   },
   {
    "id": "progress",
@@ -266,14 +266,14 @@
    "title": "Skills",
    "exercise": "skills",
    "live_profile": "skills",
-   "adaptation": "",
+   "adaptation": "Host system-appendix preload is explicitly separate from native subagent preloading. Offline SDK identities are labelled recorded fixtures; live checks use actual tool and terminal events.",
    "python_line": 791,
    "reference_contract": "docs/prompts/l11-lesson-11-skills.md",
    "reference_blob_sha": "b46f2b12df41aff0deedfbe9bfe0a5cd89c22a53",
    "foundation_component": "src/concepts/Concept11Skills.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "gap": "Project/plugin discovery, named filtering, explicit invocation, host-preload comparison, supporting resources, three source excerpts, seven questions and correlated scenarios are implemented. Native subagent preloading/reload routes, all reference actions and authored media remain pending; live model invocation is not certified by fixture tests.",
    "written_guide_content": "lesson-content"
   },
   {

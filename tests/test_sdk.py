@@ -102,7 +102,7 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     )
     # Pre-approving tools would skip can_use_tool; the PreToolUse hook decides instead.
     assert options.allowed_tools == []
-    assert events[-1].kind == ("evidence" if lesson_id <= 10 else "result")
+    assert events[-1].kind == ("evidence" if lesson_id <= 11 else "result")
 
 
 async def test_missing_live_credential_fails_before_client_connect(tmp_path, monkeypatch):

@@ -1,4 +1,4 @@
-"""Bounded SDK experiments for lessons 2–10, with independently correlated evidence.
+"""Bounded SDK experiments for lessons 2–11, with independently correlated evidence.
 
 Offline records explicitly combine real local host effects with recorded SDK identities.
 Live records are collected from the actual stream and registered callbacks.
@@ -30,6 +30,7 @@ from agent_lab.hooks import Ask, call_hook, post_tool_hook
 from agent_lab.models import Event, Lesson, LessonError, RunRequest, lesson_request
 from agent_lab.policy import decide, inside
 from agent_lab.services import Calculation, Summary
+from agent_lab.skills import local_skills
 
 Emit = Callable[[Event], Awaitable[None]]
 
@@ -49,6 +50,7 @@ def configure(
 ) -> dict[str, Any]:
     """Apply selected inputs to the real SDK options; never accept arbitrary paths or tools."""
     selected = inputs(lesson.id, request.lesson_options).model_dump()
+    extra = {}
     if lesson.id == 2:
         options.model = selected["model"]
         options.system_prompt = prompt_representation(
@@ -78,6 +80,10 @@ def configure(
         options.setting_sources = ["project"] if selected["variant"] == "project" else []
         if selected["variant"] == "project":
             inside(work, "CLAUDE.md").write_text(selected["instruction"] + "\n", encoding="utf-8")
+    elif lesson.id == 11:
+        from agent_lab.skills import configure_skills
+
+        extra = configure_skills(options, work, request)
     # Do not expose environment variables, CLI authentication or host configuration.
     fields = (
         "model",
@@ -97,6 +103,7 @@ def configure(
         }
     if lesson.id == 10:
         echo["output_format"] = options.output_format
+    echo.update(extra)
     return echo
 
 
@@ -350,6 +357,22 @@ class Evidence:
                 value == terminal.get("structured_output") for value in accepted
             )
             explanation = "The host must accept structured_output and observe terminal success. Factual accuracy and the separate interrupt/abort experiment are not certified."
+        elif self.lesson == 11:
+            from agent_lab.skills import skill_name
+
+            expected = skill_name(self.selected)
+            passed = (
+                success
+                and bool(self.initialized)
+                and expected in (self.configured.get("skills") or [])
+                and any(
+                    call["name"] == "Skill"
+                    and call["arguments"].get("skill") == expected
+                    and not call.get("parent_tool_use_id")
+                    for call in paired
+                )
+            )
+            explanation = "A visible prepared Skill call needs one successful matching result and successful parent completion. Discovery and host preload alone do not pass. Generated files and answer quality are not certified."
         return {
             "source": self.source,
             "run": self.run_id,
@@ -860,6 +883,7 @@ LOCAL_EXPERIMENTS: dict[int, Callable[..., Awaitable[dict[str, Any]]]] = {
     8: local_agents,
     9: local_prompts,
     10: local_structured,
+    11: local_skills,
 }
 
 
@@ -934,13 +958,20 @@ async def run_local(
 def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
     function = LOCAL_EXPERIMENTS[lesson_id]
     lines, start = inspect.getsourcelines(function)
-    return "agent_lab/foundations.py", "".join(lines), start
+    path = Path(inspect.getfile(function)).relative_to(Path(__file__).resolve().parent.parent)
+    return path.as_posix(), "".join(lines), start
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    from agent_lab.skills import configure_skills
+
     sections = []
     for title, function, question in (
-        ("Actual SDK configuration", configure, "Which selected values become actual SDK options?"),
+        (
+            "Actual SDK configuration",
+            configure_skills if lesson_id == 11 else configure,
+            "Which selected values become actual SDK options?",
+        ),
         (
             "Selected local experiment",
             LOCAL_EXPERIMENTS[lesson_id],
@@ -956,7 +987,9 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
         sections.append(
             {
                 "title": title,
-                "path": "agent_lab/foundations.py",
+                "path": Path(inspect.getfile(function))
+                .relative_to(Path(__file__).resolve().parent.parent)
+                .as_posix(),
                 "start": start,
                 "end": start + len(lines) - 1,
                 "code": "".join(lines),

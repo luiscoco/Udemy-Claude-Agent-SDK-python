@@ -77,6 +77,13 @@ class StructuredInputs(Inputs):
         return value
 
 
+class SkillsInputs(Inputs):
+    loading: Literal["invoke", "discovery", "preload"] = "invoke"
+    discovery: Literal["project", "plugin"] = "project"
+    visible: bool = True
+    load_support: bool = False
+
+
 INPUT_MODELS: dict[int, type[Inputs]] = {
     2: OptionsInputs,
     3: ToolsInputs,
@@ -87,6 +94,7 @@ INPUT_MODELS: dict[int, type[Inputs]] = {
     8: AgentInputs,
     9: PromptInputs,
     10: StructuredInputs,
+    11: SkillsInputs,
 }
 
 SCENARIOS: dict[int, dict[str, str]] = {

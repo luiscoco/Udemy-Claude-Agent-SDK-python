@@ -53,6 +53,8 @@ Lesson 1 checks terminal stream success and includes three recorded outcome scen
 seven explained questions and bounded request validation. See the [Lesson 1 guide](docs/lesson-1-query.md).
 Lessons 2–10 also include seven explained questions, lesson-specific experiment controls,
 correlated evidence checks and three exact source excerpts. See the [SDK experiments guide](docs/foundations-2-10.md).
+Lesson 11 adds project/plugin skill discovery, invocation and host-preload comparisons,
+supporting resources and correlated Skill evidence. See the [Skills lab guide](docs/lesson-11-skills.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

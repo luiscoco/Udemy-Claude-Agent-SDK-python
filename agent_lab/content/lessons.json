@@ -2124,11 +2124,12 @@
    3,
    9
   ],
-  "concept_brief": "A Skill is a `SKILL.md` file with `name` and `description` frontmatter under `.claude/skills/<name>/`; the Python SDK only loads it when you opt in with `ClaudeAgentOptions(setting_sources=[\"project\"])` and expose the `Skill` tool.",
-  "lab_brief": "The offline exercise `project_markdown` seeds `.claude/skills/lesson-summary/SKILL.md` in the lesson workspace and returns every Markdown file plus the setting sources the live run enables. It shows exactly which project files you are trusting before you turn settings on.",
+  "concept_brief": "Skills separate discovery metadata, loaded instructions and supporting resources. The host explicitly chooses project or local-plugin discovery and a skill-name context filter. A discovered skill is not proof of invocation; preloading instructions in a system appendix is a separate Python host adaptation. Concept-map brief: draw metadata -> selected loading stage -> instruction body -> optional resource, with output review separate.",
+  "lab_brief": "Compare Explicit invocation, Discovery only and Host preload. The experiment parses real owned SKILL.md files and optionally loads a supporting checklist. Offline SDK identities are recorded fixtures. Live mode observes actual Skill calls and matching results. The small frontmatter parser handles only prepared name/description lines, not general YAML. Lab-walkthrough brief: show the loading/source/filter controls beside the host timeline, then connect call ID to result ID and the final parent status.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
-   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
+   "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears.",
+   "Choose Skill loading and Skill source in Run the exercise. Keep Explicit invocation, Project directory and the skill filter enabled for the passing example."
   ],
   "steps": [
    {
@@ -2137,55 +2138,47 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `seed_workspace` in `agent_lab/exercises.py` to see the SKILL.md frontmatter (`name: lesson-summary`, `description: ...`) and its body."
+    "text": "Inspect agent_lab/skills.py: the prepared skill, supporting checklist, simple frontmatter parser and explicit settings sources. No personal user settings are enabled."
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Run Explicit invocation offline first. Then compare Discovery only, Host preload, a hidden skill and Local plugin. These are local demonstrations with labelled SDK correlation fixtures; no model is called."
    },
    {
     "title": "Verify the evidence",
-    "text": "Confirm `files` contains `.claude/skills/lesson-summary/SKILL.md` with its frontmatter, `setting_sources` is [\"project\"], and read the `warning`."
+    "text": "Compare configured skills, initialization, Skill arguments, call/result IDs and terminal success. Inspect local_effects.timeline for host metadata, instruction-body and supporting-resource loads. A folder or a preload alone does not pass the invocation check."
    },
    {
     "title": "Try the challenge",
-    "text": "Add a second skill in a temporary workspace and confirm the exercise lists it."
+    "text": "Compare the same question with Discovery only and Host preload. Explain when the host loads the instruction body and why neither is an observed Skill call."
    }
   ],
-  "inspect": "Look at `files` (path and full SKILL.md text), `setting_sources` and `warning`.",
-  "expected": "`files` has one key, `.claude/skills/lesson-summary/SKILL.md`, whose text starts with `---` / `name: lesson-summary` / `description: Summarize a Python lesson with one example.`; `setting_sources` is [\"project\"] and `warning` is \"Only enable settings for a trusted lesson workspace.\"",
-  "evidence_criterion": "The check confirms the skill file was found and project settings are the only source enabled.",
+  "inspect": "Inspect configured.skill_loading, skills and setting_sources, local_effects.timeline, calls, results and terminal_results. Host inventory is separate from runtime discovery; generated files are not certified.",
+  "expected": "Default explicit invocation has one labelled Skill call/result pair for lesson-summary and successful recorded parent completion. Local plugin uses lesson-skills:lesson-summary. Discovery, hidden skills and host preload show Needs review for the invocation criterion. This is expected, not a failed local demonstration.",
+  "evidence_criterion": "A visible prepared Skill call has one successful matching result and the parent run succeeds. Generated files are not certified.",
   "evidence_checks": [
    {
-    "key": "files",
+    "key": "experiment_passed",
     "rule": "truthy"
-   },
-   {
-    "key": "setting_sources",
-    "rule": "truthy"
-   },
-   {
-    "key": "warning",
-    "rule": "present"
    }
   ],
-  "challenge": "In a scratch script, create a temporary folder, call `seed_workspace(folder, get_lesson(11))`, add `.claude/skills/python-example/SKILL.md` with your own `name` and `description` frontmatter, then call `project_markdown(folder, RunRequest(), get_lesson(11))`. Verify `files` now lists both SKILL.md paths.",
+  "challenge": "Keep the prompt fixed. Compare Discovery only with Host preload, then enable the supporting checklist. Explain which stage loads metadata, instructions and resources; finish by checking a real invocation against its result ID.",
   "hints": [
-   "Import `seed_workspace` and `project_markdown` from `agent_lab.exercises`, `get_lesson` from `agent_lab.curriculum` and `RunRequest` from `agent_lab.models`.",
-   "Create the skill folder with `mkdir(parents=True)` and write text that begins with `---\\nname: python-example\\ndescription: ...\\n---\\n`; the exercise finds every `*.md` under the workspace."
+   "The host-inspection timeline contains metadata. Look for host-load or host-preload to find where the instruction body enters the local demonstration.",
+   "Preload appends instructions to system_prompt and sets skills=[]; it deliberately creates no Skill call. Explicit invocation must still match one successful result by call ID."
   ],
-  "reference": "The skill is ordinary project Markdown; what makes it available is the explicit `setting_sources=[\"project\"]` plus the `Skill` tool in the live profile. Because project settings can change the agent's behaviour, the lab only enables them for a workspace it created and inspected. The frontmatter `description` is what the agent uses to decide when the skill applies.",
+  "reference": "Discovery makes metadata available; invocation loads instructions, and supporting resources can be read later. This local parser separates simple frontmatter from the prepared body and does not implement YAML. The preload comparison explicitly puts trusted instructions in the system appendix; it is not native subagent skill preloading. Offline host file reads really execute, while SDK call/result identities are labelled fixtures. In live mode the evaluator uses the actual SDK stream. skills=[] filters the listing, not the filesystem: non-secret prepared files remain readable. A successful Skill call does not verify generated files.",
   "recovery": [
    "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
    "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it. If the live agent does not use the skill, check that the prompt names `lesson-summary` and that the SKILL.md frontmatter is intact."
   ],
   "quiz": [
    {
-    "prompt": "What must the Python host set for a project skill to load?",
+    "prompt": "Which explicit setting keeps this lesson's project discovery scoped to project settings?",
     "options": [
      {
       "text": "`setting_sources=[\"project\"]` in `ClaudeAgentOptions`.",
-      "explanation": "Correct. Without it the SDK does not read `.claude/` settings, and the live profile also exposes the `Skill` tool."
+      "explanation": "Correct. This host explicitly selects project settings. The SDK skills convenience option can otherwise supply default sources when sources are omitted."
      },
      {
       "text": "Nothing; every `SKILL.md` on disk loads automatically.",
@@ -2199,7 +2192,7 @@
     "correct": 0
    },
    {
-    "prompt": "Why does the exercise print the full content of every Markdown file?",
+    "prompt": "Why does the separate standard example print the prepared Markdown files?",
     "options": [
      {
       "text": "To reduce token usage.",
@@ -2215,10 +2208,80 @@
      }
     ],
     "correct": 2
+   },
+   {
+    "prompt": "The folder exists, but no Skill call appears. What does that establish?",
+    "options": [
+     {
+      "text": "Invocation passed.",
+      "explanation": "A file on disk is not an invocation event."
+     },
+     {
+      "text": "Host inventory only; inspect the actual SDK stream.",
+      "explanation": "Correct. Finding a prepared file does not establish runtime discovery or a successful invocation."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "A Skill call has ID A; the only result has ID B. Should the invocation check pass?",
+    "options": [
+     {
+      "text": "No; the result must match the call ID.",
+      "explanation": "Correct. Unrelated successful results cannot satisfy the call."
+     },
+     {
+      "text": "Yes, if the assistant says it used the skill.",
+      "explanation": "Assistant prose cannot replace correlated tool evidence."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "The host preloads instructions and the parent succeeds, but no Skill call exists. What should the check show?",
+    "options": [
+     {
+      "text": "Needs review for the invocation criterion.",
+      "explanation": "Correct. The preload demonstration ran, but it is a separate way of supplying instructions."
+     },
+     {
+      "text": "Passed, because all loaded text is a Skill call.",
+      "explanation": "A system appendix is not a tool invocation."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "In the concept map, what should connect metadata to the instruction body?",
+    "options": [
+     {
+      "text": "Discovery directly certifies output files.",
+      "explanation": "File quality needs separate host checks and human review."
+     },
+     {
+      "text": "A loading or invocation stage, followed by supporting reads when needed.",
+      "explanation": "Correct. Progressive disclosure separates finding a skill from loading instructions and resources."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "In the lab timeline, the skill is hidden by skills=[]. What should happen to its prepared files?",
+    "options": [
+     {
+      "text": "They remain on disk and may be readable under the host policy.",
+      "explanation": "Correct. The skill context filter is not a filesystem sandbox."
+     },
+     {
+      "text": "The SDK deletes all unlisted files.",
+      "explanation": "Filtering the skill listing does not delete files or isolate the OS."
+     }
+    ],
+    "correct": 0
    }
   ],
   "concept_code": "from pathlib import Path\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\nSKILL_MD = \"\"\"---\nname: lesson-summary\ndescription: Summarize a lesson file in three bullet points.\n---\nRead the requested file and return exactly three bullet points.\n\"\"\"\n\n\nasync def main(workspace: Path) -> None:\n    skill_dir = workspace / \".claude\" / \"skills\" / \"lesson-summary\"\n    skill_dir.mkdir(parents=True, exist_ok=True)\n    (skill_dir / \"SKILL.md\").write_text(SKILL_MD, encoding=\"utf-8\")\n    options = ClaudeAgentOptions(\n        cwd=workspace,\n        setting_sources=[\"project\"],\n        skills=[\"lesson-summary\"],\n        tools=[\"Read\", \"Skill\"],  # Skill must be available to call the skill\n    )\n    prompt = \"Use the lesson-summary skill to summarize notes.txt.\"\n    async for message in query(prompt=prompt, options=options):\n        if isinstance(message, ResultMessage):\n            print(message.result)",
-  "code_focus": "The SKILL.md frontmatter (`name`, `description`) defines the skill, and `setting_sources=[\"project\"]` plus `skills=[\"lesson-summary\"]` opt in to loading exactly that skill.",
+  "code_focus": "The concept example opts into a named project skill. The experiment in agent_lab/skills.py separately exposes project/plugin discovery, filtering and an explicit host-preload adaptation; its exact excerpts appear below the original source example.",
   "concept_points": [
    {
     "title": "A folder with SKILL.md",
@@ -2229,13 +2292,13 @@
     "text": "`setting_sources`=[\"project\"] loads trusted project files from cwd; leaving user out keeps personal settings away."
    },
    {
-    "title": "Enable it by name",
-    "text": "skills=[...] enables only the listed skills and pre-approves the Skill tool for them."
+    "title": "Filter, then observe",
+    "text": "skills=[...] filters the skill listing; skills=[] hides it. A Skill call and matching result establish invocation. Neither setting is a filesystem sandbox."
    }
   ],
   "misconception": {
-   "claim": "Any SKILL.md in the project is picked up automatically by the Python SDK.",
-   "correction": "Project files load only when `setting_sources` includes \"project\", and skills=[...] decides which discovered skills the model may invoke."
+   "claim": "Finding a SKILL.md or putting instructions in the prompt proves the Skill tool ran.",
+   "correction": "Host discovery and preload are separate observations. Check the actual Skill call, its successful matching result and the parent outcome; review generated files separately."
   }
  },
  {

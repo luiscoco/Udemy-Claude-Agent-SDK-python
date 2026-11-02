@@ -126,7 +126,7 @@ def main() -> None:
                         prompt=arguments.prompt
                         if arguments.prompt is not None
                         else LESSONS[arguments.id].prompt
-                        if arguments.id <= 10
+                        if arguments.id <= 11
                         else "",
                         scenario=arguments.scenario,
                         lesson_options=options,

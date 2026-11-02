@@ -27,7 +27,7 @@ async def test_additional_named_scenarios_have_the_documented_negative_outcome(t
     assert result["experiment"]["expected_check"] == "needs-review"
 
 
-@pytest.mark.parametrize("lesson", range(2, 11))
+@pytest.mark.parametrize("lesson", range(2, 12))
 @pytest.mark.parametrize("scenario", ["success", "missing-evidence", "wrong-identity"])
 async def test_foundation_scenarios_grade_evidence_not_prose(tmp_path, lesson, scenario):
     root = tmp_path / "work"
@@ -80,7 +80,7 @@ async def test_rejected_options_create_no_task_or_workspace(tmp_path, lesson, op
         await runner.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 11))
+@pytest.mark.parametrize("lesson", range(2, 12))
 async def test_negative_scenarios_cannot_be_used_as_live_results(tmp_path, lesson):
     runner = RunService(Settings(data_dir=tmp_path, enable_live=True))
     try:
@@ -308,7 +308,7 @@ def test_all_foundation_assessments_have_seven_explained_questions_and_exact_exc
     from agent_lab.foundations import source_sections
     from agent_lab.learning import guide
 
-    for lesson in range(2, 11):
+    for lesson in range(2, 12):
         item = guide(lesson)
         assert len(item.quiz) == 7
         for question in item.quiz:
@@ -317,12 +317,8 @@ def test_all_foundation_assessments_have_seven_explained_questions_and_exact_exc
                 compile(question.code, f"lesson-{lesson}-question.py", "exec")
         sections = source_sections(lesson)
         assert len(sections) == 3
-        lines = (
-            (Path(__file__).resolve().parents[1] / sections[0]["path"])
-            .read_text(encoding="utf-8")
-            .splitlines()
-        )
         for section in sections:
+            lines = (Path(__file__).resolve().parents[1] / section["path"]).read_text(encoding="utf-8").splitlines()
             assert section["code"].splitlines() == lines[section["start"] - 1 : section["end"]]
             assert section["question"]
 
