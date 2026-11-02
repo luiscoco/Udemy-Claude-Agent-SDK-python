@@ -78,7 +78,7 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
     if parsed.lesson_options:
         raise LessonError("This lesson does not accept lesson-specific options.")
     if parsed.scenario != "success" and (lesson_id != 1 or parsed.mode != "offline"):
-        raise LessonError("This lesson does not offer the requested scenario.")
+        raise LessonError("Recorded scenarios are available only in lesson 1 offline mode.")
     return parsed
 
 
