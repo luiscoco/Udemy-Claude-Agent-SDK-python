@@ -48,7 +48,9 @@ checks and quiz scores remain separate from manual review. See the
 Use **Export progress** on the home page or in My Learning to save them as a JSON file, and
 **Import progress** in another browser to restore them. Imports are validated
 and replace that browser's progress only after you confirm.
-The automatic check covers local evidence only; your self-review stays separate.
+Automatic checks cover exercise evidence; your self-review stays separate.
+Lesson 1 checks terminal stream success and includes three recorded outcome scenarios,
+seven explained questions and bounded request validation. See the [Lesson 1 guide](docs/lesson-1-query.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

@@ -48,8 +48,8 @@
     "tab": "Run the exercise",
     "target": ".guide-evidence-target",
     "context": ".guide-evidence-context",
-    "text": "Inspect Response and results and the Automatic check below it. The fixture should collect Recorded test text, an offline-fixture session id and zero cost. Its source explicitly says that no SDK process was started.",
-    "action": "Check source, text and results. A passing local check validates fixture handling; it does not validate an API key or a live Claude answer.",
+    "text": "Inspect assistant text separately from the final result. Success needs subtype success and is_error false. The SDK error and Missing final result offline scenarios should both need review.",
+    "action": "Compare all three recorded scenarios and their expected_check. This checks the stream outcome; review the answer and challenge yourself.",
     "student_action": true
    },
    {

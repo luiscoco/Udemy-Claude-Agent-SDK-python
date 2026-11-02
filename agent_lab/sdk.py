@@ -115,6 +115,9 @@ async def run_sdk(
     emit: Emit,
     ask: Ask,
 ) -> None:
+    from agent_lab.models import lesson_request
+
+    request = lesson_request(lesson.id, request)
     require_live_access(settings)
     await asyncio.to_thread(config.mkdir, parents=True, exist_ok=True)
     options = ClaudeAgentOptions(
@@ -318,7 +321,13 @@ async def run_sdk(
         ]
 
     async def consume(messages: Any) -> None:
+        terminal: ResultMessage | None = None
+        session_id: str | None = None
+        last_message: Any = None
         async for message in messages:
+            last_message = message
+            if lesson.id == 1 and isinstance(message, SystemMessage) and message.subtype == "init":
+                session_id = message.data.get("session_id")
             if (
                 isinstance(message, SystemMessage)
                 and message.subtype == "api_retry"
@@ -334,11 +343,42 @@ async def run_sdk(
                 )
             )
             if isinstance(message, ResultMessage):
+                terminal = message
                 if message.is_error:
+                    if lesson.id == 1:
+                        raise LessonError(
+                            "The SDK returned a failed terminal result. Inspect the subtype and keep lesson 1 within one turn and a 0.05 USD threshold."
+                        )
                     raise LessonError(failure_message(message, request))
                 if profile == "structured" and message.structured_output is not None:
                     parsed = Summary.model_validate(message.structured_output)
                     await emit(Event(kind="validated", data=parsed.model_dump()))
+        if lesson.id == 1:
+            if (
+                terminal is None
+                or terminal is not last_message
+                or terminal.subtype != "success"
+                or not terminal.session_id
+            ):
+                raise LessonError(
+                    "No final successful SDK result arrived. Partial assistant text does not establish completion."
+                )
+            if session_id is not None and session_id != terminal.session_id:
+                raise LessonError("The final SDK result belongs to a different session.")
+            await emit(
+                Event(
+                    kind="evidence",
+                    data={
+                        "source": "live SDK terminal result",
+                        "lesson_id": 1,
+                        "result": {
+                            "source": "live SDK terminal result",
+                            "successful_result": True,
+                            "results": [message_data(terminal)],
+                        },
+                    },
+                )
+            )
 
     prompt = request.prompt or lesson.prompt
     # Interactive custom-tool, permission and session lifecycles stay in this task.

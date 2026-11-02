@@ -13,7 +13,7 @@ from claude_agent_sdk import CLINotFoundError
 from agent_lab.config import Settings
 from agent_lab.curriculum import get_lesson
 from agent_lab.exercises import run_exercise, seed_workspace
-from agent_lab.models import Event, LessonError, RunRequest
+from agent_lab.models import Event, LessonError, RunRequest, lesson_request
 
 
 class BusyError(Exception):
@@ -41,6 +41,7 @@ class RunService:
 
     def start(self, lesson_id: int, request: RunRequest) -> RunHandle:
         lesson = get_lesson(lesson_id)
+        request = lesson_request(lesson_id, request)
         if request.mode == "live" and not self.settings.enable_live:
             raise PermissionError("Enable LAB_ENABLE_LIVE=true before making paid SDK calls.")
         if len(self.active) >= self.settings.max_concurrent_runs:
@@ -84,17 +85,22 @@ class RunService:
             )
             async with asyncio.timeout(self.settings.timeout_seconds):
                 seed_workspace(work, lesson)
-                evidence = await run_exercise(work, request, lesson)
-                await emit(
-                    Event(
-                        kind="evidence",
-                        data={
-                            "source": "local Python host exercise",
-                            "lesson_id": lesson.id,
-                            "result": evidence,
-                        },
-                    )
+                evidence = (
+                    {}
+                    if lesson.id == 1 and request.mode == "live"
+                    else await run_exercise(work, request, lesson)
                 )
+                if not (lesson.id == 1 and request.mode == "live"):
+                    await emit(
+                        Event(
+                            kind="evidence",
+                            data={
+                                "source": "local Python host exercise",
+                                "lesson_id": lesson.id,
+                                "result": evidence,
+                            },
+                        )
+                    )
                 if request.mode == "live":
                     from agent_lab.sdk import run_sdk
 

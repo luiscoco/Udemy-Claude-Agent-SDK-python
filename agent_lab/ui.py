@@ -74,7 +74,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
         drawer: Any
 
         with ui.header().classes("lab-header border-b items-center"):
-            ui.button(icon="menu", on_click=lambda: drawer.toggle()).props("flat color=primary aria-label='Open lesson navigation'")
+            ui.button(icon="menu", on_click=lambda: drawer.toggle()).props(
+                "flat color=primary aria-label='Open lesson navigation'"
+            )
             ui.link("Claude Agent SDK Lab", "/").classes(
                 "text-xl font-bold no-underline text-slate-900 min-w-0 flex-1"
             )
@@ -133,7 +135,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
             set_preference("last_lesson", lesson)
             source = exercise_source(current.exercise)
             lesson_header(lesson, runner.settings.enable_live)
-            with ui.row().classes("w-full items-center gap-3 guide-lesson-actions") as lesson_actions:
+            with ui.row().classes(
+                "w-full items-center gap-3 guide-lesson-actions"
+            ) as lesson_actions:
                 pass
             if current.notes:
                 with ui.card().classes("course-card w-full bg-amber-50"):
@@ -155,7 +159,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 with ui.tab_panel(visual_tab).classes("p-0 flex flex-col gap-5"):
                     visual_panel(lesson)
                 with ui.tab_panel(source_tab).classes("p-0 flex flex-col gap-5"):
-                    ui.label("Python source for this concept").classes("text-xl font-bold guide-source-context")
+                    ui.label("Python source for this concept").classes(
+                        "text-xl font-bold guide-source-context"
+                    )
                     concept_code_card(lesson, guide_target="guide-source-target")
                     with ui.expansion(
                         "How the offline lab checks this concept", icon="science"
@@ -178,13 +184,17 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         # Empty means "use the example": live runs fall back to the lesson
                         # prompt, and offline exercises see only what the student typed.
                         offline_prompt = exercise_uses(current.exercise, "prompt")
+                        offline_prompt = offline_prompt or lesson == 1
                         offline_follow_up = exercise_uses(current.exercise, "follow_up")
                         prompt = (
                             ui.textarea(
-                                "Prompt (optional)"
+                                "Prompt"
+                                if lesson == 1
+                                else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
+                                value=current.prompt if lesson == 1 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -192,7 +202,11 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if offline_prompt:
+                        if lesson == 1:
+                            ui.label(
+                                "Offline scenarios validate your prompt but replay recorded messages; they do not call Claude."
+                            ).classes("text-sm text-slate-600")
+                        elif offline_prompt:
                             ui.label(
                                 "This offline exercise also uses your prompt. Leave it empty to use the example."
                             ).classes("text-sm text-slate-500")
@@ -206,13 +220,31 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
+                        if lesson == 1:
+                            follow_up.set_visibility(False)
+                        scenario = (
+                            ui.select(
+                                {
+                                    "success": "Success",
+                                    "error": "SDK error",
+                                    "missing-result": "Missing final result",
+                                },
+                                value="success",
+                                label="Recorded scenario",
+                            )
+                            .props("outlined")
+                            .classes("w-full")
+                        )
+                        scenario.bind_visibility_from(
+                            mode, "value", lambda value: lesson == 1 and value == "offline"
+                        )
                         with ui.row().classes("w-full items-center"):
                             turns = (
                                 ui.number(
                                     "Maximum turns",
                                     value=current.max_turns,
                                     min=1,
-                                    max=12,
+                                    max=1 if lesson == 1 else 12,
                                     precision=0,
                                 )
                                 .props("outlined dense")
@@ -223,7 +255,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     "Budget threshold (USD)",
                                     value=current.max_budget_usd,
                                     min=0.01,
-                                    max=1,
+                                    max=0.05 if lesson == 1 else 1,
                                     step=0.01,
                                 )
                                 .props("outlined dense")
@@ -234,12 +266,16 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 "Live mode is disabled. Enable LAB_ENABLE_LIVE in .env after configuring your API key."
                             ).classes("text-sm text-slate-500")
                         with ui.row().classes("items-center guide-controls-context"):
-                            run_button = ui.button("Run exercise", icon="play_arrow").classes("guide-controls-target")
+                            run_button = ui.button("Run exercise", icon="play_arrow").classes(
+                                "guide-controls-target"
+                            )
                             cancel_button = ui.button("Cancel", icon="stop", color="secondary")
                             cancel_button.disable()
                             status = ui.label("Ready")
                     with ui.card().classes("course-card w-full p-6 guide-evidence-context"):
-                        evidence_view = ui.column().classes("w-full gap-3 guide-evidence-target guide-scroll-target")
+                        evidence_view = ui.column().classes(
+                            "w-full gap-3 guide-evidence-target guide-scroll-target"
+                        )
                         with evidence_view:
                             ui.label("Response and results").classes("text-xl font-bold")
                         output_state = OutputState()
@@ -339,8 +375,11 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     mode=mode.value,
                                     prompt=prompt.value or "",
                                     follow_up=follow_up.value or "",
-                                    max_turns=int(turns.value),
+                                    max_turns=turns.value,
                                     max_budget_usd=budget.value,
+                                    scenario=scenario.value
+                                    if mode.value == "offline"
+                                    else "success",
                                 )
                                 handle = runner.start(lesson, body)
                             except Exception as exc:
@@ -396,10 +435,14 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                     panel = LessonGuidePanel(tour, tabs, active_path)
                     if resume_guide:
                         ui.timer(0.15, panel.resume_saved, once=True)
-                route_name = next((p.title for p in course().paths if p.id == active_path), "All lessons")
+                route_name = next(
+                    (p.title for p in course().paths if p.id == active_path), "All lessons"
+                )
                 ui.label(f"Route: {route_name}").classes("text-sm text-slate-500")
                 if target := adjacent_lesson(lesson, 1, active_path):
-                    ui.link("Next lesson →", lesson_url(target, active_path)).classes("font-semibold")
+                    ui.link("Next lesson →", lesson_url(target, active_path)).classes(
+                        "font-semibold"
+                    )
             with ui.row().classes("w-full justify-between"):
                 if previous := adjacent_lesson(lesson, -1, active_path):
                     ui.link("← Previous lesson", lesson_url(previous, active_path))

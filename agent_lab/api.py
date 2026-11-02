@@ -14,7 +14,7 @@ from agent_lab.config import ROOT
 from agent_lab.curriculum import LESSONS, get_lesson
 from agent_lab.exercises import exercise_context
 from agent_lab.learning import course, guide
-from agent_lab.models import LessonError, RunRequest
+from agent_lab.models import LessonError, lesson_request
 from agent_lab.runtime import BusyError, RunService
 from agent_lab.tutor import TutorAnswer, TutorRequest, TutorService
 
@@ -74,9 +74,13 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from exc
 
-    def start(lesson_id: int, body: RunRequest):
+    def start(lesson_id: int, body: dict[str, Any]):
         try:
-            return runner.start(lesson_id, body)
+            return runner.start(lesson_id, lesson_request(lesson_id, body))
+        except ValidationError as exc:
+            raise HTTPException(422, exc.errors(include_context=False, include_input=False)) from exc
+        except LessonError as exc:
+            raise HTTPException(422, str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(404, str(exc)) from exc
         except PermissionError as exc:
@@ -85,13 +89,13 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
             raise HTTPException(429, str(exc)) from exc
 
     @app.post("/api/lessons/{lesson_id}/run")
-    async def run(lesson_id: int, body: RunRequest) -> dict[str, Any]:
+    async def run(lesson_id: int, body: dict[str, Any]) -> dict[str, Any]:
         handle = start(lesson_id, body)
         events = [event.model_dump() async for event in runner.events(handle)]
         return {"run_id": handle.id, "events": events}
 
     @app.post("/api/lessons/{lesson_id}/stream")
-    async def stream(lesson_id: int, body: RunRequest) -> StreamingResponse:
+    async def stream(lesson_id: int, body: dict[str, Any]) -> StreamingResponse:
         handle = start(lesson_id, body)
 
         async def output():
@@ -160,7 +164,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
         handle = None
         tasks: list[asyncio.Task[Any]] = []
         try:
-            body = RunRequest.model_validate(await websocket.receive_json())
+            body = await websocket.receive_json()
             handle = start(lesson_id, body)
 
             async def send():

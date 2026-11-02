@@ -78,7 +78,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `team` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 2418); the Python source tab shows it below the concept code. Host contracts
+(line 2456); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

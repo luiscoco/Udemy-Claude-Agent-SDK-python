@@ -75,7 +75,10 @@ def main() -> None:
     lesson = subcommands.add_parser("lesson", help="Run a standalone lesson")
     lesson.add_argument("id", type=int, choices=range(1, 76))
     lesson.add_argument("--live", action="store_true")
-    lesson.add_argument("--prompt", default="")
+    lesson.add_argument("--prompt", default=None)
+    lesson.add_argument(
+        "--scenario", choices=["success", "error", "missing-result"], default="success"
+    )
     subcommands.add_parser("list", help="List the curriculum")
     subcommands.add_parser("doctor", help="Check SDK and CLI installation without a model call")
     projects = {
@@ -106,7 +109,10 @@ def main() -> None:
                     arguments.id,
                     RunRequest(
                         mode="live" if arguments.live else "offline",
-                        prompt=arguments.prompt,
+                        prompt=arguments.prompt
+                        if arguments.prompt is not None
+                        else LESSONS[arguments.id].prompt,
+                        scenario=arguments.scenario,
                         max_turns=LESSONS[arguments.id].max_turns,
                         max_budget_usd=LESSONS[arguments.id].max_budget_usd,
                     ),

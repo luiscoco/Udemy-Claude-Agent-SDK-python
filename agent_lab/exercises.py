@@ -93,15 +93,20 @@ def seed_workspace(root: Path, lesson: Lesson) -> None:
 
 @exercise("messages", "testing")
 async def message_exercise(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, Any]:
-    from claude_agent_sdk import AssistantMessage, ResultMessage, TextBlock
+    from claude_agent_sdk import AssistantMessage, ResultMessage, SystemMessage, TextBlock
 
     async def recorded_messages():
+        if lesson.id == 1:
+            yield SystemMessage(subtype="init", data={"session_id": "offline-fixture"})
         yield AssistantMessage(content=[TextBlock(text="Recorded test text")], model="fixture")
+        if lesson.id == 1 and request.scenario == "missing-result":
+            return
+        failed = lesson.id == 1 and request.scenario == "error"
         yield ResultMessage(
-            subtype="success",
+            subtype="error_max_turns" if failed else "success",
             duration_ms=0,
             duration_api_ms=0,
-            is_error=False,
+            is_error=failed,
             num_turns=1,
             session_id="offline-fixture",
             total_cost_usd=0,
@@ -110,16 +115,49 @@ async def message_exercise(root: Path, request: RunRequest, lesson: Lesson) -> d
 
     text: list[str] = []
     results: list[dict[str, Any]] = []
+    ordered_messages: list[dict[str, Any]] = []
     async for message in recorded_messages():
+        ordered_messages.append({"type": type(message).__name__})
         if isinstance(message, AssistantMessage):
             text.extend(block.text for block in message.content if isinstance(block, TextBlock))
         elif isinstance(message, ResultMessage):
-            results.append({"session_id": message.session_id, "cost": message.total_cost_usd})
-    return {
+            results.append(
+                {
+                    "session_id": message.session_id,
+                    "cost": message.total_cost_usd,
+                    "subtype": message.subtype,
+                    "is_error": message.is_error,
+                    "duration_ms": message.duration_ms,
+                    "usage": message.usage,
+                    "num_turns": message.num_turns,
+                }
+            )
+    evidence: dict[str, Any] = {
         "source": "recorded unit-test fixture; no SDK process was started",
         "text": text,
         "results": results,
     }
+    if lesson.id == 1:
+        evidence.update(
+            {
+                "scenario": request.scenario,
+                "ordered_messages": ordered_messages,
+                "successful_result": bool(
+                    results
+                    and results[-1]["subtype"] == "success"
+                    and results[-1]["is_error"] is False
+                ),
+                "outcome": "missing-result"
+                if not results
+                else "error"
+                if results[-1]["is_error"]
+                else "success",
+                "expected_check": "passed" if request.scenario == "success" else "needs-review",
+                "prompt": request.prompt,
+                "prompt_note": "Validated input only; recorded text does not answer this prompt.",
+            }
+        )
+    return evidence
 
 
 @exercise("thinking")

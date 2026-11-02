@@ -3,7 +3,7 @@
   "id": 1,
   "prerequisites": [],
   "concept_brief": "`query()` returns an asynchronous iterator of SDK messages; you consume it with `async for` and tell an `AssistantMessage` (whose `TextBlock` items hold the text) apart from the final `ResultMessage` (session id, cost, outcome).",
-  "lab_brief": "The offline exercise `message_exercise` iterates two recorded fixture messages, collecting text from the `AssistantMessage` and the session id and cost from the `ResultMessage`. It practises the consumption pattern every later lesson relies on, without starting the SDK.",
+  "lab_brief": "The offline exercise consumes recorded SDK messages in order. Choose Success, SDK error or Missing final result. Every scenario contains assistant text; only Success has a final result/success with is_error false. No SDK process starts offline.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open this lesson in the browser.",
    "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, then restart the server so the Live Agent SDK mode appears."
@@ -19,42 +19,35 @@
    },
    {
     "title": "Run one example",
-    "text": "Keep Offline Python exercise selected and click Run exercise; the result appears under Response and results with the LOCAL PYTHON RESULT badge."
+    "text": "Keep Offline Python exercise selected, use the default nonempty prompt and Success scenario, then choose Run exercise. Inspect the labelled local evidence."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check that `text` holds the assistant text, `results` holds one entry with a session id and cost, and `source` says no SDK process was started."
+    "text": "Inspect ordered_messages, text and results: the final subtype must be success and is_error false. Then select SDK error and Missing final result in turn; each should show needs review despite having assistant text."
    },
    {
     "title": "Try the challenge",
-    "text": "In a scratch script, yield two `AssistantMessage` objects before the `ResultMessage` and confirm `text` then has two entries."
+    "text": "Compare all three offline scenarios and explain why identical assistant text can accompany different outcomes. Save your explanation as a challenge attempt. Optionally, after enabling and authorizing live use, ask for three bullet points; locate their AssistantMessage TextBlocks and inspect the terminal result separately. Judge the bullet points yourself."
    }
   ],
-  "inspect": "Look at `source`, `text` and `results` (with `session_id` and `cost`) in the Response and results panel.",
-  "expected": "`source` reads \"recorded unit-test fixture; no SDK process was started\", `text` is [\"Recorded test text\"] and `results` is one item with `session_id` \"offline-fixture\" and `cost` 0.",
-  "evidence_criterion": "The check confirms the run came from the recorded fixture and produced both collected assistant text and a final result entry.",
+  "inspect": "Compare ordered_messages, text, results, outcome and expected_check. A result includes session_id, subtype, is_error, duration_ms, num_turns, cost and usage. Usage may be unavailable in a fixture.",
+  "expected": "Success yields Recorded test text and one result/success with is_error false, so its bounded check passes. SDK error yields error_max_turns with is_error true; Missing final result yields text without a terminal result. Both negative scenarios correctly need review. The host can finish replaying either negative example without the SDK outcome being successful.",
+  "evidence_criterion": "The exercise stream ended with a final SDK result/success and is_error was false. Offline checks use explicitly recorded SDK messages. This checks the run outcome, not the quality of the answer or the challenge.",
   "evidence_checks": [
    {
-    "key": "source",
+    "key": "successful_result",
     "rule": "equals",
-    "value": "recorded unit-test fixture; no SDK process was started"
-   },
-   {
-    "key": "text",
-    "rule": "truthy"
-   },
-   {
-    "key": "results",
-    "rule": "truthy"
+    "value": true
    }
   ],
-  "challenge": "Copy the loop into a scratch script (run it with `uv run python` from the repo root) and add a second `AssistantMessage(content=[TextBlock(text=\"Second line\")], model=\"fixture\")` to the generator. Verify that the printed `text` list has two strings and `results` still has exactly one entry.",
+  "challenge": "Compare all three offline scenarios and explain why identical assistant text can accompany different outcomes. Save your explanation as a challenge attempt. Optionally, after enabling and authorizing live use, ask for three bullet points; locate their AssistantMessage TextBlocks and inspect the terminal result separately. Judge the bullet points yourself.",
   "hints": [
    "Only `AssistantMessage` content goes into `text`; only `ResultMessage` goes into `results`.",
    "Import `AssistantMessage`, `ResultMessage` and `TextBlock` from `claude_agent_sdk`, build the generator with `async def` and `yield`, and drive an `async for` loop with `asyncio.run`."
   ],
-  "reference": "The exercise reads a recorded stream exactly as it would read `query()` output: assistant messages carry `TextBlock` content, and one `ResultMessage` closes the run with metadata. Because the data is a labelled fixture, the session id is \"offline-fixture\" and the cost is 0. In live mode the same split appears, but the text and the reported cost come from Claude.",
+  "reference": "The ordered recorded stream separates AssistantMessage TextBlocks from ResultMessage outcome and accounting. A successful terminal result requires subtype success and is_error false; partial text, a failed terminal result and an interrupted run do not establish success. Offline prompts are validated but recorded text is fixed, not an answer generated for the prompt. Live mode uses your actual prompt with no tools or inherited settings, one turn, a 0.05 USD budget threshold and the host deadline. It requires a real successful terminal result and checks the session id against init when supplied. Check the reported usage and cost yourself; the threshold is not a billing guarantee.",
   "recovery": [
+   "A rejected empty prompt or invalid limit starts no run. Correct the highlighted error first. SDK error and Missing final result are intentional offline negative cases: return to Success for a passing check. Cancellation and timeout also require review.",
    "If the run fails, read the red error message and open Diagnostics — raw events; if the offline run itself fails, run `uv sync --locked` again and restart `uv run agent-lab serve`.",
    "If Live Agent SDK is not offered or reports an authentication error, check that .env has an Anthropic `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true, then restart the server; the offline exercise is complete without it."
   ],
@@ -94,10 +87,105 @@
      }
     ],
     "correct": 0
+   },
+   {
+    "prompt": "Debug this stream: did the SDK finish successfully?",
+    "code": "AssistantMessage(content=[TextBlock(text=\"Partial answer\")], model=\"fixture\")\n# The stream ends here: no ResultMessage.",
+    "options": [
+     {
+      "text": "No: the terminal result is missing.",
+      "explanation": "Correct. Assistant text is partial evidence; only a final successful ResultMessage establishes the bounded outcome."
+     },
+     {
+      "text": "Yes: any assistant text proves success.",
+      "explanation": "Text may arrive before an error or interruption. It does not establish terminal success."
+     },
+     {
+      "text": "Yes: an exhausted async iterator always means success.",
+      "explanation": "Iteration can end without the required terminal evidence. Inspect what arrived, not just whether the loop stopped."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "Debug this terminal result: what should the automatic check report?",
+    "code": "subtype = \"error_max_turns\"\nis_error = True\n# Assistant text arrived earlier.",
+    "options": [
+     {
+      "text": "Needs review: this is a failed terminal result.",
+      "explanation": "Correct. The terminal subtype is not success and is_error is true, even though assistant text arrived."
+     },
+     {
+      "text": "Passed: any ResultMessage is sufficient.",
+      "explanation": "ResultMessage also reports failures. Require subtype success and is_error false."
+     },
+     {
+      "text": "Automatically complete the lesson checklist.",
+      "explanation": "The automatic run check never replaces the student's separate manual review."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "Debug the rejected request: what ran?",
+    "code": "prompt = \"   \"\nmax_turns = 1\nmax_budget_usd = 0.05\n# Validation rejects the trimmed empty prompt.",
+    "options": [
+     {
+      "text": "Nothing: correct the prompt before starting a run.",
+      "explanation": "Correct. Host validation rejects this request before creating a run task, workspace or paid SDK call."
+     },
+     {
+      "text": "Claude ran and returned an empty answer.",
+      "explanation": "A validation rejection is not a model response. Inspect the rejected input before assuming a model ran."
+     },
+     {
+      "text": "Retry the same input with a larger budget.",
+      "explanation": "Budget cannot fix an empty prompt, and lesson 1 caps its threshold at 0.05 USD."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "Read the concept map: which arrows carry answer text and which carry outcome?",
+    "code": "# query()\n#   |\n#   +--> AssistantMessage --> TextBlock.text\n#   |\n#   +--> ResultMessage --> subtype, is_error, session_id, cost",
+    "options": [
+     {
+      "text": "TextBlock carries reply text; ResultMessage carries terminal outcome and accounting.",
+      "explanation": "Correct. These are distinct branches of the same stream; final accounting is not another text chunk."
+     },
+     {
+      "text": "ResultMessage is the only place to read reply text.",
+      "explanation": "The map explicitly routes assistant reply text through TextBlock inside AssistantMessage."
+     },
+     {
+      "text": "The two branches are separate paid calls.",
+      "explanation": "Both message types arrive while consuming a single query stream."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "Read the walkthrough: which path reaches a passing bounded check?",
+    "code": "# Validate prompt --> Consume messages --> Inspect final result\n#   success + is_error=False --> ?\n#   error / missing result   --> needs review",
+    "options": [
+     {
+      "text": "The success path passes; answer quality and manual review remain separate.",
+      "explanation": "Correct. The check covers terminal run evidence only. Quiz practice and reviewing the challenge do not call a model or complete a checklist."
+     },
+     {
+      "text": "All paths pass if the Run button was clicked.",
+      "explanation": "Clicking Run does not prove that the stream delivered successful terminal evidence."
+     },
+     {
+      "text": "The error path passes if its assistant text sounds correct.",
+      "explanation": "Prose quality cannot turn an error or missing terminal result into a successful run."
+     }
+    ],
+    "correct": 0
    }
   ],
-  "concept_code": "from claude_agent_sdk import (\n    AssistantMessage,\n    ClaudeAgentOptions,\n    ResultMessage,\n    TextBlock,\n    query,\n)\n\n\nasync def main() -> None:\n    options = ClaudeAgentOptions(max_turns=2, max_budget_usd=0.10)\n    async for message in query(\n        prompt=\"Explain what an agent loop is.\", options=options\n    ):\n        if isinstance(message, AssistantMessage):\n            for block in message.content:\n                if isinstance(block, TextBlock):\n                    print(block.text)\n        elif isinstance(message, ResultMessage):\n            # The last message: outcome and accounting, not more reply text.\n            print(message.subtype, message.session_id, message.total_cost_usd)",
-  "code_focus": "`async for message in query(prompt=..., options=...)` drives the run; the isinstance checks separate AssistantMessage TextBlock text from the final ResultMessage.",
+  "concept_code": "from contextlib import aclosing\nfrom claude_agent_sdk import (\n    AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, query,\n)\n\n\nasync def main() -> None:\n    options = ClaudeAgentOptions(\n        tools=[], setting_sources=[], strict_mcp_config=True,\n        max_turns=1, max_budget_usd=0.05,\n    )\n    terminal = None\n    stream = query(prompt=\"Explain what an agent loop is.\", options=options)\n    async with aclosing(stream):  # type: ignore[type-var]\n        async for message in stream:\n            if isinstance(message, AssistantMessage):\n                for block in message.content:\n                    if isinstance(block, TextBlock):\n                        print(block.text)\n            elif isinstance(message, ResultMessage):\n                terminal = message\n                print(message.subtype, message.is_error, message.total_cost_usd)\n    if terminal is None or terminal.subtype != \"success\" or terminal.is_error:\n        raise RuntimeError(\"No successful terminal result\")",
+  "code_focus": "query(prompt=..., options=...) creates the stream. async for consumes it inside aclosing, which closes it when leaving the block. The host also owns a deadline and cancellation. TextBlock text is separate from the terminal success check after the loop.",
   "concept_points": [
    {
     "title": "An async iterator",

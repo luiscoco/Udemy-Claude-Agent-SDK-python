@@ -92,7 +92,9 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     assert options.cwd == str(tmp_path / "work")
     assert "Bash" not in options.tools
     assert "Write" not in options.tools
-    assert options.max_budget_usd == 0.1
+    assert options.max_budget_usd == (0.05 if lesson_id == 1 else 0.1)
+    if lesson_id == 1:
+        assert options.max_turns == 1
     assert options.env["CLAUDE_CONFIG_DIR"] == str(tmp_path / "config")
     # The shared policy and audit hooks that the offline hook lessons exercise.
     assert set(options.hooks) == {"PreToolUse", "PostToolUse"} | (
@@ -100,7 +102,7 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
     )
     # Pre-approving tools would skip can_use_tool; the PreToolUse hook decides instead.
     assert options.allowed_tools == []
-    assert events[-1].kind == "result"
+    assert events[-1].kind == ("evidence" if lesson_id == 1 else "result")
 
 
 async def test_missing_live_credential_fails_before_client_connect(tmp_path, monkeypatch):
@@ -132,8 +134,14 @@ async def test_openai_key_is_rejected_before_sdk_starts(tmp_path, monkeypatch):
 
     with pytest.raises(PermissionError, match="OpenAI-style key"):
         await run_sdk(
-            LESSONS[1], RunRequest(mode="live"), tmp_path, tmp_path / "config",
-            Settings(enable_live=True), {}, callback, callback,
+            LESSONS[1],
+            RunRequest(mode="live"),
+            tmp_path,
+            tmp_path / "config",
+            Settings(enable_live=True),
+            {},
+            callback,
+            callback,
         )
 
 
@@ -175,8 +183,14 @@ async def test_401_stops_stream_and_closes_sdk_connection(tmp_path, monkeypatch,
 
     with pytest.raises(PermissionError, match="HTTP 401"):
         await run_sdk(
-            LESSONS[lesson_id], RunRequest(mode="live"), tmp_path, tmp_path / "config",
-            Settings(enable_live=True), {}, callback, callback,
+            LESSONS[lesson_id],
+            RunRequest(mode="live"),
+            tmp_path,
+            tmp_path / "config",
+            Settings(enable_live=True),
+            {},
+            callback,
+            callback,
         )
     assert closed == [True]
 
@@ -204,7 +218,7 @@ def test_failed_result_explains_its_subtype(subtype, expected):
 
 
 def test_lessons_that_need_more_room_have_live_defaults():
-    assert LESSONS[1].max_turns == 4 and LESSONS[1].max_budget_usd == 0.10
+    assert LESSONS[1].max_turns == 1 and LESSONS[1].max_budget_usd == 0.05
     assert LESSONS[16].max_turns == 8
     assert LESSONS[32].max_turns == 12
     assert LESSONS[75].max_budget_usd == 0.50

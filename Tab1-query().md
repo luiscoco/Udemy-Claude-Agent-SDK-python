@@ -23,30 +23,33 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
+from contextlib import aclosing
 from claude_agent_sdk import (
-    AssistantMessage,
-    ClaudeAgentOptions,
-    ResultMessage,
-    TextBlock,
-    query,
+    AssistantMessage, ClaudeAgentOptions, ResultMessage, TextBlock, query,
 )
 
 
 async def main() -> None:
-    options = ClaudeAgentOptions(max_turns=2, max_budget_usd=0.10)
-    async for message in query(
-        prompt="Explain what an agent loop is.", options=options
-    ):
-        if isinstance(message, AssistantMessage):
-            for block in message.content:
-                if isinstance(block, TextBlock):
-                    print(block.text)
-        elif isinstance(message, ResultMessage):
-            # The last message: outcome and accounting, not more reply text.
-            print(message.subtype, message.session_id, message.total_cost_usd)
+    options = ClaudeAgentOptions(
+        tools=[], setting_sources=[], strict_mcp_config=True,
+        max_turns=1, max_budget_usd=0.05,
+    )
+    terminal = None
+    stream = query(prompt="Explain what an agent loop is.", options=options)
+    async with aclosing(stream):  # type: ignore[type-var]
+        async for message in stream:
+            if isinstance(message, AssistantMessage):
+                for block in message.content:
+                    if isinstance(block, TextBlock):
+                        print(block.text)
+            elif isinstance(message, ResultMessage):
+                terminal = message
+                print(message.subtype, message.is_error, message.total_cost_usd)
+    if terminal is None or terminal.subtype != "success" or terminal.is_error:
+        raise RuntimeError("No successful terminal result")
 ```
 
-`async for message in query(prompt=..., options=...)` drives the run; the isinstance checks separate AssistantMessage TextBlock text from the final ResultMessage.
+query(prompt=..., options=...) creates the stream. async for consumes it inside aclosing, which closes it when leaving the block. The host also owns a deadline and cancellation. TextBlock text is separate from the terminal success check after the loop.
 
 ## How the offline lab checks it
 

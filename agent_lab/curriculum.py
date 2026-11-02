@@ -643,6 +643,7 @@ ADAPTATIONS = {
 
 # Live runs that need more than the default 4 turns or 0.10 USD to finish.
 LIVE_LIMITS: dict[int, dict[str, Any]] = {
+    1: {"max_turns": 1, "max_budget_usd": 0.05},
     16: {"max_turns": 8},
     32: {"max_turns": 12},
     # Six structured agent calls, each capped at a tenth of the threshold.

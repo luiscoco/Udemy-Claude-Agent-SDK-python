@@ -758,6 +758,49 @@ def guide_browser_context(server):
         browser.close()
 
 
+@pytest.mark.parametrize("phone", [False, True], ids=["desktop", "phone"])
+def test_browser_query_scenarios_assessment_save_and_resume(server, guide_browser_context, phone):
+    from playwright.sync_api import expect
+
+    from agent_lab.ui_learning import REVIEW_ITEMS
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390 if phone else 1440, "height": 844 if phone else 1000})
+    try:
+        page = context.new_page()
+        page.goto(base + "/?lesson=1")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Run the exercise").click()
+        expect(page.get_by_label("Maximum turns", exact=True)).to_have_value("1")
+        expect(page.get_by_label("Budget threshold (USD)", exact=True)).to_have_value("0.05")
+        for option, passed in [("Success", True), ("SDK error", False), ("Missing final result", False)]:
+            page.get_by_label("Recorded scenario", exact=True).click()
+            page.get_by_role("option", name=option, exact=True).click()
+            page.get_by_role("button", name="Run exercise", exact=True).click()
+            expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=15000)
+            expect(page.get_by_role("button", name="Run exercise", exact=True)).to_be_enabled()
+            expect(page.get_by_role("button", name="Cancel", exact=True)).to_be_disabled()
+            expect(page.get_by_text("Check passed" if passed else "Needs review", exact=True)).to_be_visible()
+            expect(page.locator(".guide-evidence-target").get_by_text({"Success": "success", "SDK error": "error", "Missing final result": "missing-result"}[option], exact=True).first).to_be_visible()
+            expect(page.locator(".guide-evidence-target")).to_contain_text("Recorded test text")
+        page.screenshot(path=str(data / f"query-scenarios-{'phone' if phone else 'desktop'}.png"), full_page=True)
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.get_by_role("tab", name="Learn").click()
+        question = page.locator(".quiz-question").nth(2)
+        question.get_by_role("radio").first.click()
+        expect(question.locator(".feedback-ok")).to_be_visible()
+        page.get_by_label("Your explanation and evidence", exact=True).fill("Text alone does not prove success; inspect the terminal result.")
+        page.get_by_role("button", name="Save attempt", exact=True).click()
+        page.reload()
+        expect(page.locator(".quiz-question").nth(2).get_by_role("radio").first).to_be_checked()
+        expect(page.get_by_label("Your explanation and evidence", exact=True)).to_have_value("Text alone does not prove success; inspect the terminal result.")
+        expect(page.get_by_text("1 saved attempts", exact=False)).to_be_visible()
+        for label in REVIEW_ITEMS:
+            expect(page.get_by_role("checkbox", name=label, exact=True)).not_to_be_checked()
+    finally:
+        context.close()
+
+
 @pytest.mark.parametrize("lesson_id", range(2, 76))
 def test_browser_remaining_learning_guides_frame_all_seven_targets(server, guide_browser_context, lesson_id):
     from playwright.sync_api import expect

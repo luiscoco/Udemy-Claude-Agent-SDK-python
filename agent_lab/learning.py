@@ -86,7 +86,7 @@ class LessonGuide(Strict):
     hints: list[str] = Field(min_length=2, max_length=2)
     reference: str
     recovery: list[str] = Field(min_length=1)
-    quiz: list[Question] = Field(min_length=2, max_length=3)
+    quiz: list[Question] = Field(min_length=2, max_length=7)
     # The lesson's concept as real SDK code: shown in Learn, Python source and the infographic.
     concept_code: str = Field(min_length=1)
     code_focus: str = Field(min_length=1)
@@ -207,7 +207,9 @@ def tour_problems(lesson_id: int) -> list[str]:
     count, problems, last = len(code.replace("\r\n", "\n").split("\n")), [], 0
     for section in tour.sections:
         if not last < section.start <= section.end <= count:
-            problems.append(f"{section.title}: lines {section.start}-{section.end} are out of order")
+            problems.append(
+                f"{section.title}: lines {section.start}-{section.end} are out of order"
+            )
         last = section.end
     return problems
 
@@ -241,6 +243,11 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 1 and evidence.get("successful_result") is not True:
+        return CheckResult(
+            status="needs-review",
+            detail="A final successful SDK result was not established. Inspect the terminal subtype and is_error; assistant text alone does not prove success. The recorded error and missing-result scenarios intentionally need review.",
+        )
     failures = []
     for check in guide(lesson_id).evidence_checks:
         if check.key not in evidence:
@@ -251,6 +258,12 @@ def check_evidence(
             failures.append(f"`{check.key}` is {evidence[check.key]!r}, expected {check.value!r}")
     if failures:
         return CheckResult(status="needs-review", detail="; ".join(failures) + ".")
+    if lesson_id == 1:
+        return CheckResult(
+            status="passed",
+            detail=("The live SDK stream" if mode == "live" else "The recorded fixture stream")
+            + " ended with a final result/success and is_error false. This checks the run outcome, not answer quality or your manual review.",
+        )
     if mode == "live" and not responded:
         return CheckResult(
             status="needs-review",

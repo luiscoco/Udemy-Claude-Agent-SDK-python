@@ -1,30 +1,30 @@
 {
  "1": {
-  "source_sha256": "a0c32e5a6f8aded3524634a05d6ed10a25ef7f96a3cab8ea06530fb89c776a26",
+  "source_sha256": "8e08faec06e438883f986de067c380f63380fd850a64d639de3141efcfaa84c4",
   "sections": [
    {
     "title": "The message types we need",
     "start": 1,
-    "end": 7,
-    "text": "We import query, the options class, and the three message and block types we will tell apart. AssistantMessage and TextBlock carry the reply, while ResultMessage carries the outcome of the whole run."
+    "end": 4,
+    "text": "Import the SDK stream and the message types we distinguish. The aclosing context closes the async generator on exit, including exceptions and cancellation."
    },
    {
     "title": "Options and the async loop",
-    "start": 11,
-    "end": 14,
-    "text": "The options cap the run at two turns and ten cents. Calling query returns an async iterator, and nothing happens until the async for loop starts pulling messages from it, one at a time as the agent produces them."
+    "start": 8,
+    "end": 15,
+    "text": "Use one turn, a five-cent budget threshold, no tools and no inherited settings. query returns the stream; async for consumes it inside the closing context. These limits do not evaluate answer quality."
    },
    {
     "title": "Reading reply text from blocks",
-    "start": 15,
-    "end": 18,
-    "text": "An AssistantMessage holds a list of content blocks, and only the TextBlock items contain reply text, so we check each block before printing. When this runs you should see the explanation of an agent loop appear here."
+    "start": 16,
+    "end": 19,
+    "text": "AssistantMessage contains blocks. Only TextBlock items contain the reply text printed here. Text alone can precede a failure, so it does not establish successful completion."
    },
    {
     "title": "The final ResultMessage",
-    "start": 19,
-    "end": 21,
-    "text": "The last message is a ResultMessage, and it is a summary rather than more reply text. Its subtype, session_id and total_cost_usd tell you how the run ended, which session it was, and what it cost."
+    "start": 20,
+    "end": 24,
+    "text": "Keep the final ResultMessage, show its outcome and cost, and require subtype success with is_error false. If it is missing or failed, raise an error. The host additionally checks session correlation and owns the run deadline."
    }
   ]
  },

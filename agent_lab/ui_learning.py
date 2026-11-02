@@ -486,7 +486,7 @@ def run_summary(state: Any, check: CheckResult) -> str:
         parts.append("Claude's answer: " + state.response_texts[-1][:1500])
     if state.evidence is not None:
         evidence = json.dumps(redact(state.evidence), default=str, ensure_ascii=False)
-        parts.append("Local evidence: " + evidence[:3000])
+        parts.append("Exercise evidence: " + evidence[:3000])
     return "\n".join(parts)[:6000]
 
 
@@ -505,6 +505,8 @@ def check_card(lesson_id: int, result: CheckResult | None) -> None:
             ui.label("Check passed" if passed else "Needs review").classes("font-bold")
         ui.markdown(result.detail)
         ui.label(
+            "The automatic check covers the stream outcome only. Your own review in the Learn tab stays separate."
+            if lesson_id == 1 else
             "The automatic check covers local evidence only. Your own review in the Learn tab stays separate."
         ).classes("text-xs text-slate-500")
 
