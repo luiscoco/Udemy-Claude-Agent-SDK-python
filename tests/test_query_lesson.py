@@ -14,6 +14,31 @@ from agent_lab.models import LessonError, RunRequest, lesson_request
 from agent_lab.runtime import RunService
 
 
+@pytest.mark.parametrize("lesson_id", [1, 58])
+def test_cli_preserves_other_lessons_offline_prompt_defaults(monkeypatch, lesson_id):
+    import sys
+
+    from agent_lab import cli
+    from agent_lab.curriculum import LESSONS
+
+    captured = []
+
+    async def run(number, request):
+        captured.append((number, request))
+        return 0
+
+    monkeypatch.setattr(cli, "run_lesson", run)
+    monkeypatch.setattr(sys, "argv", ["agent-lab", "lesson", str(lesson_id)])
+    with pytest.raises(SystemExit) as exit_info:
+        cli.main()
+    assert exit_info.value.code == 0
+    number, request = captured[0]
+    assert number == lesson_id
+    assert request.prompt == (LESSONS[1].prompt if lesson_id == 1 else "")
+    assert request.max_turns == LESSONS[lesson_id].max_turns
+    assert request.max_budget_usd == LESSONS[lesson_id].max_budget_usd
+
+
 @pytest.mark.parametrize("scenario,passed", [("success", True), ("error", False), ("missing-result", False)])
 async def test_recorded_scenarios_distinguish_text_from_terminal_success(tmp_path, scenario, passed):
     service = RunService(Settings(data_dir=tmp_path))

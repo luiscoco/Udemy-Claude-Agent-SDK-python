@@ -608,7 +608,7 @@ def test_browser_written_guide_preserves_work_and_only_changes_tour_position(ser
             expect(panel.locator(".learning-guide-step")).to_be_focused()
             assert_guide_target_fits(page)
             if section.id in {"example", "source"}:
-                expect(target.locator("code")).to_contain_text("async for message in query")
+                expect(target.locator("code")).to_contain_text(guide(1).concept_code)
                 assert target.evaluate("e => e.scrollHeight > e.clientHeight")
             assert target.bounding_box()["height"] < 350  # Small teaching target, not a whole card.
         page.get_by_role("tab", name="AI Tutor", exact=True).click()

@@ -111,7 +111,7 @@ def main() -> None:
                         mode="live" if arguments.live else "offline",
                         prompt=arguments.prompt
                         if arguments.prompt is not None
-                        else LESSONS[arguments.id].prompt,
+                        else LESSONS[arguments.id].prompt if arguments.id == 1 else "",
                         scenario=arguments.scenario,
                         max_turns=LESSONS[arguments.id].max_turns,
                         max_budget_usd=LESSONS[arguments.id].max_budget_usd,

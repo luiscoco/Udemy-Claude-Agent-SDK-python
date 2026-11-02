@@ -2526,6 +2526,9 @@ def exercise_location(name: str) -> tuple[str, int, int]:
 
 def exercise_uses(name: str, field: str) -> bool:
     """Whether an offline exercise reads a request field, so the UI can enable its input."""
+    # The testing alias reuses the producer but ignores lesson 1's student inputs.
+    if name == "testing":
+        return False
     return f"request.{field}" in exercise_source(name)
 
 
