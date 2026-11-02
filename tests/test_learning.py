@@ -797,6 +797,10 @@ def test_browser_query_scenarios_assessment_save_and_resume(server, guide_browse
         expect(page.get_by_text("1 saved attempts", exact=False)).to_be_visible()
         for label in REVIEW_ITEMS:
             expect(page.get_by_role("checkbox", name=label, exact=True)).not_to_be_checked()
+        page.goto(base + "/?lesson=51")
+        page.get_by_role("tab", name="Run the exercise").click()
+        expect(page.get_by_label("Agent prompt (live mode)", exact=True)).to_be_disabled()
+        expect(page.get_by_label("Recorded scenario", exact=True)).not_to_be_visible()
     finally:
         context.close()
 

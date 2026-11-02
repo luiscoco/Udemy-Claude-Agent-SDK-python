@@ -184,6 +184,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         # Empty means "use the example": live runs fall back to the lesson
                         # prompt, and offline exercises see only what the student typed.
                         offline_prompt = exercise_uses(current.exercise, "prompt")
+                        # Lesson 51 shares the recorded producer, but only lesson 1 uses its prompt.
+                        if lesson == 51:
+                            offline_prompt = False
                         offline_prompt = offline_prompt or lesson == 1
                         offline_follow_up = exercise_uses(current.exercise, "follow_up")
                         prompt = (
