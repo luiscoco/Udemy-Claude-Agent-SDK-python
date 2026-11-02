@@ -43,7 +43,7 @@ def usage_session_controls(registry: UsageSessions, client: Any, read_request: A
         ).classes("text-sm text-slate-600")
         prompt = (
             ui.textarea("Meter message", value="Explain cumulative usage briefly.")
-            .props("outlined rows=3 autogrow maxlength=10000")
+            .props("outlined rows=3 maxlength=10000")
             .classes("w-full")
         )
         consent = ui.checkbox(
