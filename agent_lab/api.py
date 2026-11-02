@@ -39,6 +39,9 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     from agent_lab.mcp_lab import McpWorkshops
 
     mcp_workshops = McpWorkshops(runner.settings)
+    from agent_lab.api_thinking import ThinkingSessions, install_thinking_routes
+
+    thinking_sessions = ThinkingSessions(runner)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -46,6 +49,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
         await streams.close()
         await runner.close()
         await mcp_workshops.close()
+        await thinking_sessions.close()
 
     app = FastAPI(title="Python Claude Agent SDK Lab", lifespan=lifespan)
     app.state.runner = runner
@@ -53,6 +57,8 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     install_stream_routes(app, streams)
     app.state.mcp_workshops = mcp_workshops
     install_mcp_routes(app, runner, mcp_workshops)
+    app.state.thinking_sessions = thinking_sessions
+    install_thinking_routes(app, thinking_sessions)
     tutor = app.state.tutor = TutorService(runner.settings)
 
     @app.get("/api/health")

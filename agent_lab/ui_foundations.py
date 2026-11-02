@@ -288,6 +288,88 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
                 "Offline uses real owned MCP transports with recorded agent identities. Live uses actual SDK status, lifecycle controls and tool events. Configuration alone never passes the check. Agent reservations are limited to one authorized write per run."
             ).classes("text-sm text-slate-600")
 
+        elif lesson == 14:
+            values["model"] = (
+                ui.input("Model (blank = configured model)")
+                .props("outlined maxlength=100")
+                .classes("w-full")
+            )
+            select(
+                "thinking",
+                "Thinking mode",
+                {"disabled": "Disabled", "adaptive": "Adaptive", "enabled": "Enabled with budget"},
+                "adaptive",
+            )
+            effort_choices = {
+                "omitted": "Omitted",
+                "low": "Low",
+                "medium": "Medium",
+                "high": "High",
+                "xhigh": "Extra high",
+                "max": "Maximum",
+            }
+            select("effort", "Requested effort", effort_choices, "medium")
+            values["budget_tokens"] = (
+                ui.number(
+                    "Budget tokens (enabled lanes only)",
+                    value=4000,
+                    min=1024,
+                    max=16384,
+                    precision=0,
+                )
+                .props("outlined")
+                .classes("w-full")
+            )
+            select(
+                "display",
+                "Thinking display (ignored when disabled)",
+                {"default": "SDK default", "summarized": "Summarized", "omitted": "Omitted"},
+                "default",
+            )
+            select(
+                "comparison",
+                "Comparison setting",
+                {
+                    "none": "Single lane",
+                    "effort": "Change effort only",
+                    "model": "Change model only",
+                    "thinking": "Change thinking only",
+                },
+                "none",
+            )
+            select("comparison_effort", "Comparison effort", effort_choices, "high")
+            values["comparison_effort"].bind_enabled_from(
+                values["comparison"], "value", lambda v: v == "effort"
+            )
+            values["comparison_model"] = (
+                ui.input("Comparison model", value="sonnet")
+                .props("outlined maxlength=100")
+                .classes("w-full")
+            )
+            values["comparison_model"].bind_enabled_from(
+                values["comparison"], "value", lambda v: v == "model"
+            )
+            select(
+                "comparison_thinking",
+                "Comparison thinking",
+                {"disabled": "Disabled", "adaptive": "Adaptive", "enabled": "Enabled with budget"},
+                "disabled",
+            )
+            values["comparison_thinking"].bind_enabled_from(
+                values["comparison"], "value", lambda v: v == "thinking"
+            )
+            tick(
+                "authorize_comparison",
+                "I authorize both paid lanes; the budget threshold applies to each lane separately.",
+                False,
+            )
+            values["authorize_comparison"].bind_visibility_from(
+                mode, "value", lambda v: v == "live"
+            )
+            ui.label(
+                "The same prompt is sent to fresh connections. Valid SDK shapes do not prove model support. Stop observations may differ from requested effort; that alone does not establish fallback. Offline model latency and usage remain unknown."
+            ).classes("text-sm text-slate-600")
+
     def read() -> dict[str, Any]:
         if mode.value == "live" and lesson in {5, 10}:
             return {}  # Offline-only drafts must not become live tool arguments.
@@ -309,6 +391,14 @@ def experiment_controls(lesson: int, mode: Any) -> Callable[[], dict[str, Any]]:
             if result["quantity"] != int(result["quantity"]):
                 raise ValueError("Choose a whole reservation quantity.")
             result["quantity"] = int(result["quantity"])
+        if lesson == 14:
+            result["model"] = (result["model"] or "").strip() or None
+            for key in ("effort", "comparison_effort"):
+                if result[key] == "omitted":
+                    result[key] = None
+            if result["budget_tokens"] != int(result["budget_tokens"]):
+                raise ValueError("Choose a whole thinking-token budget.")
+            result["budget_tokens"] = int(result["budget_tokens"])
         return result
 
     return read

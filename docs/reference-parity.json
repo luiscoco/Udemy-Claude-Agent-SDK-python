@@ -49,8 +49,8 @@
   {
    "id": "assessment-and-workbook",
    "status": "partial",
-   "python": "Seven explained questions per lesson for lessons 1-13, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
-   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 14-20; keep shared navigation, media and runtime adaptations separately tracked."
+   "python": "Seven explained questions per lesson for lessons 1-14, with original answer positions preserved. Other lessons retain 2-3 questions. Four manual checks, notes, hints and saved explanations remain separate.",
+   "next": "Extend individually reviewed controls, evidence scenarios and assessments to lessons 15-20; keep shared navigation, media and runtime adaptations separately tracked."
   },
   {
    "id": "progress",
@@ -311,14 +311,14 @@
    "title": "Thinking, effort and models",
    "exercise": "thinking",
    "live_profile": "thinking",
-   "adaptation": "",
+   "adaptation": "The installed Python SDK exposes thinking/effort as query options. Draft edits apply to the next fresh run; they are not live CLI mutations. Offline callbacks use recorded SDK payloads and leave model metrics unknown. Model discovery reads initialization metadata without a user prompt.",
    "python_line": 163,
    "reference_contract": "docs/prompts/l14-lesson-14-thinking-effort-models.md",
    "reference_blob_sha": "d53d8a112864683008ed3ce1d2116acdde52e450",
    "foundation_component": "src/concepts/Concept14ThinkingEffortModels.tsx",
    "reference_parity": "not-certified",
    "written_guide": "written",
-   "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+   "gap": "One/two fresh comparison lanes, exact prompt reuse, typed thinking/effort/display controls, actual Stop observation checks, unknown-safe metrics, prompt-free CLI metadata, scoped draft/run routes, three source excerpts and seven questions are implemented. Native live thinking/effort mutation, paid account/model acceptance, authored media and full reference certification remain pending.",
    "written_guide_content": "lesson-content"
   },
   {

@@ -2675,11 +2675,12 @@
   "prerequisites": [
    2
   ],
-  "concept_brief": "Python configures reasoning with `thinking` (a `ThinkingConfigAdaptive`, `ThinkingConfigEnabled` with `budget_tokens`, or `ThinkingConfigDisabled`) and `effort` (`low` to `max`). Names from other SDKs, such as `maxThinkingTokens`, are not Python options.",
-  "lab_brief": "The `thinking` exercise reads the real types of `thinking` and `effort` from the installed SDK, builds `ClaudeAgentOptions` with each thinking configuration, shows that three foreign option names are rejected, and reports the live profile's settings.",
+  "concept_brief": "Model, thinking mode and effort are requested settings, not proof of applied behavior. Compare disabled, adaptive and enabled-with-budget shapes while keeping the user prompt fixed. A Stop callback may report effort or leave it unknown. Concept-map brief: draw requested model/thinking/effort -> fresh SDK lane -> public answer and terminal metrics, with Stop observations on a separate identity-correlated lane. Keep hidden reasoning and fallback outside the measured boundary.",
+  "lab_brief": "Use one lane or change only effort, model or thinking in a second fresh lane. Offline constructs real SDK options and executes the registered host Stop callback with explicitly recorded payloads; model latency, usage and cost stay unknown. Live uses actual SDK streams and Stop callbacks. The optional metadata inspector starts a CLI without a user prompt and reports initialization metadata separately from model access. Lab-walkthrough brief: show A/B requested settings, identical prompt hashes, Stop effort, terminal status and unknown/observed metrics, then a separate prompt-free metadata panel.",
   "preparation": [
    "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 14 (or run `uv run agent-lab lesson 14`).",
-   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run uses adaptive thinking at medium effort."
+   "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live run uses adaptive thinking at medium effort.",
+   "Begin offline with a single lane. For a comparison, select exactly one changing setting; identical lanes are rejected. Live two-lane comparisons require explicit authorization and apply the budget threshold separately to each lane."
   ],
   "steps": [
    {
@@ -2688,47 +2689,41 @@
    },
    {
     "title": "Prepare your exercise",
-    "text": "Read `thinking` in the source and `THINKING_PROFILE` in `agent_lab/sdk.py`."
+    "text": "Inspect Requested SDK options, Actual Stop observer and Observed evidence and unknown metrics in Python source. Budget tokens are sent only with enabled thinking; display is omitted for disabled thinking."
    },
    {
     "title": "Run one example",
-    "text": "Run the offline exercise."
+    "text": "Run the default offline lane, then choose Change effort only. Keep the question fixed. Offline callback payloads and terminal outcomes are recorded examples, not measured model behavior; the public cards leave model latency and usage Unknown."
    },
    {
     "title": "Verify the evidence",
-    "text": "Check `effort_values`, each row of `configs` and `foreign_option_names`."
+    "text": "Compare requested options with observed Stop effort, session/run/prompt identity and successful terminal completion. Unknown effort is not zero. A requested setting or differing reported model name does not establish applied behavior or a fallback."
    },
    {
     "title": "Try the challenge",
-    "text": "Let the type checker catch a bad value."
+    "text": "Change effort while keeping prompt, model and thinking fixed. Review answer quality yourself for an explicitly authorized live comparison. Inspect model metadata separately; it submits no prompt and cannot certify access or success."
    }
   ],
-  "inspect": "`thinking_type`, `effort_values`, the `configs` table, `foreign_option_names` and `live_profile`.",
-  "expected": "`effort_values` is low, medium, high, xhigh and max. The three configs build (`adaptive`, `enabled` with `budget_tokens` 4000, `disabled`). `maxThinkingTokens`, `thinkingBudget` and `reasoningEffort` are all rejected. `live_profile` is adaptive thinking at medium effort.",
-  "evidence_criterion": "The check confirms all three thinking configurations built and no foreign option name was accepted.",
+  "inspect": "Inspect experiment.lanes: requested options, prompt_sha256, reported_models, stop_observations, terminal_results, metrics and connection_closed. Each lane has its own request/connection. Model metadata is initialization evidence, separate from successful prompt and Stop observations.",
+  "expected": "The passing offline fixture has a Stop effort observation matched to its recorded parent identity and a successful recorded terminal outcome. SDK model metrics remain Unknown. Missing callback/effort, wrong identity, recorded unsupported/model-access errors and interrupted fixtures need review. Live failures stop subsequent lanes; no host fallback or paid retry is made.",
+  "evidence_criterion": "Each planned lane needs a Stop effort observation matching its parent identity, successful terminal completion and a closed connection. Hidden reasoning, fallback, general compatibility and answer quality are not measured.",
   "evidence_checks": [
    {
-    "key": "configs",
-    "rule": "truthy"
-   },
-   {
-    "key": "foreign_option_names",
-    "rule": "truthy"
-   },
-   {
-    "key": "effort_values",
+    "key": "experiment_passed",
     "rule": "truthy"
    }
   ],
-  "challenge": "Add `ClaudeAgentOptions(effort=\"extreme\")` to `thinking` and run the lesson: it still runs. Then run `uv run mypy agent_lab` and read the error. Remove the line afterwards.",
+  "challenge": "Choose Change effort only and compare medium with high under the same prompt, model and thinking mode. Explain what was requested, what the Stop hook observed and what remains unknown. For live use, explicitly authorize both lanes; judge public answer quality separately from the automatic check.",
   "hints": [
-   "`ClaudeAgentOptions` is a dataclass, which does not check values at runtime.",
-   "The type checker knows `effort` is a Literal of five values, so mypy reports the invalid `extreme` before it ever reaches a live run."
+   "The comparison selector changes one dimension. Other requested settings and the exact prompt remain fixed; two identical lanes are rejected before a task starts.",
+   "Inspect Stop observation identity and observed_effort, then the terminal subtype and closure. A null observation or missing usage counter is Unknown, never a measured zero. A lower observed level does not by itself establish fallback."
   ],
-  "reference": "Read options from the SDK you have installed, not from another language's documentation. Wrong names fail immediately with TypeError; wrong values pass at runtime and are caught by the type checker, which is why the lab runs mypy in CI.",
+  "reference": "The host maps disabled thinking to a type-only shape, adaptive to adaptive plus optional display, and enabled to a budget plus optional display. It validates inputs before starting a task. Each comparison lane uses a fresh SDK client with the exact same prompt; it does not claim conversation continuation. Stop records parent/session/prompt identity and observed effort while ignoring private reasoning. Offline invokes the actual registered callback with a recorded payload and keeps model metrics unknown. Live requires real callback/terminal evidence; reported effort need not equal requested effort. Missing effort does not become zero, and aliases or differing reported model names do not prove fallback. Metadata inspection connects without a user prompt, reads initialization models and closes/cleans up; it establishes neither account access nor successful generation. Draft API edits apply to the next fresh run because this installed SDK exposes thinking and effort as query options, not public live mutation methods.",
   "recovery": [
    "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+   "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials.",
+   "If a live model or option combination is rejected, inspect its terminal error. No later lane, host fallback or automatic paid retry is started. Metadata can be missing or unavailable; the configured model remains unverified until an actual run establishes success.",
+   "If the Stop hook ran without effort, inspect the Unknown observation rather than inventing a level. Cancel ends the owned run and cannot pass the completion criterion."
   ],
   "quiz": [
    {
@@ -2736,7 +2731,7 @@
     "options": [
      {
       "text": "thinking=ThinkingConfigEnabled(type=\"enabled\", budget_tokens=4000)",
-      "explanation": "Correct."
+      "explanation": "Correct. The enabled thinking shape includes a fixed budget; adaptive and disabled shapes do not send that field."
      },
      {
       "text": "maxThinkingTokens=4000",
@@ -2757,8 +2752,8 @@
       "explanation": "extreme is not an allowed effort level."
      },
      {
-      "text": "The type checker, because effort is a Literal.",
-      "explanation": "Correct. Run mypy before shipping."
+      "text": "The type checker for SDK calls, and this lab's strict schema for runtime inputs.",
+      "explanation": "Correct. SDK annotations help static checking; the host must also reject invalid user-supplied levels before creating a paid task."
      },
      {
       "text": "The model, during the first turn.",
@@ -2766,10 +2761,80 @@
      }
     ],
     "correct": 1
+   },
+   {
+    "prompt": "The host requested high effort but Stop reports low. What does that establish?",
+    "options": [
+     {
+      "text": "An observed level under this parent identity; compare it without inventing fallback.",
+      "explanation": "Correct. Requested settings and observed effort differ, but that alone does not establish fallback or hidden reasoning."
+     },
+     {
+      "text": "Proof the host silently retried with another model.",
+      "explanation": "No retry or fallback can be inferred from one effort observation."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "Stop runs without an effort field and the result succeeds. How should the level be displayed?",
+    "options": [
+     {
+      "text": "As zero effort.",
+      "explanation": "Missing metadata is not a measured zero."
+     },
+     {
+      "text": "Unknown; the effort-observation criterion needs review.",
+      "explanation": "Correct. Callback execution is visible, but it does not supply a known effort level."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "The first live lane fails with a model-access error. What should the host do?",
+    "options": [
+     {
+      "text": "Stop the comparison, preserve the failure and close the connection.",
+      "explanation": "Correct. No later lane, host fallback or automatic paid retry is started."
+     },
+     {
+      "text": "Silently choose another model and mark the first lane successful.",
+      "explanation": "That would hide the failure and create an unobserved fallback claim."
+     }
+    ],
+    "correct": 0
+   },
+   {
+    "prompt": "In the comparison view, which relationship makes an effort comparison interpretable?",
+    "options": [
+     {
+      "text": "Different prompts, models and thinking modes in every lane.",
+      "explanation": "Changing all dimensions hides what was compared."
+     },
+     {
+      "text": "The exact prompt and other settings remain fixed while effort changes.",
+      "explanation": "Correct. The host freezes the prompt and varies only the selected dimension; answer quality still needs manual review."
+     }
+    ],
+    "correct": 1
+   },
+   {
+    "prompt": "The metadata panel lists a model from CLI initialization. What does that prove?",
+    "options": [
+     {
+      "text": "Runtime metadata only, not account access or successful generation.",
+      "explanation": "Correct. The probe sends no user prompt and cannot certify a later model request."
+     },
+     {
+      "text": "A paid prompt and model fallback already succeeded.",
+      "explanation": "No prompt was sent, and metadata cannot establish fallback."
+     }
+    ],
+    "correct": 0
    }
   ],
   "concept_code": "from claude_agent_sdk import (\n    AssistantMessage,\n    ClaudeAgentOptions,\n    TextBlock,\n    ThinkingBlock,\n    ThinkingConfigAdaptive,\n    ThinkingConfigEnabled,\n    query,\n)\n\nadaptive: ThinkingConfigAdaptive = {\"type\": \"adaptive\"}\nfixed_budget: ThinkingConfigEnabled = {\"type\": \"enabled\", \"budget_tokens\": 4000}\n\n\nasync def main(model: str) -> None:\n    options = ClaudeAgentOptions(model=model, thinking=adaptive, effort=\"medium\")\n    async for message in query(\n        prompt=\"When is more reasoning effort useful?\", options=options\n    ):\n        if isinstance(message, AssistantMessage):\n            for block in message.content:\n                if isinstance(block, ThinkingBlock):\n                    print(\"thinking:\", len(block.thinking), \"chars\")\n                elif isinstance(block, TextBlock):\n                    print(block.text)",
-  "code_focus": "`thinking=adaptive` with `effort=\"medium\"` configures reasoning, `ThinkingConfigEnabled` shows the fixed `budget_tokens` alternative, and `ThinkingBlock` is how reasoning arrives.",
+  "code_focus": "The compact concept example shows the supported thinking shapes. The expanded comparison in agent_lab/thinking.py creates fresh lanes, records actual Stop observations and keeps unknown metrics distinct; inspect its three exact excerpts below the separate standard example.",
   "concept_points": [
    {
     "title": "Typed thinking configs",
@@ -2780,13 +2845,13 @@
     "text": "effort ranges from low to max and works with adaptive thinking to trade latency and cost for reasoning."
    },
    {
-    "title": "Model is separate",
-    "text": "model selects which Claude model runs; thinking and effort tune how hard that model reasons."
+    "title": "Observe, do not infer",
+    "text": "A Stop callback may report effort or leave it unknown. Match its parent identity and inspect terminal results; do not infer hidden reasoning or fallback."
    }
   ],
   "misconception": {
-   "claim": "You can set maxThinkingTokens in ClaudeAgentOptions as in other languages' SDKs.",
-   "correction": "Python uses `snake_case` typed fields: thinking (with `budget_tokens`) and effort. Option names from other languages' SDKs are not Python options."
+   "claim": "Selecting a model and effort proves those settings were applied and reveals how the model reasoned.",
+   "correction": "Inspect requested options, Stop metadata, reported models and terminal results separately. Unknown fields, aliases and effort differences do not establish hidden reasoning or fallback."
   }
  },
  {

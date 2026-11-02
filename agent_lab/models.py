@@ -59,7 +59,7 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
     """Validate before creating a task; omitted fields get the lesson's defaults."""
     data = value.model_dump(exclude_unset=True) if isinstance(value, RunRequest) else value
     parsed: RunRequest
-    if 2 <= lesson_id <= 13:
+    if 2 <= lesson_id <= 14:
         from agent_lab.curriculum import get_lesson
         from agent_lab.foundation_models import SCENARIOS, inputs
 
@@ -67,6 +67,8 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
         data.setdefault("prompt", get_lesson(lesson_id).prompt)
         parsed = FoundationRunRequest.model_validate(data)
         parsed.lesson_options = inputs(lesson_id, parsed.lesson_options).model_dump()
+        if lesson_id == 14 and parsed.mode == "live" and parsed.lesson_options["comparison"] != "none" and not parsed.lesson_options["authorize_comparison"]:
+            raise LessonError("Authorize both paid comparison lanes explicitly, or choose a single lane.")
         if parsed.scenario not in SCENARIOS[lesson_id]:
             raise LessonError("Choose a scenario offered by this lesson.")
         if parsed.mode == "live" and parsed.scenario != "success":

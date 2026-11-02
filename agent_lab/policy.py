@@ -36,6 +36,7 @@ def redact(value: Any) -> Any:
         return {
             key: "[REDACTED]"
             if re.search(r"token|secret|password|api.?key|authorization", key, re.I)
+            and item is not None
             # Usage counters such as input_tokens are numbers, never credentials.
             and not (isinstance(item, int | float) and not isinstance(item, bool))
             else redact(item)

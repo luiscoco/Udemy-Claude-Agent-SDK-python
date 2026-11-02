@@ -906,6 +906,10 @@ async def run_local(
     root: Path, request: RunRequest, lesson: Lesson, ask: Ask | None = None
 ) -> dict[str, Any]:
     request = lesson_request(lesson.id, request)
+    if lesson.id == 14:
+        from agent_lab.thinking import local_thinking
+
+        return await local_thinking(root, request)
     if lesson.id == 13:
         from agent_lab.mcp_lab import local_mcp
 
@@ -981,9 +985,12 @@ async def run_local(
 def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
     from agent_lab.mcp_lab import local_mcp
     from agent_lab.streaming import local_streaming
+    from agent_lab.thinking import local_thinking
 
     function = (
-        local_mcp
+        local_thinking
+        if lesson_id == 14
+        else local_mcp
         if lesson_id == 13
         else local_streaming
         if lesson_id == 12
@@ -1016,7 +1023,7 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 "Which identities and terminal evidence does this lesson require?",
             ),
         )
-        if lesson_id not in {12, 13}
+        if lesson_id not in {12, 13, 14}
         else ()
     )
     if lesson_id == 12:
@@ -1057,6 +1064,26 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 "Bounded evidence evaluator",
                 Evidence.report,
                 "Why is a configured server alone insufficient?",
+            ),
+        )
+    if lesson_id == 14:
+        from agent_lab.thinking import Lane, lane_options
+
+        functions = (
+            (
+                "Requested SDK options",
+                lane_options,
+                "Which requested settings actually enter each fresh query?",
+            ),
+            (
+                "Actual Stop observer",
+                Lane.stop,
+                "Which identity fields connect this observation to its parent turn?",
+            ),
+            (
+                "Observed evidence and unknown metrics",
+                Lane.report,
+                "Why is unknown effort or usage different from a measured zero?",
             ),
         )
     for title, function, question in functions:

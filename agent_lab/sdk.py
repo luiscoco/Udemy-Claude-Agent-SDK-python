@@ -118,6 +118,11 @@ async def run_sdk(
     from agent_lab.models import lesson_request
 
     request = lesson_request(lesson.id, request)
+    if lesson.id == 14:
+        from agent_lab.thinking import execute_thinking
+
+        await execute_thinking(work, request, settings, emit, config)
+        return
     if lesson.id == 13:
         from agent_lab.mcp_sdk import run_mcp_sdk
 

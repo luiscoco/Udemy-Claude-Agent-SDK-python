@@ -1102,7 +1102,51 @@ def test_browser_my_learning_section_quiz_refresh_does_not_complete_lessons(serv
         context.close()
 
 
-@pytest.mark.parametrize("lesson", range(2, 14))
+def test_browser_thinking_comparison_unknown_metrics_and_prompt_free_metadata(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 1440, "height": 1000})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=14")
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_label("Comparison setting", exact=True).click()
+        page.get_by_role("option", name="Change effort only", exact=True).click()
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
+        expect(page.get_by_text("Check passed", exact=True)).to_be_visible()
+        lanes = page.locator(".thinking-lane")
+        expect(lanes).to_have_count(2)
+        expect(lanes.nth(0).get_by_text("Observed Stop effort: medium", exact=True)).to_be_visible()
+        expect(lanes.nth(1).get_by_text("Observed Stop effort: high", exact=True)).to_be_visible()
+        for lane in (lanes.nth(0), lanes.nth(1)):
+            expect(lane.get_by_text("SDK latency (ms): Unknown", exact=True)).to_be_visible()
+            expect(lane.get_by_text("Input tokens: Unknown", exact=True)).to_be_visible()
+        page.locator(".thinking-comparison").evaluate("e => e.scrollIntoView({block:'start'})")
+        page.evaluate("window.scrollBy(0, -120)")
+        page.screenshot(path=str(data / "thinking-comparison-desktop.png"))
+        page.set_viewport_size({"width": 390, "height": 844})
+        lanes.nth(0).evaluate("e => e.scrollIntoView({block:'center'})")
+        page.screenshot(path=str(data / "thinking-comparison-phone.png"))
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.get_by_label("Recorded scenario", exact=True).click()
+        page.get_by_role("option", name="Stop hook has unknown effort", exact=True).click()
+        page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
+        expect(page.get_by_text("Needs review", exact=True)).to_be_visible()
+        expect(page.locator(".thinking-lane").get_by_text("Observed Stop effort: Unknown", exact=True)).to_have_count(2)
+        page.get_by_text("Model metadata (no prompt)", exact=True).click()
+        page.get_by_role("button", name="Inspect model metadata", exact=True).click()
+        expect(page.get_by_text("disabled", exact=True).first).to_be_visible()
+        assert not errors
+    finally:
+        context.close()
+
+
+@pytest.mark.parametrize("lesson", range(2, 15))
 def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server, guide_browser_context, lesson):
     from playwright.sync_api import expect
 

@@ -59,6 +59,9 @@ Lesson 12 adds one open input queue, manual messages, acknowledged runtime contr
 token-scoped session APIs and closure checks. See the [Streaming input guide](docs/lesson-12-streaming.md).
 Lesson 13 adds real inventory MCP transports, lifecycle workshops, scoped APIs and
 correlated agent evidence. See the [MCP servers guide](docs/lesson-13-mcp.md).
+Lesson 14 compares requested model/thinking/effort with observed Stop evidence,
+keeps missing metrics unknown and offers a separate prompt-free metadata probe.
+See the [Thinking, effort and models guide](docs/lesson-14-thinking.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

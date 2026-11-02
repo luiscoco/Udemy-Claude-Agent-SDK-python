@@ -44,6 +44,10 @@ class RunService:
     def start(self, lesson_id: int, request: RunRequest) -> RunHandle:
         lesson = get_lesson(lesson_id)
         request = lesson_request(lesson_id, request)
+        if lesson_id == 14:
+            from agent_lab.thinking import plan_lanes
+
+            plan_lanes(request.lesson_options, self.settings.model)
         if request.mode == "live" and not self.settings.enable_live:
             raise PermissionError("Enable LAB_ENABLE_LIVE=true before making paid SDK calls.")
         if len(self.active) >= self.settings.max_concurrent_runs:
@@ -97,12 +101,12 @@ class RunService:
                     return
                 evidence = (
                     {}
-                    if 1 <= lesson.id <= 13 and request.mode == "live"
+                    if 1 <= lesson.id <= 14 and request.mode == "live"
                     else await run_exercise(work, request, lesson, ask=ask)
-                    if 2 <= lesson.id <= 13
+                    if 2 <= lesson.id <= 14
                     else await run_exercise(work, request, lesson)
                 )
-                if not (1 <= lesson.id <= 13 and request.mode == "live"):
+                if not (1 <= lesson.id <= 14 and request.mode == "live"):
                     await emit(
                         Event(
                             kind="evidence",

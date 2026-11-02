@@ -50,7 +50,7 @@ async def main(model: str) -> None:
                     print(block.text)
 ```
 
-`thinking=adaptive` with `effort="medium"` configures reasoning, `ThinkingConfigEnabled` shows the fixed `budget_tokens` alternative, and `ThinkingBlock` is how reasoning arrives.
+The compact concept example shows the supported thinking shapes. The expanded comparison in agent_lab/thinking.py creates fresh lanes, records actual Stop observations and keeps unknown metrics distinct; inspect its three exact excerpts below the separate standard example.
 
 ## How the offline lab checks it
 

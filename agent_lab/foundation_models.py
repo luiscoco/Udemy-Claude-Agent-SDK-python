@@ -100,6 +100,23 @@ class McpInputs(Inputs):
     lifecycle: Literal["none", "toggle", "reconnect"] = "none"
 
 
+class ThinkingInputs(Inputs):
+    model: str | None = Field(
+        default=None, min_length=1, max_length=100, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    )
+    thinking: Literal["disabled", "adaptive", "enabled"] = "adaptive"
+    effort: Literal["low", "medium", "high", "xhigh", "max"] | None = "medium"
+    budget_tokens: int = Field(default=4000, ge=1024, le=16384)
+    display: Literal["default", "summarized", "omitted"] = "default"
+    comparison: Literal["none", "effort", "model", "thinking"] = "none"
+    comparison_effort: Literal["low", "medium", "high", "xhigh", "max"] | None = "high"
+    comparison_model: str = Field(
+        default="sonnet", min_length=1, max_length=100, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]*$"
+    )
+    comparison_thinking: Literal["disabled", "adaptive", "enabled"] = "disabled"
+    authorize_comparison: bool = False
+
+
 INPUT_MODELS: dict[int, type[Inputs]] = {
     2: OptionsInputs,
     3: ToolsInputs,
@@ -113,6 +130,7 @@ INPUT_MODELS: dict[int, type[Inputs]] = {
     11: SkillsInputs,
     12: StreamingInputs,
     13: McpInputs,
+    14: ThinkingInputs,
 }
 
 SCENARIOS: dict[int, dict[str, str]] = {
@@ -126,6 +144,14 @@ SCENARIOS: dict[int, dict[str, str]] = {
 SCENARIOS[2]["limit-error"] = "Recorded limit error"
 SCENARIOS[12]["interrupted"] = "Interrupted input queue"
 SCENARIOS[13]["tool-error"] = "Inventory server rejects the reservation"
+SCENARIOS[14].update(
+    {
+        "missing-effort": "Stop hook has unknown effort",
+        "unsupported": "Recorded unsupported combination",
+        "model-error": "Recorded model access error",
+        "interrupted": "Recorded interrupted turn",
+    }
+)
 SCENARIOS[5].update(
     {
         "invalid-arguments": "Rejected handler arguments",
