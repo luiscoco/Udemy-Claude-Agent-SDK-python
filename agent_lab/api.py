@@ -42,7 +42,22 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     from agent_lab.api_thinking import ThinkingSessions, install_thinking_routes
 
     thinking_sessions = ThinkingSessions(runner)
+    from agent_lab.api_cache import install_cache_routes
+    from agent_lab.api_client_lifecycle import install_client_lifecycle_routes
+    from agent_lab.api_cloud import install_cloud_routes
+    from agent_lab.api_config_root import install_config_root_routes
+    from agent_lab.api_drops import install_drops_routes
+    from agent_lab.api_gate import install_gate_routes
+    from agent_lab.api_orchestra import install_orchestra_routes
+    from agent_lab.api_hardening import install_hardening_routes
+    from agent_lab.api_headless import install_headless_routes
+    from agent_lab.api_remote_mcp import install_remote_mcp_routes
+    from agent_lab.api_spawn import install_spawn_routes
+    from agent_lab.api_store import install_store_routes
+    from agent_lab.api_suggestions import install_suggestion_routes
+    from agent_lab.api_telemetry import install_telemetry_routes
     from agent_lab.api_usage import install_usage_routes
+    from agent_lab.api_web_tools import install_web_tool_routes
     from agent_lab.usage_sessions import UsageSessions
 
     usage_sessions = UsageSessions(runner.settings)
@@ -55,6 +70,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
         await mcp_workshops.close()
         await thinking_sessions.close()
         await usage_sessions.close()
+        await app.state.suggestions_close()
 
     app = FastAPI(title="Python Claude Agent SDK Lab", lifespan=lifespan)
     app.state.runner = runner
@@ -66,6 +82,21 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     install_thinking_routes(app, thinking_sessions)
     app.state.usage_sessions = usage_sessions
     install_usage_routes(app, runner, usage_sessions)
+    install_store_routes(app, runner)
+    install_spawn_routes(app, runner)
+    install_gate_routes(app, runner)
+    install_config_root_routes(app, runner)
+    install_client_lifecycle_routes(app, runner)
+    install_web_tool_routes(app, runner)
+    install_remote_mcp_routes(app, runner)
+    install_telemetry_routes(app, runner)
+    install_cloud_routes(app, runner)
+    install_cache_routes(app, runner)
+    install_orchestra_routes(app, runner)
+    install_hardening_routes(app, runner)
+    install_headless_routes(app, runner)
+    install_drops_routes(app, runner)
+    install_suggestion_routes(app, runner)
     tutor = app.state.tutor = TutorService(runner.settings)
 
     @app.get("/api/health")

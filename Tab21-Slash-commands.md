@@ -1,6 +1,6 @@
 # Lesson 21: Slash commands
 
-Create a project Markdown command and enable project settings explicitly.
+Discover an owned project command and verify its slash invocation with a matching Read and response marker.
 
 This lesson is part of **Tools and extensions**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -24,32 +24,30 @@ For the browser lab, run `uv run agent-lab serve`, then open
 
 ```python
 from pathlib import Path
-
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
-
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 
 async def main() -> None:
-    workspace = Path("workspace")
+    workspace = Path("workspace").resolve()
     command = workspace / ".claude" / "commands" / "lesson-summary.md"
     command.parent.mkdir(parents=True, exist_ok=True)
-    command.write_text(
-        "Summarize notes.txt in three Python-focused bullets.\n", encoding="utf-8"
-    )
+    command.write_text("Read notes.txt once. Summarize it in three bullets.\n", encoding="utf-8")
     options = ClaudeAgentOptions(
         cwd=str(workspace),
-        setting_sources=[
-            "project"
-        ],  # without this, .claude/commands is never discovered
+        setting_sources=["project"],
         tools=["Read"],
-        allowed_tools=["Read"],
+        allowed_tools=[],
         max_turns=3,
     )
-    async for message in query(prompt="/lesson-summary", options=options):
-        if isinstance(message, ResultMessage):
-            print(message.result)
+    async with ClaudeSDKClient(options=options) as client:
+        info = await client.get_server_info()
+        names = {item.get("name") for item in (info or {}).get("commands", [])}
+        assert "lesson-summary" in names
+        await client.query("/lesson-summary")
+        async for message in client.receive_response():
+            print(type(message).__name__)
 ```
 
-The Markdown file at `.claude/commands/lesson-summary.md` becomes a command only because `setting_sources=["project"]` is set, and the prompt `/lesson-summary` invokes it.
+The command is written inside an owned workspace, project settings enable discovery, get_server_info verifies inventory, and the slash prompt invokes the command. The live lab adds exact Read and response correlation.
 
 ## How the offline lab checks it
 
@@ -57,7 +55,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `project_markdown` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 791); the Python source tab shows it below the concept code. Host contracts
+(line 795); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -75,10 +73,7 @@ Suggested prompt:
 > /lesson-summary
 
 The live profile is `commands`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/slash_commands.py](agent_lab/slash_commands.py). The live run uses one SDK connection to inspect command inventory, invoke the owned slash command, and correlate a Read result with the selected response marker.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

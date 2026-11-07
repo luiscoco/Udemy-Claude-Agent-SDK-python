@@ -61,7 +61,7 @@ async def main() -> None:
                 print(message.result)
 ```
 
-`image_turn` yields a user message whose content holds an `image` block with a base64 `source`, after checking the PNG signature matches `media_type`; `client.query` streams it.
+The concept example shows a typed PNG image and text block. The runnable experiment validates a host-owned red or blue PNG and checks actual SDK responses against the file hash and selected color.
 
 ## How the offline lab checks it
 
@@ -69,7 +69,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `images` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1130); the Python source tab shows it below the concept code. Host contracts
+(line 1134); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -87,10 +87,7 @@ Suggested prompt:
 > Explain image content blocks and why MIME types matter.
 
 The live profile is `query`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/image_input_lab.py](agent_lab/image_input_lab.py). The live run validates an owned PNG, sends a typed base64 image plus text through the SDK, and compares red/blue responses with the file hashes.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;
@@ -99,7 +96,7 @@ is a threshold, not an exact billing cap.
 
 ## Python edition adaptation
 
-This exercise creates an image content block locally; the live text lesson does not upload that image.
+The original exercise builds a one-pixel image block offline. The enhanced live lesson sends a separate validated red or blue PNG through the SDK input stream.
 
 ## API and lifecycle
 

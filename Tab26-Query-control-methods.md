@@ -57,7 +57,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `control` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 723); the Python source tab shows it below the concept code. Host contracts
+(line 727); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -75,10 +75,7 @@ Suggested prompt:
 > Explain the difference between interrupting a turn and disconnecting a client.
 
 The live profile is `conversation`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/control_lab.py](agent_lab/control_lab.py). The live run observes control acknowledgements and two turns on one SDK session, or interrupts a streamed turn, then checks post-disconnect rejection.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

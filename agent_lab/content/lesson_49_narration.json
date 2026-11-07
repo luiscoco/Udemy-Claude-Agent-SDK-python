@@ -1,0 +1,36 @@
+{
+  "lesson": 49,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "run-process",
+      "title": "Bound a headless child",
+      "path": "agent_lab/headless_lab.py",
+      "start_line": 52,
+      "end_line": 84,
+      "reviewed_source_sha256": "c0799030b141373e24420685517f1b425cacee2773bb2f66f035ec19adc7f1c6",
+      "spoken_text": "The host starts one exact executable with fixed arguments, an owned working directory and a small child environment. Standard input is either connected to null or receives one bounded job, then closes. Standard output and standard error are read separately and limited while streaming. On deadline, overflow or cancellation, only the owned child is stopped and then awaited. A signal request alone is not a close receipt."
+    },
+    {
+      "id": "mapped-exit",
+      "title": "Map explicit policy codes",
+      "path": "agent_lab/headless_lab.py",
+      "start_line": 126,
+      "end_line": 152,
+      "reviewed_source_sha256": "c0799030b141373e24420685517f1b425cacee2773bb2f66f035ec19adc7f1c6",
+      "spoken_text": "This function maps actual process and machine-result facts into the lab policy codes. Cancellation is one thirty, timeout one twenty four, and a missing executable one twenty seven. A nonzero child close is ten. Missing or unsuccessful terminal evidence is eleven, and a permission denial is twelve. Only a zero close with one valid successful result reaches zero. These codes are host policy, not the Claude CLI native convention."
+    },
+    {
+      "id": "worker",
+      "title": "Supervise a local worker",
+      "path": "agent_lab/headless_lab.py",
+      "start_line": 196,
+      "end_line": 224,
+      "reviewed_source_sha256": "c0799030b141373e24420685517f1b425cacee2773bb2f66f035ec19adc7f1c6",
+      "spoken_text": "The supervisor starts one local Python worker with a fixed run identity and deadlines. It observes listening, health and readiness, then holds one job while a second is rejected with four twenty nine. Draining changes readiness to five oh three; release lets the admitted job finish. The supervisor matches job and run receipts, awaits the worker exit, and checks that a fresh TCP connection fails. This is a local process demonstration, not a cloud deployment."
+    }
+  ]
+}

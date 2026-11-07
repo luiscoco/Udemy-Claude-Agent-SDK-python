@@ -1,0 +1,527 @@
+{
+  "lesson": 35,
+  "section": "sqlite-transaction",
+  "duration": 41.352,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.18
+    },
+    {
+      "word": "is",
+      "start": 0.18,
+      "end": 0.28
+    },
+    {
+      "word": "the",
+      "start": 0.28,
+      "end": 0.37
+    },
+    {
+      "word": "durable",
+      "start": 0.37,
+      "end": 0.78
+    },
+    {
+      "word": "adapter's",
+      "start": 0.78,
+      "end": 1.25
+    },
+    {
+      "word": "append",
+      "start": 1.25,
+      "end": 1.58
+    },
+    {
+      "word": "transaction",
+      "start": 1.58,
+      "end": 2.23
+    },
+    {
+      "word": "The",
+      "start": 2.57,
+      "end": 2.7
+    },
+    {
+      "word": "project",
+      "start": 2.7,
+      "end": 3.18
+    },
+    {
+      "word": "key",
+      "start": 3.18,
+      "end": 3.49
+    },
+    {
+      "word": "session",
+      "start": 3.68,
+      "end": 4.09
+    },
+    {
+      "word": "ID",
+      "start": 4.09,
+      "end": 4.3
+    },
+    {
+      "word": "and",
+      "start": 4.72,
+      "end": 4.91
+    },
+    {
+      "word": "optional",
+      "start": 4.91,
+      "end": 5.37
+    },
+    {
+      "word": "subpath",
+      "start": 5.37,
+      "end": 5.87
+    },
+    {
+      "word": "keep",
+      "start": 5.87,
+      "end": 6.14
+    },
+    {
+      "word": "transcripts",
+      "start": 6.14,
+      "end": 6.64
+    },
+    {
+      "word": "separate",
+      "start": 6.64,
+      "end": 6.98
+    },
+    {
+      "word": "BEGIN",
+      "start": 7.36,
+      "end": 7.79
+    },
+    {
+      "word": "IMMEDIATE",
+      "start": 7.79,
+      "end": 8.48
+    },
+    {
+      "word": "serializes",
+      "start": 8.75,
+      "end": 9.75
+    },
+    {
+      "word": "writes",
+      "start": 9.95,
+      "end": 10.35
+    },
+    {
+      "word": "the",
+      "start": 10.35,
+      "end": 10.43
+    },
+    {
+      "word": "unique",
+      "start": 10.43,
+      "end": 10.82
+    },
+    {
+      "word": "UUID",
+      "start": 10.82,
+      "end": 11.17
+    },
+    {
+      "word": "index",
+      "start": 11.17,
+      "end": 11.85
+    },
+    {
+      "word": "ignores",
+      "start": 11.99,
+      "end": 12.45
+    },
+    {
+      "word": "a",
+      "start": 12.45,
+      "end": 12.5
+    },
+    {
+      "word": "repeated",
+      "start": 12.5,
+      "end": 12.95
+    },
+    {
+      "word": "UUID",
+      "start": 12.95,
+      "end": 13.37
+    },
+    {
+      "word": "while",
+      "start": 13.37,
+      "end": 13.69
+    },
+    {
+      "word": "entries",
+      "start": 13.69,
+      "end": 14.08
+    },
+    {
+      "word": "without",
+      "start": 14.08,
+      "end": 14.44
+    },
+    {
+      "word": "UUIDs",
+      "start": 14.44,
+      "end": 14.91
+    },
+    {
+      "word": "are",
+      "start": 14.91,
+      "end": 15
+    },
+    {
+      "word": "appended",
+      "start": 15,
+      "end": 15.41
+    },
+    {
+      "word": "again",
+      "start": 15.41,
+      "end": 15.77
+    },
+    {
+      "word": "Only",
+      "start": 16.08,
+      "end": 16.41
+    },
+    {
+      "word": "inserted",
+      "start": 16.41,
+      "end": 16.87
+    },
+    {
+      "word": "entries",
+      "start": 16.87,
+      "end": 17.29
+    },
+    {
+      "word": "advance",
+      "start": 17.29,
+      "end": 17.7
+    },
+    {
+      "word": "the",
+      "start": 17.7,
+      "end": 17.79
+    },
+    {
+      "word": "session",
+      "start": 17.79,
+      "end": 18.12
+    },
+    {
+      "word": "modification",
+      "start": 18.12,
+      "end": 18.8
+    },
+    {
+      "word": "time",
+      "start": 18.8,
+      "end": 19.1
+    },
+    {
+      "word": "For",
+      "start": 19.41,
+      "end": 19.61
+    },
+    {
+      "word": "the",
+      "start": 19.61,
+      "end": 19.7
+    },
+    {
+      "word": "main",
+      "start": 19.7,
+      "end": 19.97
+    },
+    {
+      "word": "transcript",
+      "start": 19.97,
+      "end": 20.62
+    },
+    {
+      "word": "fold_session_summary",
+      "start": 20.83,
+      "end": 22.23
+    },
+    {
+      "word": "updates",
+      "start": 22.53,
+      "end": 22.97
+    },
+    {
+      "word": "the",
+      "start": 22.97,
+      "end": 23.06
+    },
+    {
+      "word": "summary",
+      "start": 23.06,
+      "end": 23.57
+    },
+    {
+      "word": "in",
+      "start": 23.65,
+      "end": 23.77
+    },
+    {
+      "word": "the",
+      "start": 23.77,
+      "end": 23.84
+    },
+    {
+      "word": "same",
+      "start": 23.84,
+      "end": 24.12
+    },
+    {
+      "word": "transaction",
+      "start": 24.12,
+      "end": 24.8
+    },
+    {
+      "word": "as",
+      "start": 24.94,
+      "end": 25.15
+    },
+    {
+      "word": "the",
+      "start": 25.15,
+      "end": 25.26
+    },
+    {
+      "word": "entry",
+      "start": 25.26,
+      "end": 25.51
+    },
+    {
+      "word": "batch",
+      "start": 25.51,
+      "end": 25.92
+    },
+    {
+      "word": "A",
+      "start": 26.13,
+      "end": 26.23
+    },
+    {
+      "word": "failed",
+      "start": 26.23,
+      "end": 26.55
+    },
+    {
+      "word": "transaction",
+      "start": 26.55,
+      "end": 27.09
+    },
+    {
+      "word": "rolls",
+      "start": 27.09,
+      "end": 27.38
+    },
+    {
+      "word": "back",
+      "start": 27.38,
+      "end": 27.76
+    },
+    {
+      "word": "rather",
+      "start": 27.83,
+      "end": 28.12
+    },
+    {
+      "word": "than",
+      "start": 28.12,
+      "end": 28.27
+    },
+    {
+      "word": "leaving",
+      "start": 28.27,
+      "end": 28.57
+    },
+    {
+      "word": "a",
+      "start": 28.57,
+      "end": 28.62
+    },
+    {
+      "word": "new",
+      "start": 28.62,
+      "end": 28.89
+    },
+    {
+      "word": "entry",
+      "start": 28.89,
+      "end": 29.19
+    },
+    {
+      "word": "without",
+      "start": 29.19,
+      "end": 29.57
+    },
+    {
+      "word": "its",
+      "start": 29.57,
+      "end": 29.71
+    },
+    {
+      "word": "summary",
+      "start": 29.71,
+      "end": 30.15
+    },
+    {
+      "word": "Loading",
+      "start": 30.29,
+      "end": 30.87
+    },
+    {
+      "word": "listing",
+      "start": 31.08,
+      "end": 31.65
+    },
+    {
+      "word": "and",
+      "start": 31.68,
+      "end": 31.85
+    },
+    {
+      "word": "deleting",
+      "start": 31.85,
+      "end": 32.23
+    },
+    {
+      "word": "are",
+      "start": 32.23,
+      "end": 32.32
+    },
+    {
+      "word": "separate",
+      "start": 32.32,
+      "end": 32.74
+    },
+    {
+      "word": "methods",
+      "start": 32.74,
+      "end": 33.27
+    },
+    {
+      "word": "outside",
+      "start": 33.35,
+      "end": 33.82
+    },
+    {
+      "word": "this",
+      "start": 33.82,
+      "end": 34.01
+    },
+    {
+      "word": "excerpt",
+      "start": 34.01,
+      "end": 34.49
+    },
+    {
+      "word": "The",
+      "start": 34.65,
+      "end": 34.85
+    },
+    {
+      "word": "offline",
+      "start": 34.85,
+      "end": 35.22
+    },
+    {
+      "word": "process",
+      "start": 35.22,
+      "end": 35.63
+    },
+    {
+      "word": "test",
+      "start": 35.63,
+      "end": 36.02
+    },
+    {
+      "word": "reopens",
+      "start": 36.14,
+      "end": 36.73
+    },
+    {
+      "word": "the",
+      "start": 36.73,
+      "end": 36.79
+    },
+    {
+      "word": "SQLite",
+      "start": 36.79,
+      "end": 37.35
+    },
+    {
+      "word": "file",
+      "start": 37.35,
+      "end": 37.61
+    },
+    {
+      "word": "to",
+      "start": 37.61,
+      "end": 37.73
+    },
+    {
+      "word": "verify",
+      "start": 37.73,
+      "end": 38.1
+    },
+    {
+      "word": "persistence",
+      "start": 38.1,
+      "end": 38.89
+    },
+    {
+      "word": "it",
+      "start": 39.02,
+      "end": 39.15
+    },
+    {
+      "word": "does",
+      "start": 39.15,
+      "end": 39.33
+    },
+    {
+      "word": "not",
+      "start": 39.33,
+      "end": 39.55
+    },
+    {
+      "word": "claim",
+      "start": 39.55,
+      "end": 39.8
+    },
+    {
+      "word": "a",
+      "start": 39.8,
+      "end": 39.86
+    },
+    {
+      "word": "remote",
+      "start": 39.86,
+      "end": 40.18
+    },
+    {
+      "word": "shared",
+      "start": 40.18,
+      "end": 40.43
+    },
+    {
+      "word": "database",
+      "start": 40.43,
+      "end": 41.09
+    }
+  ]
+}

@@ -24,36 +24,20 @@ For the browser lab, run `uv run agent-lab serve`, then open
 
 ```python
 import asyncio
-import shutil
-import sys
+from pathlib import Path
 
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+from agent_lab.process_spawning_lab import FrameTap, probe_child
 
+async def inspect(root: Path) -> None:
+    child = await probe_child(root, 'success', 'machine-a')
+    print(child['frames'], child['bytes_forwarded_unchanged'])
 
-async def run_child(*args: str, seconds: float = 10) -> str:
-    process = await asyncio.create_subprocess_exec(
-        *args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-    )
-    try:
-        async with asyncio.timeout(seconds):
-            stdout, _ = await process.communicate()
-    finally:
-        if process.returncode is None:
-            process.kill()
-            await process.wait()
-    return stdout.decode()
-
-
-async def main() -> None:
-    print(await run_child(sys.executable, "-c", "print('Python child process')"))
-    # The SDK itself spawns the Claude Code CLI as a child; cli_path pins which binary.
-    options = ClaudeAgentOptions(cli_path=shutil.which("claude"), max_turns=1)
-    async for message in query(prompt="Say hello in five words.", options=options):
-        if isinstance(message, ResultMessage):
-            print(message.result)
+# The live lab also runs a separate real SDK CLI turn.
+# This installed Python SDK has no public custom-spawner option.
+asyncio.run(inspect(Path.cwd()))
 ```
 
-asyncio.create_subprocess_exec(*args) with asyncio.timeout and process.kill() is the host pattern, and ClaudeAgentOptions(`cli_path`=...) chooses the CLI the SDK itself spawns.
+FrameTap buffers split JSONL bytes; probe_child launches fixed argv and reaps interrupted children; spawn_report requires separate host and SDK success.
 
 ## How the offline lab checks it
 
@@ -61,7 +45,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `spawn` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1379); the Python source tab shows it below the concept code. Host contracts
+(line 1383); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -79,10 +63,7 @@ Suggested prompt:
 > Use the exercise tool and explain shell-free spawning.
 
 The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/process_spawning_lab.py](agent_lab/process_spawning_lab.py). The host launches a fixed Python child with explicit argv, local cwd, separate pipes, a JSONL byte tap and bounded cleanup. A separate SDK CLI turn must return a matching successful terminal. The installed Python SDK has no public custom-spawner option; this host child does not carry SDK protocol.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

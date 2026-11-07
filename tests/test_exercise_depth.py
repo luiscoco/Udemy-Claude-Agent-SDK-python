@@ -317,7 +317,7 @@ def test_offline_prompt_inputs_are_enabled_only_where_exercises_read_them():
     from agent_lab.exercises import exercise_uses
 
     using = {number for number, item in LESSONS.items() if exercise_uses(item.exercise, "prompt")}
-    assert using == set(range(1, 16)) | {35, 58, 59}
+    assert using == set(range(1, 36)) | {58, 59}
 
 
 def test_tool_search_never_selects_a_zero_score_tool(work):

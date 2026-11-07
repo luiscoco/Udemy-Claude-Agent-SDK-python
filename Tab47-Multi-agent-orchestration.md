@@ -23,45 +23,19 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-import asyncio
-
-from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, ResultMessage, query
-
-REVIEWER = AgentDefinition(
-    description="Reviews one module for bugs.",
-    prompt="Review only the file you are given and list concrete defects.",
-    tools=["Read", "Grep"],
-)
-WAVES = [
-    ["src/tags.py"],
-    ["src/search.py", "src/report.py"],
-]  # wave 2 depends on wave 1
+from agent_lab.orchestra_lab import FairLimiter, check_report
 
 
-async def run_task(path: str, limit: asyncio.Semaphore) -> str:
-    async with limit:
-        options = ClaudeAgentOptions(
-            agents={"reviewer": REVIEWER},
-            allowed_tools=["Read", "Grep", "Agent"],
-            max_turns=4,
-        )
-        async for message in query(
-            prompt=f"Use the reviewer agent on {path}.", options=options
-        ):
-            if isinstance(message, ResultMessage):
-                return message.result or ""
-    return ""
-
-
-async def main() -> None:
-    limit = asyncio.Semaphore(2)
-    for wave in WAVES:
-        async with asyncio.TaskGroup() as group:
-            tasks = [group.create_task(run_task(path, limit)) for path in wave]
-        print({path: task.result()[:80] for path, task in zip(wave, tasks)})
+async def run_owned_worker(limiter: FairLimiter, report: str) -> bool:
+    await limiter.acquire()
+    try:
+        valid, _reason = check_report(report, "north")
+        return valid
+    finally:
+        limiter.release()
 ```
 
-AgentDefinition declares the subagent, while the host loop over WAVES with asyncio.TaskGroup and asyncio.Semaphore(2) decides what runs, in what order and how many at once.
+FairLimiter transfers a reserved slot to one waiter and releases after failure. check_report compares one anchored line with fixture totals, while native child hooks and terminal evidence establish actual delegated work.
 
 ## How the offline lab checks it
 
@@ -69,7 +43,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `orchestration` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1254); the Python source tab shows it below the concept code. Host contracts
+(line 1258); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

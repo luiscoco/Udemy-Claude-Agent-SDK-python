@@ -1,0 +1,387 @@
+{
+  "lesson": 47,
+  "section": "report-check",
+  "duration": 25.128,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.1
+    },
+    {
+      "word": "host",
+      "start": 0.1,
+      "end": 0.44
+    },
+    {
+      "word": "checker",
+      "start": 0.44,
+      "end": 0.88
+    },
+    {
+      "word": "searches",
+      "start": 0.91,
+      "end": 1.39
+    },
+    {
+      "word": "for",
+      "start": 1.39,
+      "end": 1.53
+    },
+    {
+      "word": "exactly",
+      "start": 1.53,
+      "end": 2.01
+    },
+    {
+      "word": "one",
+      "start": 2.01,
+      "end": 2.24
+    },
+    {
+      "word": "region",
+      "start": 2.24,
+      "end": 2.57
+    },
+    {
+      "word": "report",
+      "start": 2.57,
+      "end": 2.95
+    },
+    {
+      "word": "line",
+      "start": 2.95,
+      "end": 3.22
+    },
+    {
+      "word": "in",
+      "start": 3.25,
+      "end": 3.37
+    },
+    {
+      "word": "the",
+      "start": 3.37,
+      "end": 3.45
+    },
+    {
+      "word": "worker's",
+      "start": 3.45,
+      "end": 3.83
+    },
+    {
+      "word": "output",
+      "start": 3.83,
+      "end": 4.29
+    },
+    {
+      "word": "It",
+      "start": 4.75,
+      "end": 4.94
+    },
+    {
+      "word": "requires",
+      "start": 4.94,
+      "end": 5.36
+    },
+    {
+      "word": "the",
+      "start": 5.36,
+      "end": 5.44
+    },
+    {
+      "word": "fixed",
+      "start": 5.44,
+      "end": 5.78
+    },
+    {
+      "word": "region",
+      "start": 5.78,
+      "end": 6.16
+    },
+    {
+      "word": "total",
+      "start": 6.46,
+      "end": 6.79
+    },
+    {
+      "word": "and",
+      "start": 6.79,
+      "end": 6.91
+    },
+    {
+      "word": "best",
+      "start": 6.91,
+      "end": 7.15
+    },
+    {
+      "word": "product",
+      "start": 7.15,
+      "end": 7.45
+    },
+    {
+      "word": "format",
+      "start": 7.45,
+      "end": 7.93
+    },
+    {
+      "word": "then",
+      "start": 8.21,
+      "end": 8.47
+    },
+    {
+      "word": "compares",
+      "start": 8.47,
+      "end": 8.84
+    },
+    {
+      "word": "the",
+      "start": 8.84,
+      "end": 8.91
+    },
+    {
+      "word": "values",
+      "start": 8.91,
+      "end": 9.35
+    },
+    {
+      "word": "with",
+      "start": 9.35,
+      "end": 9.45
+    },
+    {
+      "word": "totals",
+      "start": 9.45,
+      "end": 9.93
+    },
+    {
+      "word": "calculated",
+      "start": 9.93,
+      "end": 10.52
+    },
+    {
+      "word": "from",
+      "start": 10.52,
+      "end": 10.72
+    },
+    {
+      "word": "the",
+      "start": 10.72,
+      "end": 10.79
+    },
+    {
+      "word": "owned",
+      "start": 10.79,
+      "end": 11.1
+    },
+    {
+      "word": "sales",
+      "start": 11.1,
+      "end": 11.4
+    },
+    {
+      "word": "fixture",
+      "start": 11.4,
+      "end": 11.83
+    },
+    {
+      "word": "A",
+      "start": 12.25,
+      "end": 12.35
+    },
+    {
+      "word": "correct",
+      "start": 12.35,
+      "end": 12.67
+    },
+    {
+      "word": "sounding",
+      "start": 12.67,
+      "end": 13.04
+    },
+    {
+      "word": "parent",
+      "start": 13.04,
+      "end": 13.39
+    },
+    {
+      "word": "summary",
+      "start": 13.39,
+      "end": 13.83
+    },
+    {
+      "word": "cannot",
+      "start": 13.83,
+      "end": 14.16
+    },
+    {
+      "word": "replace",
+      "start": 14.16,
+      "end": 14.5
+    },
+    {
+      "word": "this",
+      "start": 14.5,
+      "end": 14.7
+    },
+    {
+      "word": "worker",
+      "start": 14.7,
+      "end": 14.97
+    },
+    {
+      "word": "report",
+      "start": 14.97,
+      "end": 15.36
+    },
+    {
+      "word": "This",
+      "start": 15.64,
+      "end": 15.92
+    },
+    {
+      "word": "narrow",
+      "start": 15.92,
+      "end": 16.17
+    },
+    {
+      "word": "line",
+      "start": 16.17,
+      "end": 16.4
+    },
+    {
+      "word": "check",
+      "start": 16.4,
+      "end": 16.71
+    },
+    {
+      "word": "catches",
+      "start": 16.71,
+      "end": 17.11
+    },
+    {
+      "word": "missing",
+      "start": 17.11,
+      "end": 17.39
+    },
+    {
+      "word": "or",
+      "start": 17.39,
+      "end": 17.54
+    },
+    {
+      "word": "incorrect",
+      "start": 17.54,
+      "end": 17.91
+    },
+    {
+      "word": "numbers",
+      "start": 17.91,
+      "end": 18.44
+    },
+    {
+      "word": "but",
+      "start": 18.77,
+      "end": 18.99
+    },
+    {
+      "word": "it",
+      "start": 18.99,
+      "end": 19.07
+    },
+    {
+      "word": "does",
+      "start": 19.07,
+      "end": 19.24
+    },
+    {
+      "word": "not",
+      "start": 19.24,
+      "end": 19.43
+    },
+    {
+      "word": "judge",
+      "start": 19.43,
+      "end": 19.68
+    },
+    {
+      "word": "every",
+      "start": 19.71,
+      "end": 19.96
+    },
+    {
+      "word": "sentence",
+      "start": 19.96,
+      "end": 20.45
+    },
+    {
+      "word": "around",
+      "start": 20.45,
+      "end": 20.69
+    },
+    {
+      "word": "the",
+      "start": 20.69,
+      "end": 20.76
+    },
+    {
+      "word": "line",
+      "start": 20.76,
+      "end": 21.05
+    },
+    {
+      "word": "Separate",
+      "start": 21.46,
+      "end": 21.94
+    },
+    {
+      "word": "lifecycle",
+      "start": 21.94,
+      "end": 22.48
+    },
+    {
+      "word": "and",
+      "start": 22.48,
+      "end": 22.71
+    },
+    {
+      "word": "file",
+      "start": 22.71,
+      "end": 22.96
+    },
+    {
+      "word": "hash",
+      "start": 22.96,
+      "end": 23.2
+    },
+    {
+      "word": "checks",
+      "start": 23.2,
+      "end": 23.55
+    },
+    {
+      "word": "establish",
+      "start": 23.58,
+      "end": 24.09
+    },
+    {
+      "word": "who",
+      "start": 24.09,
+      "end": 24.22
+    },
+    {
+      "word": "did",
+      "start": 24.22,
+      "end": 24.38
+    },
+    {
+      "word": "the",
+      "start": 24.38,
+      "end": 24.47
+    },
+    {
+      "word": "work",
+      "start": 24.47,
+      "end": 24.85
+    }
+  ]
+}

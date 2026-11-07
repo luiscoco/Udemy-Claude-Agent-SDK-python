@@ -248,10 +248,28 @@ def check_evidence(
             status="needs-review",
             detail="A final successful SDK result was not established. Inspect the terminal subtype and is_error; assistant text alone does not prove success. The recorded error and missing-result scenarios intentionally need review.",
         )
-    if 2 <= lesson_id <= 15:
+    if 2 <= lesson_id <= 49:
         experiment = evidence.get("experiment", {})
         passed = evidence.get("experiment_passed") is True and isinstance(experiment, dict) and experiment.get("experiment_passed") is True
-        if mode == "live" and isinstance(experiment, dict) and experiment.get("source") != "live SDK stream and actual host callbacks":
+        if mode == "live" and lesson_id <= 40 and isinstance(experiment, dict) and experiment.get("source") != "live SDK stream and actual host callbacks":
+            passed = False
+        if mode == "live" and lesson_id == 41 and isinstance(experiment, dict) and experiment.get("source_label") != "real Python SDK client and provider-backed CLI":
+            passed = False
+        if mode == "live" and lesson_id == 42 and isinstance(experiment, dict) and experiment.get("source_label") != "provider-backed SDK web tool calls and host hook observations":
+            passed = False
+        if mode == "live" and lesson_id == 43 and isinstance(experiment, dict) and experiment.get("source_label") != "provider-backed SDK remote MCP tool and resource calls":
+            passed = False
+        if mode == "live" and lesson_id == 44 and isinstance(experiment, dict) and experiment.get("source_label") != "native SDK subprocess":
+            passed = False
+        if mode == "live" and lesson_id == 45 and isinstance(experiment, dict) and experiment.get("source_label") != "native SDK subprocess":
+            passed = False
+        if mode == "live" and lesson_id == 46 and isinstance(experiment, dict) and experiment.get("source_label") != "native SDK subprocess":
+            passed = False
+        if mode == "live" and lesson_id == 47 and isinstance(experiment, dict) and experiment.get("source_label") != "native SDK and host checks":
+            passed = False
+        if mode == "live" and lesson_id == 48 and isinstance(experiment, dict) and experiment.get("source_label") != "native SDK subprocess":
+            passed = False
+        if mode == "live" and lesson_id == 49 and isinstance(experiment, dict) and experiment.get("source_label") != "native CLI and SDK":
             passed = False
         return CheckResult(
             status="passed" if passed else "needs-review",

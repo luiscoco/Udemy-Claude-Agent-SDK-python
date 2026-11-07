@@ -63,7 +63,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `elicitation` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 2088); the Python source tab shows it below the concept code. Host contracts
+(line 2092); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -81,10 +81,7 @@ Suggested prompt:
 > Call the rooms MCP book_room tool once for room Blue. It is a local demonstration with no external calendar. Report the tool's actual outcome after the user answers the form.
 
 The live profile is `elicitation`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/elicitation_lab.py](agent_lab/elicitation_lab.py). A provider-backed SDK tool invokes the owned Python MCP server through a client with a labelled simulated form callback. The host correlates the SDK call/result and checks the actual server outcome.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

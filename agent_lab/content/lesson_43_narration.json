@@ -1,0 +1,36 @@
+{
+  "lesson": 43,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "credential-lifecycle",
+      "title": "Short-lived MCP credentials",
+      "path": "agent_lab/remote_fixture_lab.py",
+      "start_line": 108,
+      "end_line": 122,
+      "reviewed_source_sha256": "ca95423a6a1ad5ef1d79583a58e6b40ef31406091c97b479701c4312f78610e2",
+      "spoken_text": "This source shows the owned credential lifecycle. Revocation clears every issued token. A new grant receives a different credential label and a random bearer value that expires after sixty seconds. The fixture stores the value only in memory. The report keeps the label, never the bearer. This local machine grant teaches the authorization sequence, but it does not claim to certify an external OAuth provider."
+    },
+    {
+      "id": "connected-rotation",
+      "title": "Replace credentials on one SDK client",
+      "path": "agent_lab/remote_mcp_lab.py",
+      "start_line": 330,
+      "end_line": 351,
+      "reviewed_source_sha256": "23c9dba437504443dc4973b692d3b7a105772ba928f403daebf23c3af2602b45",
+      "spoken_text": "This is the live rotation step. The host revokes credential one and independently checks that the old bearer now receives HTTP four oh one. It obtains credential two through the same discovery flow. Python SDK version zero point two point one seven four has no public server replacement method, so this lab sends a version guarded MCP set servers control request with the new header. The CLI must acknowledge the replacement before reconnect. Both agent turns remain on one connected client."
+    },
+    {
+      "id": "rotation-check",
+      "title": "Correlate both tool receipts",
+      "path": "agent_lab/remote_mcp_lab.py",
+      "start_line": 414,
+      "end_line": 429,
+      "reviewed_source_sha256": "23c9dba437504443dc4973b692d3b7a105772ba928f403daebf23c3af2602b45",
+      "spoken_text": "The final check compares two exact tool markers with two server receipts. Each receipt must match its SDK tool result and authenticated wire call. Marker one must carry credential one; marker two must carry credential two. The check also requires two successful terminal results with one session identity. A successful model sentence alone cannot prove rotation, because a failed tool connection can still leave a successful terminal. This receipt join is the evidence that the renewed credential actually reached the remote MCP handler."
+    }
+  ]
+}

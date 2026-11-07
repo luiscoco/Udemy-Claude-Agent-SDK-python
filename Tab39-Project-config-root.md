@@ -25,38 +25,30 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ```python
 from pathlib import Path
 
-from claude_agent_sdk import ClaudeAgentOptions, SettingSource
-
-BASE = Path("projects").resolve()
-TRUSTED = {"course-app"}
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
 
-def options_for(requested: str) -> ClaudeAgentOptions:
-    root = (BASE / requested).resolve()
-    if root == BASE or not root.is_relative_to(BASE):
-        raise ValueError(f"{requested!r} is outside the projects folder")
-    project = BASE / root.relative_to(BASE).parts[0]
-    # [] disables filesystem settings; None would load every source.
-    sources: list[SettingSource] = ["project"] if project.name in TRUSTED else []
-    return ClaudeAgentOptions(cwd=project, setting_sources=sources)
+async def compare(cwd: Path, trusted: Path, config: Path) -> None:
+    options = ClaudeAgentOptions(
+        cwd=str(cwd),
+        setting_sources=["project", "local"],
+        extra_args={"project-config-root": str(trusted)},
+        tools=[], allowed_tools=[], mcp_servers={},
+        strict_mcp_config=True,
+        env={"CLAUDE_CONFIG_DIR": str(config)},
+        max_turns=3, max_budget_usd=0.10,
+    )
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Explain the project configuration root briefly.")
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(message.session_id, message.subtype)
 
-
-def main() -> None:
-    for requested in [
-        "course-app",
-        "course-app/src",
-        "downloaded-repo",
-        "../secrets",
-        "/etc",
-    ]:
-        try:
-            options = options_for(requested)
-            print(requested, "->", options.cwd, options.setting_sources)
-        except ValueError as error:
-            print("refused:", error)
+# Check actual init cwd, hook log and command inventory separately.
+# A dry SDK argv capture proves serialization only; it does not load settings.
 ```
 
-`options_for` resolves the request under BASE, rejects anything not `is_relative_to`(BASE), and sets `setting_sources`=["project"] only for names in TRUSTED.
+cwd stays at the selected checkout while extra_args serializes an explicit project-config-root. Project and local sources must be enabled; the host verifies configuration origin from init and owned hook/command observations.
 
 ## How the offline lab checks it
 
@@ -64,7 +56,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `config_root` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 259); the Python source tab shows it below the concept code. Host contracts
+(line 263); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -82,10 +74,7 @@ Suggested prompt:
 > Read notes.txt in this isolated project.
 
 The live profile is `read`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/config_root_lab.py](agent_lab/config_root_lab.py). Each run creates owned trusted, branch and docs Git worktrees. A dry SDK argument capture checks project-config-root serialization; live SDK init, hook/command origins and fixture hashes establish selected configuration. A separate exact Bash probe compares trusted tool unavailability with branch permission, and credential-free startup probes capture invalid-root CLI errors.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

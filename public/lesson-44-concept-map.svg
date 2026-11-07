@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" role="img" aria-label="Lesson 44 OpenTelemetry concept map">
+<rect width="1200" height="690" fill="#f7f9fc"/>
+<text x="56" y="64" font-family="Arial" font-size="34" font-weight="700" fill="#14213d">OpenTelemetry: configuration → observed signals</text>
+<text x="56" y="99" font-family="Arial" font-size="17" fill="#475569">The collector receipt, not an enabled setting, establishes export.</text>
+<g font-family="Arial" fill="#14213d">
+<rect x="55" y="145" width="270" height="165" rx="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+<text x="78" y="188" font-size="24" font-weight="700">SDK subprocess</text>
+<text x="78" y="222" font-size="17">Read notes.txt</text><text x="78" y="251" font-size="17">Session + tool-use ID</text><text x="78" y="280" font-size="17">OTLP HTTP JSON config</text>
+<rect x="465" y="145" width="270" height="165" rx="20" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+<text x="488" y="188" font-size="24" font-weight="700">Owned collector</text>
+<text x="488" y="222" font-size="17">HTTP 200 receipt</text><text x="488" y="251" font-size="17">Body hash + count</text><text x="488" y="280" font-size="17">Raw body discarded</text>
+<rect x="875" y="145" width="270" height="165" rx="20" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+<text x="898" y="188" font-size="24" font-weight="700">Evidence check</text>
+<text x="898" y="222" font-size="17">Same run + lane</text><text x="898" y="251" font-size="17">Same session + tool</text><text x="898" y="280" font-size="17">Positive native records</text>
+<path d="M330 228H456M740 228H866" stroke="#64748b" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+<rect x="75" y="390" width="305" height="160" rx="18" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+<text x="98" y="430" font-size="23" font-weight="700">Metrics</text><text x="98" y="464" font-size="17">Delta: sum samples</text><text x="98" y="495" font-size="17">Cumulative: keep latest</text>
+<rect x="447" y="390" width="305" height="160" rx="18" fill="#fce7f3" stroke="#ec4899" stroke-width="2"/>
+<text x="470" y="430" font-size="23" font-weight="700">Logs</text><text x="470" y="464" font-size="17">Events and tool decisions</text><text x="470" y="495" font-size="17">Strip prompt and secrets</text>
+<rect x="819" y="390" width="305" height="160" rx="18" fill="#ede9fe" stroke="#8b5cf6" stroke-width="2"/>
+<text x="842" y="430" font-size="23" font-weight="700">Traces</text><text x="842" y="464" font-size="17">Native interaction span</text><text x="842" y="495" font-size="17">Manual host parent span</text>
+<text x="70" y="625" font-size="18" fill="#475569">Local mode sends authored fixtures. Live mode requires matching native subprocess receipts.</text>
+</g><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#64748b"/></marker></defs>
+</svg>

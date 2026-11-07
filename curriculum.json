@@ -150,7 +150,7 @@
     "module": "agent_lab.lessons.lesson_17",
     "exercise_function": "checkpoint",
     "live_profile": "query",
-    "adaptation": "Offline rewind is a host file snapshot. Live SDK checkpointing needs a write-enabled session; this lab does not grant writes to the model."
+    "adaptation": "Offline uses the real Python client with a scripted CLI and host backup effects. Live permits only one exact owned-file replacement and verifies native rewind; neither mode rewinds conversation history."
   },
   {
     "id": 18,
@@ -159,7 +159,7 @@
     "module": "agent_lab.lessons.lesson_18",
     "exercise_function": "sandbox",
     "live_profile": "query",
-    "adaptation": "The local path policy is not OS sandboxing. Configure a supported OS sandbox independently before running untrusted shell code."
+    "adaptation": "Read policy comparisons run on all platforms. Native shell enforcement is separately verified on Linux/WSL2 or macOS; Windows requests fail closed, and no unsandboxed fallback is permitted."
   },
   {
     "id": 19,
@@ -258,7 +258,7 @@
     "module": "agent_lab.lessons.lesson_29",
     "exercise_function": "images",
     "live_profile": "query",
-    "adaptation": "This exercise creates an image content block locally; the live text lesson does not upload that image."
+    "adaptation": "The original exercise builds a one-pixel image block offline. The enhanced live lesson sends a separate validated red or blue PNG through the SDK input stream."
   },
   {
     "id": 30,

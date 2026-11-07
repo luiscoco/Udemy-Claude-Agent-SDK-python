@@ -1,0 +1,327 @@
+{
+  "lesson": 48,
+  "section": "admission",
+  "duration": 23.928,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.13
+    },
+    {
+      "word": "host",
+      "start": 0.13,
+      "end": 0.45
+    },
+    {
+      "word": "examines",
+      "start": 0.45,
+      "end": 1.04
+    },
+    {
+      "word": "each",
+      "start": 1.07,
+      "end": 1.36
+    },
+    {
+      "word": "actual",
+      "start": 1.36,
+      "end": 1.81
+    },
+    {
+      "word": "tool",
+      "start": 1.81,
+      "end": 2.04
+    },
+    {
+      "word": "name",
+      "start": 2.04,
+      "end": 2.26
+    },
+    {
+      "word": "and",
+      "start": 2.26,
+      "end": 2.38
+    },
+    {
+      "word": "input",
+      "start": 2.41,
+      "end": 2.81
+    },
+    {
+      "word": "before",
+      "start": 2.84,
+      "end": 3.17
+    },
+    {
+      "word": "execution",
+      "start": 3.17,
+      "end": 3.8
+    },
+    {
+      "word": "Read",
+      "start": 4.41,
+      "end": 4.66
+    },
+    {
+      "word": "accepts",
+      "start": 4.66,
+      "end": 5.12
+    },
+    {
+      "word": "only",
+      "start": 5.12,
+      "end": 5.42
+    },
+    {
+      "word": "four",
+      "start": 5.42,
+      "end": 5.76
+    },
+    {
+      "word": "owned",
+      "start": 5.79,
+      "end": 6.04
+    },
+    {
+      "word": "fixture",
+      "start": 6.04,
+      "end": 6.4
+    },
+    {
+      "word": "paths",
+      "start": 6.4,
+      "end": 6.92
+    },
+    {
+      "word": "Write",
+      "start": 7.39,
+      "end": 7.69
+    },
+    {
+      "word": "accepts",
+      "start": 7.69,
+      "end": 8.14
+    },
+    {
+      "word": "only",
+      "start": 8.14,
+      "end": 8.42
+    },
+    {
+      "word": "one",
+      "start": 8.42,
+      "end": 8.78
+    },
+    {
+      "word": "outside",
+      "start": 8.81,
+      "end": 9.22
+    },
+    {
+      "word": "marker",
+      "start": 9.22,
+      "end": 9.55
+    },
+    {
+      "word": "path",
+      "start": 9.55,
+      "end": 9.91
+    },
+    {
+      "word": "with",
+      "start": 9.91,
+      "end": 10.08
+    },
+    {
+      "word": "exact",
+      "start": 10.08,
+      "end": 10.51
+    },
+    {
+      "word": "content",
+      "start": 10.51,
+      "end": 11.06
+    },
+    {
+      "word": "Bash",
+      "start": 11.54,
+      "end": 11.99
+    },
+    {
+      "word": "accepts",
+      "start": 11.99,
+      "end": 12.39
+    },
+    {
+      "word": "one",
+      "start": 12.39,
+      "end": 12.59
+    },
+    {
+      "word": "literal",
+      "start": 12.59,
+      "end": 12.91
+    },
+    {
+      "word": "Python",
+      "start": 12.91,
+      "end": 13.27
+    },
+    {
+      "word": "script",
+      "start": 13.27,
+      "end": 13.68
+    },
+    {
+      "word": "and",
+      "start": 13.71,
+      "end": 13.87
+    },
+    {
+      "word": "a",
+      "start": 13.87,
+      "end": 13.91
+    },
+    {
+      "word": "fixed",
+      "start": 13.91,
+      "end": 14.23
+    },
+    {
+      "word": "target",
+      "start": 14.23,
+      "end": 14.73
+    },
+    {
+      "word": "The",
+      "start": 15.18,
+      "end": 15.31
+    },
+    {
+      "word": "guarded",
+      "start": 15.31,
+      "end": 15.72
+    },
+    {
+      "word": "lane",
+      "start": 15.72,
+      "end": 16.01
+    },
+    {
+      "word": "denies",
+      "start": 16.01,
+      "end": 16.41
+    },
+    {
+      "word": "protected",
+      "start": 16.41,
+      "end": 16.89
+    },
+    {
+      "word": "reads",
+      "start": 16.89,
+      "end": 17.38
+    },
+    {
+      "word": "the",
+      "start": 17.6,
+      "end": 17.72
+    },
+    {
+      "word": "outside",
+      "start": 17.72,
+      "end": 18.19
+    },
+    {
+      "word": "write",
+      "start": 18.19,
+      "end": 18.51
+    },
+    {
+      "word": "and",
+      "start": 18.59,
+      "end": 18.75
+    },
+    {
+      "word": "the",
+      "start": 18.75,
+      "end": 18.84
+    },
+    {
+      "word": "owned",
+      "start": 18.84,
+      "end": 19.14
+    },
+    {
+      "word": "egress",
+      "start": 19.14,
+      "end": 19.47
+    },
+    {
+      "word": "target",
+      "start": 19.47,
+      "end": 19.96
+    },
+    {
+      "word": "An",
+      "start": 20.42,
+      "end": 20.6
+    },
+    {
+      "word": "unknown",
+      "start": 20.6,
+      "end": 20.99
+    },
+    {
+      "word": "path",
+      "start": 20.99,
+      "end": 21.28
+    },
+    {
+      "word": "or",
+      "start": 21.28,
+      "end": 21.36
+    },
+    {
+      "word": "shell",
+      "start": 21.36,
+      "end": 21.6
+    },
+    {
+      "word": "expression",
+      "start": 21.6,
+      "end": 22.18
+    },
+    {
+      "word": "does",
+      "start": 22.23,
+      "end": 22.45
+    },
+    {
+      "word": "not",
+      "start": 22.45,
+      "end": 22.64
+    },
+    {
+      "word": "become",
+      "start": 22.64,
+      "end": 22.91
+    },
+    {
+      "word": "a",
+      "start": 22.91,
+      "end": 22.95
+    },
+    {
+      "word": "valid",
+      "start": 22.95,
+      "end": 23.27
+    },
+    {
+      "word": "probe",
+      "start": 23.27,
+      "end": 23.66
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Lesson 24: Harnesses
+
+The SDK produces a structured task plan as a proposal. The host validates it again with a strict Pydantic model, graph rules and an exact two-file allowlist: T1 owns `src/tags.py`; T2 owns `src/search.py` and depends on T1. An approved valid plan starts deterministic host workers that write fixed Python content. The workers never execute model-generated code. A valid plan with approval disabled starts no workers. Duplicate ownership, dependency cycles and outside-scope paths are rejected before execution.
+
+The live lab exposes no model tools. The CLI's internal `StructuredOutput` call is recorded with one matching successful tool result, a successful final SDK result and a matching initialized session. The host then checks the proposal and, only for an accepted approved plan, verifies exact worker IDs and file hashes. Raw arbitrary proposal text is not needed for the automatic verdict. Offline mode performs actual host validation and file effects but labels SDK identities as fixtures. Recorded missing-proposal and wrong-worker cases need review.
+
+Use **Fixed plan proposal** and **Approve host execution after validation** in the Run tab, or pass `{"proposal":"duplicate","approve":true}` as lesson options. The proposal choices are `valid`, `duplicate`, `cycle` and `outside`; arbitrary task lists, file paths and custom prompts are not accepted by this bounded lab. The earlier `harness` exercise still compares five local proposals. Its result is host exercise evidence; the enhanced `experiment` report supplies the automatic criterion.
+
+All five real provider-backed variants passed on 3 November 2026, including approved execution, review-only and three specific rejections; see [live acceptance](live-acceptance.md). Seven questions and three exact source excerpts cover structured output, semantic validation, approval and worker evidence. Arbitrary plans, model-written patches, remote workers, broader path policies, authored media and full reference parity remain separate. Lesson 25, Compaction and context, is next.
+
+References: [Agent SDK structured output](https://platform.claude.com/docs/en/agent-sdk/structured-outputs), [SDK Python result type](https://github.com/anthropics/claude-agent-sdk-python/blob/main/src/claude_agent_sdk/types.py).

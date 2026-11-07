@@ -21,9 +21,9 @@ from claude_agent_sdk import (
 )
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from agent_lab.config import ROOT, Settings
+from agent_lab.config import Settings
 from agent_lab.doctor import resolve_cli_path
-from agent_lab.hooks import demo_elicitation_hook, lesson_hooks, permission_callback
+from agent_lab.hooks import lesson_hooks, permission_callback
 from agent_lab.models import Event, Lesson, LessonError, RunRequest
 from agent_lab.policy import decide, redact
 from agent_lab.services import Calculation, Orders, Summary, retrieve
@@ -118,6 +118,177 @@ async def run_sdk(
     from agent_lab.models import lesson_request
 
     request = lesson_request(lesson.id, request)
+    if lesson.id == 49:
+        from agent_lab.headless_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 48:
+        from agent_lab.hardening_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 47:
+        from agent_lab.orchestra_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 46:
+        from agent_lab.cache_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 45:
+        from agent_lab.cloud_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 44:
+        from agent_lab.telemetry_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 43:
+        from agent_lab.remote_mcp_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 42:
+        from agent_lab.web_tools_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 41:
+        from agent_lab.client_lifecycle_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 40:
+        from agent_lab.drops_lab import execute_lesson
+
+        await execute_lesson(work, request, settings, emit)
+        return
+    if lesson.id == 39:
+        from agent_lab.config_root_lab import execute, takeover
+
+        runner = takeover if request.lesson_options["action"] == "takeover" else execute
+        await runner(work, request, settings, emit)
+        return
+    if lesson.id == 38:
+        from agent_lab.suggestions_lab import execute_suggestions
+
+        await execute_suggestions(work, request, settings, emit, config)
+        return
+    if lesson.id == 37:
+        from agent_lab.permission_gate_lab import execute_gate
+
+        await execute_gate(work, request, settings, emit, config)
+        return
+    if lesson.id == 36:
+        from agent_lab.process_spawning_lab import execute_spawn
+
+        await execute_spawn(work, request, settings, emit, config)
+        return
+    if lesson.id == 35:
+        from agent_lab.session_store_lab import execute_store
+
+        await execute_store(work, request, settings, emit, config)
+        return
+    if lesson.id == 34:
+        from agent_lab.styles_lab import execute_styles
+
+        await execute_styles(work, request, settings, emit, config)
+        return
+    if lesson.id == 33:
+        from agent_lab.elicitation_lab import execute_elicitation
+
+        await execute_elicitation(work, request, settings, emit, config)
+        return
+    if lesson.id == 32:
+        from agent_lab.plan_lab import execute_plan_mode
+
+        await execute_plan_mode(work, request, settings, emit, config)
+        return
+    if lesson.id == 31:
+        from agent_lab.question_lab import execute_question
+
+        await execute_question(work, request, settings, emit, config)
+        return
+    if lesson.id == 30:
+        from agent_lab.todo_lab import execute_todos
+
+        await execute_todos(work, request, settings, emit, config)
+        return
+    if lesson.id == 29:
+        from agent_lab.image_input_lab import execute_image_input
+
+        await execute_image_input(work, request, settings, emit, config)
+        return
+    if lesson.id == 28:
+        from agent_lab.retry_lab import execute_retry
+
+        await execute_retry(work, request, settings, emit, config)
+        return
+    if lesson.id == 27:
+        from agent_lab.background_lab import execute_background
+
+        await execute_background(work, request, settings, emit, config)
+        return
+    if lesson.id == 26:
+        from agent_lab.control_lab import execute_control
+
+        await execute_control(work, request, settings, emit, config)
+        return
+    if lesson.id == 25:
+        from agent_lab.compaction_lab import execute_compaction
+
+        await execute_compaction(work, request, settings, emit, config)
+        return
+    if lesson.id == 24:
+        from agent_lab.harness_lab import execute_harness
+
+        await execute_harness(work, request, settings, emit, config)
+        return
+    if lesson.id == 23:
+        from agent_lab.plugin_lab import execute_plugin
+
+        await execute_plugin(work, request, settings, emit, config)
+        return
+    if lesson.id == 22:
+        from agent_lab.project_memory import execute_memory
+
+        await execute_memory(work, request, settings, emit, config)
+        return
+    if lesson.id == 21:
+        from agent_lab.slash_commands import execute_commands
+
+        await execute_commands(work, request, settings, emit, config)
+        return
+    if lesson.id == 20:
+        from agent_lab.hooks_deep import execute_hooks
+
+        await execute_hooks(work, request, settings, emit, config)
+        return
+    if lesson.id == 19:
+        from agent_lab.session_catalog import execute_catalog
+
+        await execute_catalog(work, request, settings, emit, config)
+        return
+    if lesson.id == 18:
+        from agent_lab.sandbox_lab import execute_sandbox
+
+        await execute_sandbox(work, request, settings, emit, config)
+        return
+    if lesson.id == 17:
+        from agent_lab.checkpointing import execute_checkpoint
+
+        await execute_checkpoint(work, request, settings, emit, config)
+        return
+    if lesson.id == 16:
+        from agent_lab.settings_lab import execute_settings
+
+        await execute_settings(work, request, settings, emit, config)
+        return
     if lesson.id == 15:
         from agent_lab.usage import execute_usage
 
@@ -330,16 +501,6 @@ async def run_sdk(
             }
         }
         allowed_custom.add("mcp__notes__read_note")
-    if profile == "elicitation":
-        options.mcp_servers = {
-            "rooms": {
-                "type": "stdio",
-                "command": sys.executable,
-                "args": ["-m", "agent_lab.integrations.rooms_mcp"],
-                "env": {"PYTHONPATH": str(ROOT)},
-            }
-        }
-        allowed_custom.add("mcp__rooms__book_room")
     options.include_partial_messages = profile in {"options", "streaming"}
 
     def permitted(name: str, arguments: dict[str, Any]) -> tuple[bool, str]:
@@ -367,17 +528,6 @@ async def run_sdk(
 
     options.can_use_tool = permission_callback(permitted, ask)
     options.hooks = lesson_hooks(permitted, audit)
-    if profile == "elicitation":
-        from typing import cast
-
-        from claude_agent_sdk import HookMatcher
-        from claude_agent_sdk.types import HookEvent
-
-        # Verified live on 0.2.174: the CLI delivers this callback even though the
-        # SDK's HookEvent union omits it. Keep the compatibility cast here only.
-        options.hooks[cast(HookEvent, "Elicitation")] = [
-            HookMatcher(hooks=[demo_elicitation_hook(ask, audit)], timeout=65)
-        ]
 
     if foundation is not None:
         from agent_lab.foundations import configure, experiment_hooks, live_permission
@@ -473,7 +623,7 @@ async def run_sdk(
         profile in {"conversation", "structured", "questions"}
         or tools_to_expose
         or builtins
-        or profile in {"mcp", "elicitation"}
+        or profile == "mcp"
     ):
         async with ClaudeSDKClient(options=options) as client:
             await client.query(prompt)

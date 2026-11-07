@@ -1,6 +1,6 @@
 """Lesson 22: CLAUDE.md and memory.
 
-Create Python project instructions and separate explicit memory files from runtime context.
+Compare owned CLAUDE.md rules across project settings and system prompt controls.
 """
 import asyncio
 

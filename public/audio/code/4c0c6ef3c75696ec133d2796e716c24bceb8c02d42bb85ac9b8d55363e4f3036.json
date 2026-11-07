@@ -1,0 +1,457 @@
+{
+  "lesson": 45,
+  "section": "fixed-translation",
+  "duration": 32.184,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.2
+    },
+    {
+      "word": "owned",
+      "start": 0.2,
+      "end": 0.47
+    },
+    {
+      "word": "proxy",
+      "start": 0.47,
+      "end": 0.93
+    },
+    {
+      "word": "is",
+      "start": 0.93,
+      "end": 1.21
+    },
+    {
+      "word": "the",
+      "start": 1.21,
+      "end": 1.29
+    },
+    {
+      "word": "boundary",
+      "start": 1.29,
+      "end": 1.7
+    },
+    {
+      "word": "between",
+      "start": 1.7,
+      "end": 2.06
+    },
+    {
+      "word": "native",
+      "start": 2.06,
+      "end": 2.42
+    },
+    {
+      "word": "cloud-shaped",
+      "start": 2.42,
+      "end": 2.92
+    },
+    {
+      "word": "traffic",
+      "start": 2.92,
+      "end": 3.37
+    },
+    {
+      "word": "and",
+      "start": 3.45,
+      "end": 3.65
+    },
+    {
+      "word": "one",
+      "start": 3.65,
+      "end": 3.85
+    },
+    {
+      "word": "fixed",
+      "start": 3.85,
+      "end": 4.16
+    },
+    {
+      "word": "upstream",
+      "start": 4.19,
+      "end": 4.65
+    },
+    {
+      "word": "Anthropic",
+      "start": 4.65,
+      "end": 5.18
+    },
+    {
+      "word": "call",
+      "start": 5.18,
+      "end": 5.48
+    },
+    {
+      "word": "It",
+      "start": 6.03,
+      "end": 6.2
+    },
+    {
+      "word": "records",
+      "start": 6.2,
+      "end": 6.62
+    },
+    {
+      "word": "the",
+      "start": 6.62,
+      "end": 6.7
+    },
+    {
+      "word": "lane",
+      "start": 6.7,
+      "end": 7.12
+    },
+    {
+      "word": "and",
+      "start": 7.15,
+      "end": 7.32
+    },
+    {
+      "word": "request",
+      "start": 7.32,
+      "end": 7.68
+    },
+    {
+      "word": "identity",
+      "start": 7.68,
+      "end": 8.31
+    },
+    {
+      "word": "checks",
+      "start": 8.72,
+      "end": 9.02
+    },
+    {
+      "word": "the",
+      "start": 9.02,
+      "end": 9.1
+    },
+    {
+      "word": "generated",
+      "start": 9.1,
+      "end": 9.6
+    },
+    {
+      "word": "credential",
+      "start": 9.6,
+      "end": 10.09
+    },
+    {
+      "word": "for",
+      "start": 10.09,
+      "end": 10.24
+    },
+    {
+      "word": "that",
+      "start": 10.24,
+      "end": 10.38
+    },
+    {
+      "word": "provider",
+      "start": 10.38,
+      "end": 10.93
+    },
+    {
+      "word": "and",
+      "start": 11.18,
+      "end": 11.33
+    },
+    {
+      "word": "allows",
+      "start": 11.36,
+      "end": 11.75
+    },
+    {
+      "word": "only",
+      "start": 11.75,
+      "end": 12.05
+    },
+    {
+      "word": "the",
+      "start": 12.05,
+      "end": 12.13
+    },
+    {
+      "word": "planned",
+      "start": 12.13,
+      "end": 12.46
+    },
+    {
+      "word": "model",
+      "start": 12.46,
+      "end": 12.82
+    },
+    {
+      "word": "and",
+      "start": 12.85,
+      "end": 12.99
+    },
+    {
+      "word": "bounded",
+      "start": 12.99,
+      "end": 13.35
+    },
+    {
+      "word": "message",
+      "start": 13.35,
+      "end": 13.66
+    },
+    {
+      "word": "body",
+      "start": 13.66,
+      "end": 14
+    },
+    {
+      "word": "The",
+      "start": 14.4,
+      "end": 14.62
+    },
+    {
+      "word": "upstream",
+      "start": 14.62,
+      "end": 15.03
+    },
+    {
+      "word": "key",
+      "start": 15.03,
+      "end": 15.25
+    },
+    {
+      "word": "stays",
+      "start": 15.25,
+      "end": 15.6
+    },
+    {
+      "word": "on",
+      "start": 15.6,
+      "end": 15.71
+    },
+    {
+      "word": "the",
+      "start": 15.71,
+      "end": 15.78
+    },
+    {
+      "word": "host",
+      "start": 15.78,
+      "end": 16.21
+    },
+    {
+      "word": "A",
+      "start": 16.64,
+      "end": 16.75
+    },
+    {
+      "word": "Bedrock",
+      "start": 16.75,
+      "end": 17.2
+    },
+    {
+      "word": "stream",
+      "start": 17.2,
+      "end": 17.52
+    },
+    {
+      "word": "is",
+      "start": 17.52,
+      "end": 17.67
+    },
+    {
+      "word": "returned",
+      "start": 17.67,
+      "end": 18.08
+    },
+    {
+      "word": "as",
+      "start": 18.11,
+      "end": 18.31
+    },
+    {
+      "word": "AWS",
+      "start": 18.78,
+      "end": 18.93
+    },
+    {
+      "word": "eventstream",
+      "start": 18.93,
+      "end": 19.5
+    },
+    {
+      "word": "frames",
+      "start": 19.5,
+      "end": 20
+    },
+    {
+      "word": "while",
+      "start": 20.28,
+      "end": 20.53
+    },
+    {
+      "word": "the",
+      "start": 20.53,
+      "end": 20.65
+    },
+    {
+      "word": "other",
+      "start": 20.65,
+      "end": 20.79
+    },
+    {
+      "word": "lanes",
+      "start": 20.79,
+      "end": 21.2
+    },
+    {
+      "word": "use",
+      "start": 21.2,
+      "end": 21.41
+    },
+    {
+      "word": "their",
+      "start": 21.41,
+      "end": 21.58
+    },
+    {
+      "word": "expected",
+      "start": 21.58,
+      "end": 22.08
+    },
+    {
+      "word": "response",
+      "start": 22.08,
+      "end": 22.5
+    },
+    {
+      "word": "formats",
+      "start": 22.5,
+      "end": 23.09
+    },
+    {
+      "word": "The",
+      "start": 23.32,
+      "end": 23.48
+    },
+    {
+      "word": "report",
+      "start": 23.48,
+      "end": 23.85
+    },
+    {
+      "word": "keeps",
+      "start": 23.85,
+      "end": 24.12
+    },
+    {
+      "word": "status",
+      "start": 24.12,
+      "end": 24.61
+    },
+    {
+      "word": "and",
+      "start": 24.61,
+      "end": 24.79
+    },
+    {
+      "word": "message",
+      "start": 24.79,
+      "end": 25.11
+    },
+    {
+      "word": "identifiers",
+      "start": 25.11,
+      "end": 25.92
+    },
+    {
+      "word": "not",
+      "start": 26.15,
+      "end": 26.46
+    },
+    {
+      "word": "tokens",
+      "start": 26.46,
+      "end": 26.87
+    },
+    {
+      "word": "or",
+      "start": 26.87,
+      "end": 26.95
+    },
+    {
+      "word": "secret",
+      "start": 26.95,
+      "end": 27.36
+    },
+    {
+      "word": "headers",
+      "start": 27.36,
+      "end": 27.85
+    },
+    {
+      "word": "so",
+      "start": 28.1,
+      "end": 28.31
+    },
+    {
+      "word": "we",
+      "start": 28.31,
+      "end": 28.42
+    },
+    {
+      "word": "can",
+      "start": 28.42,
+      "end": 28.58
+    },
+    {
+      "word": "compare",
+      "start": 28.58,
+      "end": 28.98
+    },
+    {
+      "word": "a",
+      "start": 28.98,
+      "end": 29.02
+    },
+    {
+      "word": "native",
+      "start": 29.02,
+      "end": 29.36
+    },
+    {
+      "word": "SDK",
+      "start": 29.36,
+      "end": 29.75
+    },
+    {
+      "word": "result",
+      "start": 29.75,
+      "end": 30.21
+    },
+    {
+      "word": "with",
+      "start": 30.45,
+      "end": 30.61
+    },
+    {
+      "word": "the",
+      "start": 30.61,
+      "end": 30.69
+    },
+    {
+      "word": "actual",
+      "start": 30.69,
+      "end": 31.08
+    },
+    {
+      "word": "forwarded",
+      "start": 31.08,
+      "end": 31.49
+    },
+    {
+      "word": "call",
+      "start": 31.49,
+      "end": 31.85
+    }
+  ]
+}

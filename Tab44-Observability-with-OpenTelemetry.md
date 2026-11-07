@@ -23,33 +23,15 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-import os
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
-
-
-def telemetry_env() -> dict[str, str]:
-    endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
-    if not endpoint:
-        return {}  # no backend configured, so nothing is exported
-    return {
-        "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
-        "OTEL_METRICS_EXPORTER": "otlp",
-        "OTEL_LOGS_EXPORTER": "otlp",
-        "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
-        "OTEL_EXPORTER_OTLP_ENDPOINT": endpoint,
-        "OTEL_RESOURCE_ATTRIBUTES": "lesson.id=44,run.mode=live",
-    }
-
-
-async def main() -> None:
-    options = ClaudeAgentOptions(env=telemetry_env(), max_turns=1)
-    async for message in query(prompt="Explain the trace attributes.", options=options):
-        if isinstance(message, ResultMessage):
-            print(message.session_id, message.duration_ms, message.total_cost_usd)
+# The host sets OTEL_EXPORTER_OTLP_PROTOCOL=http/json and an owned
+# loopback endpoint in an isolated subprocess environment.
+# A received HTTP 200 with decoded records is still required.
+options = ClaudeAgentOptions(tools=["Read"], max_turns=5, max_budget_usd=0.10)
 ```
 
-`telemetry_env` returns OTLP exporter settings only when `OTEL_EXPORTER_OTLP_ENDPOINT` is configured, and ClaudeAgentOptions(env=...) hands them to the CLI.
+The collector validates OTLP JSON, records receipt hashes and counts, and strips raw content. The live action joins native tool, session and trace identities; the local action uses explicitly authored fixtures.
 
 ## How the offline lab checks it
 
@@ -57,7 +39,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `telemetry` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1412); the Python source tab shows it below the concept code. Host contracts
+(line 1416); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

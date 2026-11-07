@@ -70,7 +70,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `plan_mode` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1317); the Python source tab shows it below the concept code. Host contracts
+(line 1321); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -88,10 +88,7 @@ Suggested prompt:
 > Read notes.txt, then plan how to improve it. Do not change any files.
 
 The live profile is `plan`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/plan_lab.py](agent_lab/plan_lab.py). The SDK starts in plan mode; the host validates a structured proposal and only an approved valid plan triggers a default-mode confirmation and fixed workers. Approval is a selected lab control.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

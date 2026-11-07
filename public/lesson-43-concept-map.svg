@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" role="img" aria-labelledby="title desc">
+  <title id="title">Lesson 43 remote MCP concept map</title>
+  <desc id="desc">An owned loopback host challenges and grants a short lived credential, then authenticates HTTP or SSE MCP tool and resource calls. Evidence joins wire, handler, and agent results. Reconnect is separate from credential rotation.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#10243b"/><stop offset="1" stop-color="#153e48"/></linearGradient>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#86d9d2"/></marker>
+  </defs>
+  <rect width="1200" height="690" rx="28" fill="url(#bg)"/>
+  <text x="48" y="55" fill="#e7f7f5" font-family="Arial,sans-serif" font-size="31" font-weight="700">Remote MCP: trust, transport, evidence</text>
+  <text x="48" y="87" fill="#b9d9df" font-family="Arial,sans-serif" font-size="17">Owned loopback fixture · machine credential demonstration · no production OAuth certification</text>
+
+  <g font-family="Arial,sans-serif">
+    <rect x="48" y="123" width="252" height="117" rx="16" fill="#213e58" stroke="#7ac9db" stroke-width="2"/>
+    <text x="69" y="156" fill="#d9f6ff" font-size="20" font-weight="700">1 · Challenge</text>
+    <text x="69" y="186" fill="#f1f8fb" font-size="17">Protected /mcp → 401</text>
+    <text x="69" y="213" fill="#b9d9df" font-size="14">WWW-Authenticate metadata URL</text>
+
+    <rect x="332" y="123" width="252" height="117" rx="16" fill="#213e58" stroke="#7ac9db" stroke-width="2"/>
+    <text x="353" y="156" fill="#d9f6ff" font-size="20" font-weight="700">2 · Discover</text>
+    <text x="353" y="186" fill="#f1f8fb" font-size="17">Resource + issuer metadata</text>
+    <text x="353" y="213" fill="#b9d9df" font-size="14">Exact owned URLs and audience</text>
+
+    <rect x="616" y="123" width="252" height="117" rx="16" fill="#213e58" stroke="#7ac9db" stroke-width="2"/>
+    <text x="637" y="156" fill="#d9f6ff" font-size="20" font-weight="700">3 · Machine grant</text>
+    <text x="637" y="186" fill="#f1f8fb" font-size="17">Opaque 60-second token</text>
+    <text x="637" y="213" fill="#b9d9df" font-size="14">Reports keep label, never secret</text>
+
+    <rect x="900" y="123" width="252" height="117" rx="16" fill="#1f5260" stroke="#8ee2d2" stroke-width="2"/>
+    <text x="921" y="156" fill="#d9fff2" font-size="20" font-weight="700">4 · Authenticated MCP</text>
+    <text x="921" y="186" fill="#f1f8fb" font-size="17">HTTP or legacy SSE</text>
+    <text x="921" y="213" fill="#b9d9df" font-size="14">Initialize, then use session</text>
+  </g>
+  <g stroke="#86d9d2" stroke-width="3" marker-end="url(#arrow)"><path d="M301 181H324"/><path d="M585 181H608"/><path d="M869 181H892"/></g>
+
+  <path d="M1025 242V275H331V303" stroke="#86d9d2" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <path d="M1025 275H876V303" stroke="#86d9d2" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <g font-family="Arial,sans-serif">
+    <rect x="48" y="307" width="536" height="165" rx="18" fill="#24405d" stroke="#5abce0" stroke-width="2"/>
+    <text x="75" y="346" fill="#d9f6ff" font-size="23" font-weight="700">Tool: get_status(marker)</text>
+    <text x="75" y="379" fill="#f1f8fb" font-size="17">Exact fixture UUID:1 or :2 → ready + receipt</text>
+    <text x="75" y="411" fill="#b9d9df" font-size="16">Wire RPC ID + connection ↔ handler receipt</text>
+    <text x="75" y="439" fill="#b9d9df" font-size="16">↔ same-ID agent tool result</text>
+
+    <rect x="616" y="307" width="536" height="165" rx="18" fill="#21574f" stroke="#78ddac" stroke-width="2"/>
+    <text x="643" y="346" fill="#dcffed" font-size="23" font-weight="700">Resource: read URI</text>
+    <text x="643" y="379" fill="#f1f8fb" font-size="17">Runbook · order · PNG · inert HTML data</text>
+    <text x="643" y="411" fill="#b9e7d3" font-size="16">resources/read URI ↔ handler digest + bytes</text>
+    <text x="643" y="439" fill="#b9e7d3" font-size="16">Host read alone ≠ agent context</text>
+  </g>
+
+  <rect x="48" y="505" width="1104" height="132" rx="18" fill="#263c52" stroke="#d4ab66" stroke-width="2"/>
+  <text x="76" y="543" fill="#ffe8bd" font-family="Arial,sans-serif" font-size="22" font-weight="700">Reconnect ≠ credential rotation</text>
+  <text x="76" y="575" fill="#f1f8fb" font-family="Arial,sans-serif" font-size="17">One Python client can reconnect and keep its agent session, using credential-1.</text>
+  <text x="76" y="604" fill="#f1f8fb" font-family="Arial,sans-serif" font-size="17">Rotation requires credential-2 on the next handler call; this SDK cannot update a connected server header.</text>
+  <text x="48" y="664" fill="#a9c4ce" font-family="Arial,sans-serif" font-size="14">Lesson 43 · Auth and transport are local fixtures; live evidence additionally requires provider-backed SDK calls.</text>
+</svg>

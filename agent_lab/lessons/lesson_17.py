@@ -1,6 +1,6 @@
 """Lesson 17: Checkpointing and rewind.
 
-Snapshot a workspace file and restore it; inspect the SDK's rewind interface separately.
+Capture a user checkpoint, edit one owned file, and verify native rewind with file hashes.
 """
 import asyncio
 

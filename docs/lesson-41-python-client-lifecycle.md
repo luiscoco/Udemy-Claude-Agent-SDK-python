@@ -1,0 +1,9 @@
+# Lesson 41: Python interactive client lifecycle
+
+This Python edition teaches the public `ClaudeSDKClient` lifecycle. The pinned reference teaches a historical JavaScript V2 session API; that export is not available in the installed Python SDK, and this lesson labels the adaptation in its facts route, screen and evidence.
+
+The fixed exercise sends three host-identified prompts through one connected client. It waits for a successful `ResultMessage` after each prompt, records the shared session ID, disconnects, and checks that a later query raises `CLIConnectionError`. A fresh client then resumes the validated owned session ID and must return a successful terminal with that same ID. Answer recall is reviewed by the student; it is not the automatic criterion.
+
+`GET /api/c41/facts` reports the installed Python SDK version and the adaptation. `POST /api/c41/client` builds a prepared or consented live base. `GET /api/c41/state` reloads a completed owned manifest. `POST /api/c41/resume` resumes its exact ID. `POST /api/c41/compare` runs base and resume in sequence. `GET /api/c41/code` returns three real Python excerpts. Bodies reject unknown fields, paths, raw prompts, session overrides and environment values. Live actions require fresh consent. The 90-second operation slot rejects overlap; prepared faults never replace the latest valid base.
+
+Prepared mode uses the real Python client against a `ScriptedCLI` fixture and labels the result as such. The 5 November 2026 provider-backed comparison passed: three successful turns on one session, three matching initialization IDs, `CLIConnectionError` after disconnect, and a fresh successful resume with the same session ID. The four terminal cost fields were $0.000791, $0.002230, $0.003425 and $0.004779. These fields can be cumulative; their sum is not an independent charge total. Report: `.lab-data/lesson-live-smoke/lesson-41-20261105T131329921401Z/report.json`.

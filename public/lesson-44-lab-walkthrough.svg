@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" role="img" aria-label="Lesson 44 telemetry lab walkthrough">
+<rect width="1200" height="690" fill="#f8fafc"/>
+<text x="56" y="65" font-family="Arial" font-size="34" font-weight="700" fill="#14213d">Lab walkthrough: prove an export arrived</text>
+<text x="56" y="101" font-family="Arial" font-size="17" fill="#475569">Six actions, eight live queries: privacy and exporters each use two lanes.</text>
+<g font-family="Arial">
+<path d="M80 180V586" stroke="#94a3b8" stroke-width="5"/>
+<g fill="#1d4ed8"><circle cx="80" cy="184" r="20"/><circle cx="80" cy="263" r="20"/><circle cx="80" cy="342" r="20"/><circle cx="80" cy="421" r="20"/><circle cx="80" cy="500" r="20"/><circle cx="80" cy="579" r="20"/></g>
+<g fill="white" font-size="20" font-weight="700" text-anchor="middle"><text x="80" y="191">1</text><text x="80" y="270">2</text><text x="80" y="349">3</text><text x="80" y="428">4</text><text x="80" y="507">5</text><text x="80" y="586">6</text></g>
+<g fill="#eef2ff" stroke="#c7d2fe"><rect x="130" y="149" width="1000" height="60" rx="12"/><rect x="130" y="228" width="1000" height="60" rx="12"/><rect x="130" y="307" width="1000" height="60" rx="12"/><rect x="130" y="386" width="1000" height="60" rx="12"/><rect x="130" y="465" width="1000" height="60" rx="12"/><rect x="130" y="544" width="1000" height="60" rx="12"/></g>
+<g fill="#1e293b" font-size="18"><text x="154" y="187"><tspan font-weight="700">Signals</tspan> — confirm positive metrics, logs and traces receipts</text>
+<text x="154" y="266"><tspan font-weight="700">Privacy</tspan> — compare private and synthetic content lanes; collector strips prompt</text>
+<text x="154" y="345"><tspan font-weight="700">Tracing</tspan> — match native interaction trace to the manual host span</text>
+<text x="154" y="424"><tspan font-weight="700">Rich</tspan> — compare denied Bash call with executed Read and their tool IDs</text>
+<text x="154" y="503"><tspan font-weight="700">Exporters</tspan> — delta sums samples; cumulative keeps the latest timestamp</text>
+<text x="154" y="582"><tspan font-weight="700">Collector</tspan> — observe 401 without a credential, then authorized HTTP 200</text></g>
+<text x="56" y="654" font-family="Arial" font-size="18" fill="#475569">Every passing lane needs a successful SDK result and received records with the same run, lane and session.</text>
+</g></svg>

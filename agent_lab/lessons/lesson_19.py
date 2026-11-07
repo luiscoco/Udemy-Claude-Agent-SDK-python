@@ -1,6 +1,6 @@
 """Lesson 19: Session management.
 
-Inspect list_sessions and get_session_messages without exposing host transcripts.
+Manage an owned SDK session catalog with scoped inspection, pagination, metadata, forks and deletion.
 """
 import asyncio
 

@@ -1,0 +1,36 @@
+{
+  "lesson": 46,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "complete-usage",
+      "title": "Require complete usage",
+      "path": "agent_lab/cache_wire.py",
+      "start_line": 19,
+      "end_line": 41,
+      "reviewed_source_sha256": "a314121a7ce68231d5b0537d8bb38236089f875c0e4637267f58c02ca9be7e8e",
+      "spoken_text": "This parser requires four primary response counters: input tokens, total cache creation, cache reads and output tokens. Each must be a finite nonnegative safe integer. The one-hour subdivision is optional, but if present it cannot exceed total creation. An explicit five-minute subdivision must add up with the one-hour count. The normalized result separates ordinary input, five-minute writes, one-hour writes, reads and output. Missing primary evidence is rejected rather than quietly turned into zero."
+    },
+    {
+      "id": "breakpoint-locations",
+      "title": "Locate cache breakpoints",
+      "path": "agent_lab/cache_wire.py",
+      "start_line": 65,
+      "end_line": 87,
+      "reviewed_source_sha256": "a314121a7ce68231d5b0537d8bb38236089f875c0e4637267f58c02ca9be7e8e",
+      "spoken_text": "The wire inspector searches for cache control at the request top level, on tools, in system blocks and inside each message content block. It retains only the location, ephemeral type and five-minute or one-hour T T L. The prompt text and credential headers are not placed in the report. A breakpoint tells the API which prefix may be reused. It does not prove that the next turn read a cached entry. To establish that, compare the response cache-read counter and the matching native SDK result."
+    },
+    {
+      "id": "native-join",
+      "title": "Join native and wire turns",
+      "path": "agent_lab/cache_lab.py",
+      "start_line": 387,
+      "end_line": 409,
+      "reviewed_source_sha256": "5bf8995c3d4f90128179a1d6ac94a003f93974451e96597adfbf4e4e35273951",
+      "spoken_text": "The live evaluator requires two authenticated upstream receipts and two ordered native turns for one operation. Each response message identifier must match its SDK assistant, and both results must succeed in the same session. The independently reported SDK usage is normalized and compared with the observer's wire usage; the SDK cumulative cost must be finite and never decrease. A completed measurement can pass with zero cache reads. A selected breakpoint, matching prose or a plausible price estimate cannot replace these correlated observations."
+    }
+  ]
+}

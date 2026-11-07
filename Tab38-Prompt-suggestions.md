@@ -23,48 +23,31 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-from typing import Literal
+from pathlib import Path
 
-from claude_agent_sdk import (
-    AssistantMessage,
-    ClaudeAgentOptions,
-    ClaudeSDKClient,
-    ToolUseBlock,
-)
-from pydantic import BaseModel
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
 
-class Todo(BaseModel):
-    content: str
-    status: Literal["pending", "in_progress", "completed"]
+async def run_chat(work: Path) -> None:
+    options = ClaudeAgentOptions(
+        cwd=str(work), tools=[], allowed_tools=[], mcp_servers={},
+        setting_sources=[], strict_mcp_config=True,
+        extra_args={"prompt-suggestions": None, "no-session-persistence": None},
+        max_turns=6, max_budget_usd=0.10,
+    )
+    async with ClaudeSDKClient(options=options) as client:
+        for prompt in ("Suggest a CLI improvement.", "Suggest a next step."):
+            await client.query(prompt)
+            async for message in client.receive_response():
+                if isinstance(message, ResultMessage):
+                    print(message.session_id, message.subtype)
 
-
-def suggestion(todos: list[Todo]) -> str | None:
-    active = [todo.content for todo in todos if todo.status == "in_progress"]
-    waiting = [todo.content for todo in todos if todo.status == "pending"]
-    if active:
-        return f"Finish: {active[0]}"
-    return f"Start: {waiting[0]}" if waiting else None
-
-
-async def main() -> None:
-    todos: list[Todo] = []
-    async with ClaudeSDKClient(
-        ClaudeAgentOptions(tools=["TodoWrite", "Read"])
-    ) as client:
-        await client.query("Plan the release checklist and track it with TodoWrite.")
-        async for message in client.receive_response():
-            if isinstance(message, AssistantMessage):
-                for block in message.content:
-                    if isinstance(block, ToolUseBlock) and block.name == "TodoWrite":
-                        todos = [
-                            Todo.model_validate(item) for item in block.input["todos"]
-                        ]
-    # The host, not the model, derives the next prompt from validated state.
-    print("Suggested next prompt:", suggestion(todos))
+# The installed Python SDK parser skips raw prompt_suggestion envelopes.
+# The lesson's SuggestionTap records those envelopes at the transport boundary.
+# A suggestion is displayed separately and enters the chat only via send().
 ```
 
-The `receive_response` loop validates each TodoWrite ToolUseBlock into Todo models, and suggestion() derives the next prompt from the in-progress or pending task.
+extra_args requests the CLI suggestion flag; the transport tap records raw prompt_suggestion envelopes after each result, while the host queue alone owns submitted inputs.
 
 ## How the offline lab checks it
 
@@ -72,7 +55,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `todos` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1151); the Python source tab shows it below the concept code. Host contracts
+(line 1155); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -90,10 +73,7 @@ Suggested prompt:
 > Use the exercise tool and explain the suggested next action.
 
 The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/suggestions_lab.py](agent_lab/suggestions_lab.py). A transport tap records raw CLI prompt_suggestion envelopes after SDK results while a separate validated host queue owns submitted inputs. The installed Python SDK parser skips this event type; suggestions may be absent even after successful turns. No tools are enabled.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

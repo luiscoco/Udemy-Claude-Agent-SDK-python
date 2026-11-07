@@ -1,0 +1,14 @@
+name: offline checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check agent_lab tests
+      - run: uv run mypy agent_lab
+      - run: uv run pytest -q

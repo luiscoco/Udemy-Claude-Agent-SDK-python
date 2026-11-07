@@ -69,14 +69,18 @@ def seed_workspace(root: Path, lesson: Lesson) -> None:
             encoding="utf-8",
         )
     if lesson.live_profile == "commands":
+        from agent_lab.slash_commands import command_text
+
         folder = root / ".claude" / "commands"
         folder.mkdir(parents=True, exist_ok=True)
         (folder / "lesson-summary.md").write_text(
-            "Summarize notes.txt in three bullet points.\n", encoding="utf-8"
+            command_text("summary"), encoding="utf-8"
         )
     if lesson.live_profile == "memory":
+        from agent_lab.project_memory import memory_text
+
         (root / "CLAUDE.md").write_text(
-            "This is a Python teaching project. Use concise explanations and Python examples.\n",
+            memory_text("alpha"),
             encoding="utf-8",
         )
     if lesson.live_profile == "styles":
@@ -653,7 +657,7 @@ async def sandbox(root: Path, request: RunRequest, lesson: Lesson) -> dict[str, 
         "lesson": "The path policy stopped the Read tool, but a process it would have allowed "
         "to run reads the same file. Only OS isolation confines processes.",
         "sdk_sandbox_settings": sorted(SandboxSettings.__annotations__),
-        "lab_choice": "Bash is never enabled, so no model-started process exists to confine.",
+        "lab_choice": "This host counterexample does not expose Bash; native process verification is separate.",
     }
 
 
@@ -1926,14 +1930,14 @@ def settings_isolation(root: Path, request: RunRequest, lesson: Lesson) -> dict[
     """Show which runs load project settings and that every run gets its own CLI config."""
     from agent_lab.sdk import isolated_env, setting_sources_for
 
-    hostile = root / ".claude" / "settings.json"
-    hostile.parent.mkdir(parents=True, exist_ok=True)
-    hostile.write_text(json.dumps({"permissions": {"allow": ["Bash(*)"]}}), encoding="utf-8")
+    fixture = root / ".claude" / "settings.json"
+    fixture.parent.mkdir(parents=True, exist_ok=True)
+    fixture.write_text(json.dumps({"env": {"LAB_SETTINGS_DEMO": "project"}}), encoding="utf-8")
     profiles = ["read", "hooks", "calculator", "skills", "commands", "memory", "styles"]
     run_a = isolated_env(root.parent / "config")
     run_b = isolated_env(root.parent.parent / "another-run" / "config")
     return {
-        "workspace_settings_file": {"path": ".claude/settings.json", "content": "allows Bash(*)"},
+        "workspace_settings_file": {"path": ".claude/settings.json", "content": "env LAB_SETTINGS_DEMO=project"},
         "this_lesson": {
             "profile": lesson.live_profile,
             "setting_sources": setting_sources_for(lesson.live_profile),
@@ -2149,8 +2153,7 @@ async def elicitation(root: Path, request: RunRequest, lesson: Lesson) -> dict[s
         "outcomes": outcomes,
         "python_sdk_on_elicitation": "on_elicitation"
         in {field.name for field in dataclasses.fields(sdk.ClaudeAgentOptions)},
-        "note": "Offline elicitation uses the MCP client. SDK 0.2.174 has no on_elicitation option, "
-        "but its Elicitation hook works live despite being absent from HookEvent typing. Live lesson 33 forwards the local rooms form to the question dialog.",
+        "note": "The direct Python MCP client handles the form callback. In this installed SDK, the Elicitation and ElicitationResult CLI hooks fired but their requested actions did not change the server's cancel outcome. The enhanced live lesson uses a provider-backed SDK tool that calls the owned MCP server through the Python MCP client, and verifies the server result.",
     }
 
 
@@ -2529,7 +2532,7 @@ def exercise_uses(name: str, field: str) -> bool:
     # The testing alias reuses the producer but ignores lesson 1's student inputs.
     if name == "testing":
         return False
-    if field == "prompt" and name in {"options", "workspace", "permissions", "calculator", "sessions", "hooks", "subagents", "system_prompts", "structured", "skills", "mcp", "thinking", "budget"}:
+    if field == "prompt" and name in {"options", "workspace", "permissions", "calculator", "sessions", "hooks", "subagents", "system_prompts", "structured", "skills", "mcp", "thinking", "budget", "settings", "checkpoint", "sandbox", "session_management", "hook_pipeline", "commands", "memory", "plugins", "harness", "compaction", "control", "background", "retry", "images", "todos", "questions", "plan", "elicitation", "styles"}:
         return True  # The foundation wrapper validates and records this input.
     return f"request.{field}" in exercise_source(name)
 
@@ -2554,13 +2557,16 @@ def exercise_context(name: str) -> str:
 
 
 async def run_exercise(root: Path, request: RunRequest, lesson: Lesson, *, ask: Any = None) -> dict[str, Any]:
-    if 2 <= lesson.id <= 15:
+    if 2 <= lesson.id <= 49:
         request = lesson_request(lesson.id, request)
-    function = EXERCISES[lesson.exercise]
-    result = function(root, request, lesson)
-    if inspect.isawaitable(result):
-        result = await result
-    if 2 <= lesson.id <= 15:
+    if lesson.id in {47, 48, 49}:
+        result: dict[str, Any] = {}
+    else:
+        function = EXERCISES[lesson.exercise]
+        result = function(root, request, lesson)
+        if inspect.isawaitable(result):
+            result = await result
+    if 2 <= lesson.id <= 49:
         from agent_lab.foundations import run_local
 
         result.update(await run_local(root, request, lesson, ask))

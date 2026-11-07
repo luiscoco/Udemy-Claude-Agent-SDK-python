@@ -1,6 +1,6 @@
 # Lesson 24: Harnesses
 
-Separate model proposals from deterministic host validation and execution.
+Validate structured SDK proposals against exact host rules before deterministic execution.
 
 This lesson is part of **Agent workflows**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -23,41 +23,46 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
-from pydantic import BaseModel, Field, ValidationError, field_validator
-
+from pathlib import Path
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 class Task(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
     id: str
     files: list[str] = Field(min_length=1)
 
-    @field_validator("files")
-    @classmethod
-    def inside_src(cls, files: list[str]) -> list[str]:
-        if not all(name.startswith("src/") for name in files):
-            raise ValueError("every file must be under src/")
-        return files
-
-
 class Plan(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
     tasks: list[Task] = Field(min_length=1)
 
+def host_accepts(plan: Plan, root: Path) -> bool:
+    expected = {"T1": "src/tags.py", "T2": "src/search.py"}
+    if len(plan.tasks) != 2 or {task.id for task in plan.tasks} != set(expected):
+        return False
+    return all(task.files == [expected[task.id]] and
+               (root / expected[task.id]).resolve().is_relative_to(root.resolve())
+               for task in plan.tasks)
 
-async def propose_plan(goal: str) -> Plan | None:
-    schema = Plan.model_json_schema()
+async def propose(root: Path) -> Plan | None:
     options = ClaudeAgentOptions(
-        tools=[], output_format={"type": "json_schema", "schema": schema}
+        cwd=str(root), tools=[], setting_sources=[],
+        output_format={"type": "json_schema", "schema": Plan.model_json_schema()},
+        max_turns=4,
     )
-    async for message in query(prompt=goal, options=options):
-        if isinstance(message, ResultMessage) and message.structured_output is not None:
-            try:
-                return Plan.model_validate(message.structured_output)
-            except ValidationError:
-                return None  # rejected proposals never reach a worker
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Propose T1 for src/tags.py and T2 for src/search.py.")
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                try:
+                    plan = Plan.model_validate(message.structured_output, strict=True)
+                except ValidationError:
+                    return None
+                return plan if host_accepts(plan, root) else None
     return None
 ```
 
-The model's `structured_output` is only a proposal until `Plan.model_validate(...)` accepts it; a `ValidationError` returns `None`, so nothing is executed.
+The SDK structured output is parsed again by the host. Exact task IDs and canonical owned paths are checked before a separate approval gate can start fixed workers.
 
 ## How the offline lab checks it
 
@@ -65,7 +70,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `harness` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1275); the Python source tab shows it below the concept code. Host contracts
+(line 1279); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -80,13 +85,10 @@ uv run agent-lab lesson 24 --live
 
 Suggested prompt:
 
-> Use the exercise tool to inspect the harness result, then explain its gate.
+> Propose the selected fixed task plan for host validation.
 
 The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/harness_lab.py](agent_lab/harness_lab.py). The live run receives a structured plan, applies exact host validation and approval, then records deterministic worker effects or a specific rejection.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

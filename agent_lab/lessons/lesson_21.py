@@ -1,6 +1,6 @@
 """Lesson 21: Slash commands.
 
-Create a project Markdown command and enable project settings explicitly.
+Discover an owned project command and verify its slash invocation with a matching Read and response marker.
 """
 import asyncio
 

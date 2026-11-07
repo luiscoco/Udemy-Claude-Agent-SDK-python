@@ -1,6 +1,6 @@
 """Lesson 18: Sandbox.
 
-Distinguish a path policy from OS process isolation and inspect SDK sandbox settings.
+Correlate tool policy decisions and verify native filesystem and network isolation on a supported OS.
 """
 import asyncio
 

@@ -1,0 +1,382 @@
+{
+  "lesson": 49,
+  "section": "worker",
+  "duration": 27.096,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.1
+    },
+    {
+      "word": "supervisor",
+      "start": 0.1,
+      "end": 0.74
+    },
+    {
+      "word": "starts",
+      "start": 0.74,
+      "end": 1.18
+    },
+    {
+      "word": "one",
+      "start": 1.18,
+      "end": 1.36
+    },
+    {
+      "word": "local",
+      "start": 1.36,
+      "end": 1.71
+    },
+    {
+      "word": "Python",
+      "start": 1.71,
+      "end": 2.04
+    },
+    {
+      "word": "worker",
+      "start": 2.04,
+      "end": 2.47
+    },
+    {
+      "word": "with",
+      "start": 2.75,
+      "end": 2.92
+    },
+    {
+      "word": "a",
+      "start": 2.92,
+      "end": 2.96
+    },
+    {
+      "word": "fixed",
+      "start": 2.96,
+      "end": 3.3
+    },
+    {
+      "word": "run",
+      "start": 3.3,
+      "end": 3.49
+    },
+    {
+      "word": "identity",
+      "start": 3.49,
+      "end": 4.11
+    },
+    {
+      "word": "and",
+      "start": 4.14,
+      "end": 4.31
+    },
+    {
+      "word": "deadlines",
+      "start": 4.31,
+      "end": 4.94
+    },
+    {
+      "word": "It",
+      "start": 5.35,
+      "end": 5.53
+    },
+    {
+      "word": "observes",
+      "start": 5.53,
+      "end": 5.94
+    },
+    {
+      "word": "listening",
+      "start": 5.94,
+      "end": 6.45
+    },
+    {
+      "word": "health",
+      "start": 6.66,
+      "end": 7
+    },
+    {
+      "word": "and",
+      "start": 7,
+      "end": 7.13
+    },
+    {
+      "word": "readiness",
+      "start": 7.13,
+      "end": 7.69
+    },
+    {
+      "word": "then",
+      "start": 8.01,
+      "end": 8.21
+    },
+    {
+      "word": "holds",
+      "start": 8.21,
+      "end": 8.53
+    },
+    {
+      "word": "one",
+      "start": 8.53,
+      "end": 8.69
+    },
+    {
+      "word": "job",
+      "start": 8.69,
+      "end": 9.09
+    },
+    {
+      "word": "while",
+      "start": 9.21,
+      "end": 9.47
+    },
+    {
+      "word": "a",
+      "start": 9.47,
+      "end": 9.52
+    },
+    {
+      "word": "second",
+      "start": 9.52,
+      "end": 9.88
+    },
+    {
+      "word": "is",
+      "start": 9.88,
+      "end": 10.01
+    },
+    {
+      "word": "rejected",
+      "start": 10.01,
+      "end": 10.5
+    },
+    {
+      "word": "with",
+      "start": 10.5,
+      "end": 10.65
+    },
+    {
+      "word": "four",
+      "start": 10.65,
+      "end": 10.88
+    },
+    {
+      "word": "twenty",
+      "start": 10.88,
+      "end": 11.16
+    },
+    {
+      "word": "nine",
+      "start": 11.16,
+      "end": 11.44
+    },
+    {
+      "word": "Draining",
+      "start": 11.85,
+      "end": 12.28
+    },
+    {
+      "word": "changes",
+      "start": 12.28,
+      "end": 12.66
+    },
+    {
+      "word": "readiness",
+      "start": 12.66,
+      "end": 13.01
+    },
+    {
+      "word": "to",
+      "start": 13.01,
+      "end": 13.11
+    },
+    {
+      "word": "five",
+      "start": 13.11,
+      "end": 13.37
+    },
+    {
+      "word": "oh",
+      "start": 13.37,
+      "end": 13.47
+    },
+    {
+      "word": "three",
+      "start": 13.47,
+      "end": 13.79
+    },
+    {
+      "word": "release",
+      "start": 14.13,
+      "end": 14.49
+    },
+    {
+      "word": "lets",
+      "start": 14.49,
+      "end": 14.78
+    },
+    {
+      "word": "the",
+      "start": 14.78,
+      "end": 14.88
+    },
+    {
+      "word": "admitted",
+      "start": 14.88,
+      "end": 15.32
+    },
+    {
+      "word": "job",
+      "start": 15.32,
+      "end": 15.59
+    },
+    {
+      "word": "finish",
+      "start": 15.59,
+      "end": 16.1
+    },
+    {
+      "word": "The",
+      "start": 16.52,
+      "end": 16.62
+    },
+    {
+      "word": "supervisor",
+      "start": 16.62,
+      "end": 17.21
+    },
+    {
+      "word": "matches",
+      "start": 17.21,
+      "end": 17.59
+    },
+    {
+      "word": "job",
+      "start": 17.59,
+      "end": 17.97
+    },
+    {
+      "word": "and",
+      "start": 18.2,
+      "end": 18.42
+    },
+    {
+      "word": "run",
+      "start": 18.42,
+      "end": 18.62
+    },
+    {
+      "word": "receipts",
+      "start": 18.62,
+      "end": 19.23
+    },
+    {
+      "word": "awaits",
+      "start": 19.53,
+      "end": 19.94
+    },
+    {
+      "word": "the",
+      "start": 19.94,
+      "end": 20.03
+    },
+    {
+      "word": "worker",
+      "start": 20.03,
+      "end": 20.34
+    },
+    {
+      "word": "exit",
+      "start": 20.34,
+      "end": 20.76
+    },
+    {
+      "word": "and",
+      "start": 21.05,
+      "end": 21.22
+    },
+    {
+      "word": "checks",
+      "start": 21.22,
+      "end": 21.5
+    },
+    {
+      "word": "that",
+      "start": 21.5,
+      "end": 21.66
+    },
+    {
+      "word": "a",
+      "start": 21.66,
+      "end": 21.7
+    },
+    {
+      "word": "fresh",
+      "start": 21.7,
+      "end": 21.99
+    },
+    {
+      "word": "TCP",
+      "start": 21.99,
+      "end": 22.37
+    },
+    {
+      "word": "connection",
+      "start": 22.37,
+      "end": 22.81
+    },
+    {
+      "word": "fails",
+      "start": 22.81,
+      "end": 23.28
+    },
+    {
+      "word": "This",
+      "start": 23.57,
+      "end": 23.8
+    },
+    {
+      "word": "is",
+      "start": 23.8,
+      "end": 23.9
+    },
+    {
+      "word": "a",
+      "start": 23.9,
+      "end": 23.94
+    },
+    {
+      "word": "local",
+      "start": 23.94,
+      "end": 24.29
+    },
+    {
+      "word": "process",
+      "start": 24.29,
+      "end": 24.62
+    },
+    {
+      "word": "demonstration",
+      "start": 24.62,
+      "end": 25.38
+    },
+    {
+      "word": "not",
+      "start": 25.64,
+      "end": 25.9
+    },
+    {
+      "word": "a",
+      "start": 25.9,
+      "end": 25.94
+    },
+    {
+      "word": "cloud",
+      "start": 25.94,
+      "end": 26.2
+    },
+    {
+      "word": "deployment",
+      "start": 26.2,
+      "end": 26.8
+    }
+  ]
+}

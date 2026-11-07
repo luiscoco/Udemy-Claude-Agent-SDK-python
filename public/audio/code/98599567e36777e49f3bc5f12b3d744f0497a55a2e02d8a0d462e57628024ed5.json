@@ -1,0 +1,422 @@
+{
+  "lesson": 43,
+  "section": "rotation-check",
+  "duration": 31.608,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.13
+    },
+    {
+      "word": "final",
+      "start": 0.13,
+      "end": 0.49
+    },
+    {
+      "word": "check",
+      "start": 0.49,
+      "end": 0.77
+    },
+    {
+      "word": "compares",
+      "start": 0.77,
+      "end": 1.23
+    },
+    {
+      "word": "two",
+      "start": 1.23,
+      "end": 1.47
+    },
+    {
+      "word": "exact",
+      "start": 1.47,
+      "end": 1.92
+    },
+    {
+      "word": "tool",
+      "start": 1.92,
+      "end": 2.13
+    },
+    {
+      "word": "markers",
+      "start": 2.13,
+      "end": 2.77
+    },
+    {
+      "word": "with",
+      "start": 2.81,
+      "end": 2.96
+    },
+    {
+      "word": "two",
+      "start": 2.96,
+      "end": 3.24
+    },
+    {
+      "word": "server",
+      "start": 3.24,
+      "end": 3.56
+    },
+    {
+      "word": "receipts",
+      "start": 3.56,
+      "end": 4.16
+    },
+    {
+      "word": "Each",
+      "start": 4.65,
+      "end": 4.96
+    },
+    {
+      "word": "receipt",
+      "start": 4.96,
+      "end": 5.39
+    },
+    {
+      "word": "must",
+      "start": 5.51,
+      "end": 5.9
+    },
+    {
+      "word": "match",
+      "start": 5.9,
+      "end": 6.17
+    },
+    {
+      "word": "its",
+      "start": 6.17,
+      "end": 6.32
+    },
+    {
+      "word": "SDK",
+      "start": 6.35,
+      "end": 6.81
+    },
+    {
+      "word": "tool",
+      "start": 6.81,
+      "end": 7.04
+    },
+    {
+      "word": "result",
+      "start": 7.04,
+      "end": 7.57
+    },
+    {
+      "word": "and",
+      "start": 7.94,
+      "end": 8.16
+    },
+    {
+      "word": "authenticated",
+      "start": 8.16,
+      "end": 8.81
+    },
+    {
+      "word": "wire",
+      "start": 8.81,
+      "end": 9.05
+    },
+    {
+      "word": "call",
+      "start": 9.05,
+      "end": 9.32
+    },
+    {
+      "word": "Marker",
+      "start": 9.631604,
+      "end": 9.971604
+    },
+    {
+      "word": "one",
+      "start": 9.971604,
+      "end": 10.241604
+    },
+    {
+      "word": "must",
+      "start": 10.241604,
+      "end": 10.531604
+    },
+    {
+      "word": "carry",
+      "start": 10.531604,
+      "end": 10.801604
+    },
+    {
+      "word": "credential",
+      "start": 10.801604,
+      "end": 11.301604
+    },
+    {
+      "word": "one",
+      "start": 11.301604,
+      "end": 11.641604
+    },
+    {
+      "word": "marker",
+      "start": 12.031604,
+      "end": 12.391604
+    },
+    {
+      "word": "two",
+      "start": 12.391604,
+      "end": 12.621604
+    },
+    {
+      "word": "must",
+      "start": 12.621604,
+      "end": 12.871604
+    },
+    {
+      "word": "carry",
+      "start": 12.871604,
+      "end": 13.131604
+    },
+    {
+      "word": "credential",
+      "start": 13.131604,
+      "end": 13.661604
+    },
+    {
+      "word": "two",
+      "start": 13.661604,
+      "end": 13.941605
+    },
+    {
+      "word": "The",
+      "start": 14.228604,
+      "end": 14.338604
+    },
+    {
+      "word": "check",
+      "start": 14.338604,
+      "end": 14.618604
+    },
+    {
+      "word": "also",
+      "start": 14.618604,
+      "end": 14.898604
+    },
+    {
+      "word": "requires",
+      "start": 14.898604,
+      "end": 15.398604
+    },
+    {
+      "word": "two",
+      "start": 15.398604,
+      "end": 15.598604
+    },
+    {
+      "word": "successful",
+      "start": 15.598604,
+      "end": 16.178604
+    },
+    {
+      "word": "terminal",
+      "start": 16.178604,
+      "end": 16.568604
+    },
+    {
+      "word": "results",
+      "start": 16.568604,
+      "end": 17.158604
+    },
+    {
+      "word": "with",
+      "start": 17.388605,
+      "end": 17.588604
+    },
+    {
+      "word": "one",
+      "start": 17.588604,
+      "end": 17.818604
+    },
+    {
+      "word": "session",
+      "start": 17.818604,
+      "end": 18.168604
+    },
+    {
+      "word": "identity",
+      "start": 18.168604,
+      "end": 18.748604
+    },
+    {
+      "word": "A",
+      "start": 19.032354,
+      "end": 19.122355
+    },
+    {
+      "word": "successful",
+      "start": 19.122355,
+      "end": 19.692354
+    },
+    {
+      "word": "model",
+      "start": 19.692354,
+      "end": 19.982355
+    },
+    {
+      "word": "sentence",
+      "start": 19.982355,
+      "end": 20.432354
+    },
+    {
+      "word": "alone",
+      "start": 20.432354,
+      "end": 20.732355
+    },
+    {
+      "word": "cannot",
+      "start": 20.732355,
+      "end": 21.052355
+    },
+    {
+      "word": "prove",
+      "start": 21.052355,
+      "end": 21.302355
+    },
+    {
+      "word": "rotation",
+      "start": 21.302355,
+      "end": 21.832354
+    },
+    {
+      "word": "because",
+      "start": 22.182354,
+      "end": 22.542355
+    },
+    {
+      "word": "a",
+      "start": 22.542355,
+      "end": 22.592354
+    },
+    {
+      "word": "failed",
+      "start": 22.592354,
+      "end": 22.932354
+    },
+    {
+      "word": "tool",
+      "start": 22.932354,
+      "end": 23.122355
+    },
+    {
+      "word": "connection",
+      "start": 23.122355,
+      "end": 23.672354
+    },
+    {
+      "word": "can",
+      "start": 23.672354,
+      "end": 23.852354
+    },
+    {
+      "word": "still",
+      "start": 23.852354,
+      "end": 24.132355
+    },
+    {
+      "word": "leave",
+      "start": 24.132355,
+      "end": 24.302355
+    },
+    {
+      "word": "a",
+      "start": 24.302355,
+      "end": 24.342354
+    },
+    {
+      "word": "successful",
+      "start": 24.342354,
+      "end": 24.912354
+    },
+    {
+      "word": "terminal",
+      "start": 24.912354,
+      "end": 25.362354
+    },
+    {
+      "word": "This",
+      "start": 25.922354,
+      "end": 26.232355
+    },
+    {
+      "word": "receipt",
+      "start": 26.232355,
+      "end": 26.532354
+    },
+    {
+      "word": "join",
+      "start": 26.532354,
+      "end": 26.942354
+    },
+    {
+      "word": "is",
+      "start": 26.972355,
+      "end": 27.132355
+    },
+    {
+      "word": "the",
+      "start": 27.132355,
+      "end": 27.212355
+    },
+    {
+      "word": "evidence",
+      "start": 27.212355,
+      "end": 27.872355
+    },
+    {
+      "word": "that",
+      "start": 27.912354,
+      "end": 28.122355
+    },
+    {
+      "word": "the",
+      "start": 28.122355,
+      "end": 28.202354
+    },
+    {
+      "word": "renewed",
+      "start": 28.202354,
+      "end": 28.522354
+    },
+    {
+      "word": "credential",
+      "start": 28.522354,
+      "end": 29.052355
+    },
+    {
+      "word": "actually",
+      "start": 29.082354,
+      "end": 29.522354
+    },
+    {
+      "word": "reached",
+      "start": 29.522354,
+      "end": 29.922354
+    },
+    {
+      "word": "the",
+      "start": 30.002354,
+      "end": 30.142355
+    },
+    {
+      "word": "remote",
+      "start": 30.142355,
+      "end": 30.452354
+    },
+    {
+      "word": "MCP",
+      "start": 30.452354,
+      "end": 30.862354
+    },
+    {
+      "word": "handler",
+      "start": 30.862354,
+      "end": 31.302355
+    }
+  ]
+}

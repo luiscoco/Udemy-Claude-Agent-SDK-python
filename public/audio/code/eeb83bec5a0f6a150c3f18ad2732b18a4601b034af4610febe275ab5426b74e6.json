@@ -1,0 +1,412 @@
+{
+  "lesson": 44,
+  "section": "native-evidence",
+  "duration": 29.592,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.25
+    },
+    {
+      "word": "live",
+      "start": 0.25,
+      "end": 0.48
+    },
+    {
+      "word": "evaluator",
+      "start": 0.48,
+      "end": 1.12
+    },
+    {
+      "word": "first",
+      "start": 1.12,
+      "end": 1.52
+    },
+    {
+      "word": "requires",
+      "start": 1.52,
+      "end": 2.05
+    },
+    {
+      "word": "one",
+      "start": 2.05,
+      "end": 2.24
+    },
+    {
+      "word": "successful",
+      "start": 2.24,
+      "end": 2.82
+    },
+    {
+      "word": "SDK",
+      "start": 2.82,
+      "end": 3.25
+    },
+    {
+      "word": "terminal",
+      "start": 3.25,
+      "end": 3.73
+    },
+    {
+      "word": "and",
+      "start": 4.05,
+      "end": 4.2
+    },
+    {
+      "word": "a",
+      "start": 4.2,
+      "end": 4.24
+    },
+    {
+      "word": "matching",
+      "start": 4.24,
+      "end": 4.64
+    },
+    {
+      "word": "initialized",
+      "start": 4.64,
+      "end": 5.21
+    },
+    {
+      "word": "session",
+      "start": 5.21,
+      "end": 5.62
+    },
+    {
+      "word": "The",
+      "start": 6.03,
+      "end": 6.27
+    },
+    {
+      "word": "exact",
+      "start": 6.27,
+      "end": 6.72
+    },
+    {
+      "word": "Read",
+      "start": 6.72,
+      "end": 6.95
+    },
+    {
+      "word": "call",
+      "start": 6.95,
+      "end": 7.18
+    },
+    {
+      "word": "must",
+      "start": 7.18,
+      "end": 7.44
+    },
+    {
+      "word": "return",
+      "start": 7.44,
+      "end": 7.74
+    },
+    {
+      "word": "the",
+      "start": 7.74,
+      "end": 7.82
+    },
+    {
+      "word": "fixed",
+      "start": 7.82,
+      "end": 8.12
+    },
+    {
+      "word": "recovery",
+      "start": 8.12,
+      "end": 8.48
+    },
+    {
+      "word": "code",
+      "start": 8.48,
+      "end": 8.8
+    },
+    {
+      "word": "have",
+      "start": 9.1,
+      "end": 9.35
+    },
+    {
+      "word": "an",
+      "start": 9.35,
+      "end": 9.43
+    },
+    {
+      "word": "allowed",
+      "start": 9.43,
+      "end": 9.75
+    },
+    {
+      "word": "pre-use",
+      "start": 9.75,
+      "end": 10.1
+    },
+    {
+      "word": "decision",
+      "start": 10.1,
+      "end": 10.61
+    },
+    {
+      "word": "and",
+      "start": 10.94,
+      "end": 11.12
+    },
+    {
+      "word": "match",
+      "start": 11.12,
+      "end": 11.39
+    },
+    {
+      "word": "an",
+      "start": 11.39,
+      "end": 11.49
+    },
+    {
+      "word": "independent",
+      "start": 11.49,
+      "end": 12.07
+    },
+    {
+      "word": "post-use",
+      "start": 12.07,
+      "end": 12.54
+    },
+    {
+      "word": "hash",
+      "start": 12.54,
+      "end": 12.89
+    },
+    {
+      "word": "of",
+      "start": 12.89,
+      "end": 13.06
+    },
+    {
+      "word": "the",
+      "start": 13.06,
+      "end": 13.14
+    },
+    {
+      "word": "owned",
+      "start": 13.17,
+      "end": 13.41
+    },
+    {
+      "word": "notes",
+      "start": 13.41,
+      "end": 13.69
+    },
+    {
+      "word": "file",
+      "start": 13.69,
+      "end": 13.97
+    },
+    {
+      "word": "For",
+      "start": 14.31,
+      "end": 14.53
+    },
+    {
+      "word": "each",
+      "start": 14.56,
+      "end": 14.81
+    },
+    {
+      "word": "signal",
+      "start": 14.81,
+      "end": 15.26
+    },
+    {
+      "word": "the",
+      "start": 15.34,
+      "end": 15.48
+    },
+    {
+      "word": "collector",
+      "start": 15.48,
+      "end": 15.86
+    },
+    {
+      "word": "must",
+      "start": 15.86,
+      "end": 16.08
+    },
+    {
+      "word": "have",
+      "start": 16.08,
+      "end": 16.23
+    },
+    {
+      "word": "an",
+      "start": 16.23,
+      "end": 16.33
+    },
+    {
+      "word": "HTTP",
+      "start": 16.36,
+      "end": 16.97
+    },
+    {
+      "word": "two",
+      "start": 16.97,
+      "end": 17.11
+    },
+    {
+      "word": "hundred",
+      "start": 17.11,
+      "end": 17.39
+    },
+    {
+      "word": "receipt",
+      "start": 17.39,
+      "end": 17.81
+    },
+    {
+      "word": "with",
+      "start": 18.12,
+      "end": 18.3
+    },
+    {
+      "word": "a",
+      "start": 18.3,
+      "end": 18.34
+    },
+    {
+      "word": "positive",
+      "start": 18.34,
+      "end": 18.82
+    },
+    {
+      "word": "decoded",
+      "start": 18.82,
+      "end": 19.25
+    },
+    {
+      "word": "count",
+      "start": 19.25,
+      "end": 19.62
+    },
+    {
+      "word": "plus",
+      "start": 20.07,
+      "end": 20.33
+    },
+    {
+      "word": "a",
+      "start": 20.33,
+      "end": 20.37
+    },
+    {
+      "word": "native",
+      "start": 20.37,
+      "end": 20.68
+    },
+    {
+      "word": "subprocess",
+      "start": 20.68,
+      "end": 21.27
+    },
+    {
+      "word": "record",
+      "start": 21.27,
+      "end": 21.63
+    },
+    {
+      "word": "for",
+      "start": 21.63,
+      "end": 21.77
+    },
+    {
+      "word": "this",
+      "start": 21.77,
+      "end": 21.98
+    },
+    {
+      "word": "run",
+      "start": 21.98,
+      "end": 22.25
+    },
+    {
+      "word": "lane",
+      "start": 22.4,
+      "end": 22.76
+    },
+    {
+      "word": "and",
+      "start": 22.79,
+      "end": 22.95
+    },
+    {
+      "word": "session",
+      "start": 22.95,
+      "end": 23.36
+    },
+    {
+      "word": "A",
+      "start": 23.77,
+      "end": 23.87
+    },
+    {
+      "word": "configured",
+      "start": 23.87,
+      "end": 24.34
+    },
+    {
+      "word": "exporter",
+      "start": 24.34,
+      "end": 24.93
+    },
+    {
+      "word": "or",
+      "start": 25.09,
+      "end": 25.38
+    },
+    {
+      "word": "a",
+      "start": 25.38,
+      "end": 25.42
+    },
+    {
+      "word": "convincing",
+      "start": 25.42,
+      "end": 25.95
+    },
+    {
+      "word": "assistant",
+      "start": 25.95,
+      "end": 26.45
+    },
+    {
+      "word": "sentence",
+      "start": 26.45,
+      "end": 27
+    },
+    {
+      "word": "cannot",
+      "start": 27.26,
+      "end": 27.63
+    },
+    {
+      "word": "replace",
+      "start": 27.63,
+      "end": 27.97
+    },
+    {
+      "word": "these",
+      "start": 27.97,
+      "end": 28.21
+    },
+    {
+      "word": "received",
+      "start": 28.21,
+      "end": 28.54
+    },
+    {
+      "word": "observations",
+      "start": 28.54,
+      "end": 29.36
+    }
+  ]
+}

@@ -64,6 +64,54 @@ keeps missing metrics unknown and offers a separate prompt-free metadata probe.
 See the [Thinking, effort and models guide](docs/lesson-14-thinking.md).
 Lesson 15 adds final usage checks, message grouping, limit scenarios and a separate
 session cost meter. See the [Cost and usage guide](docs/lesson-15-usage.md).
+Lesson 16 adds owned project/local settings controls, an actual child environment probe and correlated Read/terminal checks. CLI settings precedence remains separate. See the [Settings and environment guide](docs/lesson-16-settings.md).
+Lesson 17 adds a guarded one-file native rewind workflow, real Python client control fixtures, checkpoint UUID checks and hash-verified restoration. See the [Checkpointing and rewind guide](docs/lesson-17-checkpointing.md).
+Lesson 18 compares correlated Read policy outcomes with an actual process counterexample and a separately verified native Linux/WSL sandbox probe. See the [Sandbox guide](docs/lesson-18-sandbox.md).
+Lesson 19 adds an owned session catalog with paged inspection, rename/tag, local fork and deletion through the public SDK APIs in an isolated child. See the [Session management guide](docs/lesson-19-sessions.md).
+Lesson 20 adds correlated hook decisions, Read rewrites, success/failure audits, prompt/Stop observers and contained callback faults. See the [Hooks in depth guide](docs/lesson-20-hooks.md).
+Lesson 21 adds owned Slash command templates, SDK inventory discovery, correlated invocation evidence and a no-project control. See the [Slash commands guide](docs/lesson-21-slash-commands.md).
+Lesson 22 compares owned CLAUDE.md marker rules across project settings and system prompt modes, with automatic memory disabled in a private CLI config. See the [CLAUDE.md and memory guide](docs/lesson-22-project-memory.md).
+Lesson 23 adds a host-owned local plugin with namespaced command discovery, a correlated Skill invocation and a disabled-plugin control. See the [Plugins guide](docs/lesson-23-plugins.md).
+Lesson 24 adds a structured proposal gate with exact host validation, approval controls and deterministic two-file worker effects. See the [Harnesses guide](docs/lesson-24-harnesses.md).
+Lesson 25 adds an actual bounded MCP tool result, a host progress summary control and a registered `PreCompact` observer. See the [Compaction and context guide](docs/lesson-25-compaction-context.md).
+Lesson 26 adds observed SDK model and permission-mode controls, a streamed-turn interrupt, and post-disconnect rejection checks. See the [Query control methods guide](docs/lesson-26-query-control-methods.md).
+Lesson 27 carries a host-owned background watcher across a real SDK turn and verifies cancellation or release plus awaited cleanup. See the [Background tasks guide](docs/lesson-27-background-tasks.md).
+Lesson 28 adds bounded host retries over a real SDK MCP tool, with transient recovery, permanent rejection and an idempotent in-memory write ledger. See the [Errors, retries and recovery guide](docs/lesson-28-errors-retries-recovery.md).
+Lesson 29 sends a validated workspace-owned PNG as a typed SDK image block and checks red and blue live responses. See the [Images and file input guide](docs/lesson-29-images-file-input.md).
+Lesson 30 gates real TodoWrite calls with pre and post hooks, commits only accepted transitions and derives suggestions from the host ledger. See the [Todo tracking guide](docs/lesson-30-todo-tracking.md).
+Lesson 31 validates a fixed AskUserQuestion call, routes a labelled simulated host answer through `can_use_tool`, and correlates the real SDK tool result with the callback. Both answer variants passed provider-backed acceptance. See the [AskUserQuestion guide](docs/lesson-31-ask-user-question.md).
+Lesson 32 starts the SDK in plan mode, validates a structured proposal, and switches to default mode only for a selected approved plan before fixed host workers run. Three provider-backed variants passed. See the [Plan mode guide](docs/lesson-32-plan-mode.md).
+Lesson 33 bridges a provider-backed SDK tool to an owned Python MCP server, checks simulated accept, decline and cancel responses against actual server outcomes, and records the installed SDK's native elicitation-hook limitation. See the [MCP elicitation guide](docs/lesson-33-mcp-elicitation.md).
+Lesson 34 compares owned Teaching and Brief output styles with project settings enabled and disabled, checking the SDK-reported style, response marker and unchanged files. All three provider-backed variants passed. See the [Output styles guide](docs/lesson-34-output-styles.md).
+
+Lesson 35 compares a host JSON transcript with the SDK's separate session mirror. It includes UUID coverage, a durable SQLite adapter, fresh-client resume, flush and fault controls, and scoped inspection routes. Eight provider-backed cases passed. See the [Session stores guide](docs/lesson-35-session-stores.md).
+
+Lesson 36 launches a fixed local host child, taps JSONL stdout without changing forwarded bytes, keeps stderr separate and reaps interrupted children. A separate real SDK turn must also succeed. Five provider-backed cases passed their expected outcomes. The installed Python SDK has no public custom-spawner option. See the [Process spawning guide](docs/lesson-36-process-spawning.md).
+
+Lesson 37 runs a fixed Python stdio MCP permission gate for an owned Write, checks its loopback host decision, SDK tool result and fresh file content, and exposes scoped inspection routes. Six provider-backed outcomes passed. See the [Permission gate guide](docs/lesson-37-permission-gate.md).
+
+Lesson 38 observes raw CLI prompt suggestions after SDK turns and keeps them separate from the host input queue. It includes token-owned interactive chat routes, offline evidence scenarios and bounded live probes. See the [Prompt suggestions guide](docs/lesson-38-prompt-suggestions.md).
+
+Lesson 39 compares working directory with an independently selected project configuration root across owned Git worktrees. Its probes record SDK init, hook and command origins, exact Bash takeover evidence, and credential-free CLI startup failures. See the [Project configuration root guide](docs/lesson-39-project-config-root.md).
+
+Lesson 40 parses persisted SDK transcript ancestry, keeps queued attachments in their logical turn, and compares exact last-turn and unsafe queued-turn resume forks. The real unsafe CLI result is recovered from the SDK's structured `ResultError.data` after connection fails; exception text alone is not counted. The full provider-backed comparison passed. See the [Resume drops turn guide](docs/lesson-40-resume-drops-turn.md).
+
+Lesson 41 runs three turns on one Python `ClaudeSDKClient`, refuses a query after disconnect and resumes an owned session in a fresh client. The historical JavaScript V2 API is outside this explicit Python adaptation. See the [Python client lifecycle guide](docs/lesson-41-python-client-lifecycle.md).
+
+Lesson 42 uses fixed Node.js WebSearch/WebFetch actions with host URL policy, call/result correlation, a labelled hostile-output overlay, and per-lane citation provenance. Its provider-backed scenarios met their selected checks, including a missing-page Needs review outcome. See the [Web tools guide](docs/lesson-42-web-tools.md).
+Lesson 43 runs an owned remote MCP fixture with machine credential discovery, HTTP and SSE clients, tool receipts, and digest-checked resources. Provider-backed tool, resource and same-client credential rotation calls are bounded; rotation uses a version-guarded private SDK control. Three source-aligned Yash clips are recorded. See the [remote MCP guide](docs/lesson-43-remote-mcp.md) and [narration review](docs/lesson-43-narration.md).
+
+Lesson 44 uses an owned OTLP HTTP JSON collector for six local and live telemetry actions. The live checks require received metrics, logs and traces joined to the SDK session and tool call; privacy, trace parenting, denied-tool, temporality and collector-auth comparisons are included. Three source-aligned Yash clips are recorded. See the [telemetry guide](docs/lesson-44-telemetry.md) and [narration review](docs/lesson-44-narration.md).
+
+Lesson 45 compares five native cloud provider routes through an owned loopback proxy and fixed host-key upstream. Five live actions cover catalog inspection, equivalent prompts, authentication, model forms and denied Sonnet with fresh Haiku recovery. The portal includes distinct diagrams and three source-aligned Yash clips. See the [cloud provider guide](docs/lesson-45-cloud-providers.md) and [live acceptance](docs/live-acceptance.md).
+
+Lesson 46 measures prompt-cache behavior over two native SDK turns with independently matched wire and SDK counters. Five live acceptance cases cover cache anatomy, one-hour TTL, changed prefix, capped model switch and allowed model switch. Additional bounded live probes cover the other TTL and prefix selectors plus cancellation. The portal shows a per-turn table, distinct diagrams and three source-aligned Yash clips. See the [cache guide](docs/lesson-46-cache.md), [narration evidence](docs/lesson-46-narration.md) and [live acceptance](docs/live-acceptance.md).
+
+Lesson 47 compares native Agent delegation with host-controlled pipeline, fan-out and evaluator queries. The host joins worker starts, completions, owned file reads and independent numeric verdicts; a fair limiter bounds fan-out concurrency. Five API live actions and a one-worker variant passed. The portal includes a worker table, distinct diagrams and three source-aligned Yash clips. See the [orchestration guide](docs/lesson-47-orchestration.md), [narration evidence](docs/lesson-47-narration.md) and [live acceptance](docs/live-acceptance.md).
+
+Lesson 48 compares contrast and guarded security lanes over owned synthetic files, a child environment and a loopback collector. Four local and four provider-backed live API actions pass, along with a shared runner action and active cancellation check. The portal includes a decision table, two diagrams and three verified Yash source clips. See the [security guide](docs/lesson-48-security.md), [narration evidence](docs/lesson-48-narration.md) and [live acceptance](docs/live-acceptance.md).
+
+Lesson 49 runs exact owned child processes for headless CLI/SDK and CI decisions, maps explicit host exit codes, and supervises a one-slot local worker through readiness, backpressure, drain and close. Four local actions, the provider-backed Headless and CI matrix, a shared runner and cancellation checks pass. The portal includes fixed files, process receipts, two diagrams and three source-aligned Yash clips. See the [headless guide](docs/lesson-49-headless.md), [narration evidence](docs/lesson-49-narration.md) and [live acceptance](docs/live-acceptance.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**
@@ -134,6 +182,8 @@ The browser offers downloads for the document-generation exercise.
 
 ## Enable live SDK calls
 
+Real provider-backed scenario acceptance is required before advancing to the next lesson. Lessons 16-20 have passed their current live scenario sets (lesson 18 includes a separate native WSL process probe); see [live acceptance evidence](docs/live-acceptance.md). Run `uv run python scripts/lesson_live_smoke.py 17 --live` for the bounded lesson scenarios.
+
 After an SDK upgrade, run the optional provider smoke checks explicitly:
 
 ```shell
@@ -146,8 +196,9 @@ The checks use isolated data folders and reference implementations, stop on the 
 failure, and save a JSON report under `.lab-data/live-smoke/`. The four application
 checks use per-call budget thresholds totaling $0.35; the elicitation check uses $0.15.
 These thresholds are not hard billing caps. The script does not retry failed checks.
-Lesson 33's browser version asks you to accept, decline or cancel; only this opt-in
-smoke script supplies a fixed synthetic acceptance to the local demonstration server.
+Lesson 33's browser workspace offers labelled simulated accept, decline and cancel
+choices for the owned Python MCP callback. This older smoke script supplies a fixed
+synthetic acceptance to its separate local demonstration server.
 
 Windows: `Copy-Item .env.example .env`. macOS/Linux: `cp .env.example .env`.
 Edit the copied file:
@@ -264,7 +315,7 @@ controls, live experiments and production workflows of the original edition.**
 The autonomous engineering capstone uses scripted workers offline and real SDK
 agents in live mode, with source proposals validated by the host. Its full Git
 worktree merge/recovery and PR publication workflow is still pending. Cloud-provider
-experiments, SDK-native checkpointing/session-store experiments, channel approval
+experiments, Resumed and multi-file checkpoint/session-store experiments, channel approval
 delivery and model-driven PR publication need further implementation and live
 verification. Adaptations appear in lesson notes and the browser UI.
 

@@ -1,6 +1,6 @@
 # Lesson 19: Session management
 
-Inspect list_sessions and get_session_messages without exposing host transcripts.
+Manage an owned SDK session catalog with scoped inspection, pagination, metadata, forks and deletion.
 
 This lesson is part of **Sessions and context**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -33,7 +33,7 @@ def inspect_run_sessions(config_dir: Path, workspace: Path) -> None:
     # Call this in a child process: the session functions read CLAUDE_CONFIG_DIR.
     os.environ["CLAUDE_CONFIG_DIR"] = str(config_dir)
     project = str(workspace)
-    for session in list_sessions(directory=project, limit=5):
+    for session in list_sessions(directory=project, limit=5, include_worktrees=False):
         info = get_session_info(session.session_id, directory=project)
         print(session.session_id, session.summary, info.created_at if info else None)
         for message in get_session_messages(
@@ -42,7 +42,7 @@ def inspect_run_sessions(config_dir: Path, workspace: Path) -> None:
             print("  ", message.type, message.uuid)
 ```
 
-`os.environ["CLAUDE_CONFIG_DIR"]` scopes where transcripts are read, then `list_sessions`, `get_session_info` and `get_session_messages` read only that run's sessions.
+A child-owned CLAUDE_CONFIG_DIR and explicit project scope bound catalog access; include_worktrees=False avoids extending the listing to sibling worktrees. The host still supplies the authorization and ownership checks.
 
 ## How the offline lab checks it
 
@@ -50,7 +50,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `session_management` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 2034); the Python source tab shows it below the concept code. Host contracts
+(line 2038); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

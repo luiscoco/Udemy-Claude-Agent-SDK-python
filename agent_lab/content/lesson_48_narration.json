@@ -1,0 +1,36 @@
+{
+  "lesson": 48,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "environment",
+      "title": "Scrub the SDK child environment",
+      "path": "agent_lab/hardening_policy.py",
+      "start_line": 52,
+      "end_line": 69,
+      "reviewed_source_sha256": "3b832892d0230e832e2c72336ec5f934b0fbd9ffba0f239d6d73b5ce6196d9db",
+      "spoken_text": "The child environment starts with selected operating system values, then receives an owned home, a generated API credential and the local model observer address. In the contrast lane, one synthetic application value is present. In the guarded lane it is absent and subprocess scrubbing is enabled. The host checks these flags without displaying any secret value."
+    },
+    {
+      "id": "admission",
+      "title": "Admit exact owned tool calls",
+      "path": "agent_lab/hardening_policy.py",
+      "start_line": 104,
+      "end_line": 125,
+      "reviewed_source_sha256": "3b832892d0230e832e2c72336ec5f934b0fbd9ffba0f239d6d73b5ce6196d9db",
+      "spoken_text": "The host examines each actual tool name and input before execution. Read accepts only four owned fixture paths. Write accepts only one outside marker path with exact content. Bash accepts one literal Python script and a fixed target. The guarded lane denies protected reads, the outside write and the owned egress target. An unknown path or shell expression does not become a valid probe."
+    },
+    {
+      "id": "rewrite",
+      "title": "Rewrite known marker output",
+      "path": "agent_lab/hardening_policy.py",
+      "start_line": 35,
+      "end_line": 52,
+      "reviewed_source_sha256": "3b832892d0230e832e2c72336ec5f934b0fbd9ffba0f239d6d73b5ce6196d9db",
+      "spoken_text": "The post tool hook serializes one tool response and replaces exact registered synthetic markers. It returns the rewritten response and records hashes and whether a marker remains. This is a bounded exact-value check. Encoded or unknown secrets need different controls, and a hook observation alone does not prove what reached the model. The live observer checks model-bound request bytes separately."
+    }
+  ]
+}

@@ -1,0 +1,552 @@
+{
+  "lesson": 35,
+  "section": "mirror-append",
+  "duration": 36.768,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.11
+    },
+    {
+      "word": "concept",
+      "start": 0.11,
+      "end": 0.59
+    },
+    {
+      "word": "here",
+      "start": 0.59,
+      "end": 0.84
+    },
+    {
+      "word": "is",
+      "start": 0.84,
+      "end": 0.97
+    },
+    {
+      "word": "that",
+      "start": 0.97,
+      "end": 1.26
+    },
+    {
+      "word": "a",
+      "start": 1.33,
+      "end": 1.41
+    },
+    {
+      "word": "successful",
+      "start": 1.41,
+      "end": 2.02
+    },
+    {
+      "word": "model",
+      "start": 2.02,
+      "end": 2.35
+    },
+    {
+      "word": "turn",
+      "start": 2.35,
+      "end": 2.74
+    },
+    {
+      "word": "and",
+      "start": 3.08,
+      "end": 3.25
+    },
+    {
+      "word": "a",
+      "start": 3.25,
+      "end": 3.28
+    },
+    {
+      "word": "successful",
+      "start": 3.28,
+      "end": 3.83
+    },
+    {
+      "word": "mirror",
+      "start": 3.83,
+      "end": 4.12
+    },
+    {
+      "word": "append",
+      "start": 4.12,
+      "end": 4.51
+    },
+    {
+      "word": "are",
+      "start": 4.54,
+      "end": 4.68
+    },
+    {
+      "word": "separate",
+      "start": 4.68,
+      "end": 5.11
+    },
+    {
+      "word": "observations",
+      "start": 5.11,
+      "end": 5.89
+    },
+    {
+      "word": "This",
+      "start": 6.3,
+      "end": 6.59
+    },
+    {
+      "word": "wrapper",
+      "start": 6.59,
+      "end": 6.94
+    },
+    {
+      "word": "receives",
+      "start": 6.94,
+      "end": 7.34
+    },
+    {
+      "word": "the",
+      "start": 7.34,
+      "end": 7.46
+    },
+    {
+      "word": "real",
+      "start": 7.46,
+      "end": 7.71
+    },
+    {
+      "word": "session",
+      "start": 7.71,
+      "end": 8.06
+    },
+    {
+      "word": "key",
+      "start": 8.06,
+      "end": 8.37
+    },
+    {
+      "word": "and",
+      "start": 8.4,
+      "end": 8.57
+    },
+    {
+      "word": "entry",
+      "start": 8.57,
+      "end": 8.82
+    },
+    {
+      "word": "batch",
+      "start": 8.82,
+      "end": 9.11
+    },
+    {
+      "word": "from",
+      "start": 9.11,
+      "end": 9.28
+    },
+    {
+      "word": "the",
+      "start": 9.28,
+      "end": 9.35
+    },
+    {
+      "word": "SDK",
+      "start": 9.35,
+      "end": 9.9
+    },
+    {
+      "word": "It",
+      "start": 10.31,
+      "end": 10.48
+    },
+    {
+      "word": "starts",
+      "start": 10.48,
+      "end": 10.86
+    },
+    {
+      "word": "a",
+      "start": 10.86,
+      "end": 10.91
+    },
+    {
+      "word": "timer",
+      "start": 10.91,
+      "end": 11.39
+    },
+    {
+      "word": "optionally",
+      "start": 11.71,
+      "end": 12.27
+    },
+    {
+      "word": "rejects",
+      "start": 12.27,
+      "end": 12.64
+    },
+    {
+      "word": "the",
+      "start": 12.64,
+      "end": 12.71
+    },
+    {
+      "word": "append",
+      "start": 12.71,
+      "end": 13.09
+    },
+    {
+      "word": "for",
+      "start": 13.09,
+      "end": 13.27
+    },
+    {
+      "word": "the",
+      "start": 13.27,
+      "end": 13.36
+    },
+    {
+      "word": "fault",
+      "start": 13.36,
+      "end": 13.67
+    },
+    {
+      "word": "exercise",
+      "start": 13.67,
+      "end": 14.35
+    },
+    {
+      "word": "and",
+      "start": 14.72,
+      "end": 14.93
+    },
+    {
+      "word": "otherwise",
+      "start": 14.93,
+      "end": 15.45
+    },
+    {
+      "word": "delegates",
+      "start": 15.45,
+      "end": 15.89
+    },
+    {
+      "word": "to",
+      "start": 15.89,
+      "end": 15.99
+    },
+    {
+      "word": "the",
+      "start": 15.99,
+      "end": 16.08
+    },
+    {
+      "word": "underlying",
+      "start": 16.08,
+      "end": 16.47
+    },
+    {
+      "word": "store",
+      "start": 16.47,
+      "end": 16.81
+    },
+    {
+      "word": "Both",
+      "start": 17.19,
+      "end": 17.54
+    },
+    {
+      "word": "paths",
+      "start": 17.54,
+      "end": 17.88
+    },
+    {
+      "word": "record",
+      "start": 17.88,
+      "end": 18.22
+    },
+    {
+      "word": "how",
+      "start": 18.22,
+      "end": 18.37
+    },
+    {
+      "word": "many",
+      "start": 18.37,
+      "end": 18.59
+    },
+    {
+      "word": "entries",
+      "start": 18.59,
+      "end": 18.92
+    },
+    {
+      "word": "were",
+      "start": 18.92,
+      "end": 19.02
+    },
+    {
+      "word": "submitted",
+      "start": 19.02,
+      "end": 19.62
+    },
+    {
+      "word": "elapsed",
+      "start": 19.98,
+      "end": 20.46
+    },
+    {
+      "word": "time",
+      "start": 20.46,
+      "end": 20.83
+    },
+    {
+      "word": "and",
+      "start": 20.87,
+      "end": 21.07
+    },
+    {
+      "word": "the",
+      "start": 21.07,
+      "end": 21.13
+    },
+    {
+      "word": "error",
+      "start": 21.13,
+      "end": 21.37
+    },
+    {
+      "word": "type",
+      "start": 21.37,
+      "end": 21.72
+    },
+    {
+      "word": "The",
+      "start": 22.08,
+      "end": 22.25
+    },
+    {
+      "word": "exception",
+      "start": 22.25,
+      "end": 22.74
+    },
+    {
+      "word": "is",
+      "start": 22.74,
+      "end": 22.89
+    },
+    {
+      "word": "raised",
+      "start": 22.89,
+      "end": 23.14
+    },
+    {
+      "word": "again",
+      "start": 23.14,
+      "end": 23.52
+    },
+    {
+      "word": "so",
+      "start": 23.78,
+      "end": 23.98
+    },
+    {
+      "word": "the",
+      "start": 23.98,
+      "end": 24.06
+    },
+    {
+      "word": "SDK",
+      "start": 24.06,
+      "end": 24.52
+    },
+    {
+      "word": "can",
+      "start": 24.52,
+      "end": 24.68
+    },
+    {
+      "word": "report",
+      "start": 24.68,
+      "end": 25.07
+    },
+    {
+      "word": "or",
+      "start": 25.11,
+      "end": 25.28
+    },
+    {
+      "word": "retry",
+      "start": 25.28,
+      "end": 25.67
+    },
+    {
+      "word": "it",
+      "start": 25.67,
+      "end": 25.86
+    },
+    {
+      "word": "the",
+      "start": 26.18,
+      "end": 26.34
+    },
+    {
+      "word": "wrapper",
+      "start": 26.34,
+      "end": 26.71
+    },
+    {
+      "word": "does",
+      "start": 26.71,
+      "end": 26.9
+    },
+    {
+      "word": "not",
+      "start": 26.9,
+      "end": 27.11
+    },
+    {
+      "word": "pretend",
+      "start": 27.11,
+      "end": 27.51
+    },
+    {
+      "word": "the",
+      "start": 27.51,
+      "end": 27.59
+    },
+    {
+      "word": "mirror",
+      "start": 27.59,
+      "end": 27.82
+    },
+    {
+      "word": "succeeded",
+      "start": 27.82,
+      "end": 28.44
+    },
+    {
+      "word": "In",
+      "start": 28.73,
+      "end": 28.89
+    },
+    {
+      "word": "the",
+      "start": 28.89,
+      "end": 28.96
+    },
+    {
+      "word": "live",
+      "start": 28.96,
+      "end": 29.22
+    },
+    {
+      "word": "rejected-append",
+      "start": 29.22,
+      "end": 29.97
+    },
+    {
+      "word": "case",
+      "start": 29.97,
+      "end": 30.41
+    },
+    {
+      "word": "the",
+      "start": 30.5,
+      "end": 30.62
+    },
+    {
+      "word": "terminal",
+      "start": 30.62,
+      "end": 31.05
+    },
+    {
+      "word": "model",
+      "start": 31.05,
+      "end": 31.36
+    },
+    {
+      "word": "result",
+      "start": 31.36,
+      "end": 31.64
+    },
+    {
+      "word": "succeeds",
+      "start": 31.64,
+      "end": 32.26
+    },
+    {
+      "word": "while",
+      "start": 32.48,
+      "end": 32.71
+    },
+    {
+      "word": "the",
+      "start": 32.71,
+      "end": 32.79
+    },
+    {
+      "word": "storage",
+      "start": 32.79,
+      "end": 33.15
+    },
+    {
+      "word": "check",
+      "start": 33.15,
+      "end": 33.42
+    },
+    {
+      "word": "needs",
+      "start": 33.42,
+      "end": 33.71
+    },
+    {
+      "word": "review",
+      "start": 33.71,
+      "end": 34.09
+    },
+    {
+      "word": "because",
+      "start": 34.16,
+      "end": 34.51
+    },
+    {
+      "word": "the",
+      "start": 34.51,
+      "end": 34.59
+    },
+    {
+      "word": "local",
+      "start": 34.59,
+      "end": 34.93
+    },
+    {
+      "word": "UUIDs",
+      "start": 34.93,
+      "end": 35.41
+    },
+    {
+      "word": "are",
+      "start": 35.41,
+      "end": 35.47
+    },
+    {
+      "word": "missing",
+      "start": 35.47,
+      "end": 35.82
+    },
+    {
+      "word": "from",
+      "start": 35.82,
+      "end": 36.01
+    },
+    {
+      "word": "the",
+      "start": 36.01,
+      "end": 36.08
+    },
+    {
+      "word": "store",
+      "start": 36.08,
+      "end": 36.41
+    }
+  ]
+}

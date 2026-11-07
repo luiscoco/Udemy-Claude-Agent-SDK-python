@@ -64,7 +64,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `project_markdown` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 791); the Python source tab shows it below the concept code. Host contracts
+(line 795); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -82,10 +82,7 @@ Suggested prompt:
 > Summarize notes.txt using the configured teaching style.
 
 The live profile is `styles`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/styles_lab.py](agent_lab/styles_lab.py). The host writes an owned output-style file and settings.json, then compares fixed marker behavior with project settings enabled or disabled on the real SDK. No model tools are enabled.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

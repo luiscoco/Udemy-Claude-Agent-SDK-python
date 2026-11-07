@@ -24,44 +24,27 @@ For the browser lab, run `uv run agent-lab serve`, then open
 
 ```python
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ToolPermissionContext
-from claude_agent_sdk import (
-    PermissionResult,
-    PermissionResultAllow,
-    PermissionResultDeny,
+from claude_agent_sdk import ClaudeAgentOptions
+
+from agent_lab.permission_gate_lab import GATE_TOOL, GateState, gate_config
+
+root = Path.cwd()
+gate = GateState(root, "demo-run", "demo-gate", "demo-token", "allow")
+# A fixed stdio MCP process asks the host gate for one Write decision.
+options = ClaudeAgentOptions(
+    tools=["Write"],
+    allowed_tools=[],
+    permission_prompt_tool_name=GATE_TOOL,
+    mcp_servers={"gate": cast(Any, gate_config(gate, "http://127.0.0.1:8765", root / "gate-log.jsonl"))},
+    max_turns=4,
+    max_budget_usd=0.10,
 )
-
-WORKSPACE = Path("workspace").resolve()
-
-
-async def can_use_tool(
-    name: str, tool_input: dict[str, Any], context: ToolPermissionContext
-) -> PermissionResult:
-    if name == "Bash":
-        return PermissionResultDeny(message="Shell access is disabled.", interrupt=True)
-    if name == "Write":
-        target = (WORKSPACE / tool_input["file_path"]).resolve()
-        if not target.is_relative_to(WORKSPACE):
-            return PermissionResultDeny(message="Write only inside the workspace.")
-        return PermissionResultAllow(
-            updated_input={**tool_input, "file_path": str(target)}
-        )
-    return PermissionResultDeny(message=f"{name} is not enabled here.")
-
-
-async def main() -> None:
-    # Called only for tool calls that no hook or permission rule has already decided.
-    tools = ["Read", "Write", "Bash"]
-    options = ClaudeAgentOptions(cwd=WORKSPACE, tools=tools, can_use_tool=can_use_tool)
-    async with ClaudeSDKClient(options) as client:
-        await client.query("Read notes.txt and save a summary to summary.txt.")
-        async for message in client.receive_response():
-            print(message)
+# This is an options example; the full lab starts the bridge and checks effects.
 ```
 
-`can_use_tool` returns PermissionResultDeny(message=..., interrupt=True) for Bash, and PermissionResultAllow(`updated_input`=...) with a resolved path for in-workspace Write calls.
+GateState.decide validates identity and exact Write input; the stdio MCP tool returns one JSON text block; gate_report correlates process, SDK and disk evidence.
 
 ## How the offline lab checks it
 
@@ -69,7 +52,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `permission_callback_cases` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 443); the Python source tab shows it below the concept code. Host contracts
+(line 447); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -87,10 +70,7 @@ Suggested prompt:
 > Read notes.txt and describe the permission decision.
 
 The live profile is `hooks`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/permission_gate_lab.py](agent_lab/permission_gate_lab.py). A fixed Python stdio MCP process asks a loopback host gate for one owned Write decision. The SDK uses permission_prompt_tool_name and an exact Write hook; process receipt, SDK result and fresh file content must agree. Node is unavailable in this Python workspace.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

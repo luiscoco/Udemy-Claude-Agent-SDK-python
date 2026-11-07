@@ -1,0 +1,36 @@
+{
+  "lesson": 35,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "mirror-append",
+      "title": "Observed SDK mirror calls",
+      "path": "agent_lab/observed_session_store.py",
+      "start_line": 17,
+      "end_line": 30,
+      "reviewed_source_sha256": "e951015582b129e1885adec438b18a00271bfedab67e0b814a3abbafb1956e55",
+      "spoken_text": "The concept here is that a successful model turn and a successful mirror append are separate observations. This wrapper receives the real session key and entry batch from the SDK. It starts a timer, optionally rejects the append for the fault exercise, and otherwise delegates to the underlying store. Both paths record how many entries were submitted, elapsed time, and the error type. The exception is raised again so the SDK can report or retry it; the wrapper does not pretend the mirror succeeded. In the live rejected-append case the terminal model result succeeds, while the storage check needs review because the local UUIDs are missing from the store."
+    },
+    {
+      "id": "sqlite-transaction",
+      "title": "Transactional SQLite mirror",
+      "path": "agent_lab/sqlite_session_store.py",
+      "start_line": 66,
+      "end_line": 93,
+      "reviewed_source_sha256": "95f75347a08d65acc35f64729f36cfc3b6c5dccc929027d541766941ef9ebaf5",
+      "spoken_text": "This is the durable adapter's append transaction. The project key, session ID, and optional subpath keep transcripts separate. BEGIN IMMEDIATE serializes writes; the unique UUID index ignores a repeated UUID while entries without UUIDs are appended again. Only inserted entries advance the session modification time. For the main transcript, fold_session_summary updates the summary in the same transaction as the entry batch. A failed transaction rolls back rather than leaving a new entry without its summary. Loading, listing, and deleting are separate methods outside this excerpt. The offline process test reopens the SQLite file to verify persistence; it does not claim a remote shared database."
+    },
+    {
+      "id": "coverage-check",
+      "title": "UUID coverage and resume criterion",
+      "path": "agent_lab/session_store_lab.py",
+      "start_line": 96,
+      "end_line": 151,
+      "reviewed_source_sha256": "f93e01f971ba8ecb89bce5ae2f8a30e38afba3bdb6bde4f5825ef3946ab759ab",
+      "spoken_text": "The final check correlates the host file, SDK terminal results, and session mirror. It requires the chosen fixed answer and the same session ID across a resumed turn. It counts user and assistant entries, compares every UUID from the first owned local CLI transcript with stored UUIDs, requires no missing entries or mirror errors, and checks that the folded summary matches the session listing. The durable case must have reopened the SQLite adapter. Disabled or rejected mirroring therefore fails the storage check even if the model answered successfully. This proves UUID coverage for that local transcript, not byte equality or coverage for entries without UUIDs."
+    }
+  ]
+}

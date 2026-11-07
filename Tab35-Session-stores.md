@@ -61,7 +61,7 @@ async def main() -> None:
     save_transcript(path, rows)
 ```
 
-`save_transcript` writes transcript.tmp and calls temporary.replace(path) for an atomic update, while `session_store`=InMemorySessionStore() is the SDK's own, separate mirror.
+The host writes transcript.tmp and calls Path.replace. ClaudeAgentOptions(session_store=...) independently mirrors SDK state. The SQLite adapter persists its entries for a reopened client and isolated CLI configuration; the in-memory adapter demonstrates the process-local variant.
 
 ## How the offline lab checks it
 
@@ -69,7 +69,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `store` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1365); the Python source tab shows it below the concept code. Host contracts
+(line 1369); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -87,10 +87,7 @@ Suggested prompt:
 > Use the exercise tool and explain the transcript store boundaries.
 
 The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/session_store_lab.py](agent_lab/session_store_lab.py). The host verifies atomic JSON replacement and UUID coverage against the SDK mirror. In-memory and durable SQLite resume, eager/batched flushing, disabled storage, and rejected/delayed store operations have bounded checks. No model tools are enabled.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

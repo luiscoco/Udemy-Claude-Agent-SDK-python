@@ -1,0 +1,427 @@
+{
+  "lesson": 45,
+  "section": "signed-request",
+  "duration": 31.08,
+  "cues": [
+    {
+      "word": "A",
+      "start": 0.03,
+      "end": 0.1
+    },
+    {
+      "word": "Bedrock",
+      "start": 0.1,
+      "end": 0.58
+    },
+    {
+      "word": "request",
+      "start": 0.58,
+      "end": 0.99
+    },
+    {
+      "word": "is",
+      "start": 0.99,
+      "end": 1.17
+    },
+    {
+      "word": "accepted",
+      "start": 1.17,
+      "end": 1.65
+    },
+    {
+      "word": "only",
+      "start": 1.65,
+      "end": 1.96
+    },
+    {
+      "word": "after",
+      "start": 1.96,
+      "end": 2.23
+    },
+    {
+      "word": "the",
+      "start": 2.23,
+      "end": 2.31
+    },
+    {
+      "word": "lab",
+      "start": 2.31,
+      "end": 2.61
+    },
+    {
+      "word": "reconstructs",
+      "start": 2.61,
+      "end": 3.34
+    },
+    {
+      "word": "the",
+      "start": 3.34,
+      "end": 3.41
+    },
+    {
+      "word": "signed",
+      "start": 3.41,
+      "end": 3.77
+    },
+    {
+      "word": "request",
+      "start": 3.77,
+      "end": 4.27
+    },
+    {
+      "word": "The",
+      "start": 4.63,
+      "end": 4.79
+    },
+    {
+      "word": "verifier",
+      "start": 4.79,
+      "end": 5.28
+    },
+    {
+      "word": "checks",
+      "start": 5.28,
+      "end": 5.61
+    },
+    {
+      "word": "the",
+      "start": 5.61,
+      "end": 5.7
+    },
+    {
+      "word": "credential",
+      "start": 5.7,
+      "end": 6.2
+    },
+    {
+      "word": "scope",
+      "start": 6.2,
+      "end": 6.54
+    },
+    {
+      "word": "the",
+      "start": 6.88,
+      "end": 6.97
+    },
+    {
+      "word": "timestamp",
+      "start": 6.97,
+      "end": 7.66
+    },
+    {
+      "word": "each",
+      "start": 7.89,
+      "end": 8.21
+    },
+    {
+      "word": "named",
+      "start": 8.21,
+      "end": 8.49
+    },
+    {
+      "word": "signed",
+      "start": 8.49,
+      "end": 8.8
+    },
+    {
+      "word": "header",
+      "start": 8.8,
+      "end": 9.14
+    },
+    {
+      "word": "the",
+      "start": 9.6,
+      "end": 9.75
+    },
+    {
+      "word": "exact",
+      "start": 9.75,
+      "end": 10.15
+    },
+    {
+      "word": "body",
+      "start": 10.15,
+      "end": 10.45
+    },
+    {
+      "word": "digest",
+      "start": 10.45,
+      "end": 11.02
+    },
+    {
+      "word": "and",
+      "start": 11.32,
+      "end": 11.48
+    },
+    {
+      "word": "the",
+      "start": 11.48,
+      "end": 11.55
+    },
+    {
+      "word": "canonical",
+      "start": 11.55,
+      "end": 12.09
+    },
+    {
+      "word": "path",
+      "start": 12.09,
+      "end": 12.36
+    },
+    {
+      "word": "and",
+      "start": 12.36,
+      "end": 12.48
+    },
+    {
+      "word": "query",
+      "start": 12.48,
+      "end": 12.88
+    },
+    {
+      "word": "It",
+      "start": 13.37,
+      "end": 13.54
+    },
+    {
+      "word": "then",
+      "start": 13.54,
+      "end": 13.75
+    },
+    {
+      "word": "derives",
+      "start": 13.75,
+      "end": 14.13
+    },
+    {
+      "word": "the",
+      "start": 14.13,
+      "end": 14.21
+    },
+    {
+      "word": "signing",
+      "start": 14.21,
+      "end": 14.62
+    },
+    {
+      "word": "key",
+      "start": 14.62,
+      "end": 14.94
+    },
+    {
+      "word": "and",
+      "start": 15.14,
+      "end": 15.32
+    },
+    {
+      "word": "compares",
+      "start": 15.32,
+      "end": 15.76
+    },
+    {
+      "word": "the",
+      "start": 15.76,
+      "end": 15.84
+    },
+    {
+      "word": "signature",
+      "start": 15.84,
+      "end": 16.46
+    },
+    {
+      "word": "without",
+      "start": 16.49,
+      "end": 16.82
+    },
+    {
+      "word": "exposing",
+      "start": 16.82,
+      "end": 17.3
+    },
+    {
+      "word": "the",
+      "start": 17.3,
+      "end": 17.37
+    },
+    {
+      "word": "secret",
+      "start": 17.37,
+      "end": 17.89
+    },
+    {
+      "word": "Changing",
+      "start": 18.27,
+      "end": 18.65
+    },
+    {
+      "word": "the",
+      "start": 18.65,
+      "end": 18.73
+    },
+    {
+      "word": "model",
+      "start": 18.73,
+      "end": 19.05
+    },
+    {
+      "word": "path",
+      "start": 19.05,
+      "end": 19.29
+    },
+    {
+      "word": "region",
+      "start": 19.53,
+      "end": 20.02
+    },
+    {
+      "word": "body",
+      "start": 20.17,
+      "end": 20.7
+    },
+    {
+      "word": "host",
+      "start": 20.78,
+      "end": 21.17
+    },
+    {
+      "word": "or",
+      "start": 21.17,
+      "end": 21.26
+    },
+    {
+      "word": "signed",
+      "start": 21.26,
+      "end": 21.56
+    },
+    {
+      "word": "headers",
+      "start": 21.56,
+      "end": 22.01
+    },
+    {
+      "word": "breaks",
+      "start": 22.06,
+      "end": 22.41
+    },
+    {
+      "word": "the",
+      "start": 22.41,
+      "end": 22.48
+    },
+    {
+      "word": "proof",
+      "start": 22.48,
+      "end": 22.89
+    },
+    {
+      "word": "A",
+      "start": 23.27,
+      "end": 23.37
+    },
+    {
+      "word": "successful",
+      "start": 23.37,
+      "end": 23.91
+    },
+    {
+      "word": "signature",
+      "start": 23.91,
+      "end": 24.39
+    },
+    {
+      "word": "means",
+      "start": 24.39,
+      "end": 24.83
+    },
+    {
+      "word": "these",
+      "start": 25.13,
+      "end": 25.45
+    },
+    {
+      "word": "received",
+      "start": 25.45,
+      "end": 25.79
+    },
+    {
+      "word": "bytes",
+      "start": 25.79,
+      "end": 26.18
+    },
+    {
+      "word": "match",
+      "start": 26.18,
+      "end": 26.48
+    },
+    {
+      "word": "this",
+      "start": 26.48,
+      "end": 26.69
+    },
+    {
+      "word": "lab's",
+      "start": 26.69,
+      "end": 26.96
+    },
+    {
+      "word": "temporary",
+      "start": 26.96,
+      "end": 27.33
+    },
+    {
+      "word": "credential",
+      "start": 27.33,
+      "end": 27.88
+    },
+    {
+      "word": "it",
+      "start": 28.14,
+      "end": 28.29
+    },
+    {
+      "word": "does",
+      "start": 28.29,
+      "end": 28.48
+    },
+    {
+      "word": "not",
+      "start": 28.48,
+      "end": 28.74
+    },
+    {
+      "word": "mean",
+      "start": 28.74,
+      "end": 28.93
+    },
+    {
+      "word": "a",
+      "start": 28.93,
+      "end": 29
+    },
+    {
+      "word": "real",
+      "start": 29,
+      "end": 29.58
+    },
+    {
+      "word": "AWS",
+      "start": 29.58,
+      "end": 29.71
+    },
+    {
+      "word": "account",
+      "start": 29.71,
+      "end": 30.03
+    },
+    {
+      "word": "was",
+      "start": 30.03,
+      "end": 30.18
+    },
+    {
+      "word": "contacted",
+      "start": 30.18,
+      "end": 30.79
+    }
+  ]
+}

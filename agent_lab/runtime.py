@@ -91,7 +91,8 @@ class RunService:
                     },
                 )
             )
-            async with asyncio.timeout(self.settings.timeout_seconds):
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49} else self.settings.timeout_seconds
+            async with asyncio.timeout(deadline):
                 seed_workspace(work, lesson)
                 if lesson.id == 12:
                     from agent_lab.streaming import execute_stream
@@ -101,12 +102,12 @@ class RunService:
                     return
                 evidence = (
                     {}
-                    if 1 <= lesson.id <= 15 and request.mode == "live"
+                    if 1 <= lesson.id <= 49 and request.mode == "live"
                     else await run_exercise(work, request, lesson, ask=ask)
-                    if 2 <= lesson.id <= 15
+                    if 2 <= lesson.id <= 49
                     else await run_exercise(work, request, lesson)
                 )
-                if not (1 <= lesson.id <= 15 and request.mode == "live"):
+                if not (1 <= lesson.id <= 49 and request.mode == "live"):
                     await emit(
                         Event(
                             kind="evidence",

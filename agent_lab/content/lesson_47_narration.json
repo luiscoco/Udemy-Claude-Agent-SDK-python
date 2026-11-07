@@ -1,0 +1,36 @@
+{
+  "lesson": 47,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "limiter",
+      "title": "Reserve and transfer a worker slot",
+      "path": "agent_lab/orchestra_lab.py",
+      "start_line": 75,
+      "end_line": 97,
+      "reviewed_source_sha256": "663a1b6daf22374bad05eefbc677dc5cefd9f31aa168413fe1e4b980b2796f8f",
+      "spoken_text": "This fair limiter accepts only one or two active host jobs. A new worker reserves a slot immediately when one is free. Otherwise it joins a first in, first out queue and waits. When a worker ends, release transfers the reserved slot directly to the next waiter, so a newcomer cannot race ahead. The worker calls release in a finally block even after an error. This bounds simultaneous host queries; each query still needs its own model and cost ceiling."
+    },
+    {
+      "id": "report-check",
+      "title": "Check one fixture report line",
+      "path": "agent_lab/orchestra_lab.py",
+      "start_line": 51,
+      "end_line": 63,
+      "reviewed_source_sha256": "663a1b6daf22374bad05eefbc677dc5cefd9f31aa168413fe1e4b980b2796f8f",
+      "spoken_text": "The host checker searches for exactly one region report line in the worker's output. It requires the fixed region, total and best product format, then compares the values with totals calculated from the owned sales fixture. A correct sounding parent summary cannot replace this worker report. This narrow line check catches missing or incorrect numbers, but it does not judge every sentence around the line. Separate lifecycle and file hash checks establish who did the work."
+    },
+    {
+      "id": "stop-gate",
+      "title": "Gate an analyst stop",
+      "path": "agent_lab/orchestra_lab.py",
+      "start_line": 65,
+      "end_line": 73,
+      "reviewed_source_sha256": "663a1b6daf22374bad05eefbc677dc5cefd9f31aa168413fe1e4b980b2796f8f",
+      "spoken_text": "The analyst stop gate is stricter than the general report checker. On the first stop, the entire trimmed answer must be the exact north line. If not, the gate blocks and gives a concrete correction. If the hook is already active on a second stop, it allows that stop to avoid a loop. That bypass is only a control-flow event; the independent host checker still compares the final report with fixture truth and can reject wrong values."
+    }
+  ]
+}

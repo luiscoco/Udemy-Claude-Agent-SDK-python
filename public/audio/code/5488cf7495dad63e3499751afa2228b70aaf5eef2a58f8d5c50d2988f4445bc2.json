@@ -1,0 +1,432 @@
+{
+  "lesson": 46,
+  "section": "breakpoint-locations",
+  "duration": 27.432,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.14
+    },
+    {
+      "word": "wire",
+      "start": 0.14,
+      "end": 0.4
+    },
+    {
+      "word": "inspector",
+      "start": 0.4,
+      "end": 0.87
+    },
+    {
+      "word": "searches",
+      "start": 0.87,
+      "end": 1.28
+    },
+    {
+      "word": "for",
+      "start": 1.28,
+      "end": 1.42
+    },
+    {
+      "word": "cache",
+      "start": 1.42,
+      "end": 1.71
+    },
+    {
+      "word": "control",
+      "start": 1.71,
+      "end": 2.1
+    },
+    {
+      "word": "at",
+      "start": 2.1,
+      "end": 2.2
+    },
+    {
+      "word": "the",
+      "start": 2.2,
+      "end": 2.28
+    },
+    {
+      "word": "request",
+      "start": 2.28,
+      "end": 2.67
+    },
+    {
+      "word": "top",
+      "start": 2.67,
+      "end": 2.89
+    },
+    {
+      "word": "level",
+      "start": 2.89,
+      "end": 3.3
+    },
+    {
+      "word": "on",
+      "start": 3.63,
+      "end": 3.87
+    },
+    {
+      "word": "tools",
+      "start": 3.87,
+      "end": 4.37
+    },
+    {
+      "word": "in",
+      "start": 4.44,
+      "end": 4.63
+    },
+    {
+      "word": "system",
+      "start": 4.63,
+      "end": 4.99
+    },
+    {
+      "word": "blocks",
+      "start": 4.99,
+      "end": 5.45
+    },
+    {
+      "word": "and",
+      "start": 5.56,
+      "end": 5.75
+    },
+    {
+      "word": "inside",
+      "start": 5.75,
+      "end": 6.12
+    },
+    {
+      "word": "each",
+      "start": 6.15,
+      "end": 6.38
+    },
+    {
+      "word": "message",
+      "start": 6.38,
+      "end": 6.69
+    },
+    {
+      "word": "content",
+      "start": 6.69,
+      "end": 7.09
+    },
+    {
+      "word": "block",
+      "start": 7.09,
+      "end": 7.42
+    },
+    {
+      "word": "It",
+      "start": 7.87,
+      "end": 8.06
+    },
+    {
+      "word": "retains",
+      "start": 8.06,
+      "end": 8.49
+    },
+    {
+      "word": "only",
+      "start": 8.49,
+      "end": 8.78
+    },
+    {
+      "word": "the",
+      "start": 8.78,
+      "end": 8.86
+    },
+    {
+      "word": "location",
+      "start": 8.86,
+      "end": 9.51
+    },
+    {
+      "word": "ephemeral",
+      "start": 9.6,
+      "end": 10.06
+    },
+    {
+      "word": "type",
+      "start": 10.06,
+      "end": 10.4
+    },
+    {
+      "word": "and",
+      "start": 10.48,
+      "end": 10.66
+    },
+    {
+      "word": "five-minute",
+      "start": 10.66,
+      "end": 11.17
+    },
+    {
+      "word": "or",
+      "start": 11.17,
+      "end": 11.35
+    },
+    {
+      "word": "one-hour",
+      "start": 11.35,
+      "end": 11.67
+    },
+    {
+      "word": "T",
+      "start": 11.67,
+      "end": 11.86
+    },
+    {
+      "word": "T",
+      "start": 11.86,
+      "end": 12.03
+    },
+    {
+      "word": "L",
+      "start": 12.03,
+      "end": 12.17
+    },
+    {
+      "word": "The",
+      "start": 12.66,
+      "end": 12.8
+    },
+    {
+      "word": "prompt",
+      "start": 12.8,
+      "end": 13.17
+    },
+    {
+      "word": "text",
+      "start": 13.17,
+      "end": 13.44
+    },
+    {
+      "word": "and",
+      "start": 13.44,
+      "end": 13.57
+    },
+    {
+      "word": "credential",
+      "start": 13.57,
+      "end": 14.07
+    },
+    {
+      "word": "headers",
+      "start": 14.07,
+      "end": 14.47
+    },
+    {
+      "word": "are",
+      "start": 14.47,
+      "end": 14.53
+    },
+    {
+      "word": "not",
+      "start": 14.53,
+      "end": 14.8
+    },
+    {
+      "word": "placed",
+      "start": 14.8,
+      "end": 15.15
+    },
+    {
+      "word": "in",
+      "start": 15.15,
+      "end": 15.21
+    },
+    {
+      "word": "the",
+      "start": 15.21,
+      "end": 15.31
+    },
+    {
+      "word": "report",
+      "start": 15.31,
+      "end": 15.76
+    },
+    {
+      "word": "A",
+      "start": 16.09,
+      "end": 16.2
+    },
+    {
+      "word": "breakpoint",
+      "start": 16.2,
+      "end": 16.75
+    },
+    {
+      "word": "tells",
+      "start": 16.75,
+      "end": 16.99
+    },
+    {
+      "word": "the",
+      "start": 16.99,
+      "end": 17.06
+    },
+    {
+      "word": "API",
+      "start": 17.06,
+      "end": 17.69
+    },
+    {
+      "word": "which",
+      "start": 17.72,
+      "end": 17.97
+    },
+    {
+      "word": "prefix",
+      "start": 17.97,
+      "end": 18.42
+    },
+    {
+      "word": "may",
+      "start": 18.42,
+      "end": 18.53
+    },
+    {
+      "word": "be",
+      "start": 18.53,
+      "end": 18.66
+    },
+    {
+      "word": "reused",
+      "start": 18.66,
+      "end": 19.15
+    },
+    {
+      "word": "It",
+      "start": 19.44,
+      "end": 19.58
+    },
+    {
+      "word": "does",
+      "start": 19.58,
+      "end": 19.75
+    },
+    {
+      "word": "not",
+      "start": 19.75,
+      "end": 19.95
+    },
+    {
+      "word": "prove",
+      "start": 19.95,
+      "end": 20.15
+    },
+    {
+      "word": "that",
+      "start": 20.15,
+      "end": 20.3
+    },
+    {
+      "word": "the",
+      "start": 20.3,
+      "end": 20.37
+    },
+    {
+      "word": "next",
+      "start": 20.37,
+      "end": 20.68
+    },
+    {
+      "word": "turn",
+      "start": 20.68,
+      "end": 20.93
+    },
+    {
+      "word": "read",
+      "start": 20.93,
+      "end": 21.12
+    },
+    {
+      "word": "a",
+      "start": 21.12,
+      "end": 21.18
+    },
+    {
+      "word": "cached",
+      "start": 21.18,
+      "end": 21.55
+    },
+    {
+      "word": "entry",
+      "start": 21.55,
+      "end": 21.94
+    },
+    {
+      "word": "To",
+      "start": 22.27,
+      "end": 22.42
+    },
+    {
+      "word": "establish",
+      "start": 22.42,
+      "end": 22.93
+    },
+    {
+      "word": "that",
+      "start": 22.93,
+      "end": 23.22
+    },
+    {
+      "word": "compare",
+      "start": 23.38,
+      "end": 23.76
+    },
+    {
+      "word": "the",
+      "start": 23.76,
+      "end": 23.86
+    },
+    {
+      "word": "response",
+      "start": 23.86,
+      "end": 24.31
+    },
+    {
+      "word": "cache-read",
+      "start": 24.31,
+      "end": 24.8
+    },
+    {
+      "word": "counter",
+      "start": 24.8,
+      "end": 25.32
+    },
+    {
+      "word": "and",
+      "start": 25.38,
+      "end": 25.56
+    },
+    {
+      "word": "the",
+      "start": 25.56,
+      "end": 25.63
+    },
+    {
+      "word": "matching",
+      "start": 25.63,
+      "end": 26.01
+    },
+    {
+      "word": "native",
+      "start": 26.01,
+      "end": 26.32
+    },
+    {
+      "word": "SDK",
+      "start": 26.32,
+      "end": 26.72
+    },
+    {
+      "word": "result",
+      "start": 26.72,
+      "end": 27.15
+    }
+  ]
+}

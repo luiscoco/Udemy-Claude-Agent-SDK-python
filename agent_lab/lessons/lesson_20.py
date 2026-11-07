@@ -1,6 +1,6 @@
 """Lesson 20: Hooks in depth.
 
-Evaluate pre-tool policies, post-tool audit records and denial reasons.
+Correlate hook decisions, input rewrites, success/failure audits and prompt/Stop lifecycle observations.
 """
 import asyncio
 

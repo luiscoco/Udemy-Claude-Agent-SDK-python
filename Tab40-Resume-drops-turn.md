@@ -23,35 +23,33 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-import os
-
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, list_sessions, query
+from claude_agent_sdk import ClaudeAgentOptions
 
 
-async def ask(prompt: str, options: ClaudeAgentOptions) -> str:
-    session_id = ""
-    async for message in query(prompt=prompt, options=options):
-        if isinstance(message, ResultMessage):
-            session_id = message.session_id
-    return session_id
+def guarded_fork(source_session: str, retained_entry: str, dropped_turn: str) -> ClaudeAgentOptions:
+    return ClaudeAgentOptions(
+        resume=source_session,
+        fork_session=True,
+        resume_session_at=retained_entry,
+        resume_drops_turn=dropped_turn,
+        tools=[], allowed_tools=[], setting_sources=[],
+        max_turns=1, max_budget_usd=0.05,
+    )
 
 
-async def main() -> None:
-    # The CLI and list_sessions() must both see the same config dir.
-    os.environ["CLAUDE_CONFIG_DIR"] = os.path.abspath("claude-config")
-    first = await ask("Remember the code word CONTEXT.", ClaudeAgentOptions())
-    variants = {
-        "resume": ClaudeAgentOptions(resume=first),
-        "fork": ClaudeAgentOptions(resume=first, fork_session=True),
-        "continue": ClaudeAgentOptions(continue_conversation=True),
-    }
-    for name, options in variants.items():
-        print(name, await ask("What is the code word?", options))
-    for info in list_sessions():
-        print(info.session_id, info.summary)
+def recovery_fork(source_session: str) -> ClaudeAgentOptions:
+    return ClaudeAgentOptions(
+        resume=source_session, fork_session=True,
+        resume_session_at=None, resume_drops_turn=None,
+        tools=[], allowed_tools=[], setting_sources=[],
+        max_turns=1, max_budget_usd=0.05,
+    )
+
+# Parse raw JSONL UUID ancestry before choosing retained_entry and dropped_turn.
+# If connect raises, verify the real CLI result frame in ResultError.data; exception text alone is insufficient.
 ```
 
-ask() captures ResultMessage.session_id, then ClaudeAgentOptions(resume=first), resume plus `fork_session`=True, and `continue_conversation`=True reopen it from one `CLAUDE_CONFIG_DIR`.
+resume_session_at identifies the retained boundary and resume_drops_turn names the discarded user turn. A recovery fork clears both fields. The host verifies the actual persisted fork and source hash rather than using assistant recall.
 
 ## How the offline lab checks it
 
@@ -59,7 +57,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `resume` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 2052); the Python source tab shows it below the concept code. Host contracts
+(line 2056); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -77,10 +75,7 @@ Suggested prompt:
 > Remember the code word CONTEXT.
 
 The live profile is `conversation`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/drops_lab.py](agent_lab/drops_lab.py). The host builds four persisted SDK turns with fixed UUIDs, an owned pause tool and a queued command attachment, then parses the active JSONL ancestry. Exact last-turn and unsafe queued-turn forks use resume-session-at and resume-drops-turn; a fresh recovery fork is optional. Prepared refusal results are authored fixtures. The live unsafe CLI result is parsed from the SDK's structured ResultError.data when connect raises before yielding; exception text alone does not count.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

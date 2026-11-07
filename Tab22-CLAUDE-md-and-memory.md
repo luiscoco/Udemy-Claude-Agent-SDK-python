@@ -1,6 +1,6 @@
 # Lesson 22: CLAUDE.md and memory
 
-Create Python project instructions and separate explicit memory files from runtime context.
+Compare owned CLAUDE.md rules across project settings and system prompt controls.
 
 This lesson is part of **Configuration and hooks**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -24,16 +24,13 @@ For the browser lab, run `uv run agent-lab serve`, then open
 
 ```python
 from pathlib import Path
-
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
-
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
 async def main() -> None:
-    workspace = Path("workspace")
+    workspace = Path("workspace").resolve()
     workspace.mkdir(exist_ok=True)
     (workspace / "CLAUDE.md").write_text(
-        "# Project rules\n- Answer with Python 3.12 examples.\n- Never edit files outside src/.\n",
-        encoding="utf-8",
+        "Reply with exactly PROJECT_ALPHA_22 to the marker question.\n", encoding="utf-8"
     )
     options = ClaudeAgentOptions(
         cwd=str(workspace),
@@ -43,14 +40,14 @@ async def main() -> None:
         tools=[],
         max_turns=1,
     )
-    async for message in query(
-        prompt="Which project rules do you follow?", options=options
-    ):
-        if isinstance(message, ResultMessage):
-            print(message.result)
+    async with ClaudeSDKClient(options=options) as client:
+        await client.query("Reply with the project marker, or UNKNOWN if absent.")
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(message.result)
 ```
 
-`setting_sources=["project"]` with the `claude_code` system prompt preset loads `CLAUDE.md`, and `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` stops automatic memory writes.
+The owned CLAUDE.md supplies a fixed rule, project settings opt into loading it, and auto memory is disabled in the CLI environment. The live lab compares two markers, two system prompt modes and no-project controls.
 
 ## How the offline lab checks it
 
@@ -58,7 +55,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `project_markdown` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 791); the Python source tab shows it below the concept code. Host contracts
+(line 795); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -73,13 +70,10 @@ uv run agent-lab lesson 22 --live
 
 Suggested prompt:
 
-> Read notes.txt and obey the project response format.
+> Reply with the marker specified by the loaded project instructions. If no project marker is available, reply exactly UNKNOWN. Do not inspect files or use tools.
 
 The live profile is `memory`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/project_memory.py](agent_lab/project_memory.py). The live run compares an owned CLAUDE.md marker with project settings enabled and disabled under preset and custom system prompts, on fresh SDK connections.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

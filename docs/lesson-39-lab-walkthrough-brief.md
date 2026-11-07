@@ -1,0 +1,3 @@
+# Lesson 39 lab walkthrough brief
+
+Show a fresh owned Git repository with trusted, branch and docs worktrees. Run the inert SDK argv capture first and label it serialization only. Then run branch cwd with trusted root, omitted root and disabled sources, comparing SDK init cwd with selected command inventory and hook project/local markers. In the takeover step, show the host's one exact nonce command, trusted init without Bash, and omitted-root branch Bash call/result plus proof file. End with relative, missing and file startup probes, each showing actual CLI stderr and no provider credentials.

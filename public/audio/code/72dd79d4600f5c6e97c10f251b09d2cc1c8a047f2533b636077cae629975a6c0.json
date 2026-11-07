@@ -1,0 +1,432 @@
+{
+  "lesson": 44,
+  "section": "temporality-reducer",
+  "duration": 31.608,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.1
+    },
+    {
+      "word": "teaching",
+      "start": 0.1,
+      "end": 0.46
+    },
+    {
+      "word": "reducer",
+      "start": 0.46,
+      "end": 0.89
+    },
+    {
+      "word": "groups",
+      "start": 0.89,
+      "end": 1.41
+    },
+    {
+      "word": "numeric",
+      "start": 1.51,
+      "end": 1.97
+    },
+    {
+      "word": "metric",
+      "start": 1.97,
+      "end": 2.32
+    },
+    {
+      "word": "points",
+      "start": 2.32,
+      "end": 2.81
+    },
+    {
+      "word": "by",
+      "start": 3.03,
+      "end": 3.26
+    },
+    {
+      "word": "resource",
+      "start": 3.26,
+      "end": 3.65
+    },
+    {
+      "word": "attributes",
+      "start": 3.65,
+      "end": 4.31
+    },
+    {
+      "word": "metric",
+      "start": 4.58,
+      "end": 5.01
+    },
+    {
+      "word": "name",
+      "start": 5.01,
+      "end": 5.34
+    },
+    {
+      "word": "unit",
+      "start": 5.5,
+      "end": 6.08
+    },
+    {
+      "word": "kind",
+      "start": 6.4,
+      "end": 6.87
+    },
+    {
+      "word": "temporality",
+      "start": 7.04,
+      "end": 7.7
+    },
+    {
+      "word": "and",
+      "start": 7.7,
+      "end": 7.84
+    },
+    {
+      "word": "point",
+      "start": 7.84,
+      "end": 8.09
+    },
+    {
+      "word": "attributes",
+      "start": 8.09,
+      "end": 8.71
+    },
+    {
+      "word": "For",
+      "start": 9.13,
+      "end": 9.34
+    },
+    {
+      "word": "a",
+      "start": 9.34,
+      "end": 9.4
+    },
+    {
+      "word": "delta",
+      "start": 9.4,
+      "end": 9.72
+    },
+    {
+      "word": "sum",
+      "start": 9.72,
+      "end": 10.11
+    },
+    {
+      "word": "each",
+      "start": 10.38,
+      "end": 10.69
+    },
+    {
+      "word": "sample",
+      "start": 10.69,
+      "end": 11.08
+    },
+    {
+      "word": "adds",
+      "start": 11.08,
+      "end": 11.32
+    },
+    {
+      "word": "to",
+      "start": 11.32,
+      "end": 11.41
+    },
+    {
+      "word": "the",
+      "start": 11.41,
+      "end": 11.5
+    },
+    {
+      "word": "value",
+      "start": 11.5,
+      "end": 11.91
+    },
+    {
+      "word": "in",
+      "start": 11.91,
+      "end": 12.01
+    },
+    {
+      "word": "that",
+      "start": 12.01,
+      "end": 12.22
+    },
+    {
+      "word": "one",
+      "start": 12.22,
+      "end": 12.39
+    },
+    {
+      "word": "series",
+      "start": 12.39,
+      "end": 12.95
+    },
+    {
+      "word": "For",
+      "start": 13.25,
+      "end": 13.47
+    },
+    {
+      "word": "a",
+      "start": 13.47,
+      "end": 13.53
+    },
+    {
+      "word": "cumulative",
+      "start": 13.53,
+      "end": 14.01
+    },
+    {
+      "word": "sum",
+      "start": 14.01,
+      "end": 14.38
+    },
+    {
+      "word": "or",
+      "start": 14.41,
+      "end": 14.59
+    },
+    {
+      "word": "gauge",
+      "start": 14.59,
+      "end": 15.1
+    },
+    {
+      "word": "only",
+      "start": 15.3,
+      "end": 15.61
+    },
+    {
+      "word": "the",
+      "start": 15.61,
+      "end": 15.71
+    },
+    {
+      "word": "sample",
+      "start": 15.71,
+      "end": 16.12
+    },
+    {
+      "word": "with",
+      "start": 16.12,
+      "end": 16.26
+    },
+    {
+      "word": "the",
+      "start": 16.26,
+      "end": 16.34
+    },
+    {
+      "word": "latest",
+      "start": 16.34,
+      "end": 16.77
+    },
+    {
+      "word": "nanosecond",
+      "start": 16.77,
+      "end": 17.35
+    },
+    {
+      "word": "timestamp",
+      "start": 17.35,
+      "end": 17.93
+    },
+    {
+      "word": "sets",
+      "start": 18.09,
+      "end": 18.49
+    },
+    {
+      "word": "the",
+      "start": 18.49,
+      "end": 18.56
+    },
+    {
+      "word": "value",
+      "start": 18.56,
+      "end": 18.94
+    },
+    {
+      "word": "The",
+      "start": 19.20902,
+      "end": 19.36902
+    },
+    {
+      "word": "lab",
+      "start": 19.36902,
+      "end": 19.659021
+    },
+    {
+      "word": "therefore",
+      "start": 19.659021,
+      "end": 20.01902
+    },
+    {
+      "word": "reports",
+      "start": 20.01902,
+      "end": 20.61902
+    },
+    {
+      "word": "zero",
+      "start": 20.659021,
+      "end": 20.989021
+    },
+    {
+      "word": "point",
+      "start": 20.989021,
+      "end": 21.239021
+    },
+    {
+      "word": "zero",
+      "start": 21.239021,
+      "end": 21.52902
+    },
+    {
+      "word": "three",
+      "start": 21.52902,
+      "end": 21.829021
+    },
+    {
+      "word": "for",
+      "start": 22.069021,
+      "end": 22.329021
+    },
+    {
+      "word": "two",
+      "start": 22.329021,
+      "end": 22.499022
+    },
+    {
+      "word": "delta",
+      "start": 22.499022,
+      "end": 22.79902
+    },
+    {
+      "word": "cost",
+      "start": 22.79902,
+      "end": 23.03902
+    },
+    {
+      "word": "samples",
+      "start": 23.03902,
+      "end": 23.649021
+    },
+    {
+      "word": "but",
+      "start": 23.95902,
+      "end": 24.17902
+    },
+    {
+      "word": "zero",
+      "start": 24.17902,
+      "end": 24.409021
+    },
+    {
+      "word": "point",
+      "start": 24.409021,
+      "end": 24.63902
+    },
+    {
+      "word": "zero",
+      "start": 24.63902,
+      "end": 24.87902
+    },
+    {
+      "word": "two",
+      "start": 24.87902,
+      "end": 25.29902
+    },
+    {
+      "word": "for",
+      "start": 25.409021,
+      "end": 25.589022
+    },
+    {
+      "word": "the",
+      "start": 25.589022,
+      "end": 25.669022
+    },
+    {
+      "word": "latest",
+      "start": 25.669022,
+      "end": 26.09902
+    },
+    {
+      "word": "cumulative",
+      "start": 26.09902,
+      "end": 26.53902
+    },
+    {
+      "word": "snapshot",
+      "start": 26.53902,
+      "end": 27.09902
+    },
+    {
+      "word": "It",
+      "start": 27.499022,
+      "end": 27.63902
+    },
+    {
+      "word": "does",
+      "start": 27.63902,
+      "end": 27.839022
+    },
+    {
+      "word": "not",
+      "start": 27.839022,
+      "end": 28.03902
+    },
+    {
+      "word": "pretend",
+      "start": 28.03902,
+      "end": 28.399021
+    },
+    {
+      "word": "to",
+      "start": 28.399021,
+      "end": 28.499022
+    },
+    {
+      "word": "aggregate",
+      "start": 28.499022,
+      "end": 28.93902
+    },
+    {
+      "word": "histograms",
+      "start": 28.93902,
+      "end": 29.659021
+    },
+    {
+      "word": "or",
+      "start": 29.729021,
+      "end": 29.94902
+    },
+    {
+      "word": "serve",
+      "start": 29.94902,
+      "end": 30.229021
+    },
+    {
+      "word": "as",
+      "start": 30.229021,
+      "end": 30.35902
+    },
+    {
+      "word": "a",
+      "start": 30.35902,
+      "end": 30.399021
+    },
+    {
+      "word": "production",
+      "start": 30.399021,
+      "end": 30.85902
+    },
+    {
+      "word": "backend",
+      "start": 30.85902,
+      "end": 31.309021
+    }
+  ]
+}

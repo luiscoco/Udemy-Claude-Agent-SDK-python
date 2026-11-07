@@ -1,6 +1,6 @@
 # Lesson 20: Hooks in depth
 
-Evaluate pre-tool policies, post-tool audit records and denial reasons.
+Correlate hook decisions, input rewrites, success/failure audits and prompt/Stop lifecycle observations.
 
 This lesson is part of **Configuration and hooks**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -23,48 +23,54 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
+from pathlib import Path
+
 from claude_agent_sdk import (
-    ClaudeAgentOptions,
-    HookContext,
-    HookInput,
-    HookJSONOutput,
-    HookMatcher,
+    ClaudeAgentOptions, HookContext, HookInput, HookJSONOutput, HookMatcher,
 )
 
 
-async def guard_writes(
-    data: HookInput, tool_use_id: str | None, context: HookContext
-) -> HookJSONOutput:
-    if data["hook_event_name"] != "PreToolUse":
-        return {}
-    allowed = str(data["tool_input"].get("file_path", "")).startswith("src/")
-    return {
-        "hookSpecificOutput": {
+def build_options(workspace: Path) -> ClaudeAgentOptions:
+    root = workspace.resolve()
+
+    async def guard(
+        data: HookInput, tool_use_id: str | None, context: HookContext
+    ) -> HookJSONOutput:
+        if data["hook_event_name"] != "PreToolUse":
+            return {}
+        allowed = False
+        if data["tool_name"] == "Read":
+            try:
+                target = (root / str(data["tool_input"].get("file_path", ""))).resolve()
+                allowed = target.is_relative_to(root) and target == root / "notes.txt"
+            except (ValueError, OSError):
+                pass
+        return {"hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "allow" if allowed else "deny",
-            "permissionDecisionReason": "Writes must stay under src/.",
-        }
-    }
+            "permissionDecisionReason": "Only the owned notes.txt Read is permitted.",
+        }}
 
+    async def audit(
+        data: HookInput, tool_use_id: str | None, context: HookContext
+    ) -> HookJSONOutput:
+        if data["hook_event_name"] == "PostToolUse":
+            # Log identity and size, not the response body.
+            print(data["tool_name"], tool_use_id, len(str(data["tool_response"])))
+        return {}
 
-async def audit(
-    data: HookInput, tool_use_id: str | None, context: HookContext
-) -> HookJSONOutput:
-    if data["hook_event_name"] == "PostToolUse":
-        print(data["tool_name"], tool_use_id, len(str(data["tool_response"])))
-    return {}
-
-
-def build_options() -> ClaudeAgentOptions:
     return ClaudeAgentOptions(
+        cwd=str(root), tools=["Read"], allowed_tools=[], setting_sources=[],
+        strict_mcp_config=True,
         hooks={
-            "PreToolUse": [HookMatcher(matcher="Write|Edit", hooks=[guard_writes])],
-            "PostToolUse": [HookMatcher(hooks=[audit])],
-        }
+            "PreToolUse": [HookMatcher(matcher="Read", hooks=[guard], timeout=10)],
+            "PostToolUse": [HookMatcher(hooks=[audit], timeout=10)],
+        },
+        max_turns=4, max_budget_usd=0.10,
     )
 ```
 
-`HookMatcher(matcher="Write|Edit", hooks=[guard_writes])` returns a `permissionDecision` before the tool runs, and the unscoped PostToolUse `audit` hook reads `tool_response` after it runs.
+The resolved path and tool name determine the pre-hook decision; no string-prefix path check is used. The successful post-hook records identity and size only. The full lab additionally correlates rewrite/failure effects, prompt/Stop observations and an independent host boundary.
 
 ## How the offline lab checks it
 
@@ -72,7 +78,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `hook_pipeline` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 382); the Python source tab shows it below the concept code. Host contracts
+(line 386); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

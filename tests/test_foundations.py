@@ -22,7 +22,8 @@ from agent_lab.runtime import RunService
 async def test_additional_named_scenarios_have_the_documented_negative_outcome(tmp_path, lesson, scenario):
     root = tmp_path / "work"
     seed_workspace(root, LESSONS[lesson])
-    result = await run_local(root, RunRequest(scenario=scenario), LESSONS[lesson])
+    options = {"action": "fanout"} if lesson == 47 and scenario in {"cancel-worker", "missing-file"} else {}
+    result = await run_local(root, RunRequest(scenario=scenario, lesson_options=options), LESSONS[lesson])
     assert result["experiment_passed"] is False
     assert result["experiment"]["expected_check"] == "needs-review"
 

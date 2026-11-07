@@ -163,7 +163,7 @@ class Workshop:
                         observed = {
                             "tool": name,
                             "arguments": payload,
-                            "is_error": result.isError,
+                            "is_error": result.isError is True,
                             "content": [c.model_dump() for c in result.content],
                             "stock_before": before,
                             "stock_after": after,

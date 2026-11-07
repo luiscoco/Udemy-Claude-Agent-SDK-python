@@ -1,0 +1,3 @@
+# Lesson 35 lab walkthrough brief
+
+Create a step-by-step visual for the actual Python lab. Frames: (1) select commit or interruption and inspect host file hashes; (2) run one SDK turn with mirror enabled; (3) compare local and stored line counts plus UUID coverage; (4) reopen SQLite with a fresh SDK configuration and resume; (5) compare eager/batched flushing and delayed loading; (6) disable or reject the mirror and see a successful model turn with **Needs review** for storage. Mark offline fixtures separately from real provider-backed observations. Do not depict a production remote service or recorded audio.

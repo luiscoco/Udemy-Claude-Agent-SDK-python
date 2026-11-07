@@ -23,39 +23,16 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-import os
+from agent_lab.cloud_wire import HAIKU, canonical_model
 
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
+wire_model = "eu.anthropic.claude-haiku-4-5-20251001-v1:0"
+assert canonical_model(wire_model) == HAIKU
 
-FLAGS = {
-    "CLAUDE_CODE_USE_BEDROCK": "Amazon Bedrock",
-    "CLAUDE_CODE_USE_VERTEX": "Google Vertex AI",
-    "CLAUDE_CODE_USE_FOUNDRY": "Microsoft Foundry",
-}
-
-
-def selected_provider() -> str:
-    enabled = [name for name in FLAGS if os.environ.get(name) == "1"]
-    if len(enabled) > 1:
-        raise RuntimeError(f"Set at most one provider flag, found {enabled}")
-    if enabled:
-        return FLAGS[enabled[0]]
-    if not os.environ.get("ANTHROPIC_API_KEY"):
-        raise RuntimeError("Set ANTHROPIC_API_KEY or exactly one provider flag")
-    return "Anthropic API"
-
-
-async def main() -> None:
-    print("provider:", selected_provider())
-    # The CLI inherits the environment; credentials never appear in code or prompts.
-    async for message in query(
-        prompt="Say hello.", options=ClaudeAgentOptions(max_turns=1)
-    ):
-        if isinstance(message, ResultMessage):
-            print(message.result)
+# The proxy verifies the lane credential, then records a sanitized receipt.
+# A live check joins that receipt to an upstream message ID and SDK session.
 ```
 
-`selected_provider` checks the three CLAUDE_CODE_USE_* flags, raises if more than one is "1", and falls back to `ANTHROPIC_API_KEY` without reading any secret value into code.
+`canonical_model` accepts only fixed Haiku spellings for forwarding; `evaluate_native` joins authenticated wire, upstream and SDK identities. Provider flags and catalog labels alone cannot pass.
 
 ## How the offline lab checks it
 
@@ -63,7 +40,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `providers` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1434); the Python source tab shows it below the concept code. Host contracts
+(line 1438); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

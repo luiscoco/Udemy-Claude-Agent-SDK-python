@@ -1,6 +1,6 @@
 # Lesson 23: Plugins
 
-Build a trusted local plugin manifest with a Python-oriented command and skill.
+Load a host-owned local plugin and verify namespaced command discovery and Skill invocation.
 
 This lesson is part of **Tools and extensions**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -25,36 +25,37 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ```python
 import json
 from pathlib import Path
-
-from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, SdkPluginConfig, query
-
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
 async def main() -> None:
-    plugin = Path("teaching-plugin").resolve()
+    workspace = Path("workspace").resolve()
+    plugin = workspace / "teaching-plugin"
     (plugin / ".claude-plugin").mkdir(parents=True, exist_ok=True)
     (plugin / "commands").mkdir(exist_ok=True)
-    manifest = {"name": "python-teaching", "version": "1.0.0"}
     (plugin / ".claude-plugin" / "plugin.json").write_text(
-        json.dumps(manifest), encoding="utf-8"
+        json.dumps({"name": "python-teaching", "version": "1.0.0"}), encoding="utf-8"
     )
     (plugin / "commands" / "explain.md").write_text(
-        "Explain notes.txt with a short Python example.\n", encoding="utf-8"
+        "Explain this Python lesson briefly.\n", encoding="utf-8"
     )
-    plugins: list[SdkPluginConfig] = [{"type": "local", "path": str(plugin)}]
     options = ClaudeAgentOptions(
-        plugins=plugins,
-        cwd="workspace",
-        tools=["Read"],
-        allowed_tools=["Read"],
+        cwd=str(workspace),
+        plugins=[{"type": "local", "path": str(plugin)}],
+        setting_sources=[],
+        tools=[],
         max_turns=3,
     )
-    # Plugin commands are namespaced as /<plugin-name>:<command>.
-    async for message in query(prompt="/python-teaching:explain", options=options):
-        if isinstance(message, ResultMessage):
-            print(message.result)
+    async with ClaudeSDKClient(options=options) as client:
+        info = await client.get_server_info()
+        names = {item.get("name") for item in (info or {}).get("commands", [])}
+        assert "python-teaching:explain" in names
+        await client.query("/python-teaching:explain")
+        async for message in client.receive_response():
+            if isinstance(message, ResultMessage):
+                print(message.result)
 ```
 
-`.claude-plugin/plugin.json` names the plugin, `plugins=[{"type": "local", "path": ...}]` loads it, and `/python-teaching:explain` calls its namespaced command.
+The manifest names the plugin; the explicit local path loads it; SDK inventory verifies the namespaced command before invocation. The live lab also checks the packaged Skill tool call.
 
 ## How the offline lab checks it
 
@@ -62,7 +63,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `plugins` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 803); the Python source tab shows it below the concept code. Host contracts
+(line 807); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -77,13 +78,10 @@ uv run agent-lab lesson 23 --live
 
 Suggested prompt:
 
-> Explain how local plugins extend an agent.
+> Invoke the selected owned plugin extension.
 
 The live profile is `plugins`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/plugin_lab.py](agent_lab/plugin_lab.py). The live run checks namespaced command inventory and response markers, a correlated Skill tool call, and a disabled-plugin discovery control.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

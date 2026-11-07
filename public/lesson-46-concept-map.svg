@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">Prompt cache anatomy and evidence</title>
+  <desc id="desc">A fixed handbook and cache breakpoint enter a request. The owned observer reads wire usage; native SDK results independently confirm counters. A read token count, not the breakpoint, establishes reuse.</desc>
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#102338"/><stop offset="1" stop-color="#173b51"/></linearGradient><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0 9 4.5 0 9Z" fill="#78d5c1"/></marker></defs>
+  <rect width="1120" height="600" rx="28" fill="url(#bg)"/>
+  <text x="55" y="72" fill="#f4fcfa" font-family="Arial,sans-serif" font-size="34" font-weight="700">Prompt cache anatomy</text>
+  <text x="55" y="111" fill="#a7c9d5" font-family="Arial,sans-serif" font-size="18">A breakpoint requests reuse. The response counters establish what happened.</text>
+  <rect x="56" y="165" width="290" height="185" rx="20" fill="#1e4a61" stroke="#6fb7bc" stroke-width="2"/>
+  <text x="80" y="213" fill="#fff" font-family="Arial,sans-serif" font-size="25" font-weight="700">Request</text>
+  <text x="80" y="252" fill="#c5e5e6" font-family="Arial,sans-serif" font-size="18">180-section handbook</text>
+  <text x="80" y="283" fill="#c5e5e6" font-family="Arial,sans-serif" font-size="18">Fresh edition + nonce</text>
+  <text x="80" y="314" fill="#8ce3d1" font-family="Arial,sans-serif" font-size="18">cache_control · 5m / 1h</text>
+  <path d="M346 256H420" stroke="#78d5c1" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="430" y="165" width="292" height="185" rx="20" fill="#1b5260" stroke="#78d5c1" stroke-width="2"/>
+  <text x="454" y="213" fill="#fff" font-family="Arial,sans-serif" font-size="25" font-weight="700">Response usage</text>
+  <text x="454" y="251" fill="#d2eeeb" font-family="Arial,sans-serif" font-size="18">input · output</text>
+  <text x="454" y="282" fill="#d2eeeb" font-family="Arial,sans-serif" font-size="18">write5m · write1h</text>
+  <text x="454" y="313" fill="#9df2cf" font-family="Arial,sans-serif" font-size="21" font-weight="700">read = observed reuse</text>
+  <path d="M722 256H795" stroke="#78d5c1" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="805" y="165" width="260" height="185" rx="20" fill="#28465e" stroke="#7fa6c1" stroke-width="2"/>
+  <text x="829" y="213" fill="#fff" font-family="Arial,sans-serif" font-size="25" font-weight="700">Evidence join</text>
+  <text x="829" y="252" fill="#d5e5ee" font-family="Arial,sans-serif" font-size="18">Wire message ID</text>
+  <text x="829" y="283" fill="#d5e5ee" font-family="Arial,sans-serif" font-size="18">Native assistant ID</text>
+  <text x="829" y="314" fill="#d5e5ee" font-family="Arial,sans-serif" font-size="18">Independent counters</text>
+  <rect x="56" y="415" width="1009" height="125" rx="20" fill="#f2f8f4"/>
+  <text x="82" y="459" fill="#173b51" font-family="Arial,sans-serif" font-size="23" font-weight="700">Dated list estimate</text>
+  <text x="82" y="495" fill="#33566a" font-family="Arial,sans-serif" font-size="18">input + 1.25 × write5m + 2 × write1h + 0.1 × read + output rate</text>
+  <text x="82" y="523" fill="#386278" font-family="Arial,sans-serif" font-size="16">Keep separate from the SDK session's cumulative cost. Zero cache reads can still be a complete measurement.</text>
+</svg>

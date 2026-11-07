@@ -1,6 +1,7 @@
 """NiceGUI browser UI. Students author application code entirely in Python."""
 
 import asyncio
+import inspect
 import json
 import secrets
 from typing import Any
@@ -16,6 +17,14 @@ from agent_lab.exercises import exercise_context, exercise_source, exercise_uses
 from agent_lab.foundation_models import SCENARIOS
 from agent_lab.foundations import source_sections
 from agent_lab.learning import CheckResult, check_evidence, course
+from agent_lab.lesson35_audio import clip_for_section
+from agent_lab.lesson43_audio import clip_for_section as clip_for_remote_section
+from agent_lab.lesson44_audio import clip_for_section as clip_for_telemetry_section
+from agent_lab.lesson45_audio import clip_for_section as clip_for_cloud_section
+from agent_lab.lesson46_audio import clip_for_section as clip_for_cache_section
+from agent_lab.lesson47_audio import clip_for_section as clip_for_orchestra_section
+from agent_lab.lesson48_audio import clip_for_section as clip_for_hardening_section
+from agent_lab.lesson49_audio import clip_for_section as clip_for_headless_section
 from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
 from agent_lab.models import Event, LessonError, RunRequest
 from agent_lab.my_learning import workspace_url
@@ -137,6 +146,18 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
             current = LESSONS[lesson]
             set_preference("last_lesson", lesson)
             source = exercise_source(current.exercise)
+            if lesson == 49:
+                from agent_lab.headless_lab import local_action
+
+                source = inspect.getsource(local_action)
+            if lesson == 48:
+                from agent_lab.hardening_lab import local_action
+
+                source = inspect.getsource(local_action)
+            if lesson == 47:
+                from agent_lab.orchestra_lab import local_action
+
+                source = inspect.getsource(local_action)
             lesson_header(lesson, runner.settings.enable_live)
             with ui.row().classes(
                 "w-full items-center gap-3 guide-lesson-actions"
@@ -173,8 +194,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 15:
-                            for section in source_sections(lesson):
+                        if 2 <= lesson <= 49:
+                            for section_index, section in enumerate(source_sections(lesson)):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
                                 ):
@@ -183,8 +204,22 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     ).classes("font-semibold")
                                     ui.code(section["code"], language="python").classes("w-full")
                                     ui.label(section["question"]).classes("font-semibold")
+                                    if lesson in {35, 43, 44, 45, 46, 47, 48, 49}:
+                                        reader = (clip_for_section if lesson == 35 else
+                                                  clip_for_remote_section if lesson == 43 else
+                                                  clip_for_telemetry_section if lesson == 44 else
+                                                  clip_for_cloud_section if lesson == 45 else
+                                                  clip_for_cache_section if lesson == 46 else
+                                                  clip_for_orchestra_section if lesson == 47 else
+                                                  clip_for_hardening_section if lesson == 48 else
+                                                  clip_for_headless_section)
+                                        clip = reader(section_index, section["path"], section["start"], section["end"])
+                                        if clip:
+                                            ui.audio(clip).classes("w-full")
+                                        else:
+                                            ui.label("Reviewed source recording pending.").classes("text-xs text-slate-500")
                             ui.link(
-                                "Read the shared evidence evaluator", "/agent_lab/streaming.py" if lesson == 12 else "/agent_lab/thinking.py" if lesson == 14 else "/agent_lab/usage.py" if lesson == 15 else "/agent_lab/foundations.py"
+                                "Read the shared evidence evaluator", "/agent_lab/streaming.py" if lesson == 12 else "/agent_lab/thinking.py" if lesson == 14 else "/agent_lab/hooks_deep.py" if lesson == 20 else "/agent_lab/session_catalog.py" if lesson == 19 else "/agent_lab/sandbox_lab.py" if lesson == 18 else "/agent_lab/checkpointing.py" if lesson == 17 else "/agent_lab/settings_lab.py" if lesson == 16 else "/agent_lab/usage.py" if lesson == 15 else "/agent_lab/foundations.py"
                             )
                         ui.label(
                             "SDK integration: agent_lab/sdk.py · Task lifecycle: agent_lab/runtime.py"
@@ -204,12 +239,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         prompt = (
                             ui.textarea(
                                 "Prompt"
-                                if lesson <= 15
+                                if lesson <= 49
                                 else "Prompt (optional)"
                                 if offline_prompt
                                 else "Agent prompt (live mode)",
                                 placeholder=current.prompt,
-                                value=current.prompt if lesson <= 15 else "",
+                                value=current.prompt if lesson <= 49 else "",
                             )
                             .props("outlined autogrow clearable")
                             .classes("w-full")
@@ -217,7 +252,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_prompt
                             )
                         )
-                        if lesson <= 15:
+                        if lesson in {22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49}:
+                            prompt.props("readonly")
+                        if lesson <= 49:
                             ui.label(
                                 "Offline experiments validate your prompt and run local host code with labelled SDK fixtures; they do not call Claude."
                             ).classes("text-sm text-slate-600")
@@ -235,7 +272,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 mode, "value", lambda value: value == "live" or offline_follow_up
                             )
                         )
-                        if lesson <= 15 and lesson not in {6, 12}:
+                        if lesson <= 49 and lesson not in {6, 12}:
                             follow_up.set_visibility(False)
                         read_lesson_options = experiment_controls(lesson, mode)
                         scenario = (
@@ -255,7 +292,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             .classes("w-full")
                         )
                         scenario.bind_visibility_from(
-                            mode, "value", lambda value: lesson <= 15 and value == "offline"
+                            mode, "value", lambda value: lesson <= 49 and value == "offline"
                         )
                         with ui.row().classes("w-full items-center"):
                             turns = (
@@ -353,6 +390,185 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             ui.label("Response and results").classes("text-xl font-bold")
                         output_state = OutputState()
 
+                        if lesson == 44:
+                            signal_view = ui.select({"all": "All signals", "metrics": "Metrics",
+                                "logs": "Logs", "traces": "Traces"}, value="all",
+                                label="Signal view").props("outlined").classes("w-full")
+
+                            @ui.refreshable
+                            def telemetry_panel() -> None:
+                                evidence = output_state.evidence or {}
+                                experiment = evidence.get("experiment", {}) if isinstance(evidence, dict) else {}
+                                lanes = experiment.get("lanes", []) if isinstance(experiment, dict) else []
+                                if not lanes:
+                                    ui.label("Run a telemetry action to inspect received signals.")
+                                    return
+                                for lane in lanes:
+                                    ui.label(f"Lane: {lane.get('name', 'unknown')}").classes("font-semibold")
+                                    receipts = [row for row in lane.get("receipts", [])
+                                                if signal_view.value == "all" or row.get("signal") == signal_view.value]
+                                    ui.label("Received HTTP 200 exports: " + str(len(receipts)))
+                                    for signal in ("metrics", "logs", "traces"):
+                                        if signal_view.value in {"all", signal}:
+                                            rows = [row for row in lane.get("records", []) if row.get("signal") == signal]
+                                            ui.label(f"{signal.title()}: {len(rows)} decoded records")
+                                            if signal == "metrics":
+                                                for series in lane.get("series", [])[:8]:
+                                                    ui.label(f"{series.get('name')}: {series.get('value')} {series.get('unit')}")
+                                    if experiment.get("action") == "privacy":
+                                        ui.label(f"Synthetic content marker received: {lane.get('content_seen')}")
+                                    if experiment.get("action") == "collector":
+                                        ui.label(f"Unauthenticated probe status: {lane.get('unauthorized_status')}")
+
+                            signal_view.on_value_change(lambda _: telemetry_panel.refresh())
+                            telemetry_panel()
+
+                        if lesson == 46:
+                            @ui.refreshable
+                            def cache_panel() -> None:
+                                evidence = output_state.evidence or {}
+                                report = evidence.get("experiment", {}) if isinstance(evidence, dict) else {}
+                                receipts = report.get("receipts", []) if isinstance(report, dict) else []
+                                if not receipts:
+                                    ui.label("Run one cache action to compare two measured turns.")
+                                    return
+                                results = {row.get("turn"): row for row in report.get("frames", [])
+                                           if row.get("kind") == "result"}
+                                local_turns = {row.get("turn"): row for row in report.get("turns", [])}
+                                rows = []
+                                previous = 0.0
+                                for receipt in receipts:
+                                    number = receipt.get("turn")
+                                    usage = receipt.get("usage", {})
+                                    result = results.get(number) if report.get("mode") == "live" else local_turns.get(number)
+                                    cumulative = (result or {}).get("total_cost_usd") if report.get("mode") == "live" else None
+                                    increment = (cumulative - previous) if isinstance(cumulative, (int, float)) else None
+                                    if isinstance(cumulative, (int, float)):
+                                        previous = cumulative
+                                    rows.append({"turn": number, "model": receipt.get("model"),
+                                                 "input": usage.get("input"), "write5m": usage.get("write5m"),
+                                                 "write1h": usage.get("write1h"), "read": usage.get("read"),
+                                                 "output": usage.get("output"),
+                                                 "estimate": receipt.get("estimate_usd"),
+                                                 "sdk_cumulative": cumulative, "sdk_increment": increment})
+                                columns = [{"name": name, "label": label, "field": name, "align": "left"}
+                                           for name, label in (("turn", "Turn"), ("model", "Model"),
+                                                               ("input", "Input"), ("write5m", "Write 5m"),
+                                                               ("write1h", "Write 1h"), ("read", "Read"),
+                                                               ("output", "Output"), ("estimate", "List estimate USD"),
+                                                               ("sdk_cumulative", "SDK cumulative USD"),
+                                                               ("sdk_increment", "SDK increment USD"))]
+                                with ui.element("div").classes("w-full overflow-x-auto"):
+                                    ui.table(columns=columns, rows=rows, row_key="turn").classes("min-w-max")
+                                ui.label("List estimates use dated rates; SDK totals are cumulative. A zero read is a valid measured outcome.").classes("text-sm text-slate-600")
+
+                            with evidence_view:
+                                cache_panel()
+
+                        if lesson == 47:
+                            @ui.refreshable
+                            def orchestra_panel() -> None:
+                                evidence = output_state.evidence or {}
+                                report = evidence.get("experiment", {}) if isinstance(evidence, dict) else {}
+                                starts = report.get("starts", []) if isinstance(report, dict) else []
+                                if not starts:
+                                    ui.label("Run an orchestration pattern to inspect worker ownership and host verdicts.")
+                                    return
+                                ends = {row.get("id"): row for row in report.get("ends", [])}
+                                verdicts = {row.get("id"): row for row in report.get("verdicts", [])}
+                                rows = [{"id": start.get("id"), "role": start.get("role"),
+                                         "parent": start.get("parent"), "depth": start.get("depth"),
+                                         "owner": start.get("owner"),
+                                         "source": start.get("source"),
+                                         "status": ends.get(start.get("id"), {}).get("status", "missing"),
+                                         "host_verdict": verdicts.get(start.get("id"), {}).get("passed", "missing")}
+                                        for start in starts]
+                                columns = [{"name": key, "label": label, "field": key, "align": "left"}
+                                           for key, label in (("role", "Worker"), ("parent", "Parent"),
+                                                              ("depth", "Depth"), ("owner", "Owner"),
+                                                              ("source", "Source"), ("status", "End"),
+                                                              ("host_verdict", "Host verdict"), ("id", "ID"))]
+                                with ui.element("div").classes("w-full overflow-x-auto"):
+                                    ui.table(columns=columns, rows=rows, row_key="id").classes("min-w-max")
+                                ui.label(f"Handoffs: {len(report.get('handoffs', []))} · Limiter observations: {len(report.get('limiter', []))} · Check: {'passed' if report.get('experiment_passed') else 'needs review'}").classes("text-sm text-slate-600")
+
+                            with evidence_view:
+                                orchestra_panel()
+
+                        if lesson == 48:
+                            @ui.refreshable
+                            def hardening_panel() -> None:
+                                evidence = output_state.evidence or {}
+                                report = evidence.get("experiment", {}) if isinstance(evidence, dict) else {}
+                                lanes = report.get("lanes", []) if isinstance(report, dict) else []
+                                if not lanes:
+                                    ui.label("Run a security probe to compare contrast and guarded evidence.")
+                                    return
+                                rows = []
+                                for lane in lanes:
+                                    for call in lane.get("calls", []):
+                                        rows.append({"lane": lane.get("lane"), "probe": call.get("label"),
+                                                     "tool": call.get("tool"), "decision": call.get("decision"),
+                                                     "result_id": call.get("result_id"),
+                                                     "error": call.get("is_error")})
+                                columns = [{"name": key, "label": label, "field": key, "align": "left"}
+                                           for key, label in (("lane", "Lane"), ("probe", "Probe"),
+                                                              ("tool", "Tool"), ("decision", "Host decision"),
+                                                              ("result_id", "Result ID"), ("error", "Error"))]
+                                with ui.element("div").classes("w-full overflow-x-auto"):
+                                    ui.table(columns=columns, rows=rows, row_key="result_id").classes("min-w-max")
+                                for lane in lanes:
+                                    flags = lane.get("snapshot", {})
+                                    ui.label(f"{lane.get('lane')}: source {lane.get('source')} · outside unchanged {flags.get('outside_unchanged')} · collector leak {flags.get('collector_leak')} · closed {lane.get('closed')}").classes("text-sm text-slate-600")
+                                ui.label(f"Bounded check: {'passed' if report.get('experiment_passed') else 'needs review'}").classes("font-semibold")
+
+                            with evidence_view:
+                                hardening_panel()
+
+                        if lesson == 49:
+                            @ui.refreshable
+                            def headless_panel() -> None:
+                                from agent_lab.api_headless import files as headless_files
+
+                                evidence = output_state.evidence or {}
+                                report = evidence.get("experiment", {}) if isinstance(evidence, dict) else {}
+                                with ui.expansion("Owned fixture and deployment example files"):
+                                    for item in headless_files():
+                                        with ui.expansion(item["name"]):
+                                            ui.code(item["text"], language="python" if item["name"].endswith(".py") else "text")
+                                if not report:
+                                    ui.label("Run a headless action to inspect process and CI outcomes.")
+                                    return
+                                outcomes = report.get("outcomes", [])
+                                if outcomes:
+                                    rows = [{"name": row.get("name"), "fixture": row.get("fixture"),
+                                             "source": row.get("source"),
+                                             "actual_exit": row.get("process", {}).get("actual_exit"),
+                                             "policy_exit": row.get("policy_exit"),
+                                             "ci_exit": row.get("ci_exit"),
+                                             "stdin_closed": row.get("process", {}).get("stdin_closed")}
+                                            for row in outcomes]
+                                    columns = [{"name": key, "label": label, "field": key, "align": "left"}
+                                               for key, label in (("name", "Path"), ("fixture", "Fixture"),
+                                                                  ("source", "Source"), ("actual_exit", "Child exit"),
+                                                                  ("policy_exit", "Policy code"), ("ci_exit", "CI code"),
+                                                                  ("stdin_closed", "Stdin EOF"))]
+                                    with ui.element("div").classes("w-full overflow-x-auto"):
+                                        ui.table(columns=columns, rows=rows, row_key="name").classes("min-w-max")
+                                    for row in outcomes:
+                                        with ui.expansion(f"{row.get('name')} · separate process pipes"):
+                                            ui.label("Stdout").classes("font-semibold")
+                                            ui.code(row.get("process", {}).get("stdout_tail") or row.get("process", {}).get("stdout", ""), language="json")
+                                            ui.label("Stderr").classes("font-semibold")
+                                            ui.code(row.get("process", {}).get("stderr", ""), language="text")
+                                worker = report.get("worker", {})
+                                if worker:
+                                    ui.label(f"Local worker: health {worker.get('health')} · ready {worker.get('ready')} · second job {worker.get('busy')} · drain readiness {worker.get('not_ready')} · job {worker.get('job_status')} · exit {worker.get('exit')} · TCP closed {worker.get('closed_tcp')}").classes("text-sm text-slate-600")
+                                ui.label(f"Bounded check: {'passed' if report.get('experiment_passed') else 'needs review'}").classes("font-semibold")
+
+                            with evidence_view:
+                                headless_panel()
+
                         @ui.refreshable
                         def output() -> None:
                             render_output(
@@ -448,7 +664,19 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                             button.set_enabled(state["ready"] and state["manual_mode"])
                                     if output_state.apply(event):
                                         output.refresh()
+                                        if lesson == 44:
+                                            telemetry_panel.refresh()
+                                        if lesson == 46:
+                                            cache_panel.refresh()
+                                        if lesson == 47:
+                                            orchestra_panel.refresh()
+                                        if lesson == 48:
+                                            hardening_panel.refresh()
+                                        if lesson == 49:
+                                            headless_panel.refresh()
                                     if event.kind == "done":
+                                        run_button.enable()
+                                        cancel_button.disable()
                                         status.set_text(event.data["status"].capitalize())
                                         record_check(event.data["status"])
                             finally:
@@ -459,9 +687,22 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
 
                         async def run() -> None:
                             nonlocal handle, consumer, output_state
+                            run_button.disable()
+                            cancel_button.disable()
+                            status.set_text("Starting")
                             log.clear()
                             output_state = OutputState(mode=mode.value)
                             output.refresh()
+                            if lesson == 44:
+                                telemetry_panel.refresh()
+                            if lesson == 46:
+                                cache_panel.refresh()
+                            if lesson == 47:
+                                orchestra_panel.refresh()
+                            if lesson == 48:
+                                hardening_panel.refresh()
+                            if lesson == 49:
+                                headless_panel.refresh()
                             try:
                                 body = RunRequest(
                                     mode=mode.value,
@@ -469,13 +710,14 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     follow_up=follow_up.value or "",
                                     max_turns=turns.value,
                                     max_budget_usd=budget.value,
-                                    lesson_options=read_lesson_options(),
+                                    lesson_options=read_lesson_options(reset_consent=lesson in {44, 45, 46, 47, 48, 49}),
                                     scenario=scenario.value
                                     if mode.value == "offline"
                                     else "success",
                                 )
                                 handle = runner.start(lesson, body)
                             except Exception as exc:
+                                run_button.enable()
                                 status.set_text("Could not start")
                                 log.push(f"ERROR  {exc}")
                                 output_state.apply(Event(kind="error", data={"message": str(exc)}))
@@ -483,7 +725,6 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 output.refresh()
                                 ui.notify(str(exc), type="negative")
                                 return
-                            run_button.disable()
                             cancel_button.enable()
                             status.set_text("Running")
                             consumer = asyncio.create_task(consume())

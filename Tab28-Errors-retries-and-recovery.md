@@ -60,7 +60,7 @@ async def run_with_retry(prompt: str) -> str | None:
     return None
 ```
 
-`run_with_retry` retries only `CLIConnectionError` with `2**attempt` backoff inside one `asyncio.timeout(120)` deadline, and the `refund` tool checks a host-derived idempotency key before applying the write.
+The concept example shows a host-derived idempotency key and SDK MCP tool. The runnable lesson also correlates real call/result IDs and separates transient retries from permanent rejection and exhaustion.
 
 ## How the offline lab checks it
 
@@ -68,7 +68,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `retry` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1086); the Python source tab shows it below the concept code. Host contracts
+(line 1090); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -86,10 +86,7 @@ Suggested prompt:
 > Use the exercise tool and explain bounded retries.
 
 The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/retry_lab.py](agent_lab/retry_lab.py). The live run correlates real SDK MCP refund calls while the host applies fixed transient/permanent retry decisions to an in-memory ledger.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

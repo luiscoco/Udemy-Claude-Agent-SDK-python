@@ -1,0 +1,3 @@
+# Lesson 35 concept map brief
+
+Create a calm, legible diagram with two separate storage lanes. The left lane is **application transcript.json**: completed temporary JSON, atomic replacement, baseline retained when interrupted. The right lane is **SDK session mirror**: CLI local JSONL, append wrapper, UUID deduplication, SQLite or in-memory adapter, session ID and project key, and fresh-client resume. Draw no arrow from transcript.json into SDK resume. Show eager and batched flush as two settings on the mirror lane. Annotate the coverage criterion: nonempty local transcript, zero missing UUIDs, zero mirror errors. Note that entries without UUIDs are outside the coverage count. Use Python labels and the lesson's own source names.

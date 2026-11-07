@@ -1,0 +1,3 @@
+# Lesson 47 source narration
+
+Three reviewed English scripts in `agent_lab/content/lesson_47_narration.json` explain the actual Python limiter, report checker and analyst stop gate. `scripts/lesson47_audio.py plan --lessons=47` verified 1,362 UTF-16 characters before recording. The private Inworld call used voice Yash and `inworld-tts-2`; the manifest, MP3 hashes, decoded durations and word-alignment timing are under `public/audio/code/lesson-47-manifest.json`. The clips last 27.096, 25.128 and 23.688 seconds, totaling 75.912 seconds. The source reader displays a clip only when the current source, range, transcript, settings, MP3 and timing hashes match. `tests/test_lesson47_audio.py` verifies this release binding. Human listening review remains pending.

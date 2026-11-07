@@ -1,6 +1,6 @@
 # Lesson 18: Sandbox
 
-Distinguish a path policy from OS process isolation and inspect SDK sandbox settings.
+Correlate tool policy decisions and verify native filesystem and network isolation on a supported OS.
 
 This lesson is part of **Permissions and security**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -23,38 +23,45 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
+import json
+import sys
 from pathlib import Path
 from typing import Any
 
-from claude_agent_sdk import ClaudeAgentOptions, SandboxSettings, ToolPermissionContext
-from claude_agent_sdk import PermissionResultAllow, PermissionResultDeny
+from claude_agent_sdk import (
+    ClaudeAgentOptions, PermissionResultAllow, PermissionResultDeny, ToolPermissionContext,
+)
 
 
 def build_options(workspace: Path) -> ClaudeAgentOptions:
-    async def path_policy(
-        name: str, tool_input: dict[str, Any], context: ToolPermissionContext
-    ) -> PermissionResultAllow | PermissionResultDeny:
-        target = (workspace / str(tool_input.get("file_path", "."))).resolve()
-        if target.is_relative_to(workspace.resolve()):
-            return PermissionResultAllow()
-        return PermissionResultDeny(message="Path is outside the workspace.")
+    if sys.platform not in {"linux", "darwin"}:
+        raise RuntimeError("Native sandbox requires Linux/WSL2 or macOS.")
 
-    # The policy judges tool calls; only the sandbox confines processes Bash starts.
-    sandbox: SandboxSettings = {
-        "enabled": True,
-        "autoAllowBashIfSandboxed": False,
-        "allowUnsandboxedCommands": False,
-        "network": {"allowedDomains": ["pypi.org"]},
-    }
+    async def command_policy(
+        name: str, args: dict[str, Any], context: ToolPermissionContext
+    ) -> PermissionResultAllow | PermissionResultDeny:
+        if (name == "Bash" and args.get("command") == "python3 -I sandbox_probe.py"
+                and not args.get("dangerouslyDisableSandbox")):
+            return PermissionResultAllow()
+        return PermissionResultDeny(message="Only the fixed owned probe is permitted.")
+
     return ClaudeAgentOptions(
-        tools=["Read", "Bash"],
-        cwd=str(workspace),
-        can_use_tool=path_policy,
-        sandbox=sandbox,
+        cwd=str(workspace), tools=["Bash"], allowed_tools=[], setting_sources=[],
+        can_use_tool=command_policy, strict_mcp_config=True,
+        sandbox={
+            "enabled": True,
+            "autoAllowBashIfSandboxed": False,
+            "allowUnsandboxedCommands": False,
+            "excludedCommands": [],
+            "network": {"allowedDomains": []},
+        },
+        # CLI extension: exit if the sandbox cannot start; never silently downgrade.
+        settings=json.dumps({"sandbox": {"failIfUnavailable": True}}),
+        max_turns=4, max_budget_usd=0.10,
     )
 ```
 
-`path_policy` (a `can_use_tool` callback) decides which tool calls run, while `sandbox=SandboxSettings(...)` is what confines the processes those calls start.
+The platform gate and failIfUnavailable setting prevent an unsupported sandbox request from becoming an unsandboxed command. The independent callback permits only the fixed owned probe. Actual process effects must still be observed.
 
 ## How the offline lab checks it
 
@@ -62,7 +69,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `sandbox` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 628); the Python source tab shows it below the concept code. Host contracts
+(line 632); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -92,7 +99,7 @@ is a threshold, not an exact billing cap.
 
 ## Python edition adaptation
 
-The local path policy is not OS sandboxing. Configure a supported OS sandbox independently before running untrusted shell code.
+Read policy comparisons run on all platforms. Native shell enforcement is separately verified on Linux/WSL2 or macOS; Windows requests fail closed, and no unsandboxed fallback is permitted.
 
 ## API and lifecycle
 

@@ -1,0 +1,11 @@
+# Lesson 44: OpenTelemetry collector
+
+The lesson starts an owned OTLP HTTP JSON collector on a fresh loopback port for every action. A valid envelope can return HTTP 200 with zero decoded records; only a positive receipt count and matching decoded rows meet the check. Receipts include a UUID, signal, sender, byte count and original-body SHA-256. The collector discards the body after validating the whole envelope and keeps only allowlisted attributes. Local mode sends authored fixture records. Live mode uses an isolated ClaudeSDKClient and labels the CLI's exports as subprocess records.
+
+The six actions are Signals, Privacy, Tracing, Rich, Exporters and Collector. Privacy and Exporters have two lanes. The private/content privacy comparison uses only a generated synthetic marker. The delta reducer adds samples within one stripped series; cumulative and gauge values keep the latest nanosecond timestamp. The manual host span is exported separately from native spans. Rich denies a fixed Bash request in PreToolUse, allows one exact Read, and independently hashes notes.txt in PostToolUse. Collector probes a 401 before supplying an in-memory exporter credential.
+
+The native subprocess receives explicit OTLP JSON settings, a fresh config directory, an owned resource identity and a per-query $0.10 SDK threshold. The evidence check joins HTTP 200 receipts and positive native records to the run, lane, SDK session and Read tool ID. Tracing additionally requires a shared trace and parent span ID; Rich requires a denied Bash result and native tool ID. The live collector does not claim to intercept upstream API trace headers. This lab's reducer is for teaching, not a general production aggregation backend.
+
+The API exposes free facts, state and code inspections and six named POST actions. POST inputs accept only mode, consent and scenario. The default local mode costs nothing. Live requires fresh consent and a private configured provider key; negative evidence scenarios run locally. The browser signal view filters received evidence without starting a new action.
+
+Three [source-aligned narration clips](lesson-44-narration.md) explain the collector boundary, reducer and native check in the Python source tab. They are recorded and await human listening review.

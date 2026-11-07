@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" role="img" aria-label="Lesson 45 cloud provider concept map">
+<rect width="1200" height="690" fill="#f7f9fc"/>
+<g font-family="Arial, sans-serif" fill="#14213d">
+<text x="54" y="61" font-size="34" font-weight="700">Cloud formats meet at one owned boundary</text>
+<text x="54" y="96" font-size="17" fill="#475569">Five isolated CLI configurations are compared through a local proxy.</text>
+<rect x="55" y="145" width="305" height="408" rx="20" fill="#e0e7ff" stroke="#6366f1" stroke-width="2"/>
+<text x="79" y="185" font-size="24" font-weight="700">Native provider lanes</text>
+<text x="79" y="225" font-size="18">First party · x-api-key</text>
+<text x="79" y="274" font-size="18">Bedrock · SigV4 / bearer</text>
+<text x="79" y="323" font-size="18">Vertex · owned token exchange</text>
+<text x="79" y="372" font-size="18">Foundry · x-api-key</text>
+<text x="79" y="421" font-size="18">Gateway · bearer</text>
+<text x="79" y="488" font-size="16" fill="#475569">Fresh home and cloud config</text>
+<text x="79" y="514" font-size="16" fill="#475569">for every lane</text>
+<rect x="446" y="189" width="306" height="295" rx="20" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+<text x="470" y="230" font-size="24" font-weight="700">Owned loopback proxy</text>
+<text x="470" y="274" font-size="18">Verify Host, path and auth</text>
+<text x="470" y="313" font-size="18">Map fixed Haiku ID</text>
+<text x="470" y="352" font-size="18">Record sanitized receipt</text>
+<text x="470" y="391" font-size="18">Reject Sonnet locally</text>
+<text x="470" y="446" font-size="16" fill="#475569">No real cloud deployment</text>
+<rect x="837" y="145" width="308" height="165" rx="20" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+<text x="861" y="187" font-size="24" font-weight="700">Fixed upstream</text>
+<text x="861" y="224" font-size="17">Anthropic Messages API</text>
+<text x="861" y="260" font-size="17">Host key stays at the proxy</text>
+<rect x="837" y="389" width="308" height="164" rx="20" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+<text x="861" y="431" font-size="24" font-weight="700">Proof chain</text>
+<text x="861" y="468" font-size="17">Wire receipt + message ID</text>
+<text x="861" y="504" font-size="17">SDK session + final result</text>
+<path d="M366 341H435M759 248H826M759 434H826" stroke="#64748b" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+<text x="55" y="625" font-size="18" fill="#475569">Local fixtures show formats. Live checks join authenticated traffic to a native SDK result.</text>
+</g><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#64748b"/></marker></defs>
+</svg>

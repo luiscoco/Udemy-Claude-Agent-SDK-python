@@ -398,6 +398,37 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 49:
+        with card("Lesson 49 headless walkthrough", "Processes, CI codes and local worker"):
+            ui.image("/assets/lesson-49-lab-walkthrough.svg").props("fit=contain").classes("w-full")
+    if lesson_id == 48:
+        with card("Lesson 48 security walkthrough", "Fixed probes and independent effects"):
+            ui.image("/assets/lesson-48-lab-walkthrough.svg").props("fit=contain").classes("w-full")
+    if lesson_id == 47:
+        with card("Lesson 47 orchestration walkthrough", "Worker evidence and dependent work"):
+            ui.image("/assets/lesson-47-lab-walkthrough.svg").props(
+                'alt="Owned CSV, matched worker lifecycle, host verdict, then handoff or dependent skip"'
+            ).classes("w-full")
+    if lesson_id == 46:
+        with card("Lesson 46 cache walkthrough", "Four measured actions"):
+            ui.image("/assets/lesson-46-lab-walkthrough.svg").props(
+                'alt="Four cache actions lead to two-turn counter and hook evidence"'
+            ).classes("w-full")
+    if lesson_id == 45:
+        with card("Lesson 45 cloud walkthrough", "Five owned actions"):
+            ui.image("/assets/lesson-45-lab-walkthrough.svg").props(
+                'alt="Catalog, Same, Auth, Models and Failure cloud-format actions"'
+            ).classes("w-full")
+    if lesson_id == 44:
+        with card("Lesson 44 telemetry walkthrough", "Six collector actions"):
+            ui.image("/assets/lesson-44-lab-walkthrough.svg").props(
+                'alt="Six-step OTLP telemetry lab from signals through collector authentication"'
+            ).classes("w-full")
+    if lesson_id == 43:
+        with card("Lesson 43 walkthrough map", "Owned remote MCP fixture"):
+            ui.image("/assets/lesson-43-lab-walkthrough.svg").props(
+                'alt="Seven-step remote MCP walkthrough from auth through live evidence and rotation limits"'
+            ).classes("w-full")
     with card("Lab walkthrough", "Step by step"):
         ui.markdown(item.lab_brief)
         with ui.timeline(side="right").classes("w-full"):
@@ -452,6 +483,37 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 49:
+        with card("Headless evidence concept map", "Lesson 49"):
+            ui.image("/assets/lesson-49-concept-map.svg").props("fit=contain").classes("w-full")
+    if lesson_id == 48:
+        with card("Security boundaries concept map", "Lesson 48"):
+            ui.image("/assets/lesson-48-concept-map.svg").props("fit=contain").classes("w-full")
+    if lesson_id == 47:
+        with card("Orchestration concept map", "Lesson 47"):
+            ui.image("/assets/lesson-47-concept-map.svg").props(
+                'alt="Native lead, manager and analyst tree beside host-controlled regional fan-out"'
+            ).classes("w-full")
+    if lesson_id == 46:
+        with card("Prompt cache concept map", "Lesson 46"):
+            ui.image("/assets/lesson-46-concept-map.svg").props(
+                'alt="A cache breakpoint requests reuse while response counters prove a read"'
+            ).classes("w-full")
+    if lesson_id == 45:
+        with card("Cloud provider concept map", "Lesson 45"):
+            ui.image("/assets/lesson-45-concept-map.svg").props(
+                'alt="Five native provider configurations reach an owned proxy and fixed upstream"'
+            ).classes("w-full")
+    if lesson_id == 44:
+        with card("OpenTelemetry concept map", "Lesson 44"):
+            ui.image("/assets/lesson-44-concept-map.svg").props(
+                'alt="Native SDK telemetry exports reach the collector as metrics logs and traces"'
+            ).classes("w-full")
+    if lesson_id == 43:
+        with card("Remote MCP concept map", "Lesson 43"):
+            ui.image("/assets/lesson-43-concept-map.svg").props(
+                'alt="Remote MCP authentication, transports, tool and resource evidence, and reconnect versus rotation"'
+            ).classes("w-full")
     with card("Lesson infographic", "Python"):
         infographic(lesson_id)
     with card("How this exercise is built", "Generated from the code"):
@@ -505,8 +567,8 @@ def check_card(lesson_id: int, result: CheckResult | None) -> None:
             ui.label("Check passed" if passed else "Needs review").classes("font-bold")
         ui.markdown(result.detail)
         ui.label(
-            "The automatic check covers the stream outcome only. Your own review in the Learn tab stays separate."
-            if lesson_id <= 15 else
+            "The automatic check covers the bounded evidence criterion shown above. Your own review in the Learn tab stays separate."
+            if lesson_id <= 45 else
             "The automatic check covers local evidence only. Your own review in the Learn tab stays separate."
         ).classes("text-xs text-slate-500")
 

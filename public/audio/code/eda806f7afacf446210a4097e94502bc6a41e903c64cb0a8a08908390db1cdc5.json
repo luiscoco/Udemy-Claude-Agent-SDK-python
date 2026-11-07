@@ -1,0 +1,417 @@
+{
+  "lesson": 46,
+  "section": "native-join",
+  "duration": 31.92,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.07
+    },
+    {
+      "word": "live",
+      "start": 0.07,
+      "end": 0.35
+    },
+    {
+      "word": "evaluator",
+      "start": 0.35,
+      "end": 0.9
+    },
+    {
+      "word": "requires",
+      "start": 0.9,
+      "end": 1.4
+    },
+    {
+      "word": "two",
+      "start": 1.4,
+      "end": 1.67
+    },
+    {
+      "word": "authenticated",
+      "start": 1.67,
+      "end": 2.28
+    },
+    {
+      "word": "upstream",
+      "start": 2.28,
+      "end": 2.67
+    },
+    {
+      "word": "receipts",
+      "start": 2.67,
+      "end": 3.29
+    },
+    {
+      "word": "and",
+      "start": 3.5,
+      "end": 3.72
+    },
+    {
+      "word": "two",
+      "start": 3.72,
+      "end": 3.89
+    },
+    {
+      "word": "ordered",
+      "start": 3.89,
+      "end": 4.21
+    },
+    {
+      "word": "native",
+      "start": 4.21,
+      "end": 4.52
+    },
+    {
+      "word": "turns",
+      "start": 4.52,
+      "end": 4.86
+    },
+    {
+      "word": "for",
+      "start": 4.86,
+      "end": 5.06
+    },
+    {
+      "word": "one",
+      "start": 5.06,
+      "end": 5.23
+    },
+    {
+      "word": "operation",
+      "start": 5.23,
+      "end": 5.81
+    },
+    {
+      "word": "Each",
+      "start": 6.5,
+      "end": 6.81
+    },
+    {
+      "word": "response",
+      "start": 6.81,
+      "end": 7.28
+    },
+    {
+      "word": "message",
+      "start": 7.28,
+      "end": 7.59
+    },
+    {
+      "word": "identifier",
+      "start": 7.59,
+      "end": 8.32
+    },
+    {
+      "word": "must",
+      "start": 8.57,
+      "end": 8.93
+    },
+    {
+      "word": "match",
+      "start": 8.93,
+      "end": 9.23
+    },
+    {
+      "word": "its",
+      "start": 9.23,
+      "end": 9.4
+    },
+    {
+      "word": "SDK",
+      "start": 9.4,
+      "end": 9.81
+    },
+    {
+      "word": "assistant",
+      "start": 9.81,
+      "end": 10.38
+    },
+    {
+      "word": "and",
+      "start": 10.56,
+      "end": 10.75
+    },
+    {
+      "word": "both",
+      "start": 10.75,
+      "end": 11.01
+    },
+    {
+      "word": "results",
+      "start": 11.01,
+      "end": 11.44
+    },
+    {
+      "word": "must",
+      "start": 11.44,
+      "end": 11.64
+    },
+    {
+      "word": "succeed",
+      "start": 11.64,
+      "end": 12.07
+    },
+    {
+      "word": "in",
+      "start": 12.07,
+      "end": 12.16
+    },
+    {
+      "word": "the",
+      "start": 12.16,
+      "end": 12.24
+    },
+    {
+      "word": "same",
+      "start": 12.24,
+      "end": 12.5
+    },
+    {
+      "word": "session",
+      "start": 12.5,
+      "end": 12.91
+    },
+    {
+      "word": "The",
+      "start": 13.39,
+      "end": 13.59
+    },
+    {
+      "word": "independently",
+      "start": 13.59,
+      "end": 14.27
+    },
+    {
+      "word": "reported",
+      "start": 14.27,
+      "end": 14.69
+    },
+    {
+      "word": "SDK",
+      "start": 14.69,
+      "end": 15.09
+    },
+    {
+      "word": "usage",
+      "start": 15.09,
+      "end": 15.58
+    },
+    {
+      "word": "is",
+      "start": 15.58,
+      "end": 15.69
+    },
+    {
+      "word": "normalized",
+      "start": 15.69,
+      "end": 16.39
+    },
+    {
+      "word": "and",
+      "start": 16.67,
+      "end": 16.84
+    },
+    {
+      "word": "compared",
+      "start": 16.84,
+      "end": 17.24
+    },
+    {
+      "word": "with",
+      "start": 17.24,
+      "end": 17.36
+    },
+    {
+      "word": "the",
+      "start": 17.36,
+      "end": 17.43
+    },
+    {
+      "word": "observer's",
+      "start": 17.43,
+      "end": 17.92
+    },
+    {
+      "word": "wire",
+      "start": 17.92,
+      "end": 18.17
+    },
+    {
+      "word": "usage",
+      "start": 18.17,
+      "end": 18.7
+    },
+    {
+      "word": "the",
+      "start": 19.03,
+      "end": 19.21
+    },
+    {
+      "word": "SDK",
+      "start": 19.21,
+      "end": 19.67
+    },
+    {
+      "word": "cumulative",
+      "start": 19.67,
+      "end": 20.14
+    },
+    {
+      "word": "cost",
+      "start": 20.14,
+      "end": 20.53
+    },
+    {
+      "word": "must",
+      "start": 20.53,
+      "end": 20.75
+    },
+    {
+      "word": "be",
+      "start": 20.75,
+      "end": 20.86
+    },
+    {
+      "word": "finite",
+      "start": 20.86,
+      "end": 21.36
+    },
+    {
+      "word": "and",
+      "start": 21.36,
+      "end": 21.52
+    },
+    {
+      "word": "never",
+      "start": 21.52,
+      "end": 21.72
+    },
+    {
+      "word": "decrease",
+      "start": 21.72,
+      "end": 22.32
+    },
+    {
+      "word": "A",
+      "start": 22.54,
+      "end": 22.63
+    },
+    {
+      "word": "completed",
+      "start": 22.63,
+      "end": 23.16
+    },
+    {
+      "word": "measurement",
+      "start": 23.16,
+      "end": 23.72
+    },
+    {
+      "word": "can",
+      "start": 23.72,
+      "end": 23.89
+    },
+    {
+      "word": "pass",
+      "start": 23.89,
+      "end": 24.24
+    },
+    {
+      "word": "with",
+      "start": 24.24,
+      "end": 24.38
+    },
+    {
+      "word": "zero",
+      "start": 24.38,
+      "end": 24.63
+    },
+    {
+      "word": "cache",
+      "start": 24.63,
+      "end": 24.95
+    },
+    {
+      "word": "reads",
+      "start": 24.95,
+      "end": 25.34
+    },
+    {
+      "word": "A",
+      "start": 25.61,
+      "end": 25.79
+    },
+    {
+      "word": "selected",
+      "start": 25.79,
+      "end": 26.26
+    },
+    {
+      "word": "breakpoint",
+      "start": 26.26,
+      "end": 26.9
+    },
+    {
+      "word": "matching",
+      "start": 27.11,
+      "end": 27.5
+    },
+    {
+      "word": "prose",
+      "start": 27.5,
+      "end": 27.96
+    },
+    {
+      "word": "or",
+      "start": 27.99,
+      "end": 28.15
+    },
+    {
+      "word": "a",
+      "start": 28.15,
+      "end": 28.2
+    },
+    {
+      "word": "plausible",
+      "start": 28.2,
+      "end": 28.66
+    },
+    {
+      "word": "price",
+      "start": 28.66,
+      "end": 28.95
+    },
+    {
+      "word": "estimate",
+      "start": 28.95,
+      "end": 29.4
+    },
+    {
+      "word": "cannot",
+      "start": 29.4,
+      "end": 29.75
+    },
+    {
+      "word": "replace",
+      "start": 29.75,
+      "end": 30.13
+    },
+    {
+      "word": "these",
+      "start": 30.13,
+      "end": 30.36
+    },
+    {
+      "word": "correlated",
+      "start": 30.36,
+      "end": 30.88
+    },
+    {
+      "word": "observations",
+      "start": 30.88,
+      "end": 31.66
+    }
+  ]
+}

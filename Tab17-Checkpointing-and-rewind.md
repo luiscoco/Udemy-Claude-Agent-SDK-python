@@ -1,6 +1,6 @@
 # Lesson 17: Checkpointing and rewind
 
-Snapshot a workspace file and restore it; inspect the SDK's rewind interface separately.
+Capture a user checkpoint, edit one owned file, and verify native rewind with file hashes.
 
 This lesson is part of **Sessions and context**. The Python implementation is shared by
 the NiceGUI screen, FastAPI endpoints and command-line exercise.
@@ -53,7 +53,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `checkpoint` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1033); the Python source tab shows it below the concept code. Host contracts
+(line 1037); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -83,7 +83,7 @@ is a threshold, not an exact billing cap.
 
 ## Python edition adaptation
 
-Offline rewind is a host file snapshot. Live SDK checkpointing needs a write-enabled session; this lab does not grant writes to the model.
+Offline uses the real Python client with a scripted CLI and host backup effects. Live permits only one exact owned-file replacement and verifies native rewind; neither mode rewinds conversation history.
 
 ## API and lifecycle
 

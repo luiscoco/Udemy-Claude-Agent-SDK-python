@@ -1,0 +1,412 @@
+{
+  "lesson": 43,
+  "section": "connected-rotation",
+  "duration": 28.488,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.25
+    },
+    {
+      "word": "is",
+      "start": 0.25,
+      "end": 0.34
+    },
+    {
+      "word": "the",
+      "start": 0.34,
+      "end": 0.43
+    },
+    {
+      "word": "live",
+      "start": 0.43,
+      "end": 0.7
+    },
+    {
+      "word": "rotation",
+      "start": 0.7,
+      "end": 1.15
+    },
+    {
+      "word": "step",
+      "start": 1.15,
+      "end": 1.52
+    },
+    {
+      "word": "The",
+      "start": 1.95,
+      "end": 2.08
+    },
+    {
+      "word": "host",
+      "start": 2.08,
+      "end": 2.4
+    },
+    {
+      "word": "revokes",
+      "start": 2.4,
+      "end": 2.75
+    },
+    {
+      "word": "credential",
+      "start": 2.75,
+      "end": 3.23
+    },
+    {
+      "word": "one",
+      "start": 3.23,
+      "end": 3.56
+    },
+    {
+      "word": "and",
+      "start": 3.88,
+      "end": 4.07
+    },
+    {
+      "word": "independently",
+      "start": 4.07,
+      "end": 4.74
+    },
+    {
+      "word": "checks",
+      "start": 4.74,
+      "end": 5.18
+    },
+    {
+      "word": "that",
+      "start": 5.18,
+      "end": 5.34
+    },
+    {
+      "word": "the",
+      "start": 5.34,
+      "end": 5.44
+    },
+    {
+      "word": "old",
+      "start": 5.44,
+      "end": 5.71
+    },
+    {
+      "word": "bearer",
+      "start": 5.71,
+      "end": 6.06
+    },
+    {
+      "word": "now",
+      "start": 6.09,
+      "end": 6.33
+    },
+    {
+      "word": "receives",
+      "start": 6.33,
+      "end": 6.78
+    },
+    {
+      "word": "HTTP",
+      "start": 6.78,
+      "end": 7.36
+    },
+    {
+      "word": "four",
+      "start": 7.36,
+      "end": 7.61
+    },
+    {
+      "word": "oh",
+      "start": 7.61,
+      "end": 7.7
+    },
+    {
+      "word": "one",
+      "start": 7.7,
+      "end": 7.97
+    },
+    {
+      "word": "It",
+      "start": 8.4,
+      "end": 8.57
+    },
+    {
+      "word": "obtains",
+      "start": 8.57,
+      "end": 8.94
+    },
+    {
+      "word": "credential",
+      "start": 8.94,
+      "end": 9.42
+    },
+    {
+      "word": "two",
+      "start": 9.42,
+      "end": 9.79
+    },
+    {
+      "word": "through",
+      "start": 9.83,
+      "end": 9.99
+    },
+    {
+      "word": "the",
+      "start": 9.99,
+      "end": 10.06
+    },
+    {
+      "word": "same",
+      "start": 10.06,
+      "end": 10.36
+    },
+    {
+      "word": "discovery",
+      "start": 10.36,
+      "end": 10.76
+    },
+    {
+      "word": "flow",
+      "start": 10.76,
+      "end": 11.1
+    },
+    {
+      "word": "Python",
+      "start": 11.5,
+      "end": 11.89
+    },
+    {
+      "word": "SDK",
+      "start": 11.89,
+      "end": 12.26
+    },
+    {
+      "word": "version",
+      "start": 12.26,
+      "end": 12.62
+    },
+    {
+      "word": "zero",
+      "start": 12.62,
+      "end": 12.88
+    },
+    {
+      "word": "point",
+      "start": 12.88,
+      "end": 13.12
+    },
+    {
+      "word": "two",
+      "start": 13.12,
+      "end": 13.25
+    },
+    {
+      "word": "point",
+      "start": 13.25,
+      "end": 13.48
+    },
+    {
+      "word": "one",
+      "start": 13.48,
+      "end": 13.66
+    },
+    {
+      "word": "seven",
+      "start": 13.66,
+      "end": 13.94
+    },
+    {
+      "word": "four",
+      "start": 13.94,
+      "end": 14.26
+    },
+    {
+      "word": "has",
+      "start": 14.46,
+      "end": 14.7
+    },
+    {
+      "word": "no",
+      "start": 14.7,
+      "end": 14.88
+    },
+    {
+      "word": "public",
+      "start": 14.88,
+      "end": 15.24
+    },
+    {
+      "word": "server",
+      "start": 15.24,
+      "end": 15.51
+    },
+    {
+      "word": "replacement",
+      "start": 15.51,
+      "end": 16.06
+    },
+    {
+      "word": "method",
+      "start": 16.06,
+      "end": 16.47
+    },
+    {
+      "word": "so",
+      "start": 16.77,
+      "end": 16.95
+    },
+    {
+      "word": "this",
+      "start": 16.95,
+      "end": 17.19
+    },
+    {
+      "word": "lab",
+      "start": 17.19,
+      "end": 17.53
+    },
+    {
+      "word": "sends",
+      "start": 17.53,
+      "end": 17.84
+    },
+    {
+      "word": "a",
+      "start": 17.84,
+      "end": 17.89
+    },
+    {
+      "word": "version",
+      "start": 17.89,
+      "end": 18.25
+    },
+    {
+      "word": "guarded",
+      "start": 18.25,
+      "end": 18.65
+    },
+    {
+      "word": "MCP",
+      "start": 18.65,
+      "end": 19.11
+    },
+    {
+      "word": "set",
+      "start": 19.11,
+      "end": 19.37
+    },
+    {
+      "word": "servers",
+      "start": 19.37,
+      "end": 19.9
+    },
+    {
+      "word": "control",
+      "start": 20.14,
+      "end": 20.51
+    },
+    {
+      "word": "request",
+      "start": 20.51,
+      "end": 21.08
+    },
+    {
+      "word": "with",
+      "start": 21.11,
+      "end": 21.3
+    },
+    {
+      "word": "the",
+      "start": 21.3,
+      "end": 21.36
+    },
+    {
+      "word": "new",
+      "start": 21.36,
+      "end": 21.54
+    },
+    {
+      "word": "header",
+      "start": 21.54,
+      "end": 21.94
+    },
+    {
+      "word": "The",
+      "start": 22.42,
+      "end": 22.55
+    },
+    {
+      "word": "CLI",
+      "start": 22.82,
+      "end": 22.99
+    },
+    {
+      "word": "must",
+      "start": 22.99,
+      "end": 23.27
+    },
+    {
+      "word": "acknowledge",
+      "start": 23.27,
+      "end": 23.69
+    },
+    {
+      "word": "the",
+      "start": 23.69,
+      "end": 23.79
+    },
+    {
+      "word": "replacement",
+      "start": 23.79,
+      "end": 24.44
+    },
+    {
+      "word": "before",
+      "start": 24.47,
+      "end": 24.78
+    },
+    {
+      "word": "reconnect",
+      "start": 24.78,
+      "end": 25.32
+    },
+    {
+      "word": "Both",
+      "start": 25.74,
+      "end": 26.07
+    },
+    {
+      "word": "agent",
+      "start": 26.07,
+      "end": 26.37
+    },
+    {
+      "word": "turns",
+      "start": 26.37,
+      "end": 26.66
+    },
+    {
+      "word": "remain",
+      "start": 26.66,
+      "end": 26.95
+    },
+    {
+      "word": "on",
+      "start": 26.95,
+      "end": 27.11
+    },
+    {
+      "word": "one",
+      "start": 27.11,
+      "end": 27.32
+    },
+    {
+      "word": "connected",
+      "start": 27.32,
+      "end": 27.72
+    },
+    {
+      "word": "client",
+      "start": 27.72,
+      "end": 28.18
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Lesson 35 narration review
+
+The [reviewed script](../agent_lab/content/lesson_35_narration.json) has three English source explanations tied to exact Python files, line ranges and full source SHA-256 values. It covers the mirror wrapper, transactional SQLite append, and final UUID coverage criterion. The wording was reviewed against the current code and distinguishes local fixtures, provider observations, storage state and the host JSON transcript.
+
+Three Yash / `inworld-tts-2` clips are published in the [audio manifest](../public/audio/code/lesson-35-manifest.json). Inworld reported 2,028 processed characters across the three sections; the provider did not report a dollar price. The private [author command](../scripts/lesson35_audio.py) preserved the first request after a word-alignment validation fault, reconciled that saved response without another paid request, and recorded the remaining two clips. The recorded durations are 36.77, 41.35 and 38.23 seconds. MP3 decode, FFprobe duration, exact authored-word alignment, source/text/settings hashes, HTTP delivery and browser play/pause were verified. A repeat record command reused all three clips without a network request.
+
+The status is **recorded, needs listening review**. Browser automation establishes that playback works; it does not assess pronunciation, pace or sound quality. A human review of the three clips is required before the audio can be marked accepted. The source tab shows only clips whose source, text, settings and asset hashes match.

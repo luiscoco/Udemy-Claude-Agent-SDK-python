@@ -1,0 +1,392 @@
+{
+  "lesson": 47,
+  "section": "stop-gate",
+  "duration": 23.688,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.12
+    },
+    {
+      "word": "analyst",
+      "start": 0.12,
+      "end": 0.57
+    },
+    {
+      "word": "stop",
+      "start": 0.57,
+      "end": 0.89
+    },
+    {
+      "word": "gate",
+      "start": 0.89,
+      "end": 1.14
+    },
+    {
+      "word": "is",
+      "start": 1.14,
+      "end": 1.28
+    },
+    {
+      "word": "stricter",
+      "start": 1.28,
+      "end": 1.73
+    },
+    {
+      "word": "than",
+      "start": 1.73,
+      "end": 1.91
+    },
+    {
+      "word": "the",
+      "start": 1.91,
+      "end": 1.98
+    },
+    {
+      "word": "general",
+      "start": 1.98,
+      "end": 2.32
+    },
+    {
+      "word": "report",
+      "start": 2.32,
+      "end": 2.65
+    },
+    {
+      "word": "checker",
+      "start": 2.65,
+      "end": 3
+    },
+    {
+      "word": "On",
+      "start": 3.4,
+      "end": 3.56
+    },
+    {
+      "word": "the",
+      "start": 3.56,
+      "end": 3.62
+    },
+    {
+      "word": "first",
+      "start": 3.62,
+      "end": 3.92
+    },
+    {
+      "word": "stop",
+      "start": 3.92,
+      "end": 4.31
+    },
+    {
+      "word": "the",
+      "start": 4.58,
+      "end": 4.7
+    },
+    {
+      "word": "entire",
+      "start": 4.7,
+      "end": 5.16
+    },
+    {
+      "word": "trimmed",
+      "start": 5.16,
+      "end": 5.42
+    },
+    {
+      "word": "answer",
+      "start": 5.42,
+      "end": 5.77
+    },
+    {
+      "word": "must",
+      "start": 5.77,
+      "end": 6.03
+    },
+    {
+      "word": "be",
+      "start": 6.03,
+      "end": 6.14
+    },
+    {
+      "word": "the",
+      "start": 6.14,
+      "end": 6.23
+    },
+    {
+      "word": "exact",
+      "start": 6.23,
+      "end": 6.73
+    },
+    {
+      "word": "north",
+      "start": 6.73,
+      "end": 7.01
+    },
+    {
+      "word": "line",
+      "start": 7.01,
+      "end": 7.26
+    },
+    {
+      "word": "If",
+      "start": 7.62,
+      "end": 7.84
+    },
+    {
+      "word": "not",
+      "start": 7.84,
+      "end": 8.18
+    },
+    {
+      "word": "the",
+      "start": 8.37,
+      "end": 8.51
+    },
+    {
+      "word": "gate",
+      "start": 8.51,
+      "end": 8.75
+    },
+    {
+      "word": "blocks",
+      "start": 8.75,
+      "end": 9.17
+    },
+    {
+      "word": "and",
+      "start": 9.2,
+      "end": 9.34
+    },
+    {
+      "word": "gives",
+      "start": 9.34,
+      "end": 9.53
+    },
+    {
+      "word": "a",
+      "start": 9.53,
+      "end": 9.57
+    },
+    {
+      "word": "concrete",
+      "start": 9.57,
+      "end": 9.93
+    },
+    {
+      "word": "correction",
+      "start": 9.93,
+      "end": 10.41
+    },
+    {
+      "word": "If",
+      "start": 10.82,
+      "end": 10.96
+    },
+    {
+      "word": "the",
+      "start": 10.96,
+      "end": 11.05
+    },
+    {
+      "word": "hook",
+      "start": 11.05,
+      "end": 11.28
+    },
+    {
+      "word": "is",
+      "start": 11.28,
+      "end": 11.43
+    },
+    {
+      "word": "already",
+      "start": 11.43,
+      "end": 11.79
+    },
+    {
+      "word": "active",
+      "start": 11.79,
+      "end": 12.1
+    },
+    {
+      "word": "on",
+      "start": 12.1,
+      "end": 12.2
+    },
+    {
+      "word": "a",
+      "start": 12.2,
+      "end": 12.25
+    },
+    {
+      "word": "second",
+      "start": 12.25,
+      "end": 12.59
+    },
+    {
+      "word": "stop",
+      "start": 12.59,
+      "end": 13.03
+    },
+    {
+      "word": "it",
+      "start": 13.27,
+      "end": 13.46
+    },
+    {
+      "word": "allows",
+      "start": 13.46,
+      "end": 13.81
+    },
+    {
+      "word": "that",
+      "start": 13.81,
+      "end": 14
+    },
+    {
+      "word": "stop",
+      "start": 14,
+      "end": 14.32
+    },
+    {
+      "word": "to",
+      "start": 14.32,
+      "end": 14.39
+    },
+    {
+      "word": "avoid",
+      "start": 14.39,
+      "end": 14.71
+    },
+    {
+      "word": "a",
+      "start": 14.71,
+      "end": 14.76
+    },
+    {
+      "word": "loop",
+      "start": 14.76,
+      "end": 15.07
+    },
+    {
+      "word": "That",
+      "start": 15.44,
+      "end": 15.7
+    },
+    {
+      "word": "bypass",
+      "start": 15.7,
+      "end": 16.18
+    },
+    {
+      "word": "is",
+      "start": 16.18,
+      "end": 16.3
+    },
+    {
+      "word": "only",
+      "start": 16.3,
+      "end": 16.53
+    },
+    {
+      "word": "a",
+      "start": 16.53,
+      "end": 16.59
+    },
+    {
+      "word": "control-flow",
+      "start": 16.59,
+      "end": 17.23
+    },
+    {
+      "word": "event",
+      "start": 17.23,
+      "end": 17.61
+    },
+    {
+      "word": "the",
+      "start": 17.99,
+      "end": 18.19
+    },
+    {
+      "word": "independent",
+      "start": 18.19,
+      "end": 18.7
+    },
+    {
+      "word": "host",
+      "start": 18.7,
+      "end": 18.95
+    },
+    {
+      "word": "checker",
+      "start": 18.95,
+      "end": 19.28
+    },
+    {
+      "word": "still",
+      "start": 19.28,
+      "end": 19.59
+    },
+    {
+      "word": "compares",
+      "start": 19.59,
+      "end": 19.98
+    },
+    {
+      "word": "the",
+      "start": 19.98,
+      "end": 20.06
+    },
+    {
+      "word": "final",
+      "start": 20.06,
+      "end": 20.39
+    },
+    {
+      "word": "report",
+      "start": 20.39,
+      "end": 20.75
+    },
+    {
+      "word": "with",
+      "start": 20.75,
+      "end": 20.9
+    },
+    {
+      "word": "fixture",
+      "start": 20.9,
+      "end": 21.28
+    },
+    {
+      "word": "truth",
+      "start": 21.28,
+      "end": 21.62
+    },
+    {
+      "word": "and",
+      "start": 21.92,
+      "end": 22.12
+    },
+    {
+      "word": "can",
+      "start": 22.12,
+      "end": 22.27
+    },
+    {
+      "word": "reject",
+      "start": 22.27,
+      "end": 22.63
+    },
+    {
+      "word": "wrong",
+      "start": 22.63,
+      "end": 22.83
+    },
+    {
+      "word": "values",
+      "start": 22.83,
+      "end": 23.45
+    }
+  ]
+}

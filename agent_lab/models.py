@@ -59,7 +59,7 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
     """Validate before creating a task; omitted fields get the lesson's defaults."""
     data = value.model_dump(exclude_unset=True) if isinstance(value, RunRequest) else value
     parsed: RunRequest
-    if 2 <= lesson_id <= 15:
+    if 2 <= lesson_id <= 49:
         from agent_lab.curriculum import get_lesson
         from agent_lab.foundation_models import SCENARIOS, inputs
 
@@ -73,6 +73,95 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             raise LessonError("Choose a scenario offered by this lesson.")
         if parsed.mode == "live" and parsed.scenario != "success":
             raise LessonError("Recorded negative scenarios are offline experiments only.")
+        if lesson_id == 22 and parsed.prompt != get_lesson(22).prompt:
+            raise LessonError("Lesson 22 uses the fixed memory comparison question; restore its example prompt.")
+        if lesson_id == 23 and parsed.prompt != get_lesson(23).prompt:
+            raise LessonError("Lesson 23 uses fixed plugin prompts; restore its example prompt.")
+        if lesson_id == 23 and parsed.lesson_options["action"] == "skill" and not parsed.lesson_options["enabled"]:
+            raise LessonError("Select an enabled plugin for the Skill invocation.")
+        if lesson_id == 24 and parsed.prompt != get_lesson(24).prompt:
+            raise LessonError("Lesson 24 uses fixed proposal prompts; restore its example prompt.")
+        if lesson_id == 25 and parsed.prompt != get_lesson(25).prompt:
+            raise LessonError("Lesson 25 uses a fixed bounded-log prompt; restore its example prompt.")
+        if lesson_id == 26 and parsed.prompt != get_lesson(26).prompt:
+            raise LessonError("Lesson 26 uses fixed control-method prompts; restore its example prompt.")
+        if lesson_id == 27 and parsed.prompt != get_lesson(27).prompt:
+            raise LessonError("Lesson 27 uses a fixed background-task prompt; restore its example prompt.")
+        if lesson_id == 28 and parsed.prompt != get_lesson(28).prompt:
+            raise LessonError("Lesson 28 uses a fixed refund retry prompt; restore its example prompt.")
+        if lesson_id == 29 and parsed.prompt != get_lesson(29).prompt:
+            raise LessonError("Lesson 29 uses a fixed image question; restore its example prompt.")
+        if lesson_id == 30 and parsed.prompt != get_lesson(30).prompt:
+            raise LessonError("Lesson 30 uses fixed TodoWrite proposals; restore its example prompt.")
+        if lesson_id == 31 and parsed.prompt != get_lesson(31).prompt:
+            raise LessonError("Lesson 31 uses a fixed question; restore its example prompt.")
+        if lesson_id == 32 and parsed.prompt != get_lesson(32).prompt:
+            raise LessonError("Lesson 32 uses fixed plan proposals; restore its example prompt.")
+        if lesson_id == 33 and parsed.prompt != get_lesson(33).prompt:
+            raise LessonError("Lesson 33 uses a fixed MCP booking request; restore its example prompt.")
+        if lesson_id == 34 and parsed.prompt != get_lesson(34).prompt:
+            raise LessonError("Lesson 34 uses a fixed output-style comparison; restore its example prompt.")
+        if lesson_id == 35 and parsed.prompt != get_lesson(35).prompt:
+            raise LessonError("Lesson 35 uses a fixed transcript comparison; restore its example prompt.")
+        if lesson_id == 35:
+            selected = parsed.lesson_options
+            if selected["fault"] == "reject-append" and (selected["action"] != "commit" or not selected["enabled"]):
+                raise LessonError("The rejected-mirror comparison uses enabled storage and one commit turn.")
+            if selected["fault"] == "delay-load" and (selected["action"] != "durable-resume" or not selected["enabled"]):
+                raise LessonError("Delayed loading uses enabled durable resume.")
+            if not selected["enabled"] and selected["action"] != "commit":
+                raise LessonError("The disabled-store comparison uses one commit turn.")
+        if lesson_id == 36 and parsed.prompt != get_lesson(36).prompt:
+            raise LessonError("Lesson 36 uses a fixed process comparison; restore its example prompt.")
+        if lesson_id == 37 and parsed.prompt != get_lesson(37).prompt:
+            raise LessonError("Lesson 37 uses a fixed owned Write request; restore its example prompt.")
+        if lesson_id == 37 and parsed.mode == "live" and parsed.lesson_options["action"] == "missing-effect":
+            raise LessonError("The no-effect case is a prepared host failure only.")
+        if lesson_id == 38 and parsed.prompt != get_lesson(38).prompt:
+            raise LessonError("Lesson 38 uses a fixed suggestion probe; restore its example prompt.")
+        if lesson_id == 39 and parsed.prompt != get_lesson(39).prompt:
+            raise LessonError("Lesson 39 uses a fixed configuration-root probe; restore its example prompt.")
+        if lesson_id == 39 and parsed.mode == "live" and parsed.lesson_options["root"] in {"relative", "missing", "file"}:
+            raise LessonError("Invalid-root probes use the credential-free startup action, not a provider call.")
+        if lesson_id == 39 and parsed.lesson_options["action"] == "takeover" and (parsed.lesson_options["cwd"] != "branch" or parsed.lesson_options["root"] not in {"trusted", "omitted"} or parsed.lesson_options["sources"] != "project-local"):
+            raise LessonError("Takeover uses branch cwd, project/local sources and trusted or omitted root.")
+        if lesson_id == 40 and parsed.prompt != get_lesson(40).prompt:
+            raise LessonError("Lesson 40 uses fixed transcript turns and review prompts; restore its example prompt.")
+        if lesson_id == 41 and parsed.prompt != get_lesson(41).prompt:
+            raise LessonError("Lesson 41 uses fixed Python client prompts; restore its example prompt.")
+        if lesson_id == 42 and parsed.prompt != get_lesson(42).prompt:
+            raise LessonError("Lesson 42 uses fixed web research prompts; restore its example prompt.")
+        if lesson_id == 43 and parsed.prompt != get_lesson(43).prompt:
+            raise LessonError("Lesson 43 uses fixed remote MCP prompts; restore its example prompt.")
+        if lesson_id == 43 and parsed.mode == "live" and parsed.lesson_options["action"] not in {"live", "reconnect"}:
+            raise LessonError("Select Agent step for a billed provider call; the other remote MCP actions are local host probes.")
+        if lesson_id == 44 and parsed.prompt != get_lesson(44).prompt:
+            raise LessonError("Lesson 44 uses fixed telemetry prompts; restore its example prompt.")
+        if lesson_id == 44 and parsed.mode == "live" and not parsed.lesson_options["consent"]:
+            raise LessonError("Confirm this fresh bounded paid telemetry action.")
+        if lesson_id == 45 and parsed.prompt != get_lesson(45).prompt:
+            raise LessonError("Lesson 45 uses fixed cloud-format prompts; restore its example prompt.")
+        if lesson_id == 45 and parsed.mode == "live" and not parsed.lesson_options["consent"]:
+            raise LessonError("Confirm this fresh bounded paid cloud action.")
+        if lesson_id == 46 and parsed.prompt != get_lesson(46).prompt:
+            raise LessonError("Lesson 46 uses fixed cache measurement prompts; restore its example prompt.")
+        if lesson_id == 46 and parsed.mode == "live" and not parsed.lesson_options["consent"]:
+            raise LessonError("Confirm this fresh bounded paid cache action.")
+        if lesson_id == 47 and parsed.prompt != get_lesson(47).prompt:
+            raise LessonError("Lesson 47 uses fixed orchestration prompts; restore its example prompt.")
+        if lesson_id == 47 and parsed.mode == "live" and not parsed.lesson_options["consent"]:
+            raise LessonError("Confirm this fresh bounded paid orchestration action.")
+        if lesson_id == 47 and parsed.scenario in {"cancel-worker", "missing-file"} and parsed.lesson_options["action"] != "fanout":
+            raise LessonError("Select regional fan-out for worker cancellation or the missing east file.")
+        if lesson_id == 48 and parsed.prompt != get_lesson(48).prompt:
+            raise LessonError("Lesson 48 uses fixed owned security probes; restore its example prompt.")
+        if lesson_id == 48 and parsed.mode == "live" and not parsed.lesson_options["consent"]:
+            raise LessonError("Confirm this fresh bounded paid security action.")
+        if lesson_id == 49 and parsed.prompt != get_lesson(49).prompt:
+            raise LessonError("Lesson 49 uses fixed headless probes; restore its example prompt.")
+        if lesson_id == 49 and parsed.mode == "live" and (not parsed.lesson_options["consent"] or
+                                                          parsed.lesson_options["action"] not in {"headless", "ci"}):
+            raise LessonError("Select Headless or CI and confirm this fresh bounded paid action.")
         if lesson_id in {6, 12} and not parsed.follow_up:
             raise LessonError("Enter a nonempty follow-up for the session experiment.")
         if lesson_id == 12 and parsed.lesson_options["interactive"] and parsed.scenario != "success":
@@ -81,6 +170,16 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             parsed.lesson_options["tool"] != "reserve" or not parsed.lesson_options["enabled"]
         ):
             raise LessonError("Select an enabled Reserve tool for the inventory-error scenario.")
+        if lesson_id == 18 and parsed.lesson_options["native_required"]:
+            from agent_lab.sandbox_native import sandbox_capability
+
+            if parsed.mode != "live":
+                raise LessonError("Native sandbox verification requires explicitly selected live mode.")
+            if parsed.lesson_options["target"] != "inside":
+                raise LessonError("The native probe has its own fixed targets; select Inside.")
+            capability = sandbox_capability()
+            if not capability["supported"]:
+                raise LessonError(capability["reason"])
         return parsed
     parsed = (QueryRunRequest if lesson_id == 1 else RunRequest).model_validate(data)
     if parsed.lesson_options:

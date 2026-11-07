@@ -23,51 +23,56 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-from claude_agent_sdk import (
-    ClaudeAgentOptions,
-    HookContext,
-    HookInput,
-    HookJSONOutput,
-    HookMatcher,
-)
+from claude_agent_sdk import ClaudeAgentOptions, HookMatcher
 
+TASKS = ("read", "verify", "publish")
 ALLOWED = {("pending", "in_progress"), ("in_progress", "completed")}
-ledger: dict[str, str] = {}
+ledger = dict.fromkeys(TASKS, "pending")
+pending: dict[str, dict[str, str]] = {}
 
 
-async def validate_todos(
-    data: HookInput, tool_use_id: str | None, context: HookContext
-) -> HookJSONOutput:
-    if data["hook_event_name"] != "PreToolUse":
-        return {}
-    todos: list[dict[str, str]] = data["tool_input"].get("todos", [])
-    problems = [
-        f"{t['content']}: {old} -> {t['status']}"
-        for t in todos
-        if (old := ledger.get(t["content"], "pending")) != t["status"]
-        and (old, t["status"]) not in ALLOWED
-    ]
-    if sum(t["status"] == "in_progress" for t in todos) > 1:
-        problems.append("only one task may be in_progress")
-    if not problems:
-        ledger.update({t["content"]: t["status"] for t in todos})
-        return {}
-    return {
-        "hookSpecificOutput": {
+async def before_todo(data, tool_use_id, context):
+    items = data.get("tool_input", {}).get("todos", [])
+    next_state = {item["content"]: item["status"] for item in items}
+    problems = []
+    if set(next_state) != set(TASKS) or len(items) != len(TASKS):
+        problems.append("use exactly the owned tasks")
+    if sum(status == "in_progress" for status in next_state.values()) > 1:
+        problems.append("only one task may be in progress")
+    for name in TASKS:
+        old, new = ledger[name], next_state.get(name)
+        if new != old and (old, new) not in ALLOWED:
+            problems.append(f"{name}: {old} -> {new}")
+    if problems:
+        return {"hookSpecificOutput": {
             "hookEventName": "PreToolUse",
             "permissionDecision": "deny",
             "permissionDecisionReason": "; ".join(problems),
-        }
-    }
+        }}
+    if tool_use_id:
+        pending[tool_use_id] = next_state
+    return {}
 
 
-def build_options() -> ClaudeAgentOptions:
+async def after_todo(data, tool_use_id, context):
+    if tool_use_id in pending:
+        ledger.update(pending.pop(tool_use_id))
+    return {}
+
+
+def build_options():
     return ClaudeAgentOptions(
-        hooks={"PreToolUse": [HookMatcher(matcher="TodoWrite", hooks=[validate_todos])]}
+        tools=["TodoWrite"],
+        allowed_tools=["TodoWrite"],
+        hooks={
+            "PreToolUse": [HookMatcher(matcher="TodoWrite", hooks=[before_todo])],
+            "PostToolUse": [HookMatcher(matcher="TodoWrite", hooks=[after_todo])],
+        },
+        env={"CLAUDE_CODE_ENABLE_TASKS": "0"},
     )
 ```
 
-A PreToolUse hook scoped to `TodoWrite` checks each status change against `ALLOWED` and the one-in-progress rule, denies with a reason, and updates the host `ledger` only when every change passes.
+The simplified concept code stages valid TodoWrite proposals in PreToolUse and commits them in PostToolUse. The runnable validator also checks exact owned task identities and active forms.
 
 ## How the offline lab checks it
 
@@ -75,7 +80,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `todos` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1151); the Python source tab shows it below the concept code. Host contracts
+(line 1155); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -93,10 +98,7 @@ Suggested prompt:
 > Use the exercise tool to inspect the task ledger.
 
 The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/todo_lab.py](agent_lab/todo_lab.py). The live run checks real TodoWrite calls with PreToolUse, commits accepted results through PostToolUse, and derives suggestions from the host ledger.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;

@@ -1,0 +1,36 @@
+{
+  "lesson": 45,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "signed-request",
+      "title": "Verify signed Bedrock bytes",
+      "path": "agent_lab/cloud_wire.py",
+      "start_line": 86,
+      "end_line": 108,
+      "reviewed_source_sha256": "d796f6886a8cdfc62d8d2a5702324ed8d5393c0a524af77505e9a0d630bee0b3",
+      "spoken_text": "A Bedrock request is accepted only after the lab reconstructs the signed request. The verifier checks the credential scope, the timestamp, each named signed header, the exact body digest, and the canonical path and query. It then derives the signing key and compares the signature without exposing the secret. Changing the model path, region, body, host or signed headers breaks the proof. A successful signature means these received bytes match this lab's temporary credential; it does not mean a real AWS account was contacted."
+    },
+    {
+      "id": "fixed-translation",
+      "title": "Forward one bounded request",
+      "path": "agent_lab/cloud_proxy.py",
+      "start_line": 57,
+      "end_line": 79,
+      "reviewed_source_sha256": "ecf4eee44ff5604e9dfc4d9a95b0e308627ea98488a5f186dea3112faee482c5",
+      "spoken_text": "The owned proxy is the boundary between native cloud-shaped traffic and one fixed upstream Anthropic call. It records the lane and request identity, checks the generated credential for that provider, and allows only the planned model and bounded message body. The upstream key stays on the host. A Bedrock stream is returned as AWS eventstream frames, while the other lanes use their expected response formats. The report keeps status and message identifiers, not tokens or secret headers, so we can compare a native SDK result with the actual forwarded call."
+    },
+    {
+      "id": "evidence-join",
+      "title": "Join native and upstream evidence",
+      "path": "agent_lab/cloud_lab.py",
+      "start_line": 183,
+      "end_line": 205,
+      "reviewed_source_sha256": "316a54501c622aefd44bd7f0d1ac6e569055501c67cfb99fb2fd7cdb3154fef6",
+      "spoken_text": "This evaluator compares three independent records: the SDK's initialized provider and assistant result, the proxy receipt for its authenticated cloud request, and the upstream HTTP response. The run, lane, provider, route, model and message identifiers must agree. The denial exercise has a different expected outcome: Sonnet returns a real access denial, no upstream inference is sent, and a new Haiku request succeeds afterward. A provider label alone or a local fixture cannot satisfy this live evidence check."
+    }
+  ]
+}

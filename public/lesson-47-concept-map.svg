@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Lesson 47 orchestration concept map</title>
+  <desc id="desc">Native lead to manager to analyst delegation contrasts with three host scheduled regional queries. Both feed independent host verdicts.</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#475569" stroke-width="2"/></marker></defs>
+  <rect width="960" height="560" rx="24" fill="#f8fafc"/>
+  <text x="48" y="58" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="#0f172a">Two scheduling sources, one host check</text>
+  <text x="48" y="90" font-family="Arial,sans-serif" font-size="17" fill="#475569">A parent answer never replaces a child's completion.</text>
+  <rect x="46" y="120" width="420" height="318" rx="20" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+  <text x="70" y="156" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#075985">Native Agent delegation</text>
+  <rect x="164" y="179" width="180" height="52" rx="12" fill="#ffffff" stroke="#0284c7"/><text x="232" y="211" font-family="Arial,sans-serif" font-size="19" fill="#0f172a">Lead · depth 0</text>
+  <path d="M254 232 V258" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="164" y="266" width="180" height="52" rx="12" fill="#ffffff" stroke="#0284c7"/><text x="216" y="298" font-family="Arial,sans-serif" font-size="19" fill="#0f172a">Manager · 1</text>
+  <path d="M254 319 V345" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="164" y="353" width="180" height="52" rx="12" fill="#ffffff" stroke="#0284c7"/><text x="222" y="385" font-family="Arial,sans-serif" font-size="19" fill="#0f172a">Analyst · 2</text>
+  <rect x="494" y="120" width="420" height="318" rx="20" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="518" y="156" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#92400e">Host controlled fan-out</text>
+  <rect x="518" y="194" width="116" height="76" rx="12" fill="#ffffff" stroke="#d97706"/><text x="543" y="226" font-family="Arial,sans-serif" font-size="18" fill="#0f172a">North</text><text x="535" y="250" font-family="Arial,sans-serif" font-size="14" fill="#475569">north.csv</text>
+  <rect x="646" y="194" width="116" height="76" rx="12" fill="#ffffff" stroke="#d97706"/><text x="673" y="226" font-family="Arial,sans-serif" font-size="18" fill="#0f172a">South</text><text x="662" y="250" font-family="Arial,sans-serif" font-size="14" fill="#475569">south.csv</text>
+  <rect x="774" y="194" width="116" height="76" rx="12" fill="#ffffff" stroke="#d97706"/><text x="806" y="226" font-family="Arial,sans-serif" font-size="18" fill="#0f172a">East</text><text x="798" y="250" font-family="Arial,sans-serif" font-size="14" fill="#475569">east.csv</text>
+  <path d="M576 272 V330 M704 272 V330 M832 272 V330" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="562" y="345" width="284" height="54" rx="12" fill="#ffffff" stroke="#d97706"/><text x="595" y="378" font-family="Arial,sans-serif" font-size="19" fill="#0f172a">Fair limiter · 1 or 2</text>
+  <path d="M256 440 V470 H704 V440" fill="none" stroke="#475569" stroke-width="3"/>
+  <rect x="284" y="472" width="390" height="58" rx="14" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="333" y="506" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#166534">Matched lifecycle + host verdict</text>
+</svg>

@@ -1,0 +1,11 @@
+# Lesson 23: Plugins
+
+Each run creates one trusted, host-owned local plugin under its disposable workspace. The fixed package contains `.claude-plugin/plugin.json`, two Markdown commands (`explain` and `quiz`) and one `python-example` Skill. The SDK receives that exact plugin path through `ClaudeAgentOptions.plugins`; user and project settings sources stay disabled. Callers cannot supply a path, manifest or arbitrary extension code.
+
+The Explain and Quiz selections call `/python-teaching:explain` or `/python-teaching:quiz` on one SDK connection. The lab checks the command in `get_server_info()` inventory, the selected final response marker, a matching initialized/final session, no model tool calls and unchanged plugin-file hashes. The Skill selection exposes only `Skill`, filters it to `python-teaching:python-example`, and checks one matching successful SDK tool call/result plus its response marker. A host policy permits only that named Skill. Disabling plugin loading leaves the files in place and tests that the namespaced command disappears from SDK inventory.
+
+Use the Run tab's **Plugin extension** and **Load the owned local plugin** controls, or pass `{"action":"skill","enabled":true}` in a lesson options JSON file. `action` is limited to `explain`, `quiz` or `skill`; a disabled Skill invocation and arbitrary paths are rejected. The prompt is fixed and read-only. Offline mode writes the real host files but labels SDK identities and invocation as fixtures. Recorded negative scenarios need review. The earlier `plugins` exercise lists and validates host files; the automatic criterion uses the enhanced `experiment` report.
+
+Four real provider-backed scenarios passed on 3 November 2026; see [live acceptance](live-acceptance.md). Seven questions and three source excerpts cover manifest ownership, explicit loading, namespaced discovery, Skill identity and the disabled control. Marketplace installation, untrusted plugins, dynamic reload, multiple plugin collisions, arbitrary tools, authored media and full reference parity remain separate. Lesson 24, Harnesses, is next.
+
+References: [SDK plugin configuration](https://github.com/anthropics/claude-agent-sdk-python/blob/main/src/claude_agent_sdk/types.py), [SDK client command inventory](https://github.com/anthropics/claude-agent-sdk-python/blob/main/src/claude_agent_sdk/client.py).

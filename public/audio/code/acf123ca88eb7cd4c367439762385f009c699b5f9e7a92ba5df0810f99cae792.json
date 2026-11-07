@@ -1,0 +1,392 @@
+{
+  "lesson": 45,
+  "section": "evidence-join",
+  "duration": 30.024,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.18
+    },
+    {
+      "word": "evaluator",
+      "start": 0.18,
+      "end": 0.84
+    },
+    {
+      "word": "compares",
+      "start": 0.84,
+      "end": 1.34
+    },
+    {
+      "word": "three",
+      "start": 1.34,
+      "end": 1.55
+    },
+    {
+      "word": "independent",
+      "start": 1.55,
+      "end": 2.04
+    },
+    {
+      "word": "records",
+      "start": 2.04,
+      "end": 2.68
+    },
+    {
+      "word": "the",
+      "start": 3.05,
+      "end": 3.21
+    },
+    {
+      "word": "SDK's",
+      "start": 3.3,
+      "end": 3.78
+    },
+    {
+      "word": "initialized",
+      "start": 3.78,
+      "end": 4.38
+    },
+    {
+      "word": "provider",
+      "start": 4.38,
+      "end": 4.88
+    },
+    {
+      "word": "and",
+      "start": 5.07,
+      "end": 5.26
+    },
+    {
+      "word": "assistant",
+      "start": 5.26,
+      "end": 5.7
+    },
+    {
+      "word": "result",
+      "start": 5.7,
+      "end": 6.16
+    },
+    {
+      "word": "the",
+      "start": 6.44,
+      "end": 6.55
+    },
+    {
+      "word": "proxy",
+      "start": 6.55,
+      "end": 6.97
+    },
+    {
+      "word": "receipt",
+      "start": 6.97,
+      "end": 7.32
+    },
+    {
+      "word": "for",
+      "start": 7.32,
+      "end": 7.48
+    },
+    {
+      "word": "its",
+      "start": 7.48,
+      "end": 7.63
+    },
+    {
+      "word": "authenticated",
+      "start": 7.63,
+      "end": 8.25
+    },
+    {
+      "word": "cloud",
+      "start": 8.25,
+      "end": 8.5
+    },
+    {
+      "word": "request",
+      "start": 8.5,
+      "end": 9.05
+    },
+    {
+      "word": "and",
+      "start": 9.41,
+      "end": 9.61
+    },
+    {
+      "word": "the",
+      "start": 9.61,
+      "end": 9.74
+    },
+    {
+      "word": "upstream",
+      "start": 9.74,
+      "end": 10.16
+    },
+    {
+      "word": "HTTP",
+      "start": 10.16,
+      "end": 10.7
+    },
+    {
+      "word": "response",
+      "start": 10.7,
+      "end": 11.37
+    },
+    {
+      "word": "The",
+      "start": 11.63,
+      "end": 11.86
+    },
+    {
+      "word": "run",
+      "start": 11.86,
+      "end": 12.19
+    },
+    {
+      "word": "lane",
+      "start": 12.31,
+      "end": 12.73
+    },
+    {
+      "word": "provider",
+      "start": 12.73,
+      "end": 13.2
+    },
+    {
+      "word": "route",
+      "start": 13.2,
+      "end": 13.65
+    },
+    {
+      "word": "model",
+      "start": 13.7,
+      "end": 14.13
+    },
+    {
+      "word": "and",
+      "start": 14.13,
+      "end": 14.35
+    },
+    {
+      "word": "message",
+      "start": 14.35,
+      "end": 14.71
+    },
+    {
+      "word": "identifiers",
+      "start": 14.71,
+      "end": 15.42
+    },
+    {
+      "word": "must",
+      "start": 15.45,
+      "end": 15.71
+    },
+    {
+      "word": "agree",
+      "start": 15.71,
+      "end": 16.04
+    },
+    {
+      "word": "The",
+      "start": 16.35,
+      "end": 16.5
+    },
+    {
+      "word": "denial",
+      "start": 16.5,
+      "end": 16.9
+    },
+    {
+      "word": "exercise",
+      "start": 16.9,
+      "end": 17.44
+    },
+    {
+      "word": "has",
+      "start": 17.44,
+      "end": 17.63
+    },
+    {
+      "word": "a",
+      "start": 17.63,
+      "end": 17.67
+    },
+    {
+      "word": "different",
+      "start": 17.67,
+      "end": 18.05
+    },
+    {
+      "word": "expected",
+      "start": 18.05,
+      "end": 18.47
+    },
+    {
+      "word": "outcome",
+      "start": 18.47,
+      "end": 18.89
+    },
+    {
+      "word": "Sonnet",
+      "start": 19.27,
+      "end": 19.67
+    },
+    {
+      "word": "returns",
+      "start": 19.67,
+      "end": 20.01
+    },
+    {
+      "word": "a",
+      "start": 20.01,
+      "end": 20.05
+    },
+    {
+      "word": "real",
+      "start": 20.05,
+      "end": 20.32
+    },
+    {
+      "word": "access",
+      "start": 20.32,
+      "end": 20.66
+    },
+    {
+      "word": "denial",
+      "start": 20.66,
+      "end": 21.07
+    },
+    {
+      "word": "no",
+      "start": 21.34,
+      "end": 21.61
+    },
+    {
+      "word": "upstream",
+      "start": 21.61,
+      "end": 22
+    },
+    {
+      "word": "inference",
+      "start": 22,
+      "end": 22.41
+    },
+    {
+      "word": "is",
+      "start": 22.41,
+      "end": 22.51
+    },
+    {
+      "word": "sent",
+      "start": 22.51,
+      "end": 22.87
+    },
+    {
+      "word": "and",
+      "start": 23.24,
+      "end": 23.41
+    },
+    {
+      "word": "a",
+      "start": 23.41,
+      "end": 23.44
+    },
+    {
+      "word": "new",
+      "start": 23.44,
+      "end": 23.64
+    },
+    {
+      "word": "Haiku",
+      "start": 23.64,
+      "end": 23.98
+    },
+    {
+      "word": "request",
+      "start": 23.98,
+      "end": 24.31
+    },
+    {
+      "word": "succeeds",
+      "start": 24.31,
+      "end": 24.77
+    },
+    {
+      "word": "afterward",
+      "start": 24.77,
+      "end": 25.23
+    },
+    {
+      "word": "A",
+      "start": 25.54,
+      "end": 25.64
+    },
+    {
+      "word": "provider",
+      "start": 25.64,
+      "end": 26.03
+    },
+    {
+      "word": "label",
+      "start": 26.03,
+      "end": 26.32
+    },
+    {
+      "word": "alone",
+      "start": 26.32,
+      "end": 26.72
+    },
+    {
+      "word": "or",
+      "start": 26.85,
+      "end": 27.01
+    },
+    {
+      "word": "a",
+      "start": 27.01,
+      "end": 27.06
+    },
+    {
+      "word": "local",
+      "start": 27.06,
+      "end": 27.39
+    },
+    {
+      "word": "fixture",
+      "start": 27.39,
+      "end": 27.8
+    },
+    {
+      "word": "cannot",
+      "start": 27.8,
+      "end": 28.1
+    },
+    {
+      "word": "satisfy",
+      "start": 28.1,
+      "end": 28.58
+    },
+    {
+      "word": "this",
+      "start": 28.58,
+      "end": 28.78
+    },
+    {
+      "word": "live",
+      "start": 28.78,
+      "end": 29.01
+    },
+    {
+      "word": "evidence",
+      "start": 29.01,
+      "end": 29.35
+    },
+    {
+      "word": "check",
+      "start": 29.35,
+      "end": 29.76
+    }
+  ]
+}

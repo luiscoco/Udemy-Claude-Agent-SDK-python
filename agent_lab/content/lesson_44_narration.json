@@ -1,0 +1,36 @@
+{
+  "lesson": 44,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "collector-boundary",
+      "title": "Owned collector boundary",
+      "path": "agent_lab/telemetry_collector.py",
+      "start_line": 171,
+      "end_line": 198,
+      "reviewed_source_sha256": "8266307fdce52828756247cc7e7315691e255993b551236322f703a73c43a067",
+      "spoken_text": "This collector accepts only owned loopback telemetry routes. It labels a request as native subprocess or authored fixture, checks the run and lane path, and refuses unknown signals and methods. The Host header must match its own listener. In the authenticated collector action, a missing or wrong bearer receives HTTP four oh one before the body is parsed. These checks make a successful export receipt evidence about this exact lab, rather than an arbitrary endpoint the browser supplied."
+    },
+    {
+      "id": "temporality-reducer",
+      "title": "Delta and cumulative metric series",
+      "path": "agent_lab/telemetry_collector.py",
+      "start_line": 136,
+      "end_line": 154,
+      "reviewed_source_sha256": "8266307fdce52828756247cc7e7315691e255993b551236322f703a73c43a067",
+      "spoken_text": "The teaching reducer groups numeric metric points by resource attributes, metric name, unit, kind, temporality and point attributes. For a delta sum, each sample adds to the value in that one series. For a cumulative sum or gauge, only the sample with the latest nanosecond timestamp sets the value. The lab therefore reports zero point zero three for two delta cost samples, but zero point zero two for the latest cumulative snapshot. It does not pretend to aggregate histograms or serve as a production backend."
+    },
+    {
+      "id": "native-evidence",
+      "title": "Native export and tool correlation",
+      "path": "agent_lab/telemetry_lab.py",
+      "start_line": 363,
+      "end_line": 397,
+      "reviewed_source_sha256": "537f98850d953c077fd6254249bfc94e8c853b8d886b53dfa0241f1942172bfa",
+      "spoken_text": "This live evaluator first requires one successful SDK terminal and a matching initialized session. The exact Read call must return the fixed recovery code, have an allowed pre-use decision, and match an independent post-use hash of the owned notes file. For each signal, the collector must have an HTTP two hundred receipt with a positive decoded count, plus a native subprocess record for this run, lane and session. A configured exporter or a convincing assistant sentence cannot replace these received observations."
+    }
+  ]
+}

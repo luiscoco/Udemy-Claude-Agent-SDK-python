@@ -1,6 +1,6 @@
 """Lesson 23: Plugins.
 
-Build a trusted local plugin manifest with a Python-oriented command and skill.
+Load a host-owned local plugin and verify namespaced command discovery and Skill invocation.
 """
 import asyncio
 

@@ -1,0 +1,9 @@
+.env
+.git
+.lab-data
+.venv
+__pycache__
+.pytest_cache
+dist
+build
+*.pyc

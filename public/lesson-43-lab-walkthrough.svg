@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" role="img" aria-labelledby="title desc">
+  <title id="title">Lesson 43 remote MCP lab walkthrough</title>
+  <desc id="desc">Seven steps move from fixed facts and authentication through token renewal, transport and resource comparisons, local rehearsal, live correlated agent calls, and a reconnect versus rotation review.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f1f8fb"/><stop offset="1" stop-color="#dbeee9"/></linearGradient>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#257e8e"/></marker>
+  </defs>
+  <rect width="1200" height="690" rx="28" fill="url(#bg)"/>
+  <text x="48" y="57" fill="#14374b" font-family="Arial,sans-serif" font-size="31" font-weight="700">Walk the evidence, one boundary at a time</text>
+  <text x="48" y="88" fill="#486875" font-family="Arial,sans-serif" font-size="17">Local protocol probes first · one explicit paid action only after consent</text>
+  <path d="M91 139V610" stroke="#70aab0" stroke-width="4" stroke-dasharray="8 8"/>
+  <g font-family="Arial,sans-serif">
+    <g fill="#fff" stroke="#c1d9df" stroke-width="2">
+      <rect x="146" y="122" width="1006" height="65" rx="14"/><rect x="146" y="198" width="1006" height="65" rx="14"/>
+      <rect x="146" y="274" width="1006" height="65" rx="14"/><rect x="146" y="350" width="1006" height="65" rx="14"/>
+      <rect x="146" y="426" width="1006" height="65" rx="14"/><rect x="146" y="502" width="1006" height="65" rx="14"/>
+      <rect x="146" y="578" width="1006" height="65" rx="14"/>
+    </g>
+    <g fill="#1a6675"><circle cx="91" cy="154" r="27"/><circle cx="91" cy="230" r="27"/><circle cx="91" cy="306" r="27"/><circle cx="91" cy="382" r="27"/><circle cx="91" cy="458" r="27"/><circle cx="91" cy="534" r="27"/></g>
+    <circle cx="91" cy="610" r="27" fill="#ab6c2a"/>
+    <g fill="#fff" font-size="20" font-weight="700" text-anchor="middle"><text x="91" y="161">1</text><text x="91" y="237">2</text><text x="91" y="313">3</text><text x="91" y="389">4</text><text x="91" y="465">5</text><text x="91" y="541">6</text><text x="91" y="617">7</text></g>
+    <g fill="#173e50" font-size="18" font-weight="700">
+      <text x="170" y="149">Read fixed facts</text><text x="170" y="225">Challenge and grant</text>
+      <text x="170" y="301">Revoke and renew</text><text x="170" y="377">Compare transport and data</text>
+      <text x="170" y="453">Rehearse the agent step locally</text><text x="170" y="529">Verify the live agent</text>
+      <text x="170" y="605">Separate reconnect from rotation</text>
+    </g>
+    <g fill="#426170" font-size="15">
+      <text x="170" y="172">Choose one owned action, resource URI and HTTP or SSE transport.</text>
+      <text x="170" y="248">Check 401, metadata, machine grant, 400 before initialize and 404 unknown session.</text>
+      <text x="170" y="324">Old token → 401; fresh credential-2 reaches marker :2 and incident note.</text>
+      <text x="170" y="400">Match scoped RPC key, resource URI, handler digest and decoded byte count.</text>
+      <text x="170" y="476">Local tool, resource and rotate steps report agentExecuted=false.</text>
+      <text x="170" y="552">Match SDK call/result ID, server receipt, connected inventory and terminal UUID.</text>
+      <text x="170" y="628">Reconnect keeps credential-1; native live credential replacement is unavailable.</text>
+    </g>
+  </g>
+</svg>

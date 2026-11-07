@@ -1,0 +1,352 @@
+{
+  "lesson": 49,
+  "section": "mapped-exit",
+  "duration": 25.296,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.2
+    },
+    {
+      "word": "function",
+      "start": 0.2,
+      "end": 0.53
+    },
+    {
+      "word": "maps",
+      "start": 0.53,
+      "end": 0.88
+    },
+    {
+      "word": "actual",
+      "start": 0.88,
+      "end": 1.28
+    },
+    {
+      "word": "process",
+      "start": 1.28,
+      "end": 1.86
+    },
+    {
+      "word": "and",
+      "start": 1.99,
+      "end": 2.18
+    },
+    {
+      "word": "machine-result",
+      "start": 2.18,
+      "end": 2.82
+    },
+    {
+      "word": "facts",
+      "start": 2.82,
+      "end": 3.33
+    },
+    {
+      "word": "into",
+      "start": 3.53,
+      "end": 3.77
+    },
+    {
+      "word": "the",
+      "start": 3.77,
+      "end": 3.85
+    },
+    {
+      "word": "lab",
+      "start": 3.85,
+      "end": 4.08
+    },
+    {
+      "word": "policy",
+      "start": 4.08,
+      "end": 4.46
+    },
+    {
+      "word": "codes",
+      "start": 4.46,
+      "end": 4.96
+    },
+    {
+      "word": "Cancellation",
+      "start": 5.58,
+      "end": 6.19
+    },
+    {
+      "word": "is",
+      "start": 6.19,
+      "end": 6.33
+    },
+    {
+      "word": "one",
+      "start": 6.33,
+      "end": 6.5
+    },
+    {
+      "word": "thirty",
+      "start": 6.5,
+      "end": 6.96
+    },
+    {
+      "word": "timeout",
+      "start": 7.29,
+      "end": 7.7
+    },
+    {
+      "word": "one",
+      "start": 7.7,
+      "end": 7.85
+    },
+    {
+      "word": "twenty",
+      "start": 7.85,
+      "end": 8.08
+    },
+    {
+      "word": "four",
+      "start": 8.08,
+      "end": 8.46
+    },
+    {
+      "word": "and",
+      "start": 8.87,
+      "end": 9.03
+    },
+    {
+      "word": "a",
+      "start": 9.03,
+      "end": 9.07
+    },
+    {
+      "word": "missing",
+      "start": 9.07,
+      "end": 9.38
+    },
+    {
+      "word": "executable",
+      "start": 9.38,
+      "end": 9.97
+    },
+    {
+      "word": "one",
+      "start": 9.97,
+      "end": 10.13
+    },
+    {
+      "word": "twenty",
+      "start": 10.13,
+      "end": 10.36
+    },
+    {
+      "word": "seven",
+      "start": 10.36,
+      "end": 10.7
+    },
+    {
+      "word": "A",
+      "start": 11.18,
+      "end": 11.28
+    },
+    {
+      "word": "nonzero",
+      "start": 11.28,
+      "end": 11.75
+    },
+    {
+      "word": "child",
+      "start": 11.75,
+      "end": 12.08
+    },
+    {
+      "word": "close",
+      "start": 12.08,
+      "end": 12.38
+    },
+    {
+      "word": "is",
+      "start": 12.38,
+      "end": 12.51
+    },
+    {
+      "word": "ten",
+      "start": 12.51,
+      "end": 12.82
+    },
+    {
+      "word": "Missing",
+      "start": 13.13,
+      "end": 13.49
+    },
+    {
+      "word": "or",
+      "start": 13.49,
+      "end": 13.61
+    },
+    {
+      "word": "unsuccessful",
+      "start": 13.61,
+      "end": 14.22
+    },
+    {
+      "word": "terminal",
+      "start": 14.22,
+      "end": 14.6
+    },
+    {
+      "word": "evidence",
+      "start": 14.6,
+      "end": 14.93
+    },
+    {
+      "word": "is",
+      "start": 14.93,
+      "end": 15.06
+    },
+    {
+      "word": "eleven",
+      "start": 15.06,
+      "end": 15.46
+    },
+    {
+      "word": "and",
+      "start": 15.78,
+      "end": 15.93
+    },
+    {
+      "word": "a",
+      "start": 15.93,
+      "end": 15.97
+    },
+    {
+      "word": "permission",
+      "start": 15.97,
+      "end": 16.41
+    },
+    {
+      "word": "denial",
+      "start": 16.41,
+      "end": 16.73
+    },
+    {
+      "word": "is",
+      "start": 16.73,
+      "end": 16.83
+    },
+    {
+      "word": "twelve",
+      "start": 16.83,
+      "end": 17.18
+    },
+    {
+      "word": "Only",
+      "start": 17.66,
+      "end": 17.98
+    },
+    {
+      "word": "a",
+      "start": 17.98,
+      "end": 18.02
+    },
+    {
+      "word": "zero",
+      "start": 18.02,
+      "end": 18.31
+    },
+    {
+      "word": "close",
+      "start": 18.31,
+      "end": 18.65
+    },
+    {
+      "word": "with",
+      "start": 18.65,
+      "end": 18.78
+    },
+    {
+      "word": "one",
+      "start": 18.78,
+      "end": 19.01
+    },
+    {
+      "word": "valid",
+      "start": 19.01,
+      "end": 19.34
+    },
+    {
+      "word": "successful",
+      "start": 19.34,
+      "end": 19.81
+    },
+    {
+      "word": "result",
+      "start": 19.81,
+      "end": 20.2
+    },
+    {
+      "word": "reaches",
+      "start": 20.42,
+      "end": 20.77
+    },
+    {
+      "word": "zero",
+      "start": 20.77,
+      "end": 21.14
+    },
+    {
+      "word": "These",
+      "start": 21.55,
+      "end": 21.85
+    },
+    {
+      "word": "codes",
+      "start": 21.85,
+      "end": 22.12
+    },
+    {
+      "word": "are",
+      "start": 22.12,
+      "end": 22.21
+    },
+    {
+      "word": "host",
+      "start": 22.21,
+      "end": 22.55
+    },
+    {
+      "word": "policy",
+      "start": 22.55,
+      "end": 23.11
+    },
+    {
+      "word": "not",
+      "start": 23.21,
+      "end": 23.48
+    },
+    {
+      "word": "the",
+      "start": 23.48,
+      "end": 23.56
+    },
+    {
+      "word": "Claude",
+      "start": 23.56,
+      "end": 23.81
+    },
+    {
+      "word": "CLI",
+      "start": 23.81,
+      "end": 23.98
+    },
+    {
+      "word": "native",
+      "start": 23.98,
+      "end": 24.4
+    },
+    {
+      "word": "convention",
+      "start": 24.4,
+      "end": 24.94
+    }
+  ]
+}

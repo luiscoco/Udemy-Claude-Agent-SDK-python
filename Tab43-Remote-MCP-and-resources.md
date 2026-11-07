@@ -23,38 +23,40 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-from claude_agent_sdk import ClaudeAgentOptions
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 from pydantic import AnyUrl
+import httpx
 
-URL = "http://127.0.0.1:8765/mcp"
+
+async def inspect_owned_server(base: str, token: str) -> None:
+    async with httpx.AsyncClient(headers={"Authorization": "Bearer " + token}) as http:
+        async with streamable_http_client(base + "/mcp", http_client=http) as (read, write, session_id):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                tools = await session.list_tools()
+                resources = await session.list_resources()
+                status = await session.call_tool("get_status", {"marker": "owned-marker"})
+                runbook = await session.read_resource(AnyUrl("docs://runbook"))
+                print(session_id(), tools, resources, status, runbook)
 
 
-async def main() -> None:
-    async with streamable_http_client(URL) as (read, write, get_session_id):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
-            print("MCP session id:", get_session_id())
-            tools = await session.list_tools()
-            resources = await session.list_resources()
-            print(
-                [tool.name for tool in tools.tools],
-                [str(r.uri) for r in resources.resources],
-            )
-            welcome = await session.read_resource(
-                AnyUrl("notes://welcome")
-            )  # data, by URI
-            note = await session.call_tool(
-                "read_note", {"name": "welcome"}
-            )  # action, with args
-            print(welcome.contents, note.content)
-    # The same endpoint, given to the agent as a remote HTTP MCP server.
-    options = ClaudeAgentOptions(mcp_servers={"notes": {"type": "http", "url": URL}})
-    print(options.mcp_servers)
+def agent_options(base: str, token: str) -> ClaudeAgentOptions:
+    return ClaudeAgentOptions(
+        tools=["ReadMcpResourceTool"],
+        allowed_tools=["mcp__lesson_remote__get_status", "ReadMcpResourceTool"],
+        mcp_servers={"lesson_remote": {
+            "type": "http", "url": base + "/mcp",
+            "headers": {"Authorization": "Bearer " + token},
+        }},
+        strict_mcp_config=True,
+        max_turns=5,
+        max_budget_usd=0.10,
+    )
 ```
 
-`streamable_http_client`(URL) plus ClientSession lists tools and resources, then `read_resource`(AnyUrl(...)) reads data while `call_tool`(...) runs an action.
+The host discovers metadata, requests a short-lived credential, then uses a real MCP ClientSession. ClaudeSDKClient receives the same owned endpoint and a bounded tool catalog; matching call IDs and server receipts establish the live path.
 
 ## How the offline lab checks it
 
@@ -62,7 +64,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `remote_mcp` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 966); the Python source tab shows it below the concept code. Host contracts
+(line 970); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 

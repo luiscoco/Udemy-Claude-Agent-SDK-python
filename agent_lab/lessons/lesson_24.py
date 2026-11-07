@@ -1,6 +1,6 @@
 """Lesson 24: Harnesses.
 
-Separate model proposals from deterministic host validation and execution.
+Validate structured SDK proposals against exact host rules before deterministic execution.
 """
 import asyncio
 

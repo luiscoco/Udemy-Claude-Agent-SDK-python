@@ -906,6 +906,154 @@ async def run_local(
     root: Path, request: RunRequest, lesson: Lesson, ask: Ask | None = None
 ) -> dict[str, Any]:
     request = lesson_request(lesson.id, request)
+    if lesson.id == 49:
+        from agent_lab.headless_lab import local as local_headless
+
+        result = await local_headless(root, request)
+        result["experiment"]["expected_check"] = "passed" if result["experiment_passed"] else "needs-review"
+        return result
+    if lesson.id == 48:
+        from agent_lab.hardening_lab import local as local_hardening
+
+        result = await local_hardening(root, request)
+        result["experiment"]["expected_check"] = "passed" if result["experiment_passed"] else "needs-review"
+        return result
+    if lesson.id == 47:
+        from agent_lab.orchestra_lab import local as local_orchestra
+
+        result = await local_orchestra(root, request)
+        result["experiment"]["expected_check"] = "passed" if result["experiment_passed"] else "needs-review"
+        return result
+    if lesson.id == 46:
+        from agent_lab.cache_lab import local as local_cache
+
+        result = await local_cache(root, request)
+        result["experiment"]["expected_check"] = "passed" if result["experiment_passed"] else "needs-review"
+        return result
+    if lesson.id == 45:
+        from agent_lab.cloud_lab import local as local_cloud
+
+        result = await local_cloud(root, request)
+        result["experiment"]["expected_check"] = "passed" if result["experiment_passed"] else "needs-review"
+        return result
+    if lesson.id == 44:
+        from agent_lab.telemetry_lab import local as local_telemetry
+
+        result = await local_telemetry(root, request)
+        result["experiment"]["expected_check"] = "passed" if result["experiment_passed"] else "needs-review"
+        return result
+    if lesson.id == 43:
+        from agent_lab.remote_mcp_lab import local as local_remote_mcp
+
+        return await local_remote_mcp(root, request)
+    if lesson.id == 42:
+        from agent_lab.web_tools_lab import local as local_web_tools
+
+        return await local_web_tools(root, request)
+    if lesson.id == 41:
+        from agent_lab.client_lifecycle_lab import local as local_client_lifecycle
+
+        return await local_client_lifecycle(root, request)
+    if lesson.id == 40:
+        from agent_lab.drops_lab import local as local_drops
+
+        return await local_drops(root, request)
+    if lesson.id == 39:
+        from agent_lab.config_root_lab import local
+
+        return await local(root, request)
+    if lesson.id == 38:
+        from agent_lab.suggestions_lab import local_suggestions
+
+        return await local_suggestions(root, request)
+    if lesson.id == 37:
+        from agent_lab.permission_gate_lab import local_gate
+
+        return await local_gate(root, request)
+    if lesson.id == 36:
+        from agent_lab.process_spawning_lab import local_spawn
+
+        return await local_spawn(root, request)
+    if lesson.id == 35:
+        from agent_lab.session_store_lab import local_store
+
+        return await local_store(root, request)
+    if lesson.id == 34:
+        from agent_lab.styles_lab import local_styles
+
+        return await local_styles(root, request)
+    if lesson.id == 33:
+        from agent_lab.elicitation_lab import local_elicitation
+
+        return await local_elicitation(root, request)
+    if lesson.id == 32:
+        from agent_lab.plan_lab import local_plan_mode
+
+        return await local_plan_mode(root, request)
+    if lesson.id == 31:
+        from agent_lab.question_lab import local_question
+
+        return await local_question(root, request)
+    if lesson.id == 30:
+        from agent_lab.todo_lab import local_todos
+
+        return await local_todos(root, request)
+    if lesson.id == 29:
+        from agent_lab.image_input_lab import local_image_input
+
+        return await local_image_input(root, request)
+    if lesson.id == 28:
+        from agent_lab.retry_lab import local_retry
+
+        return await local_retry(root, request)
+    if lesson.id == 27:
+        from agent_lab.background_lab import local_background
+
+        return await local_background(root, request)
+    if lesson.id == 26:
+        from agent_lab.control_lab import local_control
+
+        return await local_control(root, request)
+    if lesson.id == 25:
+        from agent_lab.compaction_lab import local_compaction
+
+        return await local_compaction(root, request)
+    if lesson.id == 24:
+        from agent_lab.harness_lab import local_harness
+
+        return await local_harness(root, request)
+    if lesson.id == 23:
+        from agent_lab.plugin_lab import local_plugin
+
+        return await local_plugin(root, request)
+    if lesson.id == 22:
+        from agent_lab.project_memory import local_memory
+
+        return await local_memory(root, request)
+    if lesson.id == 21:
+        from agent_lab.slash_commands import local_commands
+
+        return await local_commands(root, request)
+    if lesson.id == 20:
+        from agent_lab.hooks_deep import local_hooks_deep
+
+        return await local_hooks_deep(root, request)
+    if lesson.id == 19:
+        from agent_lab.session_catalog import local_catalog
+
+        return await local_catalog(root, request)
+    if lesson.id == 18:
+        from agent_lab.sandbox_lab import local_sandbox
+
+        return await local_sandbox(root, request)
+    if lesson.id == 17:
+        from agent_lab.checkpointing import local_checkpoint
+
+        return await local_checkpoint(root, request)
+    if lesson.id == 16:
+        from agent_lab.settings_lab import local_settings
+
+        return await local_settings(root, request)
     if lesson.id == 15:
         from agent_lab.usage import local_usage
 
@@ -987,13 +1135,103 @@ async def run_local(
 
 
 def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
+    from agent_lab.background_lab import local_background
+    from agent_lab.checkpointing import local_checkpoint
+    from agent_lab.client_lifecycle_lab import local as local_client_lifecycle
+    from agent_lab.cloud_lab import local as local_cloud
+    from agent_lab.compaction_lab import local_compaction
+    from agent_lab.config_root_lab import local as local_config_root
+    from agent_lab.control_lab import local_control
+    from agent_lab.drops_lab import local as local_drops
+    from agent_lab.elicitation_lab import local_elicitation
+    from agent_lab.harness_lab import local_harness
+    from agent_lab.hooks_deep import local_hooks_deep
+    from agent_lab.image_input_lab import local_image_input
     from agent_lab.mcp_lab import local_mcp
+    from agent_lab.permission_gate_lab import local_gate
+    from agent_lab.plan_lab import local_plan_mode
+    from agent_lab.plugin_lab import local_plugin
+    from agent_lab.process_spawning_lab import local_spawn
+    from agent_lab.project_memory import local_memory
+    from agent_lab.question_lab import local_question
+    from agent_lab.remote_mcp_lab import local as local_remote_mcp
+    from agent_lab.retry_lab import local_retry
+    from agent_lab.sandbox_lab import local_sandbox
+    from agent_lab.session_catalog import local_catalog
+    from agent_lab.session_store_lab import local_store
+    from agent_lab.settings_lab import local_settings
+    from agent_lab.slash_commands import local_commands
     from agent_lab.streaming import local_streaming
+    from agent_lab.styles_lab import local_styles
+    from agent_lab.suggestions_lab import local_suggestions
+    from agent_lab.telemetry_lab import local as local_telemetry
     from agent_lab.thinking import local_thinking
+    from agent_lab.todo_lab import local_todos
     from agent_lab.usage import local_usage
+    from agent_lab.web_tools_lab import local as local_web_tools
 
     function = (
-        local_usage
+        local_cloud
+        if lesson_id == 45
+        else local_telemetry
+        if lesson_id == 44
+        else local_remote_mcp
+        if lesson_id == 43
+        else local_web_tools
+        if lesson_id == 42
+        else local_client_lifecycle
+        if lesson_id == 41
+        else local_drops
+        if lesson_id == 40
+        else local_config_root
+        if lesson_id == 39
+        else local_suggestions
+        if lesson_id == 38
+        else local_gate
+        if lesson_id == 37
+        else local_spawn
+        if lesson_id == 36
+        else local_store
+        if lesson_id == 35
+        else local_styles
+        if lesson_id == 34
+        else local_elicitation
+        if lesson_id == 33
+        else local_plan_mode
+        if lesson_id == 32
+        else local_question
+        if lesson_id == 31
+        else local_todos
+        if lesson_id == 30
+        else local_image_input
+        if lesson_id == 29
+        else local_retry
+        if lesson_id == 28
+        else local_background
+        if lesson_id == 27
+        else local_control
+        if lesson_id == 26
+        else local_compaction
+        if lesson_id == 25
+        else local_harness
+        if lesson_id == 24
+        else local_plugin
+        if lesson_id == 23
+        else local_memory
+        if lesson_id == 22
+        else local_commands
+        if lesson_id == 21
+        else local_hooks_deep
+        if lesson_id == 20
+        else local_catalog
+        if lesson_id == 19
+        else local_sandbox
+        if lesson_id == 18
+        else local_checkpoint
+        if lesson_id == 17
+        else local_settings
+        if lesson_id == 16
+        else local_usage
         if lesson_id == 15
         else local_thinking
         if lesson_id == 14
@@ -1009,6 +1247,80 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 49:
+        from agent_lab.api_headless import code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Run a bounded process", "Map an explicit CI code",
+                                        "Supervise a local worker"), code(), strict=True)]
+    if lesson_id == 48:
+        from agent_lab.api_hardening import code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Scrub child environment", "Admit fixed tools",
+                                        "Rewrite known output"), code(), strict=True)]
+    if lesson_id == 47:
+        from agent_lab.api_orchestra import code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Queue one worker", "Check fixture truth",
+                                        "Gate an analyst stop"), code(), strict=True)]
+    if lesson_id == 46:
+        from agent_lab.api_cache import code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Parse exact usage", "Locate breakpoints",
+                                        "Join two turns"), code(), strict=True)]
+    if lesson_id == 45:
+        from agent_lab.api_cloud import source_excerpts
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Verify signed bytes", "Translate one request",
+                                        "Join native evidence"), source_excerpts(), strict=True)]
+    if lesson_id == 44:
+        import json
+
+        from agent_lab.config import ROOT
+
+        script = json.loads((ROOT / "agent_lab/content/lesson_44_narration.json").read_text(encoding="utf-8"))
+        questions = (
+            "Which request belongs to this collector and lane?",
+            "How do delta and cumulative values differ?",
+            "What proves the native subprocess exported each signal?",
+        )
+        return [{"title": section["title"], "path": section["path"],
+                 "start": section["start_line"], "end": section["end_line"],
+                 "code": "\n".join((ROOT / section["path"]).read_text(encoding="utf-8").splitlines()[
+                     section["start_line"] - 1:section["end_line"]]) + "\n",
+                 "question": questions[index]}
+                for index, section in enumerate(script["sections"])]
+    if lesson_id == 43:
+        import json
+
+        from agent_lab.config import ROOT
+
+        script = json.loads((ROOT / "agent_lab/content/lesson_43_narration.json").read_text(encoding="utf-8"))
+        questions = (
+            "Why do reports keep a credential label instead of the bearer value?",
+            "Which control updates the connected server before reconnect?",
+            "How do two receipts establish same-client credential rotation?",
+        )
+        return [{"title": section["title"], "path": section["path"],
+                 "start": section["start_line"], "end": section["end_line"],
+                 "code": "\n".join((ROOT / section["path"]).read_text(encoding="utf-8").splitlines()[
+                     section["start_line"] - 1:section["end_line"]]) + "\n",
+                 "question": questions[index]}
+                for index, section in enumerate(script["sections"])]
     from agent_lab.skills import configure_skills
 
     sections = []
@@ -1030,7 +1342,7 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
                 "Which identities and terminal evidence does this lesson require?",
             ),
         )
-        if lesson_id not in {12, 13, 14, 15}
+        if lesson_id not in {12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44}
         else ()
     )
     if lesson_id == 12:
@@ -1100,6 +1412,256 @@ def source_sections(lesson_id: int) -> list[dict[str, Any]]:
             ("Requested limits and planning guidance", usage_options, "Which fields stop a run, and which only guide planning?"),
             ("Cumulative cost meter", UsageMeter.observe, "Why subtract before updating the baseline?"),
             ("Final accounting criterion", UsageObservation.report, "Why are intermediate usage and unknown counters insufficient?"),
+        )
+    if lesson_id == 16:
+        from agent_lab.settings_lab import probe_environment, settings_options, settings_report
+
+        functions = (
+            ("Owned settings and SDK options", settings_options, "Which sources are explicitly enabled?"),
+            ("Actual child environment probe", probe_environment, "What is observed without exposing host secrets?"),
+            ("Bounded configuration criterion", settings_report, "Why does this not prove CLI precedence?"),
+        )
+    if lesson_id == 17:
+        from agent_lab.checkpointing import (
+            checkpoint_options,
+            checkpoint_report,
+            execute_checkpoint,
+        )
+
+        functions = (
+            ("Checkpoint SDK options", checkpoint_options, "Which options enable backups and replayed UUIDs?"),
+            ("Owned edit and native rewind", execute_checkpoint, "Which UUID is sent to rewind_files and when?"),
+            ("Observed restoration criterion", checkpoint_report, "Why is an acknowledgement insufficient without a changed and restored hash?"),
+        )
+    if lesson_id == 18:
+        from agent_lab.sandbox_lab import boundary_probe, sandbox_options, sandbox_report
+
+        functions = (
+            ("Bounded SDK tool policy", sandbox_options, "Why is Bash absent from policy comparisons?"),
+            ("Actual process counterexample", boundary_probe, "Why can this host child read the synthetic neighbor?"),
+            ("Observed boundary criterion", sandbox_report, "Which matching decision and result prove the selected policy outcome?"),
+        )
+    if lesson_id == 19:
+        from agent_lab.session_catalog import catalog_options, catalog_report
+        from agent_lab.session_catalog_child import operate
+
+        functions = (
+            ("Owned SDK session", catalog_options, "Why are model tools and filesystem settings disabled?"),
+            ("Child-only owned catalog operations", operate, "Why is this function called only in an isolated child with an owned session and directories?"),
+            ("Observed persistence criterion", catalog_report, "Which persistence and mutation effects must actually match?"),
+        )
+    if lesson_id == 20:
+        from agent_lab.hooks_deep import HookObservation
+
+        functions = (
+            ("Contained teaching decisions", HookObservation.teaching, "How do rewrites and callback faults stay inside the host boundary?"),
+            ("Actual SDK hook registration", HookObservation.hooks, "Which matchers and lifecycle channels are registered?"),
+            ("Correlated lifecycle criterion", HookObservation.report, "Why are a hook log and a successful answer insufficient on their own?"),
+        )
+    if lesson_id == 21:
+        from agent_lab.slash_commands import command_options, command_report, prepare
+
+        functions = (
+            ("Owned command template", prepare, "Which exact project file and note are hashed before invocation?"),
+            ("SDK discovery options", command_options, "Which setting source enables discovery and which tools remain available?"),
+            ("Correlated invocation criterion", command_report, "Why are a command file and a successful answer alone insufficient?"),
+        )
+    if lesson_id == 22:
+        from agent_lab.project_memory import memory_options, memory_report, prepare_memory
+
+        functions = (
+            ("Owned project instruction", prepare_memory, "Which host-authored CLAUDE.md is hashed?"),
+            ("SDK settings and prompt mode", memory_options, "Which options load the project file and disable automatic memory?"),
+            ("Behavioral comparison criterion", memory_report, "What can the fixed-answer comparison establish without the resolved system prompt?"),
+        )
+    if lesson_id == 23:
+        from agent_lab.plugin_lab import plugin_options, plugin_report, prepare_plugin
+
+        functions = (
+            ("Owned plugin files", prepare_plugin, "Which manifest, commands and skill are created by the host?"),
+            ("Explicit SDK plugin options", plugin_options, "Which trusted local plugin and tool catalog are configured?"),
+            ("Discovery and invocation criterion", plugin_report, "What correlates the SDK command or Skill behavior with the owned plugin?"),
+        )
+    if lesson_id == 24:
+        from agent_lab.harness_lab import harness_options, harness_report, host_gate
+
+        functions = (
+            ("Structured SDK proposal", harness_options, "Why is schema output still a proposal?"),
+            ("Strict host gate", host_gate, "Which graph and exact owned-file rules run before workers?"),
+            ("Observed execution criterion", harness_report, "How are accepted, rejected and review-only outcomes distinguished?"),
+        )
+    if lesson_id == 25:
+        from agent_lab.compaction_lab import bounded_result, compaction_options, compaction_report
+
+        functions = (
+            ("Bounded MCP result", bounded_result, "Where is the exact delivery bound and marker computed?"),
+            ("SDK tool and compaction hook options", compaction_options, "Which tool and PreCompact observer are registered?"),
+            ("Correlated context criterion", compaction_report, "Why must the callback and SDK call/result agree?"),
+        )
+    if lesson_id == 26:
+        from agent_lab.control_lab import control_options, control_report, execute_control
+
+        functions = (
+            ("Owned SDK control configuration", control_options, "Which tools, model and streaming option are selected?"),
+            ("One connected control sequence", execute_control, "When are controls sent relative to the two turns or interrupt?"),
+            ("Observed lifecycle criterion", control_report, "Which acknowledgements, session IDs and terminal outcomes prove the selected control?"),
+        )
+    if lesson_id == 27:
+        from agent_lab.background_lab import (
+            background_options,
+            background_report,
+            execute_background,
+        )
+
+        functions = (
+            ("Bounded SDK turn", background_options, "Why are model tools disabled while the host watcher runs?"),
+            ("Owned watcher lifecycle", execute_background, "Where does the host cancel or release and await the task?"),
+            ("Cleanup criterion", background_report, "Which task and SDK observations establish complete cleanup?"),
+        )
+    if lesson_id == 28:
+        from agent_lab.retry_lab import refund_attempt, retry_options, retry_report
+
+        functions = (
+            ("Idempotent in-memory effect", refund_attempt, "When is the fixed refund key applied, and why only once?"),
+            ("Owned SDK MCP tool", retry_options, "Which tool and session settings are allowed?"),
+            ("Bounded retry criterion", retry_report, "Which correlated results and decisions distinguish recovery, rejection and exhaustion?"),
+        )
+    if lesson_id == 29:
+        from agent_lab.image_input_lab import image_report, image_turn, validated_image
+
+        functions = (
+            ("Owned PNG validation", validated_image, "Which byte signature and dimensions must match the MIME type?"),
+            ("Typed SDK image message", image_turn, "Where are the image and text blocks placed in the user message?"),
+            ("Observed image criterion", image_report, "Which file hashes, sent block and model answer are checked?"),
+        )
+    if lesson_id == 30:
+        from agent_lab.todo_lab import todo_options, todo_report, validate_todos
+
+        functions = (
+            ("Host transition validator", validate_todos, "Which status changes and task identities can pass?"),
+            ("TodoWrite hook registration", todo_options, "How are the pre and post callbacks attached to the SDK tool?"),
+            ("Correlated ledger criterion", todo_report, "Why do only accepted and completed tool uses commit state?"),
+        )
+    if lesson_id == 31:
+        from agent_lab.question_lab import question_options, question_report, validate_question
+
+        functions = (
+            ("Exact question validator", validate_question, "Which shape and fixed options can reach the answer callback?"),
+            ("AskUserQuestion SDK configuration", question_options, "Where is can_use_tool registered without a bypassing allow rule?"),
+            ("Correlated answer criterion", question_report, "Which call, result, callback, and session observations must agree?"),
+        )
+    if lesson_id == 32:
+        from agent_lab.plan_lab import plan_options, plan_prompt, plan_report
+
+        functions = (
+            ("Plan-mode SDK configuration", plan_options, "Where is permission_mode set to plan with no model tools?"),
+            ("Fixed proposal request", plan_prompt, "Which exact plan does the host ask the model to propose?"),
+            ("Mode and execution criterion", plan_report, "Why must validation and approval precede the mode switch and workers?"),
+        )
+    if lesson_id == 33:
+        from agent_lab.elicitation_lab import elicitation_options, elicitation_report, known_request
+
+        functions = (
+            ("Owned MCP form boundary", known_request, "Which server and form fields can receive a host answer?"),
+            ("Owned SDK-to-MCP bridge", elicitation_options, "Which SDK tool invokes the host's MCP client callback?"),
+            ("Correlated response criterion", elicitation_report, "Which callback, action, call/result and session observations must agree?"),
+        )
+    if lesson_id == 34:
+        from agent_lab.styles_lab import prepare_style, style_options, style_report
+
+        functions = (
+            ("Owned style and settings files", prepare_style, "Which project files select the output style?"),
+            ("Project setting source control", style_options, "Where does the SDK opt into project settings without adding tools?"),
+            ("Style behavior criterion", style_report, "Which marker, file hashes and SDK session observations must agree?"),
+        )
+    if lesson_id == 35:
+        from agent_lab.observed_session_store import ObservedSessionStore
+        from agent_lab.session_store_lab import store_report
+        from agent_lab.sqlite_session_store import SQLiteSessionStore
+
+        functions = (
+            ("Observed SDK mirror calls", ObservedSessionStore.append, "How are append timing and errors observed without replacing the store?"),
+            ("Transactional SQLite mirror", SQLiteSessionStore._append, "Where are UUID deduplication and summary folding committed?"),
+            ("UUID coverage and resume criterion", store_report, "Which local UUID, mirror error, summary and session observations must agree?"),
+        )
+    if lesson_id == 36:
+        from agent_lab.process_spawning_lab import FrameTap, probe_child, spawn_report
+
+        functions = (
+            ("Incremental protocol framing", FrameTap.feed, "How do partial UTF-8 chunks become complete JSONL frames without changing forwarded bytes?"),
+            ("Owned child lifecycle", probe_child, "Which argv, cwd, stream and cleanup controls bind the process?"),
+            ("Correlated host and SDK criterion", spawn_report, "Why must both the host child and SDK terminal succeed?"),
+        )
+    if lesson_id == 37:
+        from agent_lab.permission_gate_lab import GateState, gate_report, prepared_round_trip
+
+        functions = (
+            ("Correlated host decision", GateState.decide, "Which identities and exact Write arguments must match before a decision?"),
+            ("Actual MCP client receipt", prepared_round_trip, "Where does the owned stdio MCP server receive the request?"),
+            ("Gate and disk criterion", gate_report, "Which process, SDK and fresh file observations are required?"),
+        )
+    if lesson_id == 38:
+        from agent_lab.suggestions_lab import SuggestionSession, SuggestionTap, evaluate
+
+        functions = (
+            ("Raw suggestion relay", SuggestionTap.read_messages, "Where is prompt_suggestion observed after the typed SDK parser skips it?"),
+            ("Validated send queue", SuggestionSession.send, "Which input limits and busy-turn facts are recorded?"),
+            ("Turn and suggestion criterion", evaluate, "Which result, session, order and closure observations establish the check?"),
+        )
+    if lesson_id == 39:
+        from agent_lab.config_root_lab import dry_flags, fixture
+        from agent_lab.config_root_lab import evaluate as evaluate_config_root
+
+        functions = (
+            ("Owned Git fixture", fixture, "How are trusted, branch and docs worktrees kept inside one run?"),
+            ("Inert SDK argument capture", dry_flags, "Where is the optional project-config-root flag serialized without a real CLI?"),
+            ("Origin evidence criterion", evaluate_config_root, "Which initialization, hook, hash and closure observations must agree?"),
+        )
+    if lesson_id == 40:
+        from agent_lab.drops_lab import active_chain, cases_report, turns
+
+        functions = (
+            ("Active transcript ancestry", active_chain, "How are inactive physical branches excluded and invalid parent links refused?"),
+            ("Logical turns and queued attachments", turns, "Which user prompts start turns and where does the queued command attach?"),
+            ("Exact and unsafe guard criterion", cases_report, "Why must a typed refusal and independently verified fork agree?"),
+        )
+    if lesson_id == 41:
+        from agent_lab.client_lifecycle_lab import _one_turn, base, resume
+
+        functions = (
+            ("One identified Python client turn", _one_turn, "Which SDK result ends one turn?"),
+            ("One connected client", base, "How do three turns share a session before disconnect?"),
+            ("Owned resume", resume, "How is the saved session ID checked on a fresh client?"),
+        )
+    if lesson_id == 42:
+        from agent_lab.web_tools_lab import WebPolicy, citation_labels
+
+        functions = (
+            ("Host web input policy", WebPolicy.pre, "How does the host replace search domains and deny unlisted fetch URLs?"),
+            ("Fetched output treatment", WebPolicy.post, "Which known instruction-like spans are replaced before delivery?"),
+            ("Citation provenance", citation_labels, "How are URLs labelled from the current lane's observed source history?"),
+        )
+    if lesson_id == 43:
+        from agent_lab.remote_fixture_lab import RemoteFixture, host_probe
+        from agent_lab.remote_mcp_lab import live_action
+
+        functions = (
+            ("Protected fixture boundary", RemoteFixture.__call__, "How are credentials and MCP sessions checked?"),
+            ("Real transport probe", host_probe, "Which tools and resources are observed over HTTP or SSE?"),
+            ("Provider-backed call", live_action,
+             "How do SDK call and result IDs join the host receipt?"),
+        )
+    if lesson_id == 44:
+        from agent_lab.telemetry_collector import Collector, aggregate
+        from agent_lab.telemetry_lab import local_action
+
+        functions = (
+            ("Bounded OTLP collector", Collector.__call__,
+             "Which HTTP receipt proves a signal reached the collector?"),
+            ("Numeric temporality reducer", aggregate,
+             "Why is a cumulative value kept by timestamp instead of summed?"),
+            ("Owned local producer", local_action,
+             "Which records came from an authored fixture rather than a native subprocess?"),
         )
     for title, function, question in functions:
         function = inspect.unwrap(function)

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 600" role="img" aria-labelledby="title desc">
+  <title id="title">Lesson 46 two-turn cache lab walkthrough</title>
+  <desc id="desc">Four fixed actions each run two turns. The workflow compares authenticated wire receipts and native results, then checks usage, model hooks and closure.</desc>
+  <defs><linearGradient id="panel" x2="1" y2="1"><stop stop-color="#fffaf1"/><stop offset="1" stop-color="#e9f6f2"/></linearGradient></defs>
+  <rect width="1120" height="600" rx="28" fill="url(#panel)"/>
+  <text x="55" y="72" fill="#17394f" font-family="Arial,sans-serif" font-size="34" font-weight="700">Run one comparison per click</text>
+  <text x="55" y="111" fill="#426579" font-family="Arial,sans-serif" font-size="18">Two ordered turns · one operation · one session · fresh live consent</text>
+  <g font-family="Arial,sans-serif">
+    <rect x="55" y="158" width="233" height="137" rx="18" fill="#174c60"/>
+    <text x="77" y="200" fill="white" font-size="23" font-weight="700">1 · Anatomy</text>
+    <text x="77" y="235" fill="#cce8e7" font-size="17">Inspect block locations</text>
+    <text x="77" y="263" fill="#cce8e7" font-size="17">and response reads</text>
+    <rect x="314" y="158" width="233" height="137" rx="18" fill="#236579"/>
+    <text x="336" y="200" fill="white" font-size="23" font-weight="700">2 · Switches</text>
+    <text x="336" y="235" fill="#dcf1eb" font-size="17">Measure 5m, 1h or off</text>
+    <text x="336" y="263" fill="#dcf1eb" font-size="17">one selection at a time</text>
+    <rect x="573" y="158" width="233" height="137" rx="18" fill="#317767"/>
+    <text x="595" y="200" fill="white" font-size="23" font-weight="700">3 · Breakers</text>
+    <text x="595" y="235" fill="#e2f4e8" font-size="17">Compare system and</text>
+    <text x="595" y="263" fill="#e2f4e8" font-size="17">tool digests by turn</text>
+    <rect x="832" y="158" width="233" height="137" rx="18" fill="#9a613e"/>
+    <text x="854" y="200" fill="white" font-size="23" font-weight="700">4 · Model switch</text>
+    <text x="854" y="235" fill="#fff0df" font-size="17">Pre-hook cap or allow</text>
+    <text x="854" y="263" fill="#fff0df" font-size="17">Post-hook if completed</text>
+    <rect x="55" y="355" width="1010" height="172" rx="19" fill="#fff" stroke="#c6ded9" stroke-width="2"/>
+    <text x="83" y="397" fill="#17394f" font-size="23" font-weight="700">Per-turn evidence table</text>
+    <text x="83" y="433" fill="#426579" font-size="18">turn · model · input · write5m · write1h · read · output · estimate</text>
+    <text x="83" y="466" fill="#426579" font-size="18">wire receipt ↔ assistant ID ↔ result session and independent SDK usage</text>
+    <text x="83" y="499" fill="#317767" font-size="18" font-weight="700">Check: two successful finite counter rows; no promised saving.</text>
+  </g>
+</svg>

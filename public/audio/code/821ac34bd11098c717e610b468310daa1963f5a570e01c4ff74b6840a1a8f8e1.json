@@ -1,0 +1,407 @@
+{
+  "lesson": 47,
+  "section": "limiter",
+  "duration": 27.096,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.28
+    },
+    {
+      "word": "fair",
+      "start": 0.28,
+      "end": 0.54
+    },
+    {
+      "word": "limiter",
+      "start": 0.54,
+      "end": 1.04
+    },
+    {
+      "word": "accepts",
+      "start": 1.09,
+      "end": 1.53
+    },
+    {
+      "word": "only",
+      "start": 1.53,
+      "end": 1.74
+    },
+    {
+      "word": "one",
+      "start": 1.74,
+      "end": 2.01
+    },
+    {
+      "word": "or",
+      "start": 2.01,
+      "end": 2.13
+    },
+    {
+      "word": "two",
+      "start": 2.13,
+      "end": 2.31
+    },
+    {
+      "word": "active",
+      "start": 2.31,
+      "end": 2.63
+    },
+    {
+      "word": "host",
+      "start": 2.63,
+      "end": 2.92
+    },
+    {
+      "word": "jobs",
+      "start": 2.92,
+      "end": 3.38
+    },
+    {
+      "word": "A",
+      "start": 3.95,
+      "end": 4.07
+    },
+    {
+      "word": "new",
+      "start": 4.07,
+      "end": 4.26
+    },
+    {
+      "word": "worker",
+      "start": 4.26,
+      "end": 4.64
+    },
+    {
+      "word": "reserves",
+      "start": 4.64,
+      "end": 4.99
+    },
+    {
+      "word": "a",
+      "start": 4.99,
+      "end": 5.03
+    },
+    {
+      "word": "slot",
+      "start": 5.03,
+      "end": 5.38
+    },
+    {
+      "word": "immediately",
+      "start": 5.38,
+      "end": 6.1
+    },
+    {
+      "word": "when",
+      "start": 6.13,
+      "end": 6.34
+    },
+    {
+      "word": "one",
+      "start": 6.34,
+      "end": 6.5
+    },
+    {
+      "word": "is",
+      "start": 6.5,
+      "end": 6.65
+    },
+    {
+      "word": "free",
+      "start": 6.65,
+      "end": 6.97
+    },
+    {
+      "word": "Otherwise",
+      "start": 7.54,
+      "end": 7.97
+    },
+    {
+      "word": "it",
+      "start": 7.97,
+      "end": 8.06
+    },
+    {
+      "word": "joins",
+      "start": 8.06,
+      "end": 8.42
+    },
+    {
+      "word": "a",
+      "start": 8.42,
+      "end": 8.46
+    },
+    {
+      "word": "first",
+      "start": 8.46,
+      "end": 8.87
+    },
+    {
+      "word": "in",
+      "start": 8.87,
+      "end": 9.14
+    },
+    {
+      "word": "first",
+      "start": 9.22,
+      "end": 9.55
+    },
+    {
+      "word": "out",
+      "start": 9.55,
+      "end": 9.74
+    },
+    {
+      "word": "queue",
+      "start": 9.74,
+      "end": 10.09
+    },
+    {
+      "word": "and",
+      "start": 10.12,
+      "end": 10.29
+    },
+    {
+      "word": "waits",
+      "start": 10.29,
+      "end": 10.78
+    },
+    {
+      "word": "When",
+      "start": 11.17,
+      "end": 11.35
+    },
+    {
+      "word": "a",
+      "start": 11.35,
+      "end": 11.4
+    },
+    {
+      "word": "worker",
+      "start": 11.4,
+      "end": 11.77
+    },
+    {
+      "word": "ends",
+      "start": 11.77,
+      "end": 12.15
+    },
+    {
+      "word": "release",
+      "start": 12.36,
+      "end": 12.76
+    },
+    {
+      "word": "transfers",
+      "start": 12.76,
+      "end": 13.27
+    },
+    {
+      "word": "the",
+      "start": 13.27,
+      "end": 13.36
+    },
+    {
+      "word": "reserved",
+      "start": 13.36,
+      "end": 13.74
+    },
+    {
+      "word": "slot",
+      "start": 13.74,
+      "end": 14.02
+    },
+    {
+      "word": "directly",
+      "start": 14.02,
+      "end": 14.45
+    },
+    {
+      "word": "to",
+      "start": 14.45,
+      "end": 14.55
+    },
+    {
+      "word": "the",
+      "start": 14.55,
+      "end": 14.63
+    },
+    {
+      "word": "next",
+      "start": 14.63,
+      "end": 14.93
+    },
+    {
+      "word": "waiter",
+      "start": 14.93,
+      "end": 15.32
+    },
+    {
+      "word": "so",
+      "start": 15.72,
+      "end": 15.92
+    },
+    {
+      "word": "a",
+      "start": 15.92,
+      "end": 15.95
+    },
+    {
+      "word": "newcomer",
+      "start": 15.95,
+      "end": 16.4
+    },
+    {
+      "word": "cannot",
+      "start": 16.4,
+      "end": 16.73
+    },
+    {
+      "word": "race",
+      "start": 16.73,
+      "end": 16.98
+    },
+    {
+      "word": "ahead",
+      "start": 16.98,
+      "end": 17.3
+    },
+    {
+      "word": "The",
+      "start": 17.78,
+      "end": 17.93
+    },
+    {
+      "word": "worker",
+      "start": 17.93,
+      "end": 18.24
+    },
+    {
+      "word": "calls",
+      "start": 18.24,
+      "end": 18.58
+    },
+    {
+      "word": "release",
+      "start": 18.58,
+      "end": 18.93
+    },
+    {
+      "word": "in",
+      "start": 18.93,
+      "end": 19.07
+    },
+    {
+      "word": "a",
+      "start": 19.07,
+      "end": 19.13
+    },
+    {
+      "word": "finally",
+      "start": 19.13,
+      "end": 19.54
+    },
+    {
+      "word": "block",
+      "start": 19.54,
+      "end": 19.94
+    },
+    {
+      "word": "even",
+      "start": 20.19,
+      "end": 20.48
+    },
+    {
+      "word": "after",
+      "start": 20.48,
+      "end": 20.82
+    },
+    {
+      "word": "an",
+      "start": 20.82,
+      "end": 20.92
+    },
+    {
+      "word": "error",
+      "start": 20.92,
+      "end": 21.22
+    },
+    {
+      "word": "This",
+      "start": 21.65,
+      "end": 21.93
+    },
+    {
+      "word": "bounds",
+      "start": 21.93,
+      "end": 22.27
+    },
+    {
+      "word": "simultaneous",
+      "start": 22.27,
+      "end": 22.88
+    },
+    {
+      "word": "host",
+      "start": 22.88,
+      "end": 23.16
+    },
+    {
+      "word": "queries",
+      "start": 23.16,
+      "end": 23.73
+    },
+    {
+      "word": "each",
+      "start": 23.98,
+      "end": 24.26
+    },
+    {
+      "word": "query",
+      "start": 24.26,
+      "end": 24.6
+    },
+    {
+      "word": "still",
+      "start": 24.6,
+      "end": 24.87
+    },
+    {
+      "word": "needs",
+      "start": 24.87,
+      "end": 25.13
+    },
+    {
+      "word": "its",
+      "start": 25.13,
+      "end": 25.27
+    },
+    {
+      "word": "own",
+      "start": 25.27,
+      "end": 25.42
+    },
+    {
+      "word": "model",
+      "start": 25.42,
+      "end": 25.84
+    },
+    {
+      "word": "and",
+      "start": 25.87,
+      "end": 26.03
+    },
+    {
+      "word": "cost",
+      "start": 26.03,
+      "end": 26.36
+    },
+    {
+      "word": "ceiling",
+      "start": 26.36,
+      "end": 26.72
+    }
+  ]
+}

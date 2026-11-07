@@ -1,0 +1,287 @@
+{
+  "lesson": 48,
+  "section": "environment",
+  "duration": 21.648,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.1
+    },
+    {
+      "word": "child",
+      "start": 0.1,
+      "end": 0.41
+    },
+    {
+      "word": "environment",
+      "start": 0.41,
+      "end": 0.95
+    },
+    {
+      "word": "starts",
+      "start": 0.95,
+      "end": 1.38
+    },
+    {
+      "word": "with",
+      "start": 1.38,
+      "end": 1.49
+    },
+    {
+      "word": "selected",
+      "start": 1.49,
+      "end": 1.93
+    },
+    {
+      "word": "operating",
+      "start": 1.93,
+      "end": 2.31
+    },
+    {
+      "word": "system",
+      "start": 2.31,
+      "end": 2.67
+    },
+    {
+      "word": "values",
+      "start": 2.67,
+      "end": 3.24
+    },
+    {
+      "word": "then",
+      "start": 3.76,
+      "end": 4.02
+    },
+    {
+      "word": "receives",
+      "start": 4.02,
+      "end": 4.45
+    },
+    {
+      "word": "an",
+      "start": 4.45,
+      "end": 4.56
+    },
+    {
+      "word": "owned",
+      "start": 4.56,
+      "end": 4.77
+    },
+    {
+      "word": "home",
+      "start": 4.77,
+      "end": 5.13
+    },
+    {
+      "word": "a",
+      "start": 5.45,
+      "end": 5.56
+    },
+    {
+      "word": "generated",
+      "start": 5.56,
+      "end": 6.06
+    },
+    {
+      "word": "API",
+      "start": 6.06,
+      "end": 6.39
+    },
+    {
+      "word": "credential",
+      "start": 6.39,
+      "end": 6.98
+    },
+    {
+      "word": "and",
+      "start": 7.42,
+      "end": 7.59
+    },
+    {
+      "word": "the",
+      "start": 7.59,
+      "end": 7.65
+    },
+    {
+      "word": "local",
+      "start": 7.65,
+      "end": 8.01
+    },
+    {
+      "word": "model",
+      "start": 8.01,
+      "end": 8.31
+    },
+    {
+      "word": "observer",
+      "start": 8.31,
+      "end": 8.75
+    },
+    {
+      "word": "address",
+      "start": 8.75,
+      "end": 9.3
+    },
+    {
+      "word": "In",
+      "start": 9.66,
+      "end": 9.8
+    },
+    {
+      "word": "the",
+      "start": 9.8,
+      "end": 9.89
+    },
+    {
+      "word": "contrast",
+      "start": 9.89,
+      "end": 10.42
+    },
+    {
+      "word": "lane",
+      "start": 10.42,
+      "end": 10.73
+    },
+    {
+      "word": "one",
+      "start": 10.92,
+      "end": 11.18
+    },
+    {
+      "word": "synthetic",
+      "start": 11.18,
+      "end": 11.61
+    },
+    {
+      "word": "application",
+      "start": 11.61,
+      "end": 12.11
+    },
+    {
+      "word": "value",
+      "start": 12.11,
+      "end": 12.4
+    },
+    {
+      "word": "is",
+      "start": 12.4,
+      "end": 12.53
+    },
+    {
+      "word": "present",
+      "start": 12.53,
+      "end": 12.91
+    },
+    {
+      "word": "In",
+      "start": 13.47,
+      "end": 13.61
+    },
+    {
+      "word": "the",
+      "start": 13.61,
+      "end": 13.7
+    },
+    {
+      "word": "guarded",
+      "start": 13.7,
+      "end": 14.09
+    },
+    {
+      "word": "lane",
+      "start": 14.09,
+      "end": 14.46
+    },
+    {
+      "word": "it",
+      "start": 14.54,
+      "end": 14.73
+    },
+    {
+      "word": "is",
+      "start": 14.73,
+      "end": 14.87
+    },
+    {
+      "word": "absent",
+      "start": 14.87,
+      "end": 15.41
+    },
+    {
+      "word": "and",
+      "start": 15.85,
+      "end": 16.03
+    },
+    {
+      "word": "subprocess",
+      "start": 16.03,
+      "end": 16.53
+    },
+    {
+      "word": "scrubbing",
+      "start": 16.53,
+      "end": 16.93
+    },
+    {
+      "word": "is",
+      "start": 16.93,
+      "end": 17.08
+    },
+    {
+      "word": "enabled",
+      "start": 17.08,
+      "end": 17.55
+    },
+    {
+      "word": "The",
+      "start": 18.03,
+      "end": 18.17
+    },
+    {
+      "word": "host",
+      "start": 18.17,
+      "end": 18.45
+    },
+    {
+      "word": "checks",
+      "start": 18.45,
+      "end": 18.75
+    },
+    {
+      "word": "these",
+      "start": 18.75,
+      "end": 18.97
+    },
+    {
+      "word": "flags",
+      "start": 18.97,
+      "end": 19.47
+    },
+    {
+      "word": "without",
+      "start": 19.59,
+      "end": 19.93
+    },
+    {
+      "word": "displaying",
+      "start": 19.93,
+      "end": 20.39
+    },
+    {
+      "word": "any",
+      "start": 20.39,
+      "end": 20.57
+    },
+    {
+      "word": "secret",
+      "start": 20.57,
+      "end": 20.94
+    },
+    {
+      "word": "value",
+      "start": 20.94,
+      "end": 21.36
+    }
+  ]
+}

@@ -1,0 +1,372 @@
+{
+  "lesson": 46,
+  "section": "complete-usage",
+  "duration": 30.168,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.22
+    },
+    {
+      "word": "parser",
+      "start": 0.22,
+      "end": 0.58
+    },
+    {
+      "word": "requires",
+      "start": 0.58,
+      "end": 1.17
+    },
+    {
+      "word": "four",
+      "start": 1.24,
+      "end": 1.54
+    },
+    {
+      "word": "primary",
+      "start": 1.54,
+      "end": 1.91
+    },
+    {
+      "word": "response",
+      "start": 1.91,
+      "end": 2.35
+    },
+    {
+      "word": "counters",
+      "start": 2.35,
+      "end": 3.03
+    },
+    {
+      "word": "input",
+      "start": 3.37,
+      "end": 3.72
+    },
+    {
+      "word": "tokens",
+      "start": 3.72,
+      "end": 4.27
+    },
+    {
+      "word": "total",
+      "start": 4.66,
+      "end": 4.99
+    },
+    {
+      "word": "cache",
+      "start": 4.99,
+      "end": 5.28
+    },
+    {
+      "word": "creation",
+      "start": 5.28,
+      "end": 5.86
+    },
+    {
+      "word": "cache",
+      "start": 6.18,
+      "end": 6.53
+    },
+    {
+      "word": "reads",
+      "start": 6.53,
+      "end": 6.99
+    },
+    {
+      "word": "and",
+      "start": 7.06,
+      "end": 7.24
+    },
+    {
+      "word": "output",
+      "start": 7.24,
+      "end": 7.56
+    },
+    {
+      "word": "tokens",
+      "start": 7.56,
+      "end": 8.13
+    },
+    {
+      "word": "Each",
+      "start": 8.36,
+      "end": 8.65
+    },
+    {
+      "word": "must",
+      "start": 8.65,
+      "end": 8.86
+    },
+    {
+      "word": "be",
+      "start": 8.86,
+      "end": 9.02
+    },
+    {
+      "word": "a",
+      "start": 9.02,
+      "end": 9.06
+    },
+    {
+      "word": "finite",
+      "start": 9.06,
+      "end": 9.57
+    },
+    {
+      "word": "nonnegative",
+      "start": 9.57,
+      "end": 10.1
+    },
+    {
+      "word": "safe",
+      "start": 10.1,
+      "end": 10.4
+    },
+    {
+      "word": "integer",
+      "start": 10.4,
+      "end": 10.87
+    },
+    {
+      "word": "The",
+      "start": 11.38,
+      "end": 11.54
+    },
+    {
+      "word": "one-hour",
+      "start": 11.54,
+      "end": 11.89
+    },
+    {
+      "word": "subdivision",
+      "start": 11.89,
+      "end": 12.42
+    },
+    {
+      "word": "is",
+      "start": 12.42,
+      "end": 12.54
+    },
+    {
+      "word": "optional",
+      "start": 12.54,
+      "end": 13.01
+    },
+    {
+      "word": "but",
+      "start": 13.36,
+      "end": 13.6
+    },
+    {
+      "word": "if",
+      "start": 13.6,
+      "end": 13.74
+    },
+    {
+      "word": "present",
+      "start": 13.74,
+      "end": 14.18
+    },
+    {
+      "word": "it",
+      "start": 14.22,
+      "end": 14.39
+    },
+    {
+      "word": "cannot",
+      "start": 14.39,
+      "end": 14.78
+    },
+    {
+      "word": "exceed",
+      "start": 14.78,
+      "end": 15.13
+    },
+    {
+      "word": "total",
+      "start": 15.13,
+      "end": 15.42
+    },
+    {
+      "word": "creation",
+      "start": 15.42,
+      "end": 15.93
+    },
+    {
+      "word": "An",
+      "start": 16.31,
+      "end": 16.46
+    },
+    {
+      "word": "explicit",
+      "start": 16.46,
+      "end": 16.94
+    },
+    {
+      "word": "five-minute",
+      "start": 16.94,
+      "end": 17.41
+    },
+    {
+      "word": "subdivision",
+      "start": 17.41,
+      "end": 18.02
+    },
+    {
+      "word": "must",
+      "start": 18.25,
+      "end": 18.53
+    },
+    {
+      "word": "add",
+      "start": 18.53,
+      "end": 18.82
+    },
+    {
+      "word": "up",
+      "start": 18.82,
+      "end": 18.95
+    },
+    {
+      "word": "with",
+      "start": 18.95,
+      "end": 19.05
+    },
+    {
+      "word": "the",
+      "start": 19.05,
+      "end": 19.14
+    },
+    {
+      "word": "one-hour",
+      "start": 19.14,
+      "end": 19.49
+    },
+    {
+      "word": "count",
+      "start": 19.49,
+      "end": 19.89
+    },
+    {
+      "word": "The",
+      "start": 20.21,
+      "end": 20.32
+    },
+    {
+      "word": "normalized",
+      "start": 20.32,
+      "end": 20.91
+    },
+    {
+      "word": "result",
+      "start": 20.91,
+      "end": 21.28
+    },
+    {
+      "word": "separates",
+      "start": 21.31,
+      "end": 21.83
+    },
+    {
+      "word": "ordinary",
+      "start": 21.83,
+      "end": 22.25
+    },
+    {
+      "word": "input",
+      "start": 22.25,
+      "end": 22.67
+    },
+    {
+      "word": "five-minute",
+      "start": 22.94,
+      "end": 23.44
+    },
+    {
+      "word": "writes",
+      "start": 23.44,
+      "end": 23.89
+    },
+    {
+      "word": "one-hour",
+      "start": 23.98,
+      "end": 24.41
+    },
+    {
+      "word": "writes",
+      "start": 24.41,
+      "end": 24.89
+    },
+    {
+      "word": "reads",
+      "start": 25.03,
+      "end": 25.34
+    },
+    {
+      "word": "and",
+      "start": 25.34,
+      "end": 25.43
+    },
+    {
+      "word": "output",
+      "start": 25.43,
+      "end": 25.87
+    },
+    {
+      "word": "Missing",
+      "start": 26.18,
+      "end": 26.51
+    },
+    {
+      "word": "primary",
+      "start": 26.51,
+      "end": 26.87
+    },
+    {
+      "word": "evidence",
+      "start": 26.87,
+      "end": 27.25
+    },
+    {
+      "word": "is",
+      "start": 27.25,
+      "end": 27.38
+    },
+    {
+      "word": "rejected",
+      "start": 27.38,
+      "end": 27.97
+    },
+    {
+      "word": "rather",
+      "start": 28.18,
+      "end": 28.46
+    },
+    {
+      "word": "than",
+      "start": 28.46,
+      "end": 28.63
+    },
+    {
+      "word": "quietly",
+      "start": 28.63,
+      "end": 29.05
+    },
+    {
+      "word": "turned",
+      "start": 29.05,
+      "end": 29.31
+    },
+    {
+      "word": "into",
+      "start": 29.31,
+      "end": 29.49
+    },
+    {
+      "word": "zero",
+      "start": 29.49,
+      "end": 29.85
+    }
+  ]
+}

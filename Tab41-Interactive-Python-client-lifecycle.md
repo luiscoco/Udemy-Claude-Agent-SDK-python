@@ -23,29 +23,36 @@ For the browser lab, run `uv run agent-lab serve`, then open
 ## The concept in code
 
 ```python
-from claude_agent_sdk import AssistantMessage, ClaudeAgentOptions, ClaudeSDKClient
-from claude_agent_sdk import CLIConnectionError, TextBlock
+from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, ResultMessage
 
 
-async def turn(client: ClaudeSDKClient, prompt: str) -> None:
+async def one_turn(client: ClaudeSDKClient, prompt: str) -> ResultMessage:
     await client.query(prompt)
     async for message in client.receive_response():
-        if isinstance(message, AssistantMessage):
-            print("".join(b.text for b in message.content if isinstance(b, TextBlock)))
+        if isinstance(message, ResultMessage):
+            return message
+    raise RuntimeError("No terminal result")
 
 
-async def main() -> None:
-    client = ClaudeSDKClient(ClaudeAgentOptions(max_turns=1))
-    async with client:  # connect() on enter, disconnect() on exit
-        await turn(client, "Introduce yourself as a Python teaching assistant.")
-        await turn(client, "Repeat your role in five words.")
-    try:
-        await client.query("Are you still there?")
-    except CLIConnectionError as error:
-        print("client is closed:", error)
+async def base_and_resume(session_home: str) -> None:
+    options = ClaudeAgentOptions(tools=[], setting_sources=[], max_turns=3)
+    async with ClaudeSDKClient(options) as client:
+        for prompt in ("Remember Ana teaches Python", "Suggest a title", "Recall the name"):
+            result = await one_turn(client, prompt)
+            if result.subtype != "success" or result.is_error:
+                raise RuntimeError("Turn failed")
+        session_id = result.session_id
+
+    resumed = ClaudeAgentOptions(resume=session_id, tools=[], setting_sources=[], max_turns=1)
+    async with ClaudeSDKClient(resumed) as client:
+        result = await one_turn(client, "Recall the name and subject")
+        if result.session_id != session_id or result.is_error:
+            raise RuntimeError("Resume identity or result failed")
+
+# This Python lifecycle example is an adaptation, not the historical JavaScript V2 API.
 ```
 
-async with client connects and disconnects, each turn() pairs client.query with `receive_response`, and the final query raises CLIConnectionError.
+One connected Python client handles three sequential turns. A fresh client resumes the validated session ID, and every terminal subtype and identity is checked.
 
 ## How the offline lab checks it
 
@@ -53,7 +60,7 @@ Predict the evidence, then run the exercise. A model's description of an action 
 not evidence that the action happened.
 
 The lab is `client_lifecycle` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 761); the Python source tab shows it below the concept code. Host contracts
+(line 765); the Python source tab shows it below the concept code. Host contracts
 are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
 [agent_lab/policy.py](agent_lab/policy.py).
 
@@ -71,10 +78,7 @@ Suggested prompt:
 > Introduce yourself as a Python teaching assistant.
 
 The live profile is `conversation`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+[agent_lab/client_lifecycle_lab.py](agent_lab/client_lifecycle_lab.py). Three fixed prompts run sequentially through one connected Python ClaudeSDKClient. A completed owned manifest records the session ID; a fresh client resumes that same ID and must return a successful terminal. Prepared mode uses ScriptedCLI and is labelled as a fixture. The historical JavaScript V2 API is not a Python SDK export.
 
 `ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
 `setting_sources` and `include_partial_messages`. The SDK owns the agent loop;
