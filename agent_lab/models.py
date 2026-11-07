@@ -98,6 +98,21 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             raise LessonError("Lesson 51 is an offline-only host testing lab.")
         parsed.lesson_options = SuiteInput.model_validate(parsed.lesson_options).model_dump()
         return parsed
+    if lesson_id == 52:
+        from agent_lab.curriculum import get_lesson
+        from agent_lab.evals_core import EvalInput
+
+        selected = dict(data)
+        selected.setdefault("prompt", get_lesson(52).prompt)
+        parsed = FoundationRunRequest.model_validate(selected)
+        if parsed.scenario != "success" or parsed.prompt != get_lesson(52).prompt:
+            raise LessonError("Lesson 52 uses the fixed evaluation case manifest.")
+        options = EvalInput.model_validate({"mode": "live" if parsed.mode == "live" else "synthetic",
+                                            **parsed.lesson_options})
+        if options.mode != ("live" if parsed.mode == "live" else "synthetic"):
+            raise LessonError("Lesson 52 mode must match the requested run mode.")
+        parsed.lesson_options = options.model_dump()
+        return parsed
     if 2 <= lesson_id <= 49:
         from agent_lab.curriculum import get_lesson
         from agent_lab.foundation_models import SCENARIOS, inputs

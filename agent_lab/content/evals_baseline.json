@@ -1,0 +1,366 @@
+{
+  "id": "1060d224-e1de-486c-b2bc-2331dc3377e9",
+  "createdAt": "2026-11-07T22:25:55.313357+00:00",
+  "mode": "synthetic",
+  "variant": "baseline",
+  "trials": 3,
+  "judge": "heuristic",
+  "fingerprint": "ca242236863ca11c8880f72ff2b760a9782cd111ef1ed766da8487948e904578",
+  "rows": [
+    {
+      "id": "fcebc2ca-f348-4340-901e-fdc0071afc64",
+      "caseId": "orders",
+      "index": 0,
+      "reply": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "214a2fdb-b7a5-4b40-b6c9-854b0b7d45da",
+      "caseId": "orders",
+      "index": 1,
+      "reply": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "df66dd97-a6fe-449a-9683-938593495ba5",
+      "caseId": "orders",
+      "index": 2,
+      "reply": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "3262d49b-4f87-47cf-8aa4-70557108b9d8",
+      "caseId": "ticket",
+      "index": 0,
+      "reply": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "b781bff0-fd83-495f-9945-f13d73d1c466",
+      "caseId": "ticket",
+      "index": 1,
+      "reply": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "66a05353-d1c9-445e-9a79-84ad4e3f8ae1",
+      "caseId": "ticket",
+      "index": 2,
+      "reply": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "65d0df0f-fab4-40ce-91a3-5c7489cd5212",
+      "caseId": "denied-refund",
+      "index": 0,
+      "reply": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "edfbe46d-c188-4d32-9122-e2c061c2577c",
+      "caseId": "denied-refund",
+      "index": 1,
+      "reply": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    },
+    {
+      "id": "35434033-a946-40d7-ab60-0e7c5107ae8a",
+      "caseId": "denied-refund",
+      "index": 2,
+      "reply": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+      "business": {
+        "scope": true,
+        "effect": true,
+        "money": true
+      },
+      "verdict": {
+        "grounded": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "honest": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "nextSteps": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "empathy": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        },
+        "noLeaks": {
+          "evidence": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+          "pass": true
+        }
+      },
+      "agentError": null,
+      "judgeError": null,
+      "agentCost": 0.01,
+      "judgeCost": 0.0,
+      "source": "authored-synthetic-fixture",
+      "evidence": "Authored fixed support case; business booleans are fixture data."
+    }
+  ],
+  "modelCalls": 0,
+  "actualBilledUsd": 0.0,
+  "complete": true,
+  "provenance": "authored-synthetic-fixture"
+}

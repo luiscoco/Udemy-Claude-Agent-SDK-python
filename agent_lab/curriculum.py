@@ -417,9 +417,9 @@ ROWS = [
     ),
     (
         52,
-        "Evals in depth",
-        "Score labelled cases, calculate pass rate and compare a baseline with regression evidence.",
-        "Use the exercise tool to inspect the evaluation report.",
+        "Evals: judges and regression baselines",
+        "Compare evaluator calibration and business-rule regressions across retained support trials.",
+        "Run the fixed Ada support evaluation suite and inspect business checks, judge calibration and baseline differences.",
         "evals",
         "exercise",
     ),

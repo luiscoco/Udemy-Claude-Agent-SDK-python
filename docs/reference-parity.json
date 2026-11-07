@@ -893,7 +893,7 @@
     },
     {
       "id": 52,
-      "title": "Evals in depth",
+      "title": "Evals: judges and regression baselines",
       "exercise": "evals",
       "live_profile": "exercise",
       "adaptation": "",
@@ -903,7 +903,7 @@
       "foundation_component": "src/concepts/Concept52Evals.tsx",
       "reference_parity": "not-certified",
       "written_guide": "written",
-      "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+      "gap": "Three fixed cases, scoped synthetic baseline, 40-decision calibration, 24 regression metrics, strict routes, guarded paid native trials, retained reports, promotion gate, pairwise review, seven questions, two diagrams, three source-bound Yash clips and mobile browser panel pass. A reviewed provider-backed nine-trial run passed all rubric and business criteria and was promoted into the scoped live/model baseline; a fresh three-case comparison passed all 24 metrics. Full offline regression: 2,000 passed and 16 skipped. Human listening and independent student acceptance remain open.",
       "written_guide_content": "lesson-content"
     },
     {

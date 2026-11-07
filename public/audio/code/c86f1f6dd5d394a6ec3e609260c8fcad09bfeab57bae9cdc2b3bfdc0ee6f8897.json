@@ -1,0 +1,307 @@
+{
+  "lesson": 52,
+  "section": "comparison",
+  "duration": 23.256,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.14
+    },
+    {
+      "word": "comparison",
+      "start": 0.14,
+      "end": 0.75
+    },
+    {
+      "word": "first",
+      "start": 0.75,
+      "end": 1.12
+    },
+    {
+      "word": "rejects",
+      "start": 1.12,
+      "end": 1.49
+    },
+    {
+      "word": "incomplete",
+      "start": 1.49,
+      "end": 2.15
+    },
+    {
+      "word": "or",
+      "start": 2.18,
+      "end": 2.4
+    },
+    {
+      "word": "incompatible",
+      "start": 2.43,
+      "end": 3.12
+    },
+    {
+      "word": "reports",
+      "start": 3.12,
+      "end": 3.7
+    },
+    {
+      "word": "It",
+      "start": 4.16,
+      "end": 4.35
+    },
+    {
+      "word": "keeps",
+      "start": 4.35,
+      "end": 4.61
+    },
+    {
+      "word": "synthetic",
+      "start": 4.61,
+      "end": 5.12
+    },
+    {
+      "word": "and",
+      "start": 5.12,
+      "end": 5.24
+    },
+    {
+      "word": "live",
+      "start": 5.24,
+      "end": 5.5
+    },
+    {
+      "word": "provenance",
+      "start": 5.5,
+      "end": 5.93
+    },
+    {
+      "word": "separate",
+      "start": 5.93,
+      "end": 6.4
+    },
+    {
+      "word": "For",
+      "start": 6.83,
+      "end": 7.05
+    },
+    {
+      "word": "each",
+      "start": 7.05,
+      "end": 7.24
+    },
+    {
+      "word": "case",
+      "start": 7.24,
+      "end": 7.76
+    },
+    {
+      "word": "hard",
+      "start": 7.81,
+      "end": 8.14
+    },
+    {
+      "word": "scope",
+      "start": 8.14,
+      "end": 8.47
+    },
+    {
+      "word": "and",
+      "start": 8.47,
+      "end": 8.59
+    },
+    {
+      "word": "money",
+      "start": 8.59,
+      "end": 8.81
+    },
+    {
+      "word": "failures",
+      "start": 8.81,
+      "end": 9.38
+    },
+    {
+      "word": "matter",
+      "start": 9.41,
+      "end": 9.78
+    },
+    {
+      "word": "immediately",
+      "start": 9.78,
+      "end": 10.39
+    },
+    {
+      "word": "Other",
+      "start": 10.88,
+      "end": 11.09
+    },
+    {
+      "word": "drops",
+      "start": 11.09,
+      "end": 11.47
+    },
+    {
+      "word": "need",
+      "start": 11.47,
+      "end": 11.63
+    },
+    {
+      "word": "both",
+      "start": 11.63,
+      "end": 11.86
+    },
+    {
+      "word": "a",
+      "start": 11.86,
+      "end": 11.91
+    },
+    {
+      "word": "meaningful",
+      "start": 11.91,
+      "end": 12.36
+    },
+    {
+      "word": "rate",
+      "start": 12.36,
+      "end": 12.54
+    },
+    {
+      "word": "decline",
+      "start": 12.54,
+      "end": 13.04
+    },
+    {
+      "word": "and",
+      "start": 13.07,
+      "end": 13.24
+    },
+    {
+      "word": "Fisher",
+      "start": 13.24,
+      "end": 13.54
+    },
+    {
+      "word": "evidence",
+      "start": 13.54,
+      "end": 14.09
+    },
+    {
+      "word": "a",
+      "start": 14.34,
+      "end": 14.47
+    },
+    {
+      "word": "drop",
+      "start": 14.47,
+      "end": 14.81
+    },
+    {
+      "word": "with",
+      "start": 14.81,
+      "end": 14.99
+    },
+    {
+      "word": "weak",
+      "start": 14.99,
+      "end": 15.19
+    },
+    {
+      "word": "evidence",
+      "start": 15.19,
+      "end": 15.57
+    },
+    {
+      "word": "is",
+      "start": 15.57,
+      "end": 15.67
+    },
+    {
+      "word": "suspect",
+      "start": 15.67,
+      "end": 16.17
+    },
+    {
+      "word": "Wilson",
+      "start": 16.7,
+      "end": 17.09
+    },
+    {
+      "word": "intervals",
+      "start": 17.09,
+      "end": 17.69
+    },
+    {
+      "word": "and",
+      "start": 17.72,
+      "end": 17.88
+    },
+    {
+      "word": "separate",
+      "start": 17.88,
+      "end": 18.27
+    },
+    {
+      "word": "agent",
+      "start": 18.27,
+      "end": 18.61
+    },
+    {
+      "word": "and",
+      "start": 18.61,
+      "end": 18.73
+    },
+    {
+      "word": "judge",
+      "start": 18.73,
+      "end": 19
+    },
+    {
+      "word": "costs",
+      "start": 19,
+      "end": 19.61
+    },
+    {
+      "word": "show",
+      "start": 19.86,
+      "end": 20.22
+    },
+    {
+      "word": "what",
+      "start": 20.22,
+      "end": 20.49
+    },
+    {
+      "word": "these",
+      "start": 20.49,
+      "end": 20.7
+    },
+    {
+      "word": "tiny",
+      "start": 20.7,
+      "end": 20.98
+    },
+    {
+      "word": "trials",
+      "start": 20.98,
+      "end": 21.51
+    },
+    {
+      "word": "can",
+      "start": 21.54,
+      "end": 21.82
+    },
+    {
+      "word": "and",
+      "start": 21.82,
+      "end": 21.99
+    },
+    {
+      "word": "cannot",
+      "start": 21.99,
+      "end": 22.28
+    },
+    {
+      "word": "establish",
+      "start": 22.28,
+      "end": 22.99
+    }
+  ]
+}

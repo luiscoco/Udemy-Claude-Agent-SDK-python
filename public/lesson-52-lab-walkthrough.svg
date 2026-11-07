@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
+<title id="title">Lesson 52 lab walkthrough</title><desc id="desc">Run a free baseline comparison, inspect nine rows, calibrate forty decisions, change candidates, review a retained digest, and promote only an eligible scoped baseline.</desc>
+<rect width="960" height="480" rx="24" fill="#f8fafc"/><g font-family="Arial" fill="#172033"><text x="30" y="55" font-size="30" font-weight="bold">Walk the evidence before promotion</text>
+<rect x="30" y="84" width="900" height="65" rx="14" fill="#ddd6fe"/><text x="50" y="125" font-size="22">1   Free baseline → 9 authored rows · 24 metric rows · 0 model calls</text>
+<rect x="30" y="158" width="900" height="65" rx="14" fill="#ccfbf1"/><text x="50" y="199" font-size="22">2   Calibrate → 40 decisions · κ ≈ 0.805 · 2 semantic misses</text>
+<rect x="30" y="232" width="900" height="65" rx="14" fill="#fef3c7"/><text x="50" y="273" font-size="22">3   Cold tone / false refund → inspect fail and hard money gate</text>
+<rect x="30" y="306" width="900" height="65" rx="14" fill="#dbeafe"/><text x="50" y="347" font-size="22">4   Retain → eligibility → reviewed digest → scoped baseline write</text>
+<text x="30" y="430" font-size="20">Optional paid trials require fresh consent and a compatible measured baseline.</text></g></svg>

@@ -15,6 +15,7 @@ from claude_agent_sdk import (
     HookMatcher,
     ResultMessage,
     SystemMessage,
+    TextBlock,
     ToolResultBlock,
     ToolUseBlock,
     UserMessage,
@@ -73,7 +74,8 @@ def _native_passed(report: dict[str, Any], root: Path) -> bool:
 async def native_chat(store: DeskStore, approver: DeskApprover, *, customer: str = "ada",
                       conversation: uuid.UUID | None = None, intent: Intent = "orders",
                       message: str = "Please inspect my orders.",
-                      on_approval: DecisionCallback | None = None) -> dict[str, Any]:
+                      on_approval: DecisionCallback | None = None,
+                      instruction: str = "", max_budget_usd: float = 0.10) -> dict[str, Any]:
     key = private_key()
     selected = await store.open(customer, "live") if conversation is None else store.require_open(conversation, customer, "live")
     run = uuid.uuid4()
@@ -85,6 +87,9 @@ async def native_chat(store: DeskStore, approver: DeskApprover, *, customer: str
     home.mkdir(parents=True, exist_ok=True)
     environment = native_environment(home, key)
     frames: list[dict[str, Any]] = []
+    visible: list[str] = []
+    seen_text: set[tuple[str | None, int, str]] = set()
+    observed_models: set[str] = set()
     denials: list[dict[str, Any]] = []
     stops: list[dict[str, Any]] = []
 
@@ -142,14 +147,15 @@ async def native_chat(store: DeskStore, approver: DeskApprover, *, customer: str
                    f"If the selected intent is refund, then call mcp__desk__refund with "
                    f"orderId order-{customer} and amountCents 1000. "
                    "The host will request a human decision. Finish after the required tool results. "
-                   f"Selected intent: {intent}. Call only the required tools for that intent.")
+                   f"Selected intent: {intent}. Call only the required tools for that intent. "
+                   f"{instruction}")
     options = ClaudeAgentOptions(
         cwd=work, model=HAIKU, system_prompt=instruction, env=environment,
         setting_sources=[], strict_mcp_config=True,
         mcp_servers={"desk": create_sdk_mcp_server(name="desk", tools=[
             orders_handler, ticket_handler, refund_handler])},
         tools=[], allowed_tools=expected, permission_mode="bypassPermissions",
-        thinking={"type": "disabled"}, max_turns=6, max_budget_usd=0.10,
+        thinking={"type": "disabled"}, max_turns=6, max_budget_usd=max_budget_usd,
         resume=selected.nativeSession, fork_session=False,
         hooks={"PreToolUse": [HookMatcher(hooks=[pre])],  # type: ignore[list-item]
                "Stop": [HookMatcher(hooks=[stop])]},  # type: ignore[list-item]
@@ -168,6 +174,16 @@ async def native_chat(store: DeskStore, approver: DeskApprover, *, customer: str
                 if isinstance(item, SystemMessage) and item.subtype == "init":
                     frames.append({"kind": "init", "session_id": item.data.get("session_id")})
                 elif isinstance(item, AssistantMessage):
+                    if isinstance(item.model, str):
+                        observed_models.add(item.model)
+                    for index, block in enumerate(item.content):
+                        if isinstance(block, TextBlock) and block.text:
+                            identity = (item.message_id, index, block.text)
+                            if identity not in seen_text:
+                                seen_text.add(identity)
+                                visible.append(block.text)
+                    if sum(map(len, visible)) > 12000:
+                        raise ValueError("Native desk visible reply limit")
                     frames.append({"kind": "assistant", "session_id": item.session_id,
                                    "tools": [{"id": block.id, "name": block.name}
                                              for block in item.content if isinstance(block, ToolUseBlock)]})
@@ -206,7 +222,9 @@ async def native_chat(store: DeskStore, approver: DeskApprover, *, customer: str
     report = operation.report("normal", "failed" if error else "completed")
     report.update({"native": True, "source": "native-python-sdk/real-host-effects",
                    "frames": frames, "denials": denials, "stop_checks": stops,
-                   "error_class": error, "cost_delta_usd": delta})
+                   "error_class": error, "cost_delta_usd": delta,
+                   "visible_reply": "\n".join(visible),
+                   "observed_models": sorted(observed_models)})
     report["experiment_passed"] = _native_passed(report, store.root)
     return report
 

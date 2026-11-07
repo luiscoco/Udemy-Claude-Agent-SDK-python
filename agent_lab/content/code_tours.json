@@ -1383,31 +1383,25 @@
     ]
   },
   "52": {
-    "source_sha256": "434d20af22d478d5d98f91770f7f6e0287ba4fa5f75d6cbc424a2a2f95c46866",
+    "source_sha256": "a69f2401c53e936e68c812919713c0f6345efc07237f113e0dbb03b8adde0a5a",
     "sections": [
       {
-        "title": "Documents, cases and baseline",
-        "start": 5,
-        "end": 14,
-        "text": "DOCS is the tiny policy corpus, and CASES pairs each query with the section it should return, including a lunar rover query that should match nothing. BASELINE is the stored pass rate a release must not fall below."
+        "title": "Compare authored candidates",
+        "start": 4,
+        "end": 8,
+        "text": "The fixed cold-tone candidate loses rubric criteria across exact trials."
       },
       {
-        "title": "The function that ships",
-        "start": 17,
-        "end": 22,
-        "text": "retrieve scores each document by the words it shares with the query and returns the best section id, or None when nothing overlaps. This is the component the eval measures."
+        "title": "Inspect judge calibration",
+        "start": 10,
+        "end": 11,
+        "text": "Two semantic inventions are deliberately missed by the keyword heuristic."
       },
       {
-        "title": "The tool reuses retrieve",
-        "start": 25,
-        "end": 35,
-        "text": "The search_policy tool calls the very same retrieve function and returns its id, or a no matching section message. Because the eval scores this exact code rather than a copy, a passing eval says something about what the agent really uses."
-      },
-      {
-        "title": "Pass rate against baseline",
-        "start": 38,
-        "end": 46,
-        "text": "run_evals counts how many cases match their expected outcome and divides by the number of cases. If the pass rate drops below BASELINE it exits with a regression message, so a quality drop becomes a failing check instead of something you might miss."
+        "title": "Require complete evidence",
+        "start": 13,
+        "end": 15,
+        "text": "Only the authored zero-call passing comparison earns the automatic check."
       }
     ]
   },

@@ -2768,3 +2768,42 @@ def test_browser_lesson51_offline_suite_and_replay(server, guide_browser_context
         assert not errors
     finally:
         context.close()
+
+
+def test_browser_lesson52_evals_and_calibration(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=52")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Visual guide", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-52-concept-map.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Lab walkthrough", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-52-lab-walkthrough.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Python source", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        page.get_by_role("tab", name="Run the exercise", exact=True).click()
+        lab = page.locator(".evals-lab")
+        expect(lab).to_be_visible()
+        expect(page.get_by_text("Response and results", exact=True)).to_be_hidden()
+        lab.get_by_role("button", name="Run synthetic comparison").click()
+        expect(lab.get_by_text("Synthetic check passed", exact=True)).to_be_visible(timeout=25000)
+        expect(lab.get_by_text("Comparison: pass", exact=False)).to_be_visible()
+        lab.get_by_role("button", name="Calibrate heuristic").click()
+        expect(lab.get_by_text("Heuristic calibration:", exact=False)).to_be_visible(timeout=25000)
+        lab.get_by_label("Candidate variant").click()
+        page.get_by_role("option", name="Cold tone", exact=True).click()
+        lab.get_by_role("button", name="Run synthetic comparison").click()
+        expect(lab.get_by_text("Comparison: fail", exact=False)).to_be_visible(timeout=25000)
+        lab.get_by_role("button", name="Inspect baseline").click()
+        expect(lab.get_by_text("Selected baseline: synthetic/heuristic", exact=False)).to_be_visible(timeout=25000)
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "evals-lesson52-phone.png"))
+        assert not errors
+    finally:
+        context.close()

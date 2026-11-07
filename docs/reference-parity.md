@@ -1,5 +1,7 @@
 # Python / TypeScript reference parity
 
+Lesson 52 implements the [evaluation lab](lesson-52-evals.md): three fixed cases, a scoped synthetic baseline, calibration, measured trials, strict routes, retained reports, guarded promotion, pairwise inspection and an optional paid native Agent SDK path. A reviewed provider-backed nine-trial run passed all model-judge and business criteria and was promoted into the scoped live/model baseline; a fresh three-case comparison passed all 24 metrics. Earlier failures remain retained. Three source-bound Yash clips are recorded, and the full offline regression passed with 2,000 passed and 16 skipped. Human listening review and independent student acceptance remain open.
+
 Lesson 51 now implements the [offline host testing contract](lesson-51-offline.md): fixed sixteen-case manifest, real host assertions, single-case mutation, six public synthetic replays, strict streaming routes and network-guarded CLI. The page has seven questions, two diagrams and three source-bound Yash clips. The reference expressly excludes a live provider path; full regression and independent acceptance are tracked separately.
 
 Reviewed 29 October 2026. This is the initial, source-based comparison and implementation backlog, not a declaration of complete migration parity.

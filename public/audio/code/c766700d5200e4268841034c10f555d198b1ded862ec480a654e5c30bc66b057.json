@@ -1,0 +1,287 @@
+{
+  "lesson": 52,
+  "section": "calibration",
+  "duration": 22.848,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.16
+    },
+    {
+      "word": "calibration",
+      "start": 0.16,
+      "end": 0.79
+    },
+    {
+      "word": "runs",
+      "start": 0.79,
+      "end": 1.26
+    },
+    {
+      "word": "eight",
+      "start": 1.31,
+      "end": 1.57
+    },
+    {
+      "word": "human",
+      "start": 1.57,
+      "end": 1.91
+    },
+    {
+      "word": "labelled",
+      "start": 1.91,
+      "end": 2.23
+    },
+    {
+      "word": "replies",
+      "start": 2.23,
+      "end": 2.83
+    },
+    {
+      "word": "through",
+      "start": 3.11,
+      "end": 3.27
+    },
+    {
+      "word": "five",
+      "start": 3.27,
+      "end": 3.59
+    },
+    {
+      "word": "heuristic",
+      "start": 3.59,
+      "end": 4.01
+    },
+    {
+      "word": "criteria",
+      "start": 4.01,
+      "end": 4.67
+    },
+    {
+      "word": "It",
+      "start": 5.16,
+      "end": 5.33
+    },
+    {
+      "word": "counts",
+      "start": 5.33,
+      "end": 5.65
+    },
+    {
+      "word": "forty",
+      "start": 5.65,
+      "end": 5.97
+    },
+    {
+      "word": "decisions",
+      "start": 5.97,
+      "end": 6.61
+    },
+    {
+      "word": "positive",
+      "start": 6.98,
+      "end": 7.43
+    },
+    {
+      "word": "marginals",
+      "start": 7.43,
+      "end": 7.99
+    },
+    {
+      "word": "and",
+      "start": 7.99,
+      "end": 8.15
+    },
+    {
+      "word": "chance",
+      "start": 8.15,
+      "end": 8.48
+    },
+    {
+      "word": "agreement",
+      "start": 8.48,
+      "end": 9.02
+    },
+    {
+      "word": "before",
+      "start": 9.25,
+      "end": 9.59
+    },
+    {
+      "word": "computing",
+      "start": 9.59,
+      "end": 10.06
+    },
+    {
+      "word": "Cohen",
+      "start": 10.06,
+      "end": 10.36
+    },
+    {
+      "word": "kappa",
+      "start": 10.36,
+      "end": 10.79
+    },
+    {
+      "word": "Two",
+      "start": 11.15,
+      "end": 11.37
+    },
+    {
+      "word": "invented",
+      "start": 11.37,
+      "end": 11.81
+    },
+    {
+      "word": "claims",
+      "start": 11.81,
+      "end": 12.17
+    },
+    {
+      "word": "remain",
+      "start": 12.17,
+      "end": 12.62
+    },
+    {
+      "word": "lenient",
+      "start": 12.87,
+      "end": 13.35
+    },
+    {
+      "word": "errors",
+      "start": 13.35,
+      "end": 13.71
+    },
+    {
+      "word": "because",
+      "start": 13.71,
+      "end": 14.06
+    },
+    {
+      "word": "the",
+      "start": 14.06,
+      "end": 14.14
+    },
+    {
+      "word": "keyword",
+      "start": 14.14,
+      "end": 14.52
+    },
+    {
+      "word": "heuristic",
+      "start": 14.52,
+      "end": 15.02
+    },
+    {
+      "word": "misses",
+      "start": 15.02,
+      "end": 15.36
+    },
+    {
+      "word": "their",
+      "start": 15.36,
+      "end": 15.5
+    },
+    {
+      "word": "meaning",
+      "start": 15.5,
+      "end": 15.87
+    },
+    {
+      "word": "The",
+      "start": 16.23,
+      "end": 16.4
+    },
+    {
+      "word": "advisory",
+      "start": 16.4,
+      "end": 16.98
+    },
+    {
+      "word": "trust",
+      "start": 16.98,
+      "end": 17.26
+    },
+    {
+      "word": "value",
+      "start": 17.26,
+      "end": 17.74
+    },
+    {
+      "word": "belongs",
+      "start": 17.83,
+      "end": 18.25
+    },
+    {
+      "word": "only",
+      "start": 18.28,
+      "end": 18.54
+    },
+    {
+      "word": "to",
+      "start": 18.54,
+      "end": 18.65
+    },
+    {
+      "word": "this",
+      "start": 18.65,
+      "end": 18.79
+    },
+    {
+      "word": "small",
+      "start": 18.79,
+      "end": 19.13
+    },
+    {
+      "word": "teaching",
+      "start": 19.13,
+      "end": 19.44
+    },
+    {
+      "word": "set",
+      "start": 19.44,
+      "end": 19.82
+    },
+    {
+      "word": "it",
+      "start": 20.26,
+      "end": 20.41
+    },
+    {
+      "word": "does",
+      "start": 20.41,
+      "end": 20.61
+    },
+    {
+      "word": "not",
+      "start": 20.61,
+      "end": 20.77
+    },
+    {
+      "word": "certify",
+      "start": 20.77,
+      "end": 21.23
+    },
+    {
+      "word": "the",
+      "start": 21.23,
+      "end": 21.39
+    },
+    {
+      "word": "optional",
+      "start": 21.39,
+      "end": 21.76
+    },
+    {
+      "word": "model",
+      "start": 21.76,
+      "end": 22.08
+    },
+    {
+      "word": "judge",
+      "start": 22.08,
+      "end": 22.59
+    }
+  ]
+}

@@ -10354,120 +10354,201 @@
     "prerequisites": [
       51
     ],
-    "concept_brief": "Evals turn agent quality into numbers: label each case with its expected outcome, score the actual result, compute a pass rate and compare it with a stored baseline so a regression is visible before release. Here the scored component is `retrieve`, the same function the live `search_policy` SDK tool uses.",
-    "lab_brief": "The `evals` exercise runs three labelled queries through `retrieve`: 'refunds requested' should return refunds#1, 'password reset links' should return security#1 and 'lunar rover' should return nothing. It reports each case, the `pass_rate` and a `baseline` of 1.0.",
+    "concept_brief": "An eval combines fixed cases, business checks and a judge. Lesson 52 compares three Ada support cases across retained trials. The free demo is authored synthetic fixture data with zero model calls. A measured live report uses fresh isolated DeskStore effects and separate SDK costs. A judge label is not a reliability certificate; inspect calibration before using a score for promotion.",
+    "lab_brief": "Run the synthetic baseline comparison. Inspect the three cases, business scope/effect/money checks, five rubric criteria, Wilson intervals, Fisher exact evidence and agent-versus-judge cost. Try cold tone and false refund, then calibrate the heuristic against forty human-labelled decisions. Review a retained report and its digest before any synthetic baseline promotion. Optional paid runs require fresh consent, a bounded budget and an isolated native SDK measurement.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 52 (or run `uv run agent-lab lesson 52` in a terminal).",
-      "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+      "Complete Lesson 51 and distinguish synthetic authored trials from measured model behavior.",
+      "Start the local portal; the first evaluation needs no provider key or credit."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Learn how labelled cases, a pass rate and a baseline make quality changes measurable."
+        "text": "Separate business effects, heuristic judgement and statistical uncertainty."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `evals` in `agent_lab/exercises.py` and `retrieve` and `POLICIES` in `agent_lab/services.py`."
+        "text": "Select baseline, three trials per case and the free synthetic route."
       },
       {
         "title": "Run one example",
-        "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+        "text": "Run the baseline comparison, then calibrate the heuristic."
       },
       {
         "title": "Verify the evidence",
-        "text": "Confirm all three cases passed, including the negative case with expected None, and that `pass_rate` equals `baseline`."
+        "text": "Inspect nine exact trial rows, twenty-four metric rows, zero model calls and the calibration's two semantic misses."
       },
       {
         "title": "Try the challenge",
-        "text": "Try a new query that should hit shipping#1 and see whether it would pass or lower the pass rate."
+        "text": "Change the candidate to cold tone or false refund and decide whether the regression gate passes."
       }
     ],
-    "inspect": "The `cases` table (query, expected, actual, passed), `pass_rate` and `baseline`.",
-    "expected": "Three rows, all passed: refunds requested gives refunds#1, password reset links gives security#1, and lunar rover gives Not available for both expected and actual. `pass_rate` is 1.0 and `baseline` is 1.0.",
-    "evidence_criterion": "The check confirms that every labelled case passed and the pass rate matches the 1.0 baseline.",
+    "inspect": "Inspect caseId and index for every trial, source, complete, modelCalls, actualBilledUsd, scope/effect/money, five structured verdicts, calibration kappa and lenient errors, comparison status and cost. A missing live baseline is stale; a weak drop without enough Fisher evidence is suspect; missing manifest or cost is error.",
+    "expected": "Baseline and fix-findings synthetic candidates pass. Cold tone fails empathy and next-step metrics; false refund fails the hard money gate. The fixed heuristic calibrates at 38/40 agreement, kappa about 0.805 and two visible lenient semantic misses. Each normal comparison has 24 case/criterion rows. Live runs remain measured observations until a compatible reviewed baseline exists.",
+    "evidence_criterion": "Distinct complete authored synthetic baseline and candidate reports have exact trial manifests, matching heuristic fingerprint, zero model calls and zero actual billing; a recomputed comparison passes. Paid reports never satisfy this automatic check.",
     "evidence_checks": [
       {
-        "key": "pass_rate",
+        "key": "experiment_passed",
         "rule": "equals",
-        "value": 1.0
-      },
-      {
-        "key": "baseline",
-        "rule": "equals",
-        "value": 1.0
-      },
-      {
-        "key": "cases",
-        "rule": "truthy"
+        "value": true
       }
     ],
-    "challenge": "Run `uv run python -c \"from agent_lab.services import retrieve; print([h['id'] for h in retrieve('how long does delivery take')])\"`. You get refunds#1 first, so adding the case ('how long does delivery take', 'shipping#1') would drop the pass rate to 0.75, below the baseline. Then try 'standard delivery business days' and confirm shipping#1 ranks first.",
+    "challenge": "Run cold tone and false refund separately. Explain why the first loses empathy and next-step points and why the second fails the hard money rule. Try one trial per case and observe the narrower Wilson intervals and weaker statistical evidence. Restore a three-trial baseline run before asking for automatic credit.",
     "hints": [
-      "A case with expected None tests that the system returns nothing for an off-topic query.",
-      "`retrieve` scores policies by shared words and keeps ties in list order; 'take' does not match 'takes', so the refund policy wins a tie on 'delivery'. Any pass rate below the baseline is a regression to investigate before release."
+      "Compare each candidate row against the exact case and inspect business checks before judge prose.",
+      "A 3/3 to 0/3 pass-rate drop has one-sided Fisher p=0.05; money and scope fail on any measured candidate miss. A missing baseline is stale, not a pass."
     ],
-    "reference": "Each case compares the top retrieval hit with a labelled answer, so the score is computed by code, not judged by a model. All three cases pass, so `pass_rate` equals the 1.0 baseline. Adding a harder case can expose a weakness such as word-overlap ties, which is exactly what an eval set is for.",
+    "reference": "The host stores exact case/index trial rows with isolated provenance. A business failure is measured even if a reply sounds reassuring. The heuristic uses disclosed keyword rules and misses invented Friday shipment and funds-sent claims; calibration reports those lenient errors. Comparison uses one-sided Fisher, Wilson intervals, hard money/scope gates and a 1.5× agent-cost limit. Promotion reads a retained eligible report, checks its current harness fingerprint and reviewed digest, then writes only that provenance/judge baseline. This classroom harness cannot certify production reliability.",
     "recovery": [
-      "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 52` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
-      "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+      "If a report is stale, re-measure the baseline under the current harness and judge; synthetic and live reports cannot be compared.",
+      "If a run has unknown terminal cost, malformed judge output, interruption or missing rows, inspect the retained partial report before retrying with fresh consent."
     ],
     "quiz": [
       {
-        "prompt": "Why is 'lunar rover' with expected None a useful eval case?",
+        "prompt": "What does a passing synthetic comparison establish?",
         "options": [
           {
-            "text": "It checks that the retriever returns nothing for an off-topic query instead of a misleading citation.",
-            "explanation": "Correct. Negative cases catch false positives that positive cases miss."
+            "text": "The fixed host report contract passed using authored fixture rows and zero model calls.",
+            "explanation": "Correct. Synthetic trials teach interpretation without measuring a model."
           },
           {
-            "text": "It always fails, which keeps the pass rate honest.",
-            "explanation": "It passes in this run; its purpose is to test false positives."
+            "text": "The live model improved across deployment traffic.",
+            "explanation": "No. Synthetic trials teach interpretation without measuring a model."
           },
           {
-            "text": "It measures latency.",
-            "explanation": "The exercise records no timing."
+            "text": "The model judge is production certified.",
+            "explanation": "No. Synthetic trials teach interpretation without measuring a model."
           }
         ],
         "correct": 0
       },
       {
-        "prompt": "If you add a fourth case that fails, what does the report show?",
+        "prompt": "Why calibrate a judge before using it for promotion?",
         "options": [
           {
-            "text": "`pass_rate` stays 1.0 because the baseline is 1.0.",
-            "explanation": "The baseline is a stored reference; it does not change the measured rate."
+            "text": "A label alone cannot show agreement or lenient mistakes against human gold items.",
+            "explanation": "Correct. The forty decisions expose disagreement, marginals, kappa and leniency."
           },
           {
-            "text": "The run calls Claude to fix the case.",
-            "explanation": "Evals here are pure host code; nothing is fixed automatically."
+            "text": "Calibration makes every future reply correct.",
+            "explanation": "No. The forty decisions expose disagreement, marginals, kappa and leniency."
           },
           {
-            "text": "`pass_rate` becomes 0.75, below the 1.0 baseline, which signals a regression.",
-            "explanation": "Correct. Three of four passing gives 0.75, and comparing it with the baseline makes the drop visible."
+            "text": "A heuristic score is the same as a business effect.",
+            "explanation": "No. The forty decisions expose disagreement, marginals, kappa and leniency."
           }
         ],
-        "correct": 2
+        "correct": 0
+      },
+      {
+        "prompt": "Why is a new live report called stale when no live baseline exists?",
+        "options": [
+          {
+            "text": "There is no compatible retained measurement to compare yet.",
+            "explanation": "Correct. Live and synthetic provenance must remain separate."
+          },
+          {
+            "text": "The agent always failed its support tools.",
+            "explanation": "No. Live and synthetic provenance must remain separate."
+          },
+          {
+            "text": "A synthetic baseline can automatically substitute.",
+            "explanation": "No. Live and synthetic provenance must remain separate."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does an unknown terminal cost do to a comparison?",
+        "options": [
+          {
+            "text": "It produces an error rather than a silent tie or pass.",
+            "explanation": "Correct. The comparison needs known costs for each measured row."
+          },
+          {
+            "text": "It counts as zero dollars.",
+            "explanation": "No. The comparison needs known costs for each measured row."
+          },
+          {
+            "text": "It improves the agent-cost mean.",
+            "explanation": "No. The comparison needs known costs for each measured row."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why can a reassuring false-refund reply fail?",
+        "options": [
+          {
+            "text": "The hard money check uses the actual denied host effect, not the reply claim.",
+            "explanation": "Correct. Business checks are grounded in independently reloaded effects."
+          },
+          {
+            "text": "Empathy is always forbidden.",
+            "explanation": "No. Business checks are grounded in independently reloaded effects."
+          },
+          {
+            "text": "A model judge cannot read English.",
+            "explanation": "No. Business checks are grounded in independently reloaded effects."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Which diagram path reaches baseline promotion?",
+        "options": [
+          {
+            "text": "Retained run, eligibility gate, reviewed digest, then scoped baseline write.",
+            "explanation": "Correct. A click is separate from successful promotion."
+          },
+          {
+            "text": "Button click, then automatic live release.",
+            "explanation": "No. A click is separate from successful promotion."
+          },
+          {
+            "text": "Synthetic demo, then production certification.",
+            "explanation": "No. A click is separate from successful promotion."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What do the two known calibration misses show?",
+        "options": [
+          {
+            "text": "A keyword heuristic can pass semantic inventions despite high aggregate agreement.",
+            "explanation": "Correct. The invented Friday and funds-sent replies remain visible lenient errors."
+          },
+          {
+            "text": "The human labels must be rewritten to match the heuristic.",
+            "explanation": "No. The invented Friday and funds-sent replies remain visible lenient errors."
+          },
+          {
+            "text": "The model judge is calibrated by the heuristic set.",
+            "explanation": "No. The invented Friday and funds-sent replies remain visible lenient errors."
+          }
+        ],
+        "correct": 0
       }
     ],
-    "concept_code": "from typing import Any\n\nfrom claude_agent_sdk import tool\n\nDOCS = {\n    \"refunds#1\": \"Refunds are requested within 30 days of delivery.\",\n    \"security#1\": \"Password reset links expire after one hour.\",\n}\nCASES = [\n    (\"refunds requested\", \"refunds#1\"),\n    (\"password reset links\", \"security#1\"),\n    (\"lunar rover\", None),\n]\nBASELINE = 1.0\n\n\ndef retrieve(query: str) -> str | None:\n    words = set(query.lower().split())\n    score, doc = max(\n        (len(words & set(text.lower().split())), doc) for doc, text in DOCS.items()\n    )\n    return doc if score > 0 else None\n\n\n@tool(\n    \"search_policy\",\n    \"Return the id of the policy section that best matches the query.\",\n    {\"query\": str},\n)\nasync def search_policy(args: dict[str, Any]) -> dict[str, Any]:\n    return {\n        \"content\": [\n            {\"type\": \"text\", \"text\": retrieve(args[\"query\"]) or \"no matching section\"}\n        ]\n    }\n\n\ndef run_evals() -> float:\n    pass_rate = sum(retrieve(query) == expected for query, expected in CASES) / len(\n        CASES\n    )\n    if pass_rate < BASELINE:\n        raise SystemExit(\n            f\"regression: pass rate {pass_rate:.2f} is below baseline {BASELINE}\"\n        )\n    return pass_rate",
-    "code_focus": "`run_evals()` scores the labelled CASES against retrieve(), the same function the `search_policy` tool calls, and fails when the pass rate drops below BASELINE.",
+    "concept_code": "from agent_lab.evals_core import calibrate, compare, synthetic_criterion, synthetic_report\n\n\nbase = synthetic_report('baseline', trials=3)\ncandidate = synthetic_report('cold-tone', trials=3)\nresult = compare(base, candidate)\nassert len(result['metrics']) == 24\nassert result['status'] == 'fail'\n\ncalibration = calibrate()\nassert calibration['summary']['lenientErrors'] == 2\n\nfixed = synthetic_report('fix-findings', trials=3)\npassing = compare(base, fixed)\nassert synthetic_criterion(base, fixed, passing)",
+    "code_focus": "`synthetic_report` creates explicitly authored rows, `compare` applies measured hard and statistical gates, `calibrate` exposes the heuristic's known semantic misses and `synthetic_criterion` requires exact zero-call evidence.",
     "concept_points": [
       {
-        "title": "Labelled cases",
-        "text": "Each case pairs an input with its expected outcome, including a query that should return nothing."
+        "title": "Keep provenance visible",
+        "text": "Authored synthetic replies and business booleans teach report reading. Live trials require fresh isolated host effects and SDK receipts."
       },
       {
-        "title": "Score what ships",
-        "text": "The eval calls retrieve(), the exact code behind the `search_policy` tool, not a copy of it."
+        "title": "Separate checkers",
+        "text": "Business scope/effect/money checks read host facts. The heuristic or optional model judge scores the reply under five named criteria."
       },
       {
-        "title": "Baseline gate",
-        "text": "Comparing the pass rate with a stored baseline turns a quality drop into a failing check before release."
+        "title": "Compare with uncertainty",
+        "text": "Wilson intervals, Fisher evidence, hard gates and cost limits produce pass, fail, suspect, stale or error."
       }
     ],
     "misconception": {
-      "claim": "Reading a few agent transcripts by hand is as good as an eval.",
-      "correction": "Spot checks are not repeatable and miss regressions. Labelled cases with a pass rate and a baseline give the same verdict every run."
+      "claim": "A synthetic improvement or a high judge agreement score proves the deployed agent is better.",
+      "correction": "The synthetic values are authored, and eight golden replies are a small calibration set. Promotion requires compatible retained measurements and still is not production certification."
     }
   },
   {

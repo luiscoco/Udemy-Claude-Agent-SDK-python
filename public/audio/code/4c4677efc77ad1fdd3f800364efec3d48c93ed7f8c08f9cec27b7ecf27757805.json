@@ -1,0 +1,272 @@
+{
+  "lesson": 52,
+  "section": "promotion",
+  "duration": 20.904,
+  "cues": [
+    {
+      "word": "Promotion",
+      "start": 0,
+      "end": 0.5
+    },
+    {
+      "word": "reloads",
+      "start": 0.5,
+      "end": 0.95
+    },
+    {
+      "word": "the",
+      "start": 0.95,
+      "end": 1.05
+    },
+    {
+      "word": "retained",
+      "start": 1.05,
+      "end": 1.44
+    },
+    {
+      "word": "run",
+      "start": 1.44,
+      "end": 1.74
+    },
+    {
+      "word": "and",
+      "start": 1.93,
+      "end": 2.15
+    },
+    {
+      "word": "checks",
+      "start": 2.15,
+      "end": 2.49
+    },
+    {
+      "word": "the",
+      "start": 2.49,
+      "end": 2.58
+    },
+    {
+      "word": "eligibility",
+      "start": 2.58,
+      "end": 3.15
+    },
+    {
+      "word": "gate",
+      "start": 3.15,
+      "end": 3.56
+    },
+    {
+      "word": "before",
+      "start": 3.61,
+      "end": 4.01
+    },
+    {
+      "word": "writing",
+      "start": 4.01,
+      "end": 4.41
+    },
+    {
+      "word": "A",
+      "start": 4.93,
+      "end": 5.05
+    },
+    {
+      "word": "reviewed",
+      "start": 5.05,
+      "end": 5.37
+    },
+    {
+      "word": "digest",
+      "start": 5.37,
+      "end": 6.06
+    },
+    {
+      "word": "detects",
+      "start": 6.11,
+      "end": 6.56
+    },
+    {
+      "word": "changed",
+      "start": 6.56,
+      "end": 6.93
+    },
+    {
+      "word": "measurements",
+      "start": 6.93,
+      "end": 7.65
+    },
+    {
+      "word": "and",
+      "start": 7.99,
+      "end": 8.18
+    },
+    {
+      "word": "a",
+      "start": 8.18,
+      "end": 8.21
+    },
+    {
+      "word": "missing",
+      "start": 8.21,
+      "end": 8.61
+    },
+    {
+      "word": "or",
+      "start": 8.61,
+      "end": 8.75
+    },
+    {
+      "word": "ineligible",
+      "start": 8.75,
+      "end": 9.27
+    },
+    {
+      "word": "run",
+      "start": 9.27,
+      "end": 9.55
+    },
+    {
+      "word": "is",
+      "start": 9.58,
+      "end": 9.77
+    },
+    {
+      "word": "rejected",
+      "start": 9.77,
+      "end": 10.34
+    },
+    {
+      "word": "The",
+      "start": 10.84,
+      "end": 11
+    },
+    {
+      "word": "write",
+      "start": 11,
+      "end": 11.26
+    },
+    {
+      "word": "targets",
+      "start": 11.26,
+      "end": 11.76
+    },
+    {
+      "word": "only",
+      "start": 11.79,
+      "end": 12.1
+    },
+    {
+      "word": "the",
+      "start": 12.1,
+      "end": 12.19
+    },
+    {
+      "word": "matching",
+      "start": 12.19,
+      "end": 12.56
+    },
+    {
+      "word": "provenance",
+      "start": 12.56,
+      "end": 13.27
+    },
+    {
+      "word": "and",
+      "start": 13.52,
+      "end": 13.73
+    },
+    {
+      "word": "judge",
+      "start": 13.73,
+      "end": 13.97
+    },
+    {
+      "word": "baseline",
+      "start": 13.97,
+      "end": 14.58
+    },
+    {
+      "word": "and",
+      "start": 14.84,
+      "end": 15.04
+    },
+    {
+      "word": "records",
+      "start": 15.04,
+      "end": 15.43
+    },
+    {
+      "word": "an",
+      "start": 15.43,
+      "end": 15.55
+    },
+    {
+      "word": "audit",
+      "start": 15.55,
+      "end": 15.87
+    },
+    {
+      "word": "note",
+      "start": 15.87,
+      "end": 16.21
+    },
+    {
+      "word": "Opening",
+      "start": 16.67,
+      "end": 17.08
+    },
+    {
+      "word": "the",
+      "start": 17.08,
+      "end": 17.16
+    },
+    {
+      "word": "baseline",
+      "start": 17.16,
+      "end": 17.72
+    },
+    {
+      "word": "or",
+      "start": 17.75,
+      "end": 17.92
+    },
+    {
+      "word": "clicking",
+      "start": 17.92,
+      "end": 18.23
+    },
+    {
+      "word": "the",
+      "start": 18.23,
+      "end": 18.31
+    },
+    {
+      "word": "button",
+      "start": 18.31,
+      "end": 18.64
+    },
+    {
+      "word": "alone",
+      "start": 18.64,
+      "end": 19.07
+    },
+    {
+      "word": "cannot",
+      "start": 19.29,
+      "end": 19.68
+    },
+    {
+      "word": "promote",
+      "start": 19.68,
+      "end": 20.07
+    },
+    {
+      "word": "an",
+      "start": 20.07,
+      "end": 20.16
+    },
+    {
+      "word": "agent",
+      "start": 20.16,
+      "end": 20.6
+    }
+  ]
+}

@@ -398,6 +398,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 52:
+        with card("Lesson 52 evaluation walkthrough", "Cases, calibration and baseline gate"):
+            ui.image("/assets/lesson-52-lab-walkthrough.svg").props('alt="Run fixed cases, inspect checks, calibrate, compare, and review promotion"').classes("w-full")
     if lesson_id == 51:
         with card("Lesson 51 offline walkthrough", "Sixteen assertions and six public replays"):
             ui.image("/assets/lesson-51-lab-walkthrough.svg").props('alt="Run all cases, inspect assertions, challenge mutation, replay fixtures"').classes("w-full")
@@ -489,6 +492,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 52:
+        with card("Evaluation concept map", "Lesson 52"):
+            ui.image("/assets/lesson-52-concept-map.svg").props('alt="Business facts and judge verdicts flow into statistical comparison"').classes("w-full")
     if lesson_id == 51:
         with card("Offline host testing concept map", "Lesson 51"):
             ui.image("/assets/lesson-51-concept-map.svg").props('alt="Fixed envelopes enter real host consumer and produce zero billed cost"').classes("w-full")

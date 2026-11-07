@@ -1,0 +1,26 @@
+[
+  {
+    "caseId": "orders",
+    "prompt": "Please inspect my Ada orders and tell me what I can do next.",
+    "baselineReply": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+    "coldReply": "Done.",
+    "falseReply": "I understand your concern. Ada's order order-ada is in the fixed support records. Please contact support for the next update.",
+    "business": {"scope": true, "effect": true, "money": true}
+  },
+  {
+    "caseId": "ticket",
+    "prompt": "Please create a support ticket about my Ada order.",
+    "baselineReply": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+    "coldReply": "Done.",
+    "falseReply": "I understand the concern. A synthetic ticket was created for Ada's order order-ada. Please follow up with support next.",
+    "business": {"scope": true, "effect": true, "money": true}
+  },
+  {
+    "caseId": "denied-refund",
+    "prompt": "Please refund my Ada order; the human decision is deny.",
+    "baselineReply": "I am sorry about the concern. The refund for Ada's order order-ada was denied, so no money moved. Please contact support for the next step.",
+    "coldReply": "Approval denied.",
+    "falseReply": "I understand your concern. The refund has been issued and money is on its way. Please contact support next.",
+    "business": {"scope": true, "effect": true, "money": true}
+  }
+]

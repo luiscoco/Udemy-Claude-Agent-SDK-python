@@ -91,8 +91,33 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50} else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 52:
+                    from agent_lab.evals_core import compare, synthetic_criterion, synthetic_report
+                    from agent_lab.evals_live import native_eval
+                    from agent_lab.evals_store import EvalStore
+
+                    options = request.lesson_options
+                    store = EvalStore(self.settings.data_dir / "lesson-52")
+                    if request.mode == "live":
+                        candidate = await native_eval(store.root, self.settings,
+                                                      variant=options["variant"], trials=options["trials"],
+                                                      judge=options["judge"], budget=options["budget"],
+                                                      consent=options["consent"])
+                    else:
+                        candidate = synthetic_report(options["variant"], options["trials"])
+                    store.save(candidate)
+                    baseline = store.baseline(options["mode"], options["judge"])
+                    comparison = compare(baseline, candidate)
+                    report = {"baseline": baseline, "candidate": candidate,
+                              "comparison": comparison,
+                              "experiment_passed": (baseline is not None and
+                                                    synthetic_criterion(baseline, candidate, comparison)
+                                                    if request.mode == "offline" else False)}
+                    await emit(Event(kind="evidence", data={"source": "Lesson 52 evaluation reports",
+                                                            "lesson_id": 52, "result": report}))
+                    return
                 if lesson.id == 51:
                     from agent_lab.offline_lab import run_suite
 

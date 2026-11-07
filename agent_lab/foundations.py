@@ -1247,6 +1247,14 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 52:
+        from agent_lab.api_evals import eval_code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Compare measured trials", "Calibrate the heuristic",
+                                        "Promote a retained baseline"), eval_code(), strict=True)]
     if lesson_id == 51:
         from agent_lab.api_offline import offline_code
 

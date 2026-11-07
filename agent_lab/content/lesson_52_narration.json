@@ -1,0 +1,36 @@
+{
+  "lesson": 52,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "comparison",
+      "title": "Compare trial evidence",
+      "path": "agent_lab/evals_core.py",
+      "start_line": 223,
+      "end_line": 264,
+      "reviewed_source_sha256": "3570b396e859518f3de0f551f892b6faa7ac7a36b8d350cb8f58dcfe79298c6a",
+      "spoken_text": "The comparison first rejects incomplete or incompatible reports. It keeps synthetic and live provenance separate. For each case, hard scope and money failures matter immediately. Other drops need both a meaningful rate decline and Fisher evidence; a drop with weak evidence is suspect. Wilson intervals and separate agent and judge costs show what these tiny trials can and cannot establish."
+    },
+    {
+      "id": "calibration",
+      "title": "Calibrate the heuristic",
+      "path": "agent_lab/evals_core.py",
+      "start_line": 171,
+      "end_line": 197,
+      "reviewed_source_sha256": "3570b396e859518f3de0f551f892b6faa7ac7a36b8d350cb8f58dcfe79298c6a",
+      "spoken_text": "The calibration runs eight human labelled replies through five heuristic criteria. It counts forty decisions, positive marginals and chance agreement before computing Cohen kappa. Two invented claims remain lenient errors because the keyword heuristic misses their meaning. The advisory trust value belongs only to this small teaching set; it does not certify the optional model judge."
+    },
+    {
+      "id": "promotion",
+      "title": "Promote reviewed reports",
+      "path": "agent_lab/evals_store.py",
+      "start_line": 84,
+      "end_line": 113,
+      "reviewed_source_sha256": "197b950c1afe7eaff955c8aa99e9544f42662cc26c0b24ecd2dcf1dd68aceda3",
+      "spoken_text": "Promotion reloads the retained run and checks the eligibility gate before writing. A reviewed digest detects changed measurements, and a missing or ineligible run is rejected. The write targets only the matching provenance and judge baseline and records an audit note. Opening the baseline or clicking the button alone cannot promote an agent."
+    }
+  ]
+}

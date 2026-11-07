@@ -243,6 +243,16 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 52:
+        from agent_lab.evals_core import synthetic_criterion
+
+        baseline, candidate, comparison = (evidence.get(key) for key in ("baseline", "candidate", "comparison"))
+        passed = (mode == "offline" and all(isinstance(item, dict) for item in
+                                            (baseline, candidate, comparison)) and
+                  synthetic_criterion(baseline, candidate, comparison))
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail=("Correlated synthetic baseline/candidate trial evidence passed with zero calls."
+                                   if passed else "Complete authored synthetic reports and a recomputed passing comparison are required."))
     if lesson_id == 51:
         from agent_lab.offline_lab import evaluate_suite
 
