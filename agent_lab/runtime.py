@@ -91,8 +91,46 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49} else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 51:
+                    from agent_lab.offline_lab import run_suite
+
+                    report = await run_suite(self.settings.data_dir / "lesson-51",
+                                             group=request.lesson_options["group"],
+                                             mutation=request.lesson_options["mutation"])
+                    await emit(Event(kind="evidence", data={"source": "actual offline host assertions",
+                                                            "lesson_id": 51, "result": report}))
+                    return
+                if lesson.id == 50:
+                    from agent_lab.desk_approver import DeskApprover, Pending
+                    from agent_lab.desk_lab import local_chat
+                    from agent_lab.desk_native import native_chat
+                    from agent_lab.desk_store import DeskStore
+
+                    options = request.lesson_options
+                    desk = DeskStore(self.settings.data_dir / "lesson-50")
+                    approver = DeskApprover()
+
+                    async def decide(entry: Pending) -> None:
+                        approver.answer(entry.run, entry.conversation, entry.call,
+                                        entry.token, options["approval"])
+
+                    selected = uuid.UUID(options["conversation_id"]) if options["conversation_id"] else None
+                    intent = options["intent"]
+                    if request.mode == "live":
+                        result = await native_chat(desk, approver, customer=options["customer"],
+                                                   conversation=selected, intent=intent,
+                                                   message=request.prompt, on_approval=decide)
+                    else:
+                        result = await local_chat(desk, approver, customer=options["customer"],
+                                                  conversation=selected, intent=intent,
+                                                  message=request.prompt,
+                                                  scenario="normal" if request.scenario == "success" else request.scenario,
+                                                  on_approval=decide)
+                    await emit(Event(kind="evidence", data={"source": result["source"],
+                                                            "lesson_id": 50, "result": result}))
+                    return
                 seed_workspace(work, lesson)
                 if lesson.id == 12:
                     from agent_lab.streaming import execute_stream

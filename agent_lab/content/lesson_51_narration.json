@@ -1,0 +1,36 @@
+{
+  "lesson": 51,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "suite",
+      "title": "Run the suite",
+      "path": "agent_lab/offline_lab.py",
+      "start_line": 316,
+      "end_line": 339,
+      "reviewed_source_sha256": "31d4414382828e08016e8ff52a17b3b3050bc4f35a8560eb336815332a48ce79",
+      "spoken_text": "The suite reserves its own temporary store and executes the fixed manifest sequentially. Each case calls the real host contract and returns an assertion row. The complete report requires every case, every passing observation, zero model calls and owned cleanup. A filtered group is useful for diagnosis, but cannot earn the complete check."
+    },
+    {
+      "id": "consumer",
+      "title": "Consume the fake query",
+      "path": "agent_lab/offline_lab.py",
+      "start_line": 99,
+      "end_line": 125,
+      "reviewed_source_sha256": "31d4414382828e08016e8ff52a17b3b3050bc4f35a8560eb336815332a48ce79",
+      "spoken_text": "The fake query yields normalized synthetic envelopes. The host consumer admits only the known lookup order and executes a real scoped store snapshot. It correlates the exact tool call and result identifiers, checks the terminal state and closes the fake query. This proves host handling of injected input, not a live model decision."
+    },
+    {
+      "id": "evaluator",
+      "title": "Evaluate complete evidence",
+      "path": "agent_lab/offline_lab.py",
+      "start_line": 289,
+      "end_line": 315,
+      "reviewed_source_sha256": "31d4414382828e08016e8ff52a17b3b3050bc4f35a8560eb336815332a48ce79",
+      "spoken_text": "The evaluator requires sixteen ordered passing cases, no mutation, zero model calls, zero actual billing and cleanup. The mutation challenge changes only the observed denial code, so its one failing assertion remains visible. Synthetic replay cost is labeled separately from actual provider billing."
+    }
+  ]
+}

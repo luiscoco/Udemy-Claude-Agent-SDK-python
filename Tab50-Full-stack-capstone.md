@@ -1,153 +1,32 @@
 # Lesson 50: Full-stack support capstone
 
-Bind a support tool to a host-selected customer and require approval before refunding.
-
-This lesson is part of **Production and deployment**. The Python implementation is shared by
-the NiceGUI screen, FastAPI endpoints and command-line exercise.
+Build a scoped synthetic support desk with a persisted conversation, native SDK tools, one-shot refund approval and structured CRM closure.
 
 ## Run it
 
-Install the environment once with `uv sync --locked`. Then run:
-
 ```shell
 uv run agent-lab lesson 50
-uv run python -m agent_lab.lessons.lesson_50
+uv run agent-lab serve
 ```
 
-Both commands run **offline host code**. No model is called, no API cost is incurred,
-and recorded examples are labelled as fixtures rather than live SDK messages.
+Open `http://127.0.0.1:8080/?lesson=50` and choose **Run the exercise**. The desk panel uses the same owned store as the `/api/c50` routes. Ada and Bo are classroom fixtures; the customer selector is not production authentication, and a refund changes only the lesson ledger.
 
-For the browser lab, run `uv run agent-lab serve`, then open
-[lesson 50](http://127.0.0.1:8080/?lesson=50).
+Start with **Orders** for Ada. Resume the saved open conversation for **Ticket**. Each operation reads orders again before a write. Try **Refund** twice, denying the first exact proposal and approving the second. Then use **Close to CRM** and **Local evaluations**. Inspect matched call IDs, audit rows, one 1000-cent refund row, closed CRM and unchanged transcript. The three negative Local scenarios deliberately withhold the success verdict.
 
-## The concept in code
+The command-line runner also uses the persisted desk. Its default intent is Orders; `lesson_options` can select `customer`, `intent`, `conversation_id` and `approval`. The local authored lifecycle creates real owned records and is labelled as local evidence.
 
-```python
-import time
-from dataclasses import dataclass
-from typing import Any
+## Live Agent SDK
 
-from claude_agent_sdk import McpSdkServerConfig, create_sdk_mcp_server, tool
+With a private `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true`, restart the app and choose Live. Confirm each paid chat or CRM close separately. The native chat admits only selected support tools, resumes the SDK session and joins the real tool call/result IDs to the host ledger. A restricted fork creates schema-constrained CRM data without desk tools. One chat is capped at $0.10; use `scripts/desk_live_matrix.py --live --budget 0.50` for the complete bounded journey after local checks pass.
 
+## Source and verification
 
-@dataclass
-class Approval:
-    customer_id: str
-    amount: float
-    expires_at: float
+- `agent_lab/desk_store.py`: scoped persisted conversations, orders, tickets, refunds and audit.
+- `agent_lab/desk_approver.py`: exact one-shot pending approval and timeout cleanup.
+- `agent_lab/desk_lab.py`: host admission, local operations, close and evaluator.
+- `agent_lab/desk_native.py`: native SDK calls, resumed session, restricted CRM fork and terminal evidence.
+- `agent_lab/api_desk.py`: strict HTTP contract; `agent_lab/ui_desk.py`: browser controls.
 
+The Python source tab has three source-bound Yash recordings with verified hashes and word timing. The Visual guide and Lab walkthrough show the concept and ordered exercise. Seven questions test scope, fresh reads, one-shot approval, denial, native evidence, CRM and negative evidence.
 
-def support_server(
-    customer_id: str, approvals: dict[str, Approval]
-) -> McpSdkServerConfig:
-    @tool(
-        "list_orders", "List the orders of the customer signed in to this session.", {}
-    )
-    async def list_orders(args: dict[str, Any]) -> dict[str, Any]:
-        return {
-            "content": [{"type": "text", "text": f"Orders for {customer_id}: A1 40.00"}]
-        }
-
-    @tool(
-        "refund",
-        "Refund an order that staff approved.",
-        {"order_id": str, "amount": float},
-    )
-    async def refund(args: dict[str, Any]) -> dict[str, Any]:
-        a = approvals.get(args["order_id"])
-        if (
-            a is None
-            or time.time() > a.expires_at
-            or (a.customer_id, a.amount) != (customer_id, args["amount"])
-        ):
-            return {
-                "content": [
-                    {"type": "text", "text": "No valid approval for this exact refund."}
-                ],
-                "is_error": True,
-            }
-        del approvals[args["order_id"]]  # single use: the approval is consumed
-        return {
-            "content": [
-                {
-                    "type": "text",
-                    "text": f"Refunded {a.amount:.2f} on {args['order_id']}.",
-                }
-            ]
-        }
-
-    return create_sdk_mcp_server("support", tools=[list_orders, refund])
-```
-
-`support_server` closes over the host's `customer_id`, so `list_orders` takes no customer argument, and refund only runs, and then deletes the approval, when an unexpired Approval for that order matches the customer and amount.
-
-## How the offline lab checks it
-
-Predict the evidence, then run the exercise. A model's description of an action is
-not evidence that the action happened.
-
-The lab is `support` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1804); the Python source tab shows it below the concept code. Host contracts
-are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
-
-## Live Agent SDK exercise
-
-Copy `.env.example` to `.env`, configure `ANTHROPIC_API_KEY`, and explicitly set
-`LAB_ENABLE_LIVE=true`. Restart the app and choose **Live Agent SDK**.
-
-```shell
-uv run agent-lab lesson 50 --live
-```
-
-Suggested prompt:
-
-> Use the support tools to inspect my orders; propose a refund without executing it.
-
-The live profile is `support`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
-
-`ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
-`setting_sources` and `include_partial_messages`. The SDK owns the agent loop;
-the host owns validation, tool authority and task lifecycle. The budget option
-is a threshold, not an exact billing cap.
-
-## API and lifecycle
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/lessons/50` | Lesson metadata |
-| `POST /api/lessons/50/run` | Collected JSON events |
-| `POST /api/lessons/50/stream` | Server-Sent Events |
-| `/api/lessons/50/ws` | WebSocket events and cancellation |
-
-Pydantic validates the request before the run starts:
-
-```json
-{"mode": "offline", "prompt": "", "max_turns": 4, "max_budget_usd": 0.10}
-```
-
-All transports use [RunService](agent_lab/runtime.py). It bounds concurrency,
-owns the producer task and closes the SDK connection in the task that opened
-it. A run emits one terminal `done` event. Cancellation awaits cleanup before
-releasing the run slot.
-
-## Practice
-
-1. Identify trusted host inputs and untrusted model or source data.
-2. Change one bounded input and predict whether validation accepts it.
-3. Add a failure case and explain how the host should report it.
-4. Compare offline evidence with a live run without mistaking fixtures for model output.
-
-## Verification and references
-
-`uv run pytest` executes every offline lesson and checks host policies, tenant
-isolation, approvals, dependency failures, cancellation and API validation.
-Paid calls are separate, opt-in checks.
-
-- [Official Python Agent SDK reference](https://code.claude.com/docs/en/agent-sdk/python)
-- [Python SDK source](https://github.com/anthropics/claude-agent-sdk-python)
-- [Setup and migration coverage](README.md)
+This Python adaptation does not connect to real customer identity, payment processing or deployed CRM. Offline records are authored host effects. Live evidence is provider-backed only when the native SDK path actually completes.

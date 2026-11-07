@@ -1,0 +1,36 @@
+{
+  "lesson": 50,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "scope",
+      "title": "Scope saved records",
+      "path": "agent_lab/desk_store.py",
+      "start_line": 125,
+      "end_line": 139,
+      "reviewed_source_sha256": "eeb6ba0d1b87d4d6660c1492de9250919d9cdab3c07d9a91b1b5add0fffa4c15",
+      "spoken_text": "The snapshot method loads the owned desk data, then keeps only conversations, tickets, refunds and audit rows belonging to the host-selected customer. Orders come from the fixed synthetic fixture for that same customer. The model never supplies the customer scope through a tool argument. This view makes cross-customer records invisible in the lesson report."
+    },
+    {
+      "id": "approval",
+      "title": "Settle exact approval",
+      "path": "agent_lab/desk_approver.py",
+      "start_line": 39,
+      "end_line": 56,
+      "reviewed_source_sha256": "238056cb6a27e1f3df688d60b91a048b4da1272eb5b8677888a205f46fd43e09",
+      "spoken_text": "The approval waiter accepts only the pending exact call. It waits for one answer with a timeout. Whether approval succeeds, is denied, times out or is cancelled, the pending entry is removed. A later call cannot reuse that decision. The refund handler also checks the run, conversation, call and token before it writes an effect."
+    },
+    {
+      "id": "crm-close",
+      "title": "Close into CRM",
+      "path": "agent_lab/desk_lab.py",
+      "start_line": 215,
+      "end_line": 232,
+      "reviewed_source_sha256": "b170ddab04a8109a94323b1919de32da2c3944d968c1c049f67f40bc023b14db",
+      "spoken_text": "A local CRM close first requires the selected open conversation and copies its messages. It builds strict structured CRM data, persists the close and reloads the saved state. Success requires a closed status, the same CRM record and an unchanged transcript. The native close uses a restricted fork with no support tools, then checks the same host facts."
+    }
+  ]
+}

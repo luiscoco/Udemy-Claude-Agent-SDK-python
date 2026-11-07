@@ -398,6 +398,12 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 51:
+        with card("Lesson 51 offline walkthrough", "Sixteen assertions and six public replays"):
+            ui.image("/assets/lesson-51-lab-walkthrough.svg").props('alt="Run all cases, inspect assertions, challenge mutation, replay fixtures"').classes("w-full")
+    if lesson_id == 50:
+        with card("Lesson 50 support desk walkthrough", "Scoped effects and CRM close"):
+            ui.image("/assets/lesson-50-lab-walkthrough.svg").props("fit=contain").classes("w-full")
     if lesson_id == 49:
         with card("Lesson 49 headless walkthrough", "Processes, CI codes and local worker"):
             ui.image("/assets/lesson-49-lab-walkthrough.svg").props("fit=contain").classes("w-full")
@@ -483,6 +489,12 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 51:
+        with card("Offline host testing concept map", "Lesson 51"):
+            ui.image("/assets/lesson-51-concept-map.svg").props('alt="Fixed envelopes enter real host consumer and produce zero billed cost"').classes("w-full")
+    if lesson_id == 50:
+        with card("Support desk concept map", "Lesson 50"):
+            ui.image("/assets/lesson-50-concept-map.svg").props("fit=contain").classes("w-full")
     if lesson_id == 49:
         with card("Headless evidence concept map", "Lesson 49"):
             ui.image("/assets/lesson-49-concept-map.svg").props("fit=contain").classes("w-full")

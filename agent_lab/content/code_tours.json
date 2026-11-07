@@ -1337,54 +1337,48 @@
     ]
   },
   "50": {
-    "source_sha256": "53bd25c72447b4d28111b6a45b5c25d840f90e12b3e077278b0d680dc28d2682",
+    "source_sha256": "d0f2a6a8057414490a9c6f1c2e2a61bc623dccd10e60d179bd22d70558e09a32",
     "sections": [
       {
-        "title": "An approval record",
+        "title": "The persisted host",
+        "start": 1,
+        "end": 6,
+        "text": "The host has a persisted scoped store and a separate one-shot approver."
+      },
+      {
+        "title": "Open and read",
         "start": 8,
-        "end": 12,
-        "text": "An Approval ties a refund to one customer, one amount and an expiry time. Staff create these on the host side; the model can only use one that already exists."
+        "end": 11,
+        "text": "The first operation opens an Ada conversation and reads current orders."
       },
       {
-        "title": "Identity from the session",
-        "start": 15,
-        "end": 24,
-        "text": "support_server receives customer_id from the signed-in session and the tools close over it. That is why list_orders has an empty input schema: the model has no argument it could use to ask about someone else's orders."
-      },
-      {
-        "title": "Checking the exact approval",
-        "start": 26,
-        "end": 43,
-        "text": "The refund tool looks up the approval for the order and refuses if it is missing, expired, or does not match both the session's customer and the requested amount. The refusal comes back with is_error set and a clear reason, so the model sees why no money moved."
-      },
-      {
-        "title": "Single use, then the server",
-        "start": 44,
-        "end": 54,
-        "text": "Only after every check passes is the approval deleted and the refund confirmed, so the same approval cannot be used twice. Finally create_sdk_mcp_server bundles both tools into an in-process server named support for the agent's options."
+        "title": "Resume for a ticket",
+        "start": 12,
+        "end": 14,
+        "text": "The second operation resumes the saved UUID and reads orders again before a ticket."
       }
     ]
   },
   "51": {
-    "source_sha256": "2ed3d8b40f237ed6100623870ba85dc759c71c6843a82dc752498bc6852d13df",
+    "source_sha256": "1d53adb63e15207c054dc240564b1f99fd3563245e1cb5628705ab3490027e81",
     "sections": [
       {
-        "title": "Consumer of any stream",
-        "start": 6,
-        "end": 16,
-        "text": "collect accepts any async iterator of Message, so it does not care whether messages come from query or from a fixture. It gathers TextBlock text from each AssistantMessage and takes total_cost_usd from the ResultMessage."
+        "title": "Normal complete suite",
+        "start": 1,
+        "end": 8,
+        "text": "The complete normal suite checks sixteen real host cases and zero model calls."
       },
       {
-        "title": "A fake run with real types",
-        "start": 19,
-        "end": 31,
-        "text": "fake_run yields genuine AssistantMessage, TextBlock and ResultMessage objects from the SDK, filled with fixture values. Because they are the real dataclasses, the isinstance checks in collect behave exactly as they would in a live run."
+        "title": "Fixed fake query",
+        "start": 10,
+        "end": 11,
+        "text": "FakeQuery holds fixed normalized envelopes; the host consumer, not a provider, reads them."
       },
       {
-        "title": "The test and its limits",
-        "start": 34,
-        "end": 36,
-        "text": "The test feeds the fixture to collect and expects the joined text and a cost of zero. No CLI process starts and no API call is made, so a pass proves your parsing logic only, not what the model would actually answer."
+        "title": "Real host observation",
+        "start": 12,
+        "end": 14,
+        "text": "The host executes one scoped order lookup, matches its result and records no billed cost."
       }
     ]
   },

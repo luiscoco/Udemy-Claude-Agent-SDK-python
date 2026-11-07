@@ -1,7 +1,7 @@
 {
   "format": "python-reference-parity",
   "version": 1,
-  "date": "2026-11-05",
+  "date": "2026-11-07",
   "reference": {
     "repository": "luiscoco/Udemy-Claude-Agent-SDK-Student-Rebuild",
     "commit": "777d8479b62fddf5cd62df86fb048d589ed43a7c",
@@ -867,13 +867,13 @@
       "exercise": "support",
       "live_profile": "support",
       "adaptation": "",
-      "python_line": 1800,
+      "python_line": 186,
       "reference_contract": "docs/prompts/l50-lesson-50-full-stack-capstone.md",
       "reference_blob_sha": "ee039c76f15f7a9f1de49366cd7bdc780bed24b3",
       "foundation_component": "src/concepts/Concept50Capstone.tsx",
       "reference_parity": "not-certified",
       "written_guide": "written",
-      "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+      "gap": "Scoped synthetic store, one-shot approval, fresh orders admission, native resumed support tools, restricted CRM fork, strict API, browser panel, seven questions, two diagrams and three source-bound Yash clips pass. The full offline regression and post-change provider-backed five-action matrix, shared runner and approval-boundary cancellation pass. Production identity/payment/CRM, human listening review and independent student acceptance remain open.",
       "written_guide_content": "lesson-content"
     },
     {
@@ -888,7 +888,7 @@
       "foundation_component": "src/concepts/Concept51UnitTesting.tsx",
       "reference_parity": "not-certified",
       "written_guide": "written",
-      "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+      "gap": "The fixed 16-case offline host suite, six public replay streams, strict SSE routes, network-guarded CLI, mutation challenge, browser controls, seven questions, two diagrams and three source-bound Yash clips pass. Full offline regression: 1,992 passed and 15 skipped. Human audio listening and independent student acceptance remain open. The reference contract has no live path.",
       "written_guide_content": "lesson-content"
     },
     {

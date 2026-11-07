@@ -402,8 +402,8 @@ ROWS = [
     (
         50,
         "Full-stack support capstone",
-        "Bind a support tool to a host-selected customer and require approval before refunding.",
-        "Use the support tools to inspect my orders; propose a refund without executing it.",
+        "Run a scoped synthetic support conversation from orders through approval and CRM close.",
+        "Please inspect my orders.",
         "support",
         "support",
     ),

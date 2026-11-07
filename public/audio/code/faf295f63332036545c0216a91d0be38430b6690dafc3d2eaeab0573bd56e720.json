@@ -1,0 +1,272 @@
+{
+  "lesson": 51,
+  "section": "consumer",
+  "duration": 20.952,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.14
+    },
+    {
+      "word": "fake",
+      "start": 0.14,
+      "end": 0.43
+    },
+    {
+      "word": "query",
+      "start": 0.43,
+      "end": 0.92
+    },
+    {
+      "word": "yields",
+      "start": 0.95,
+      "end": 1.32
+    },
+    {
+      "word": "normalized",
+      "start": 1.32,
+      "end": 1.92
+    },
+    {
+      "word": "synthetic",
+      "start": 1.92,
+      "end": 2.38
+    },
+    {
+      "word": "envelopes",
+      "start": 2.38,
+      "end": 3.01
+    },
+    {
+      "word": "The",
+      "start": 3.57,
+      "end": 3.71
+    },
+    {
+      "word": "host",
+      "start": 3.71,
+      "end": 4.01
+    },
+    {
+      "word": "consumer",
+      "start": 4.01,
+      "end": 4.55
+    },
+    {
+      "word": "admits",
+      "start": 4.55,
+      "end": 4.94
+    },
+    {
+      "word": "only",
+      "start": 4.97,
+      "end": 5.32
+    },
+    {
+      "word": "the",
+      "start": 5.32,
+      "end": 5.41
+    },
+    {
+      "word": "known",
+      "start": 5.41,
+      "end": 5.66
+    },
+    {
+      "word": "lookup",
+      "start": 5.66,
+      "end": 6
+    },
+    {
+      "word": "order",
+      "start": 6,
+      "end": 6.38
+    },
+    {
+      "word": "and",
+      "start": 6.81,
+      "end": 6.97
+    },
+    {
+      "word": "executes",
+      "start": 6.97,
+      "end": 7.52
+    },
+    {
+      "word": "a",
+      "start": 7.52,
+      "end": 7.59
+    },
+    {
+      "word": "real",
+      "start": 7.59,
+      "end": 7.86
+    },
+    {
+      "word": "scoped",
+      "start": 7.86,
+      "end": 8.21
+    },
+    {
+      "word": "store",
+      "start": 8.21,
+      "end": 8.47
+    },
+    {
+      "word": "snapshot",
+      "start": 8.47,
+      "end": 9.06
+    },
+    {
+      "word": "It",
+      "start": 9.6,
+      "end": 9.77
+    },
+    {
+      "word": "correlates",
+      "start": 9.77,
+      "end": 10.32
+    },
+    {
+      "word": "the",
+      "start": 10.32,
+      "end": 10.41
+    },
+    {
+      "word": "exact",
+      "start": 10.41,
+      "end": 10.89
+    },
+    {
+      "word": "tool",
+      "start": 10.89,
+      "end": 11.12
+    },
+    {
+      "word": "call",
+      "start": 11.12,
+      "end": 11.52
+    },
+    {
+      "word": "and",
+      "start": 11.55,
+      "end": 11.74
+    },
+    {
+      "word": "result",
+      "start": 11.74,
+      "end": 12.09
+    },
+    {
+      "word": "identifiers",
+      "start": 12.09,
+      "end": 12.94
+    },
+    {
+      "word": "checks",
+      "start": 13.46,
+      "end": 13.75
+    },
+    {
+      "word": "the",
+      "start": 13.75,
+      "end": 13.83
+    },
+    {
+      "word": "terminal",
+      "start": 13.83,
+      "end": 14.22
+    },
+    {
+      "word": "state",
+      "start": 14.22,
+      "end": 14.66
+    },
+    {
+      "word": "and",
+      "start": 14.77,
+      "end": 14.95
+    },
+    {
+      "word": "closes",
+      "start": 14.95,
+      "end": 15.32
+    },
+    {
+      "word": "the",
+      "start": 15.32,
+      "end": 15.4
+    },
+    {
+      "word": "fake",
+      "start": 15.4,
+      "end": 15.66
+    },
+    {
+      "word": "query",
+      "start": 15.66,
+      "end": 16.05
+    },
+    {
+      "word": "This",
+      "start": 16.44,
+      "end": 16.75
+    },
+    {
+      "word": "proves",
+      "start": 16.75,
+      "end": 17.1
+    },
+    {
+      "word": "host",
+      "start": 17.1,
+      "end": 17.46
+    },
+    {
+      "word": "handling",
+      "start": 17.46,
+      "end": 17.83
+    },
+    {
+      "word": "of",
+      "start": 17.83,
+      "end": 17.98
+    },
+    {
+      "word": "injected",
+      "start": 17.98,
+      "end": 18.42
+    },
+    {
+      "word": "input",
+      "start": 18.42,
+      "end": 18.89
+    },
+    {
+      "word": "not",
+      "start": 19.18,
+      "end": 19.49
+    },
+    {
+      "word": "a",
+      "start": 19.49,
+      "end": 19.53
+    },
+    {
+      "word": "live",
+      "start": 19.53,
+      "end": 19.85
+    },
+    {
+      "word": "model",
+      "start": 19.85,
+      "end": 20.15
+    },
+    {
+      "word": "decision",
+      "start": 20.15,
+      "end": 20.61
+    }
+  ]
+}

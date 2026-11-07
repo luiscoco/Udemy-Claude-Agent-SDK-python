@@ -112,6 +112,10 @@ Lesson 47 compares native Agent delegation with host-controlled pipeline, fan-ou
 Lesson 48 compares contrast and guarded security lanes over owned synthetic files, a child environment and a loopback collector. Four local and four provider-backed live API actions pass, along with a shared runner action and active cancellation check. The portal includes a decision table, two diagrams and three verified Yash source clips. See the [security guide](docs/lesson-48-security.md), [narration evidence](docs/lesson-48-narration.md) and [live acceptance](docs/live-acceptance.md).
 
 Lesson 49 runs exact owned child processes for headless CLI/SDK and CI decisions, maps explicit host exit codes, and supervises a one-slot local worker through readiness, backpressure, drain and close. Four local actions, the provider-backed Headless and CI matrix, a shared runner and cancellation checks pass. The portal includes fixed files, process receipts, two diagrams and three source-aligned Yash clips. See the [headless guide](docs/lesson-49-headless.md), [narration evidence](docs/lesson-49-narration.md) and [live acceptance](docs/live-acceptance.md).
+
+Lesson 50 connects a synthetic scoped support conversation, persisted orders/tickets/refunds/audit, one-shot exact refund approval and structured CRM close. The local API and browser lifecycle pass; a bounded provider-backed orders, ticket, denied refund, approved refund and restricted-fork close matrix has passed. The page includes seven explained questions, two diagrams and three source-aligned Yash clips. See the [desk guide](docs/lesson-50-desk.md), [narration evidence](docs/lesson-50-narration.md) and [live acceptance](docs/live-acceptance.md).
+
+Lesson 51 runs sixteen deterministic host assertions and six synthetic stream replays against real host contracts with zero model calls and zero billed cost. A one-case denial mutation, strict streaming API, network-guarded CLI and mobile lab panel make the test boundary visible. The page includes seven questions, two diagrams and three source-bound Yash clips. This lesson is offline only; see the [host suite guide](docs/lesson-51-offline.md) and [narration evidence](docs/lesson-51-narration.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**
@@ -182,7 +186,7 @@ The browser offers downloads for the document-generation exercise.
 
 ## Enable live SDK calls
 
-Real provider-backed scenario acceptance is required before advancing to the next lesson. Lessons 16-20 have passed their current live scenario sets (lesson 18 includes a separate native WSL process probe); see [live acceptance evidence](docs/live-acceptance.md). Run `uv run python scripts/lesson_live_smoke.py 17 --live` for the bounded lesson scenarios.
+Real provider-backed scenario acceptance is required before advancing when the lesson contract includes a live path. Lesson 51 expressly has no live path. Lessons 16-20 have passed their current live scenario sets (lesson 18 includes a separate native WSL process probe); see [live acceptance evidence](docs/live-acceptance.md). Run `uv run python scripts/lesson_live_smoke.py 17 --live` for the bounded lesson scenarios.
 
 After an SDK upgrade, run the optional provider smoke checks explicitly:
 

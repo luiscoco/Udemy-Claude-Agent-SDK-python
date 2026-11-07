@@ -1,0 +1,222 @@
+{
+  "lesson": 51,
+  "section": "evaluator",
+  "duration": 18.312,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.12
+    },
+    {
+      "word": "evaluator",
+      "start": 0.12,
+      "end": 0.69
+    },
+    {
+      "word": "requires",
+      "start": 0.69,
+      "end": 1.14
+    },
+    {
+      "word": "sixteen",
+      "start": 1.14,
+      "end": 1.6
+    },
+    {
+      "word": "ordered",
+      "start": 1.6,
+      "end": 1.93
+    },
+    {
+      "word": "passing",
+      "start": 1.93,
+      "end": 2.28
+    },
+    {
+      "word": "cases",
+      "start": 2.28,
+      "end": 2.89
+    },
+    {
+      "word": "no",
+      "start": 3.29,
+      "end": 3.51
+    },
+    {
+      "word": "mutation",
+      "start": 3.51,
+      "end": 4.17
+    },
+    {
+      "word": "zero",
+      "start": 4.51,
+      "end": 4.84
+    },
+    {
+      "word": "model",
+      "start": 4.84,
+      "end": 5.15
+    },
+    {
+      "word": "calls",
+      "start": 5.15,
+      "end": 5.68
+    },
+    {
+      "word": "zero",
+      "start": 5.96,
+      "end": 6.32
+    },
+    {
+      "word": "actual",
+      "start": 6.32,
+      "end": 6.68
+    },
+    {
+      "word": "billing",
+      "start": 6.68,
+      "end": 6.99
+    },
+    {
+      "word": "and",
+      "start": 6.99,
+      "end": 7.11
+    },
+    {
+      "word": "cleanup",
+      "start": 7.11,
+      "end": 7.47
+    },
+    {
+      "word": "The",
+      "start": 7.88,
+      "end": 8.04
+    },
+    {
+      "word": "mutation",
+      "start": 8.04,
+      "end": 8.54
+    },
+    {
+      "word": "challenge",
+      "start": 8.54,
+      "end": 8.95
+    },
+    {
+      "word": "changes",
+      "start": 8.95,
+      "end": 9.54
+    },
+    {
+      "word": "only",
+      "start": 9.77,
+      "end": 10.07
+    },
+    {
+      "word": "the",
+      "start": 10.07,
+      "end": 10.15
+    },
+    {
+      "word": "observed",
+      "start": 10.15,
+      "end": 10.55
+    },
+    {
+      "word": "denial",
+      "start": 10.55,
+      "end": 10.95
+    },
+    {
+      "word": "code",
+      "start": 10.95,
+      "end": 11.26
+    },
+    {
+      "word": "so",
+      "start": 11.58,
+      "end": 11.81
+    },
+    {
+      "word": "its",
+      "start": 11.81,
+      "end": 12.01
+    },
+    {
+      "word": "one",
+      "start": 12.01,
+      "end": 12.22
+    },
+    {
+      "word": "failing",
+      "start": 12.22,
+      "end": 12.53
+    },
+    {
+      "word": "assertion",
+      "start": 12.53,
+      "end": 13.1
+    },
+    {
+      "word": "remains",
+      "start": 13.16,
+      "end": 13.56
+    },
+    {
+      "word": "visible",
+      "start": 13.56,
+      "end": 13.97
+    },
+    {
+      "word": "Synthetic",
+      "start": 14.5,
+      "end": 15.02
+    },
+    {
+      "word": "replay",
+      "start": 15.02,
+      "end": 15.32
+    },
+    {
+      "word": "cost",
+      "start": 15.32,
+      "end": 15.62
+    },
+    {
+      "word": "is",
+      "start": 15.62,
+      "end": 15.76
+    },
+    {
+      "word": "labeled",
+      "start": 15.76,
+      "end": 16.17
+    },
+    {
+      "word": "separately",
+      "start": 16.2,
+      "end": 16.76
+    },
+    {
+      "word": "from",
+      "start": 16.76,
+      "end": 16.93
+    },
+    {
+      "word": "actual",
+      "start": 16.93,
+      "end": 17.27
+    },
+    {
+      "word": "provider",
+      "start": 17.27,
+      "end": 17.64
+    },
+    {
+      "word": "billing",
+      "start": 17.64,
+      "end": 17.98
+    }
+  ]
+}

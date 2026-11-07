@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" role="img" aria-labelledby="t d">
+<title id="t">Offline host testing</title><desc id="d">Fixed synthetic envelopes pass through a real scoped host consumer. Assertions examine result correlation, terminal state and cleanup without model calls or billing.</desc>
+<rect width="900" height="380" rx="24" fill="#f8fafc"/><text x="36" y="56" font-family="Arial" font-size="30" font-weight="bold" fill="#1e293b">Test the host with injected input</text>
+<g font-family="Arial" font-size="22" fill="#1e293b">
+<rect x="35" y="100" width="250" height="160" rx="18" fill="#ddd6fe"/><text x="55" y="142" font-weight="bold">Fixed envelopes</text><text x="55" y="180">FakeQuery stream</text><text x="55" y="215">16 known cases</text>
+<path d="M290 180h46" stroke="#7c3aed" stroke-width="5" marker-end="url(#a)"/>
+<rect x="345" y="100" width="250" height="160" rx="18" fill="#ccfbf1"/><text x="365" y="142" font-weight="bold">Real host consumer</text><text x="365" y="180">Scoped DeskStore</text><text x="365" y="215">Exit and approvals</text>
+<path d="M600 180h46" stroke="#0f766e" stroke-width="5" marker-end="url(#a)"/>
+<rect x="655" y="100" width="210" height="160" rx="18" fill="#fef3c7"/><text x="675" y="142" font-weight="bold">Assertions</text><text x="675" y="180">IDs and terminal</text><text x="675" y="215">Cleanup and scope</text>
+<rect x="35" y="288" width="830" height="58" rx="14" fill="#e2e8f0"/><text x="57" y="325">Model calls: 0     Actual billed: $0     Fixture cost: simulated only</text>
+</g><defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0l10 5-10 5z" fill="#475569"/></marker></defs></svg>

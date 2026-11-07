@@ -243,6 +243,13 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 51:
+        from agent_lab.offline_lab import evaluate_suite
+
+        passed = mode == "offline" and evaluate_suite(evidence)
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail=("The complete unmodified 16-case host suite passed with zero model calls."
+                                   if passed else "Complete unmodified host-suite evidence is required; partial, replay and mutation observations are separate."))
     if lesson_id == 1 and evidence.get("successful_result") is not True:
         return CheckResult(
             status="needs-review",

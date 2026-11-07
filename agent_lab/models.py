@@ -59,6 +59,45 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
     """Validate before creating a task; omitted fields get the lesson's defaults."""
     data = value.model_dump(exclude_unset=True) if isinstance(value, RunRequest) else value
     parsed: RunRequest
+    if lesson_id == 50:
+        from agent_lab.curriculum import get_lesson
+
+        selected = dict(data)
+        selected.setdefault("prompt", get_lesson(50).prompt)
+        parsed = FoundationRunRequest.model_validate(selected)
+        allowed = {"customer", "intent", "conversation_id", "approval"}
+        if set(parsed.lesson_options) - allowed:
+            raise LessonError("Unknown Lesson 50 desk option.")
+        options = {"customer": "ada", "intent": "orders", "conversation_id": None,
+                   "approval": "deny"} | parsed.lesson_options
+        if (not isinstance(options["customer"], str) or options["customer"] not in {"ada", "bo"} or
+                not isinstance(options["intent"], str) or options["intent"] not in {"orders", "ticket", "refund"} or
+                not isinstance(options["approval"], str) or options["approval"] not in {"approve", "deny"}):
+            raise LessonError("Choose a fixed synthetic customer, intent and approval.")
+        if not 1 <= len(parsed.prompt) <= 500:
+            raise LessonError("The support message must be 1 to 500 characters.")
+        if options["conversation_id"] is not None:
+            import uuid
+
+            try:
+                options["conversation_id"] = str(uuid.UUID(options["conversation_id"]))
+            except (TypeError, ValueError) as exc:
+                raise LessonError("Choose a valid conversation UUID.") from exc
+        if parsed.scenario not in {"success", "missing", "foreign", "failed"} or (parsed.mode == "live" and parsed.scenario != "success"):
+            raise LessonError("Choose a Lesson 50 scenario; live requires success.")
+        parsed.lesson_options = options
+        return parsed
+    if lesson_id == 51:
+        from agent_lab.curriculum import get_lesson
+        from agent_lab.offline_lab import SuiteInput
+
+        selected = dict(data)
+        selected.setdefault("prompt", get_lesson(51).prompt)
+        parsed = FoundationRunRequest.model_validate(selected)
+        if parsed.mode != "offline" or parsed.scenario != "success":
+            raise LessonError("Lesson 51 is an offline-only host testing lab.")
+        parsed.lesson_options = SuiteInput.model_validate(parsed.lesson_options).model_dump()
+        return parsed
     if 2 <= lesson_id <= 49:
         from agent_lab.curriculum import get_lesson
         from agent_lab.foundation_models import SCENARIOS, inputs

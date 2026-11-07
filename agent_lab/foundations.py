@@ -1247,6 +1247,22 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 51:
+        from agent_lab.api_offline import offline_code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Sequential host assertions", "Injected host consumer",
+                                        "Complete-suite evidence"), offline_code(), strict=True)]
+    if lesson_id == 50:
+        from agent_lab.api_desk import desk_code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Scope the saved records", "Settle one approval",
+                                        "Close into CRM"), desk_code(), strict=True)]
     if lesson_id == 49:
         from agent_lab.api_headless import code
 

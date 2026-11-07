@@ -1,0 +1,282 @@
+{
+  "lesson": 50,
+  "section": "approval",
+  "duration": 20.592,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.13
+    },
+    {
+      "word": "approval",
+      "start": 0.13,
+      "end": 0.53
+    },
+    {
+      "word": "waiter",
+      "start": 0.53,
+      "end": 0.96
+    },
+    {
+      "word": "accepts",
+      "start": 0.96,
+      "end": 1.4
+    },
+    {
+      "word": "only",
+      "start": 1.43,
+      "end": 1.72
+    },
+    {
+      "word": "the",
+      "start": 1.72,
+      "end": 1.82
+    },
+    {
+      "word": "pending",
+      "start": 1.82,
+      "end": 2.16
+    },
+    {
+      "word": "exact",
+      "start": 2.16,
+      "end": 2.54
+    },
+    {
+      "word": "call",
+      "start": 2.58,
+      "end": 2.88
+    },
+    {
+      "word": "It",
+      "start": 3.64,
+      "end": 3.83
+    },
+    {
+      "word": "waits",
+      "start": 3.83,
+      "end": 4.14
+    },
+    {
+      "word": "for",
+      "start": 4.14,
+      "end": 4.32
+    },
+    {
+      "word": "one",
+      "start": 4.32,
+      "end": 4.48
+    },
+    {
+      "word": "answer",
+      "start": 4.48,
+      "end": 4.99
+    },
+    {
+      "word": "with",
+      "start": 5.08,
+      "end": 5.27
+    },
+    {
+      "word": "a",
+      "start": 5.27,
+      "end": 5.32
+    },
+    {
+      "word": "timeout",
+      "start": 5.32,
+      "end": 5.74
+    },
+    {
+      "word": "Whether",
+      "start": 6.26,
+      "end": 6.56
+    },
+    {
+      "word": "approval",
+      "start": 6.56,
+      "end": 6.94
+    },
+    {
+      "word": "succeeds",
+      "start": 6.94,
+      "end": 7.69
+    },
+    {
+      "word": "is",
+      "start": 7.8,
+      "end": 7.99
+    },
+    {
+      "word": "denied",
+      "start": 7.99,
+      "end": 8.54
+    },
+    {
+      "word": "times",
+      "start": 8.89,
+      "end": 9.22
+    },
+    {
+      "word": "out",
+      "start": 9.22,
+      "end": 9.43
+    },
+    {
+      "word": "or",
+      "start": 9.43,
+      "end": 9.62
+    },
+    {
+      "word": "is",
+      "start": 9.62,
+      "end": 9.75
+    },
+    {
+      "word": "cancelled",
+      "start": 9.75,
+      "end": 10.36
+    },
+    {
+      "word": "the",
+      "start": 10.65,
+      "end": 10.77
+    },
+    {
+      "word": "pending",
+      "start": 10.77,
+      "end": 11.13
+    },
+    {
+      "word": "entry",
+      "start": 11.13,
+      "end": 11.37
+    },
+    {
+      "word": "is",
+      "start": 11.37,
+      "end": 11.52
+    },
+    {
+      "word": "removed",
+      "start": 11.52,
+      "end": 11.97
+    },
+    {
+      "word": "A",
+      "start": 12.42,
+      "end": 12.53
+    },
+    {
+      "word": "later",
+      "start": 12.53,
+      "end": 12.84
+    },
+    {
+      "word": "call",
+      "start": 12.84,
+      "end": 13.18
+    },
+    {
+      "word": "cannot",
+      "start": 13.18,
+      "end": 13.54
+    },
+    {
+      "word": "reuse",
+      "start": 13.54,
+      "end": 13.89
+    },
+    {
+      "word": "that",
+      "start": 13.89,
+      "end": 14.07
+    },
+    {
+      "word": "decision",
+      "start": 14.07,
+      "end": 14.57
+    },
+    {
+      "word": "The",
+      "start": 14.86,
+      "end": 15.01
+    },
+    {
+      "word": "refund",
+      "start": 15.01,
+      "end": 15.35
+    },
+    {
+      "word": "handler",
+      "start": 15.35,
+      "end": 15.64
+    },
+    {
+      "word": "also",
+      "start": 15.64,
+      "end": 15.95
+    },
+    {
+      "word": "checks",
+      "start": 15.95,
+      "end": 16.24
+    },
+    {
+      "word": "the",
+      "start": 16.24,
+      "end": 16.35
+    },
+    {
+      "word": "run",
+      "start": 16.35,
+      "end": 16.69
+    },
+    {
+      "word": "conversation",
+      "start": 16.94,
+      "end": 17.72
+    },
+    {
+      "word": "call",
+      "start": 17.93,
+      "end": 18.2
+    },
+    {
+      "word": "and",
+      "start": 18.2,
+      "end": 18.32
+    },
+    {
+      "word": "token",
+      "start": 18.32,
+      "end": 18.8
+    },
+    {
+      "word": "before",
+      "start": 19.06,
+      "end": 19.4
+    },
+    {
+      "word": "it",
+      "start": 19.4,
+      "end": 19.49
+    },
+    {
+      "word": "writes",
+      "start": 19.49,
+      "end": 19.79
+    },
+    {
+      "word": "an",
+      "start": 19.79,
+      "end": 19.87
+    },
+    {
+      "word": "effect",
+      "start": 19.87,
+      "end": 20.3
+    }
+  ]
+}

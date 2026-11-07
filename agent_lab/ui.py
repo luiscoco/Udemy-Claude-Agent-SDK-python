@@ -25,9 +25,12 @@ from agent_lab.lesson46_audio import clip_for_section as clip_for_cache_section
 from agent_lab.lesson47_audio import clip_for_section as clip_for_orchestra_section
 from agent_lab.lesson48_audio import clip_for_section as clip_for_hardening_section
 from agent_lab.lesson49_audio import clip_for_section as clip_for_headless_section
+from agent_lab.lesson50_audio import clip_for_section as clip_for_desk_section
+from agent_lab.lesson51_audio import clip_for_section as clip_for_offline_section
 from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
 from agent_lab.models import Event, LessonError, RunRequest
 from agent_lab.my_learning import workspace_url
+from agent_lab.nicegui_storage import install_windows_storage_retry
 from agent_lab.output import OutputState, render_output
 from agent_lab.policy import redact
 from agent_lab.publishing_studio import PublishingService
@@ -69,6 +72,7 @@ def storage_secret(runner: RunService) -> str:
 
 
 def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) -> None:
+    install_windows_storage_retry()
     if (ROOT / "public").is_dir():
         nice_app.add_static_files("/assets", str(ROOT / "public"))
     install_coach_page(CoachService(runner.settings))
@@ -150,6 +154,14 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 from agent_lab.headless_lab import local_action
 
                 source = inspect.getsource(local_action)
+            if lesson == 50:
+                from agent_lab.desk_lab import local_chat
+
+                source = inspect.getsource(local_chat)
+            if lesson == 51:
+                from agent_lab.offline_lab import run_suite
+
+                source = inspect.getsource(run_suite)
             if lesson == 48:
                 from agent_lab.hardening_lab import local_action
 
@@ -158,7 +170,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 from agent_lab.orchestra_lab import local_action
 
                 source = inspect.getsource(local_action)
-            lesson_header(lesson, runner.settings.enable_live)
+            lesson_header(lesson, runner.settings.enable_live and lesson != 51)
             with ui.row().classes(
                 "w-full items-center gap-3 guide-lesson-actions"
             ) as lesson_actions:
@@ -194,7 +206,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 49:
+                        if 2 <= lesson <= 51:
                             for section_index, section in enumerate(source_sections(lesson)):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
@@ -204,7 +216,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     ).classes("font-semibold")
                                     ui.code(section["code"], language="python").classes("w-full")
                                     ui.label(section["question"]).classes("font-semibold")
-                                    if lesson in {35, 43, 44, 45, 46, 47, 48, 49}:
+                                    if lesson in {35, 43, 44, 45, 46, 47, 48, 49, 50, 51}:
                                         reader = (clip_for_section if lesson == 35 else
                                                   clip_for_remote_section if lesson == 43 else
                                                   clip_for_telemetry_section if lesson == 44 else
@@ -212,7 +224,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                                   clip_for_cache_section if lesson == 46 else
                                                   clip_for_orchestra_section if lesson == 47 else
                                                   clip_for_hardening_section if lesson == 48 else
-                                                  clip_for_headless_section)
+                                                  clip_for_headless_section if lesson == 49 else
+                                                  clip_for_desk_section if lesson == 50 else
+                                                  clip_for_offline_section)
                                         clip = reader(section_index, section["path"], section["start"], section["end"])
                                         if clip:
                                             ui.audio(clip).classes("w-full")
@@ -227,9 +241,9 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 with ui.tab_panel(tutor_tab).classes("p-0 flex flex-col gap-5"):
                     tutor_panel(lesson, tutor, exercise_context(current.exercise))
                 with ui.tab_panel(run_tab).classes("p-0 flex flex-col gap-5"):
-                    with ui.card().classes("course-card w-full p-6"):
+                    with ui.card().classes("course-card w-full p-6") as run_card:
                         modes = {"offline": "Offline Python exercise"}
-                        if runner.settings.enable_live:
+                        if runner.settings.enable_live and lesson != 51:
                             modes["live"] = "Live Agent SDK"
                         mode = ui.toggle(modes, value="offline")
                         # Empty means "use the example": live runs fall back to the lesson
@@ -382,7 +396,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                 ui.label("These controls target this page's active run only. End input drains the queue; Cancel aborts. Acknowledgement is separate from model behavior or permission effects.").classes("text-sm text-slate-600")
                                 for button in stream_buttons:
                                     button.disable()
-                    with ui.card().classes("course-card w-full p-6 guide-evidence-context"):
+                    with ui.card().classes("course-card w-full p-6 guide-evidence-context") as generic_evidence_card:
                         evidence_view = ui.column().classes(
                             "w-full gap-3 guide-evidence-target guide-scroll-target"
                         )
@@ -739,6 +753,19 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         cancel_button.on_click(cancel)
                         client.on_disconnect(cancel)
 
+                    if lesson == 50:
+                        from agent_lab.ui_desk import desk_panel
+
+                        run_card.set_visibility(False)
+                        generic_evidence_card.set_visibility(False)
+                        desk_panel(application, runner.settings)
+                    if lesson == 51:
+                        from agent_lab.ui_offline import offline_panel
+
+                        run_card.set_visibility(False)
+                        generic_evidence_card.set_visibility(False)
+                        offline_panel(application)
+
                     saved_check = record(lesson)["check"]
                     check_result = CheckResult(**saved_check) if saved_check else None
 
@@ -746,7 +773,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                     def checks() -> None:
                         check_card(lesson, check_result)
 
-                    checks()
+                    if lesson not in {50, 51}:
+                        checks()
 
                     def record_check(status_value: str) -> None:
                         nonlocal check_result

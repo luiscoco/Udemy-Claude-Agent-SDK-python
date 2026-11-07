@@ -1,0 +1,41 @@
+{
+  "success": [
+    {"type":"init","session":"owned"},
+    {"type":"delta","text":"Inspecting the owned order."},
+    {"type":"tool-call","id":"call-1","name":"lookup_order","input":{"orderId":"order-ada"}},
+    {"type":"tool-result","id":"call-1","ok":true},
+    {"type":"result","session":"owned","success":true,"cost":0.01}
+  ],
+  "budget": [
+    {"type":"init","session":"owned"},
+    {"type":"result","session":"owned","success":true,"cost":0.05}
+  ],
+  "api-error": [
+    {"type":"init","session":"owned"},
+    {"type":"throw","marker":"synthetic-api-error"}
+  ],
+  "invalid": [
+    {"type":"init","session":"owned"},
+    {"type":"result","session":"foreign","success":true,"cost":0.01}
+  ],
+  "truncated": [
+    {"type":"init","session":"owned"},
+    {"type":"delta","text":"An unfinished synthetic response."}
+  ],
+  "malformed-tool": [
+    {"type":"init","session":"owned"},
+    {"type":"tool-call","id":"call-1","name":"lookup_order","input":{"orderId":17}},
+    {"type":"result","session":"owned","success":true,"cost":0.01}
+  ],
+  "foreign-result": [
+    {"type":"init","session":"owned"},
+    {"type":"tool-call","id":"call-1","name":"lookup_order","input":{"orderId":"order-ada"}},
+    {"type":"tool-result","id":"foreign","ok":true},
+    {"type":"result","session":"owned","success":true,"cost":0.01}
+  ],
+  "duplicate-terminal": [
+    {"type":"init","session":"owned"},
+    {"type":"result","session":"owned","success":true,"cost":0.01},
+    {"type":"result","session":"owned","success":true,"cost":0.01}
+  ]
+}

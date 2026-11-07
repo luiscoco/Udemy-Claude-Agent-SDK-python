@@ -46,11 +46,13 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     from agent_lab.api_client_lifecycle import install_client_lifecycle_routes
     from agent_lab.api_cloud import install_cloud_routes
     from agent_lab.api_config_root import install_config_root_routes
+    from agent_lab.api_desk import install_desk_routes
     from agent_lab.api_drops import install_drops_routes
     from agent_lab.api_gate import install_gate_routes
-    from agent_lab.api_orchestra import install_orchestra_routes
     from agent_lab.api_hardening import install_hardening_routes
     from agent_lab.api_headless import install_headless_routes
+    from agent_lab.api_offline import install_offline_routes
+    from agent_lab.api_orchestra import install_orchestra_routes
     from agent_lab.api_remote_mcp import install_remote_mcp_routes
     from agent_lab.api_spawn import install_spawn_routes
     from agent_lab.api_store import install_store_routes
@@ -95,6 +97,8 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     install_orchestra_routes(app, runner)
     install_hardening_routes(app, runner)
     install_headless_routes(app, runner)
+    install_desk_routes(app, runner)
+    install_offline_routes(app, runner)
     install_drops_routes(app, runner)
     install_suggestion_routes(app, runner)
     tutor = app.state.tutor = TutorService(runner.settings)

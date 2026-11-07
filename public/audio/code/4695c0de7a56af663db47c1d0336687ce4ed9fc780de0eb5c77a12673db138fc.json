@@ -1,0 +1,272 @@
+{
+  "lesson": 51,
+  "section": "suite",
+  "duration": 21.456,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.12
+    },
+    {
+      "word": "suite",
+      "start": 0.12,
+      "end": 0.56
+    },
+    {
+      "word": "reserves",
+      "start": 0.56,
+      "end": 1
+    },
+    {
+      "word": "its",
+      "start": 1,
+      "end": 1.17
+    },
+    {
+      "word": "own",
+      "start": 1.17,
+      "end": 1.33
+    },
+    {
+      "word": "temporary",
+      "start": 1.33,
+      "end": 1.8
+    },
+    {
+      "word": "store",
+      "start": 1.8,
+      "end": 2.21
+    },
+    {
+      "word": "and",
+      "start": 2.65,
+      "end": 2.83
+    },
+    {
+      "word": "executes",
+      "start": 2.83,
+      "end": 3.35
+    },
+    {
+      "word": "the",
+      "start": 3.35,
+      "end": 3.43
+    },
+    {
+      "word": "fixed",
+      "start": 3.43,
+      "end": 3.8
+    },
+    {
+      "word": "manifest",
+      "start": 3.8,
+      "end": 4.43
+    },
+    {
+      "word": "sequentially",
+      "start": 4.46,
+      "end": 5.23
+    },
+    {
+      "word": "Each",
+      "start": 5.58,
+      "end": 5.92
+    },
+    {
+      "word": "case",
+      "start": 5.92,
+      "end": 6.29
+    },
+    {
+      "word": "calls",
+      "start": 6.29,
+      "end": 6.61
+    },
+    {
+      "word": "the",
+      "start": 6.61,
+      "end": 6.71
+    },
+    {
+      "word": "real",
+      "start": 6.71,
+      "end": 6.98
+    },
+    {
+      "word": "host",
+      "start": 6.98,
+      "end": 7.32
+    },
+    {
+      "word": "contract",
+      "start": 7.32,
+      "end": 7.92
+    },
+    {
+      "word": "and",
+      "start": 8.2,
+      "end": 8.41
+    },
+    {
+      "word": "returns",
+      "start": 8.41,
+      "end": 8.82
+    },
+    {
+      "word": "an",
+      "start": 8.82,
+      "end": 8.91
+    },
+    {
+      "word": "assertion",
+      "start": 8.91,
+      "end": 9.37
+    },
+    {
+      "word": "row",
+      "start": 9.37,
+      "end": 9.63
+    },
+    {
+      "word": "The",
+      "start": 10.04,
+      "end": 10.18
+    },
+    {
+      "word": "complete",
+      "start": 10.18,
+      "end": 10.61
+    },
+    {
+      "word": "report",
+      "start": 10.61,
+      "end": 10.97
+    },
+    {
+      "word": "requires",
+      "start": 10.97,
+      "end": 11.55
+    },
+    {
+      "word": "every",
+      "start": 11.58,
+      "end": 11.88
+    },
+    {
+      "word": "case",
+      "start": 11.88,
+      "end": 12.39
+    },
+    {
+      "word": "every",
+      "start": 12.64,
+      "end": 12.95
+    },
+    {
+      "word": "passing",
+      "start": 12.95,
+      "end": 13.31
+    },
+    {
+      "word": "observation",
+      "start": 13.31,
+      "end": 13.97
+    },
+    {
+      "word": "zero",
+      "start": 14.43,
+      "end": 14.78
+    },
+    {
+      "word": "model",
+      "start": 14.78,
+      "end": 15.1
+    },
+    {
+      "word": "calls",
+      "start": 15.1,
+      "end": 15.59
+    },
+    {
+      "word": "and",
+      "start": 15.62,
+      "end": 15.8
+    },
+    {
+      "word": "owned",
+      "start": 15.8,
+      "end": 16.02
+    },
+    {
+      "word": "cleanup",
+      "start": 16.02,
+      "end": 16.41
+    },
+    {
+      "word": "A",
+      "start": 16.86,
+      "end": 16.96
+    },
+    {
+      "word": "filtered",
+      "start": 16.96,
+      "end": 17.42
+    },
+    {
+      "word": "group",
+      "start": 17.42,
+      "end": 17.69
+    },
+    {
+      "word": "is",
+      "start": 17.69,
+      "end": 17.84
+    },
+    {
+      "word": "useful",
+      "start": 17.84,
+      "end": 18.19
+    },
+    {
+      "word": "for",
+      "start": 18.19,
+      "end": 18.34
+    },
+    {
+      "word": "diagnosis",
+      "start": 18.34,
+      "end": 19.17
+    },
+    {
+      "word": "but",
+      "start": 19.5,
+      "end": 19.74
+    },
+    {
+      "word": "cannot",
+      "start": 19.74,
+      "end": 20.12
+    },
+    {
+      "word": "earn",
+      "start": 20.12,
+      "end": 20.32
+    },
+    {
+      "word": "the",
+      "start": 20.32,
+      "end": 20.4
+    },
+    {
+      "word": "complete",
+      "start": 20.4,
+      "end": 20.8
+    },
+    {
+      "word": "check",
+      "start": 20.8,
+      "end": 21.18
+    }
+  ]
+}

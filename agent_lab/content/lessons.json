@@ -9944,244 +9944,409 @@
   {
     "id": 50,
     "prerequisites": [
-      4,
-      5
+      15,
+      28,
+      49
     ],
-    "concept_brief": "A support agent's tools act for the signed-in customer chosen by the host session, never for a customer named in tool arguments. Money-moving actions need an approval bound to the exact action, single use and time limited.",
-    "lab_brief": "The `support` exercise lists orders for the host-selected customer, proposes a refund and drives an `Approval` through refusal without approval, a wrong credential, staff approval, a mismatched amount and finally the single approved refund.",
+    "concept_brief": "A full support desk connects conversation, scoped tools, durable records, one-shot approval and CRM closure. The host chooses the synthetic customer, admits exact tool calls and owns every effect. Each ticket or refund turn must read current orders first. A resumed native SDK session keeps conversation context; a restricted fork produces the CRM record. Passing evidence joins native call/result IDs with saved host effects.",
+    "lab_brief": "Use Ada or Bo classroom records. Inspect orders, resume the same conversation to create a ticket, then try a denied and an approved 1000-cent refund. Close the conversation into strict CRM data and run local evaluations. The browser and /api/c50 routes share persisted synthetic data. Live mode requires explicit consent for each paid SDK action; offline mode is an authored lifecycle with real local effects.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 50 (or run `uv run agent-lab lesson 50`).",
-      "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live support profile proposes refunds without executing them."
+      "Read the synthetic customer and order fixtures; no real identity or payment account is connected.",
+      "Start with Local mode and inspect the separate orders, tickets, refunds and audit evidence. Enable live access and confirm each paid action only when ready."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Gate a refund behind an approval tied to the exact action."
+        "text": "Trace a customer-bound conversation from order read through close and distinguish proposals from host-owned effects."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `support` and the `Approval` class in `agent_lab/services.py`."
+        "text": "Choose Ada or Bo, Local or Live, an intent and a message. Select an open saved conversation to resume it."
       },
       {
         "title": "Run one example",
-        "text": "Run the offline exercise."
+        "text": "Send Orders. Resume it for Ticket and Refund; deny one proposal, approve another, then close to CRM."
       },
       {
         "title": "Verify the evidence",
-        "text": "Follow `approval_steps` from refusal to the consumed approval."
+        "text": "Inspect exact matched call IDs, persisted ticket/refund/audit rows, approval outcome, stable transcript and closed CRM record."
       },
       {
         "title": "Try the challenge",
-        "text": "Expire the approval and see the refund refused."
+        "text": "Run Missing evidence, Foreign call or Failed locally; the host must withhold the success verdict even if a tool effect happened."
       }
     ],
-    "inspect": "`customer`, `visible_orders`, the `proposal`, each row of `approval_steps`, `refunds_executed` and `final_state`.",
-    "expected": "Only alice's order A-001 is visible. The steps read: `Approval is not usable.`, `Invalid approval credential.`, `approved`, `Approval belongs to a different action.`, `consumed`. `refunds_executed` is 1.",
-    "evidence_criterion": "The check confirms exactly one refund ran, after approval, and the approval was consumed.",
+    "inspect": "Check `calls`, `results`, `snapshot`, `refunds_before`, `pending_after`, `experiment_passed` and the CRM close report. Live reports also contain native init, assistant tool calls, tool results, terminal and cost delta.",
+    "expected": "Orders reads Ada's order only. Ticket saves exactly one ticket after a fresh orders read. Denied refund adds an audit denial and no refund row. Approved refund adds exactly one 1000-cent row. CRM close stores structured data without editing the transcript.",
+    "evidence_criterion": "The selected operation has successful matched tool evidence and the corresponding scoped host effects. A denied refund passes only as an explicit denied outcome with no refund effect.",
     "evidence_checks": [
       {
-        "key": "final_state",
+        "key": "experiment_passed",
         "rule": "equals",
-        "value": "consumed"
-      },
-      {
-        "key": "refunds_executed",
-        "rule": "equals",
-        "value": 1
-      },
-      {
-        "key": "approval_steps",
-        "rule": "truthy"
+        "value": true
       }
     ],
-    "challenge": "Create the approval with `Approval(proposal, ttl=0)` and run again: the staff step now fails with `Approval is expired.` Restore the default afterwards.",
+    "challenge": "Choose Foreign call in Local mode after an orders operation. The evaluator must reject a result whose call ID is not the admitted ID; inspect the persisted audit separately from the intentionally corrupted report.",
     "hints": [
-      "`decide` checks the clock against `created + ttl` before approving.",
-      "With ttl 0 the approval is already expired when staff decide, so `decide` raises `ValueError: Approval is expired.` and no refund can run."
+      "The selected ticket or refund tool needs a successful orders result in the same operation.",
+      "One-shot approval binds run, conversation, call and token; denial and cancellation clear pending state."
     ],
-    "reference": "The host binds identity and authority: the customer comes from the session, the refund needs a secret approval token, and the approval's fingerprint matches only the exact proposed action. Consuming it makes it single use.",
+    "reference": "The host loads only the selected customer's records, admits a fresh orders call, checks the selected tool's exact arguments and ID, and writes scoped effects. Refund authorization is a one-shot exact decision. Native session evidence and the persisted ledger are checked separately; the CRM fork has no desk tools.",
     "recovery": [
-      "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-      "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+      "If a support operation needs review, inspect the first failed call and the saved audit. A negative local scenario is expected to fail its success criterion.",
+      "If live access fails, check the private provider key and LAB_ENABLE_LIVE, restart the app, and use Local mode while resolving the connection. Each live action requires fresh consent."
     ],
     "quiz": [
       {
-        "prompt": "Where should a support tool get the customer identity?",
+        "prompt": "Who chooses the customer scope for a desk tool?",
         "options": [
           {
-            "text": "From the host session, never from tool arguments.",
-            "explanation": "Correct. The model must not choose whose data it acts on."
+            "text": "The host session selects Ada or Bo before the tool call.",
+            "explanation": "Correct. Model text cannot grant a different customer's scope."
           },
           {
-            "text": "From the customer name the model writes.",
-            "explanation": "Model text can be wrong or manipulated."
+            "text": "The model supplies a customerId in each call.",
+            "explanation": "No. Model text cannot grant a different customer's scope."
           },
           {
-            "text": "From the most recent order in the database.",
-            "explanation": "That would act for an arbitrary customer."
+            "text": "The customer's message supplies the id.",
+            "explanation": "No. Model text cannot grant a different customer's scope."
           }
         ],
         "correct": 0
       },
       {
-        "prompt": "Why bind an approval to a fingerprint of the action?",
+        "prompt": "Why read orders again on a resumed ticket turn?",
         "options": [
           {
-            "text": "To make approvals faster.",
-            "explanation": "Speed is not the purpose."
+            "text": "The ticket operation needs current orders evidence of its own.",
+            "explanation": "Correct. The host admits the selected write only after a fresh successful read."
           },
           {
-            "text": "So it cannot authorize a different amount or order.",
-            "explanation": "Correct. Approval of one refund is not approval of another."
+            "text": "The old orders result is deleted.",
+            "explanation": "No. The host admits the selected write only after a fresh successful read."
           },
           {
-            "text": "Because the SDK requires it.",
-            "explanation": "This is host design, not an SDK requirement."
+            "text": "The CRM fork needs an order list.",
+            "explanation": "No. The host admits the selected write only after a fresh successful read."
           }
         ],
-        "correct": 1
+        "correct": 0
+      },
+      {
+        "prompt": "What makes refund approval one use?",
+        "options": [
+          {
+            "text": "The decision is bound to the exact pending call and consumed.",
+            "explanation": "Correct. Run, conversation, call and token must match before settlement."
+          },
+          {
+            "text": "A general approve flag stays set on the account.",
+            "explanation": "No. Run, conversation, call and token must match before settlement."
+          },
+          {
+            "text": "The model says a staff member approved it.",
+            "explanation": "No. Run, conversation, call and token must match before settlement."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What should a denied refund change?",
+        "options": [
+          {
+            "text": "An audit denial, with no refund row.",
+            "explanation": "Correct. The host records the refusal while leaving the ledger untouched."
+          },
+          {
+            "text": "A refund row marked pending.",
+            "explanation": "No. The host records the refusal while leaving the ledger untouched."
+          },
+          {
+            "text": "The customer's order total.",
+            "explanation": "No. The host records the refusal while leaving the ledger untouched."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why compare native call and result IDs?",
+        "options": [
+          {
+            "text": "It ties provider-backed tool evidence to the host effect.",
+            "explanation": "Correct. A report needs both a matched SDK lifecycle and saved host facts."
+          },
+          {
+            "text": "It proves the answer text sounds helpful.",
+            "explanation": "No. A report needs both a matched SDK lifecycle and saved host facts."
+          },
+          {
+            "text": "It replaces persisted audit checks.",
+            "explanation": "No. A report needs both a matched SDK lifecycle and saved host facts."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What can the restricted CRM fork do?",
+        "options": [
+          {
+            "text": "Return schema-constrained CRM data without desk tools.",
+            "explanation": "Correct. Closure stores the validated record while preserving the transcript."
+          },
+          {
+            "text": "Issue another refund during close.",
+            "explanation": "No. Closure stores the validated record while preserving the transcript."
+          },
+          {
+            "text": "Rewrite prior customer messages.",
+            "explanation": "No. Closure stores the validated record while preserving the transcript."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why does a Foreign call local case need review?",
+        "options": [
+          {
+            "text": "Its result ID differs from the admitted call ID.",
+            "explanation": "Correct. A local effect by itself does not prove the selected operation's evidence."
+          },
+          {
+            "text": "It uses Bo instead of Ada automatically.",
+            "explanation": "No. A local effect by itself does not prove the selected operation's evidence."
+          },
+          {
+            "text": "It always times out.",
+            "explanation": "No. A local effect by itself does not prove the selected operation's evidence."
+          }
+        ],
+        "correct": 0
       }
     ],
-    "concept_code": "import time\nfrom dataclasses import dataclass\nfrom typing import Any\n\nfrom claude_agent_sdk import McpSdkServerConfig, create_sdk_mcp_server, tool\n\n\n@dataclass\nclass Approval:\n    customer_id: str\n    amount: float\n    expires_at: float\n\n\ndef support_server(\n    customer_id: str, approvals: dict[str, Approval]\n) -> McpSdkServerConfig:\n    @tool(\n        \"list_orders\", \"List the orders of the customer signed in to this session.\", {}\n    )\n    async def list_orders(args: dict[str, Any]) -> dict[str, Any]:\n        return {\n            \"content\": [{\"type\": \"text\", \"text\": f\"Orders for {customer_id}: A1 40.00\"}]\n        }\n\n    @tool(\n        \"refund\",\n        \"Refund an order that staff approved.\",\n        {\"order_id\": str, \"amount\": float},\n    )\n    async def refund(args: dict[str, Any]) -> dict[str, Any]:\n        a = approvals.get(args[\"order_id\"])\n        if (\n            a is None\n            or time.time() > a.expires_at\n            or (a.customer_id, a.amount) != (customer_id, args[\"amount\"])\n        ):\n            return {\n                \"content\": [\n                    {\"type\": \"text\", \"text\": \"No valid approval for this exact refund.\"}\n                ],\n                \"is_error\": True,\n            }\n        del approvals[args[\"order_id\"]]  # single use: the approval is consumed\n        return {\n            \"content\": [\n                {\n                    \"type\": \"text\",\n                    \"text\": f\"Refunded {a.amount:.2f} on {args['order_id']}.\",\n                }\n            ]\n        }\n\n    return create_sdk_mcp_server(\"support\", tools=[list_orders, refund])",
-    "code_focus": "`support_server` closes over the host's `customer_id`, so `list_orders` takes no customer argument, and refund only runs, and then deletes the approval, when an unexpired Approval for that order matches the customer and amount.",
+    "concept_code": "import uuid\n\nfrom agent_lab.desk_approver import DeskApprover\nfrom agent_lab.desk_lab import local_chat\nfrom agent_lab.desk_store import DeskStore\n\n\nasync def example(root):\n    store = DeskStore(root)\n    approver = DeskApprover()\n    orders = await local_chat(store, approver, customer='ada', intent='orders')\n    ticket = await local_chat(store, approver, customer='ada',\n                              conversation=uuid.UUID(orders['conversation']), intent='ticket')\n    return orders, ticket",
+    "code_focus": "`DeskStore` owns scoped persisted effects, `DeskApprover` settles one exact pending refund, and `local_chat` admits a fresh orders call before the selected ticket or refund. The native path uses the same host operation and evaluator.",
     "concept_points": [
       {
-        "title": "Identity from the session",
-        "text": "The tools capture `customer_id` from the signed-in session, so the model cannot ask about another customer's orders."
+        "title": "Scope every operation",
+        "text": "The host-selected Ada or Bo scope determines which orders and conversation a tool can touch."
       },
       {
-        "title": "Approval bound to an action",
-        "text": "An approval covers one customer, order and amount, expires, and is deleted after one refund."
+        "title": "Own each effect",
+        "text": "Tool calls enter a host admission path; tickets and refunds are written to a persisted ledger with audit rows."
       },
       {
-        "title": "Refusals the model can read",
-        "text": "A missing or mismatched approval returns `is_error` with a clear reason instead of moving money."
+        "title": "Join evidence before success",
+        "text": "Success requires exact call/result pairs and saved effects. A CRM fork closes a conversation with validated structured data."
       }
     ],
     "misconception": {
-      "claim": "Adding a `customer_id` parameter to the tool is fine as long as the system prompt says to use the current user's id.",
-      "correction": "The model fills tool arguments, and injected text can change them. Identity must come from the host session that the tool closes over, not from arguments."
+      "claim": "A helpful final answer proves a refund was safely completed.",
+      "correction": "The host checks the approval decision, exact tool call and persisted refund row. Assistant text is only part of the conversation."
     }
   },
   {
     "id": 51,
     "prerequisites": [
-      1
+      1,
+      5,
+      7
     ],
-    "concept_brief": "Host code that consumes SDK messages can be unit-tested by feeding it a fake async generator of real `AssistantMessage`, `TextBlock` and `ResultMessage` objects from `claude_agent_sdk`. The test then checks your parsing logic without starting the CLI or calling Claude.",
-    "lab_brief": "The `testing` exercise (shared with lesson 1) yields one recorded `AssistantMessage` and one `ResultMessage`, then collects text and result fields with `isinstance` checks. The `source` field states that no SDK process was started, so the test cannot be confused with a model run.",
+    "concept_brief": "Unit tests can exercise agent host policy without calling a model. Lesson 51 injects fixed synthetic SDK-style envelopes into a real Python host consumer, then checks identity, tool correlation, scoped effects, budget, terminal state and cleanup. The complete 16-case suite is the graded criterion; filtered groups, mutation and individual replay are separate observations. Synthetic cost is never billed cost.",
+    "lab_brief": "Run all 16 offline host assertions, inspect each returned case row and verify modelCalls=0 and actualBilledUsd=0. Then enable the mutation challenge: only denial-policy changes its observed code from 12 to 0, so exactly one unchanged assertion fails. Restore the normal suite. Replay success, budget, API error, invalid session, truncated stream and malformed tool fixtures through the real host consumer. The standalone command installs a controlled Python network guard before loading host suite modules.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 51 (or run `uv run agent-lab lesson 51` in a terminal).",
-      "Optional: run `uv run pytest` to see the repo's own offline tests pass without an API key.",
-      "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+      "Read the fixed synthetic stream fixture and distinguish it from native SDK wire messages.",
+      "Start the local app or run `uv run python scripts/offline_host.py`; no API key, live selector or provider credit is needed."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Learn to test message-handling code with a fake async source while being honest that no model ran."
+        "text": "Test actual host contracts with injected deterministic input while making zero model calls."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `message_exercise` in `agent_lab/exercises.py` and find `recorded_messages` and the `async for` loop."
+        "text": "Choose All 16 assertions and leave the mutation challenge unchecked."
       },
       {
         "title": "Run one example",
-        "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+        "text": "Run the offline suite, then replay the success and budget fixtures through the host consumer."
       },
       {
         "title": "Verify the evidence",
-        "text": "Confirm that `source` says no SDK process was started, `text` contains 'Recorded test text' and `results` shows a cost of 0."
+        "text": "Inspect 16 ordered assertion rows, 16/16 summary, zero model/network calls, matched tool result and closed fake query."
       },
       {
         "title": "Try the challenge",
-        "text": "Write a small pytest of your own that feeds a fake stream to the same kind of loop and asserts what it collects."
+        "text": "Enable the denial-policy mutation, explain its one failing assertion, then turn it off and rerun the normal suite."
       }
     ],
-    "inspect": "`source`, the `text` list and the `results` table. The panel hides `session_id` columns; the terminal output of `uv run agent-lab lesson 51` shows `offline-fixture`.",
-    "expected": "`source` is 'recorded unit-test fixture; no SDK process was started', `text` is ['Recorded test text'] and `results` has one row with cost 0 (`session_id` `offline-fixture` in the raw output).",
-    "evidence_criterion": "The check confirms that the result is labelled as a recorded fixture and that both text and a final result were collected from the fake stream.",
+    "inspect": "Compare `assertions`, `summary`, `modelCalls`, `actualBilledUsd`, `cleanup`, `experiment_passed` and replay `fixture`, `handler`, `terminalCount`, `simulatedCostUsd`, `closed`. The replay stream is synthetic; the scoped handler is real host code.",
+    "expected": "All normal cases pass in manifest order, with 16/16, zero model calls, zero actual billing and owned cleanup. Contracts/Store/Replay groups show 6/2/8 passing assertions but do not earn complete-suite credit. Mutation shows 15/16 with only denial-policy failing. Six public replays produce success, budget, api-error, invalid, truncated and invalid-tool; no replay earns suite credit.",
+    "evidence_criterion": "The complete, unmodified offline test suite finished with every case passing and zero model API calls. This does not grade the separate mutation challenge.",
     "evidence_checks": [
       {
-        "key": "source",
+        "key": "experiment_passed",
         "rule": "equals",
-        "value": "recorded unit-test fixture; no SDK process was started"
-      },
-      {
-        "key": "text",
-        "rule": "truthy"
-      },
-      {
-        "key": "results",
-        "rule": "truthy"
+        "value": true
       }
     ],
-    "challenge": "Create tests/test_fake_stream.py with an async generator that yields two `AssistantMessage(content=[TextBlock(text=...)], model='fixture')` objects, collect the text the same way, and assert you get both strings. Run it with `uv run pytest tests/test_fake_stream.py`, using `asyncio.run` inside a normal test function.",
+    "challenge": "Run with the mutation checkbox selected. `denial-policy` still expects host code 12 but observes 0; the single failure is intentional. Restore mutation off and confirm 16/16 again. In a shell, `uv run python scripts/offline_host.py --mutation` exits 1 while the normal command exits 0.",
     "hints": [
-      "Use the real SDK classes so your isinstance checks are tested exactly as in production.",
-      "A `ResultMessage` needs `subtype`, `duration_ms`, `duration_api_ms`, `is_error`, `num_turns` and `session_id`; copy the fixture in `message_exercise`. Keep test fixtures labelled so nobody reads them as live output."
+      "The mutation changes only the observed denial code inside one test case; the expected assertion remains 12.",
+      "Inspect the `denial-policy` row: the unchanged host policy returns 12 for a permission denial, while the deliberately substituted policy returns 0. A separate normal rerun must still pass."
     ],
-    "reference": "The fake generator yields the same message types the SDK would, so the loop's text and result handling is exercised exactly. Nothing is sent to Claude, and the evidence says so in `source`. This kind of test is fast, free and deterministic, which makes it suitable for CI, while live behaviour is checked separately.",
+    "reference": "The normal host suite calls real strict input, exit mapping, approval and scoped store contracts, then feeds fixed fake-query envelopes to the real host consumer. It counts returned results, checks terminal and call IDs, closes the query and reports zero model calls. The mutation replaces only the denial observation, so its one failure teaches why weakening an expectation is not a fix. Replay costs are simulated values, not API spend.",
     "recovery": [
-      "If your own test fails to import, run it with `uv run pytest` from the repo root so `claude_agent_sdk` and `agent_lab` come from the project environment; check the required `ResultMessage` fields if construction fails.",
-      "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+      "If an offline assertion fails unexpectedly, inspect its bounded detail and the real host contract it called; run the standalone command to separate browser behavior from host behavior.",
+      "If a replay needs review, inspect its synthetic fixture, status and cleanup. Invalid input is rejected before work. There is no live fallback for this lesson."
     ],
     "quiz": [
       {
-        "prompt": "What does this exercise prove?",
+        "prompt": "What does the complete offline suite establish?",
         "options": [
           {
-            "text": "That Claude answered 'Recorded test text'.",
-            "explanation": "No model ran; the text is a recorded fixture."
+            "text": "The host contracts passed deterministic tests with zero model calls.",
+            "explanation": "Correct. An injected stream tests host logic, not model choices."
           },
           {
-            "text": "That the host loop correctly separates assistant text from the final result.",
-            "explanation": "Correct. The fake stream tests your parsing logic, not the model."
+            "text": "Claude would choose the same tools in a live conversation.",
+            "explanation": "No. An injected stream tests host logic, not model choices."
           },
           {
-            "text": "That the CLI process starts correctly.",
-            "explanation": "No SDK process was started, as `source` states."
+            "text": "The synthetic fixture is raw SDK wire compatibility.",
+            "explanation": "No. An injected stream tests host logic, not model choices."
           }
         ],
-        "correct": 1
+        "correct": 0
       },
       {
-        "prompt": "Why build the fake stream from real `claude_agent_sdk` classes instead of plain dicts?",
+        "prompt": "How should the budget replay's 0.05 USD be labeled?",
         "options": [
           {
-            "text": "The `isinstance(message, AssistantMessage)` checks in host code then behave exactly as in production.",
-            "explanation": "Correct. Real types keep the test faithful to the code path that runs live."
+            "text": "Simulated cost; actual billed cost is zero.",
+            "explanation": "Correct. The fixture value triggers a host budget status without billing."
           },
           {
-            "text": "Plain dicts would call the API.",
-            "explanation": "Dicts call nothing; they simply would not match the isinstance checks."
+            "text": "A real provider invoice.",
+            "explanation": "No. The fixture value triggers a host budget status without billing."
           },
           {
-            "text": "The SDK refuses to import without them.",
-            "explanation": "The import works either way; the reason is test fidelity."
+            "text": "A discounted live model call.",
+            "explanation": "No. The fixture value triggers a host budget status without billing."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why does foreign-result fail?",
+        "options": [
+          {
+            "text": "Its tool-result ID differs from the admitted tool-call ID.",
+            "explanation": "Correct. The host joins exact call and result identities."
+          },
+          {
+            "text": "Its answer text is too short.",
+            "explanation": "No. The host joins exact call and result identities."
+          },
+          {
+            "text": "It uses the wrong visual guide.",
+            "explanation": "No. The host joins exact call and result identities."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What happens when a stream ends without a terminal?",
+        "options": [
+          {
+            "text": "The host reports truncated and closes the fake query.",
+            "explanation": "Correct. A terminal is required evidence; prose is insufficient."
+          },
+          {
+            "text": "The last text delta counts as success.",
+            "explanation": "No. A terminal is required evidence; prose is insufficient."
+          },
+          {
+            "text": "The host invents a zero-cost terminal.",
+            "explanation": "No. A terminal is required evidence; prose is insufficient."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why does the mutation challenge show one failure?",
+        "options": [
+          {
+            "text": "It substitutes denial code 0 while the assertion still expects 12.",
+            "explanation": "Correct. Only the denial-policy observation is deliberately changed."
+          },
+          {
+            "text": "The model refused the request.",
+            "explanation": "No. Only the denial-policy observation is deliberately changed."
+          },
+          {
+            "text": "All 16 expectations were weakened.",
+            "explanation": "No. Only the denial-policy observation is deliberately changed."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Which path can earn the automatic check?",
+        "options": [
+          {
+            "text": "The unmodified All group with 16 matched passing assertions and zero calls.",
+            "explanation": "Correct. The exact complete suite, summary and owned cleanup are required."
+          },
+          {
+            "text": "Any filtered group with all selected cases passing.",
+            "explanation": "No. The exact complete suite, summary and owned cleanup are required."
+          },
+          {
+            "text": "One successful synthetic replay.",
+            "explanation": "No. The exact complete suite, summary and owned cleanup are required."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does the host-handler observation in the concept map represent?",
+        "options": [
+          {
+            "text": "A real scoped DeskStore snapshot for Ada's owned order.",
+            "explanation": "Correct. The fixture drives the call but the host lookup uses the actual store contract."
+          },
+          {
+            "text": "A native Claude tool choice.",
+            "explanation": "No. The fixture drives the call but the host lookup uses the actual store contract."
+          },
+          {
+            "text": "A paid refund processor.",
+            "explanation": "No. The fixture drives the call but the host lookup uses the actual store contract."
           }
         ],
         "correct": 0
       }
     ],
-    "concept_code": "from collections.abc import AsyncIterator\n\nfrom claude_agent_sdk import AssistantMessage, Message, ResultMessage, TextBlock\n\n\nasync def collect(messages: AsyncIterator[Message]) -> tuple[str, float | None]:\n    text: list[str] = []\n    cost: float | None = None\n    async for message in messages:\n        if isinstance(message, AssistantMessage):\n            text += [\n                block.text for block in message.content if isinstance(block, TextBlock)\n            ]\n        elif isinstance(message, ResultMessage):\n            cost = message.total_cost_usd\n    return \"\".join(text), cost\n\n\nasync def fake_run() -> AsyncIterator[Message]:\n    yield AssistantMessage(\n        content=[TextBlock(text=\"Refunds take 5 days.\")], model=\"fixture\"\n    )\n    yield ResultMessage(\n        subtype=\"success\",\n        duration_ms=0,\n        duration_api_ms=0,\n        is_error=False,\n        num_turns=1,\n        session_id=\"fixture\",\n        total_cost_usd=0.0,\n    )\n\n\nasync def test_collect_reads_text_and_cost() -> None:\n    # The fixture stands in for query(): no CLI process starts and no API call is made.\n    assert await collect(fake_run()) == (\"Refunds take 5 days.\", 0.0)",
-    "code_focus": "collect() accepts any AsyncIterator[Message], so the test feeds it `fake_run()`, a generator of real AssistantMessage, TextBlock and ResultMessage objects, instead of query().",
+    "concept_code": "from agent_lab.offline_lab import FakeQuery, run_offline_host, run_suite\n\n\nasync def test_without_a_model(root):\n    complete = await run_suite(root, group='all', mutation=False)\n    assert complete['summary']['passed'] == 16\n    assert complete['modelCalls'] == 0\n    assert complete['experiment_passed'] is True\n\n    fake = FakeQuery('success')  # fixed synthetic envelopes\n    observed = await run_offline_host(root, 'success')\n    assert observed['handlerCount'] == 1\n    assert observed['matchedResult'] is True\n    assert observed['actualBilledUsd'] == 0",
+    "code_focus": "`run_suite` executes sixteen real host assertions in order, `FakeQuery` supplies fixed normalized envelopes and `run_offline_host` validates them while calling the real scoped store. `evaluate_suite` accepts only the complete unmodified 16/16/0 report.",
     "concept_points": [
       {
-        "title": "Depend on the stream type",
-        "text": "Write consumers against AsyncIterator[Message] so query() in production and a fixture in tests are interchangeable."
+        "title": "Inject deterministic input",
+        "text": "FakeQuery yields fixed envelopes. It is not a native SDK call and cannot prove model behavior."
       },
       {
-        "title": "Real SDK types",
-        "text": "The fixture builds genuine `claude_agent_sdk` dataclasses, so isinstance checks behave exactly as in a live run."
+        "title": "Assert real host outcomes",
+        "text": "Tests call the actual exit mapping, approver and scoped store, then verify tool IDs, terminal states and cleanup."
       },
       {
-        "title": "Honest about scope",
-        "text": "The test proves your parsing logic only; it says nothing about what the model would answer."
+        "title": "Keep grading exact",
+        "text": "Only the complete unmodified 16-case suite with zero model calls passes. Mutation and replay stay separate."
       }
     ],
     "misconception": {
-      "claim": "A test that passes with a fake message stream shows that the agent gives correct answers.",
-      "correction": "The fake stream only checks your host code. Answer quality needs evals against real model runs."
+      "claim": "A fake message stream proves the agent will behave the same way live.",
+      "correction": "It proves the host handles those injected inputs. Live model choices and native SDK wire behavior require separate validation, which this intentionally offline lesson does not perform."
     }
   },
   {

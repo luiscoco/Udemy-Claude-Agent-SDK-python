@@ -1,0 +1,10 @@
+{
+  "customers": [
+    {"id": "ada", "name": "Ada Example"},
+    {"id": "bo", "name": "Bo Example"}
+  ],
+  "orders": [
+    {"id": "order-ada", "customer": "ada", "paidCents": 2500},
+    {"id": "order-bo", "customer": "bo", "paidCents": 4000}
+  ]
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 450" role="img" aria-labelledby="t d">
+<title id="t">Lesson 51 lab walkthrough</title><desc id="d">Run the complete suite, inspect sixteen passing rows, run a single-failure mutation, restore the suite and replay six fixtures. Only the normal complete suite earns credit.</desc>
+<rect width="900" height="450" rx="24" fill="#f8fafc"/><text x="32" y="54" font-family="Arial" font-size="30" font-weight="bold" fill="#1e293b">Follow the offline evidence</text>
+<g font-family="Arial" font-size="22" fill="#1e293b">
+<rect x="32" y="85" width="836" height="62" rx="14" fill="#ddd6fe"/><text x="52" y="124">1   Run All 16, mutation off → 16/16 and zero calls</text>
+<rect x="32" y="156" width="836" height="62" rx="14" fill="#ccfbf1"/><text x="52" y="195">2   Inspect ordered rows, scoped lookup, terminal and cleanup</text>
+<rect x="32" y="227" width="836" height="62" rx="14" fill="#fef3c7"/><text x="52" y="266">3   Turn mutation on → denial-policy fails, 15/16</text>
+<rect x="32" y="298" width="836" height="62" rx="14" fill="#dbeafe"/><text x="52" y="337">4   Restore normal suite; replay six synthetic fixtures</text>
+<text x="32" y="411" font-size="20">Filtered groups and replay are observations; complete normal 16/16 earns credit.</text>
+</g></svg>

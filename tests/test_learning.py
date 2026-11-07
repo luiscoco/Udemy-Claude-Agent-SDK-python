@@ -1330,6 +1330,9 @@ def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server
                 page.set_viewport_size({"width": 390, "height": 844})
             page.get_by_label("Recorded scenario", exact=True).click()
             page.get_by_role("option", name=label, exact=True).click()
+            if lesson == 13:
+                expect(page.get_by_label("Recorded scenario", exact=True)).to_have_value(label)
+                page.wait_for_timeout(150)
             page.get_by_role("button", name="Run exercise", exact=True).click()
             expect(page.locator(".guide-evidence-target").get_by_text(scenario, exact=True).first).to_be_visible(timeout=20000)
             expect(page.get_by_text("Completed", exact=True)).to_be_visible(timeout=20000)
@@ -1346,8 +1349,10 @@ def test_browser_foundation_experiments_controls_scenarios_and_saved_work(server
         expect(question.locator(".feedback-ok")).to_be_visible()
         draft = f"Lesson {lesson}: correlate the actual operation and terminal evidence."
         page.get_by_label("Your explanation and evidence", exact=True).fill(draft)
+        page.get_by_label("Your explanation and evidence", exact=True).blur()
+        expect(page.get_by_label("Your explanation and evidence", exact=True)).to_have_value(draft)
         page.get_by_role("button", name="Save attempt", exact=True).click()
-        expect(page.get_by_text("1 saved attempts", exact=False)).to_be_visible()
+        expect(page.get_by_text("1 saved attempts", exact=False)).to_be_visible(timeout=20000)
         page.reload()
         expect(page.get_by_label("Your explanation and evidence", exact=True)).to_have_value(draft)
         expect(page.locator(".quiz-question").last.get_by_role("radio").nth(guide(lesson).quiz[-1].correct)).to_be_checked()
@@ -1666,6 +1671,8 @@ def test_browser_session_catalog_operations_and_pagination(server, guide_browser
             expect(page.get_by_text("Check passed", exact=True)).to_be_visible()
         page.get_by_label("Recorded scenario", exact=True).click()
         page.get_by_role("option", name="Missing SDK catalog observation", exact=True).click()
+        expect(page.get_by_label("Recorded scenario", exact=True)).to_have_value("Missing SDK catalog observation")
+        page.wait_for_timeout(150)
         page.get_by_role("button", name="Run exercise", exact=True).click()
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=15000)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
@@ -2336,12 +2343,14 @@ def test_browser_web_tools_actions_and_negative(server, guide_browser_context):
                        "Host URL guard", "Research lanes"):
             page.get_by_label("Web experiment", exact=True).click()
             page.get_by_role("option", name=action, exact=True).click()
+            expect(page.get_by_role("button", name="Run exercise", exact=True)).to_be_enabled(timeout=15000)
             page.get_by_role("button", name="Run exercise", exact=True).click()
             expect(page.get_by_text("Check passed", exact=True)).to_be_visible(timeout=15000)
         page.get_by_label("Web experiment", exact=True).click()
         page.get_by_role("option", name="Fetch one page", exact=True).click()
         page.get_by_label("Fixed fetch page", exact=True).click()
         page.get_by_role("option", name="Missing page", exact=True).click()
+        expect(page.get_by_role("button", name="Run exercise", exact=True)).to_be_enabled(timeout=15000)
         page.get_by_role("button", name="Run exercise", exact=True).click()
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=15000)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
@@ -2668,6 +2677,94 @@ def test_browser_remote_mcp_actions_and_negative(server, guide_browser_context):
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=25000)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=str(data / "remote-mcp-phone.png"))
+        assert not errors
+    finally:
+        context.close()
+
+
+def test_browser_lesson50_desk_lifecycle(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+            page = context.new_page()
+            errors = []
+            page.on("pageerror", lambda error: errors.append(str(error)))
+            page.goto(base + "/?lesson=50")
+            expect(page.locator(".quiz-question")).to_have_count(7)
+            page.get_by_role("tab", name="Python source", exact=True).click()
+            expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+            expect(page.locator("audio")).to_have_count(3)
+            page.get_by_role("tab", name="Run the exercise", exact=True).click()
+            desk = page.locator(".desk-lab")
+            expect(desk.get_by_text("Synthetic support desk", exact=True)).to_be_visible()
+            expect(page.get_by_text("Response and results", exact=True)).to_be_hidden()
+            desk.get_by_role("button", name="Send support request").click()
+            expect(desk.get_by_text("Passed", exact=True)).to_be_visible(timeout=15000)
+            desk.get_by_label("Intent", exact=True).click()
+            page.get_by_role("option", name="Ticket", exact=True).click()
+            desk.get_by_role("button", name="Send support request").click()
+            expect(desk.get_by_text("Tickets: 1", exact=True)).to_be_visible(timeout=15000)
+            desk.get_by_label("Intent", exact=True).click()
+            page.get_by_role("option", name="Refund", exact=True).click()
+            desk.get_by_role("button", name="Send support request").click()
+            expect(desk.get_by_role("button", name="Deny", exact=True)).to_be_visible(timeout=15000)
+            desk.get_by_role("button", name="Deny", exact=True).click()
+            expect(desk.get_by_text("Refunds: 0", exact=True)).to_be_visible(timeout=15000)
+            desk.get_by_role("button", name="Close to CRM", exact=True).click()
+            expect(desk.get_by_text("CRM closed", exact=True)).to_be_visible(timeout=15000)
+            desk.get_by_role("button", name="Local evaluations", exact=True).click()
+            expect(desk.get_by_text("Local evaluations passed", exact=True)).to_be_visible(timeout=15000)
+            page.reload()
+            page.get_by_role("tab", name="Run the exercise", exact=True).click()
+            expect(page.locator(".desk-lab").get_by_text("Tickets: 1", exact=True)).to_be_visible(timeout=15000)
+            page.wait_for_timeout(500)
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+            page.screenshot(path=str(data / "desk-lesson50-phone.png"))
+            assert not errors
+    finally:
+        context.close()
+
+
+def test_browser_lesson51_offline_suite_and_replay(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=51")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Visual guide", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-51-concept-map.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Lab walkthrough", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-51-lab-walkthrough.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Python source", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        expect(page.locator("audio")).to_have_count(3)
+        source = page.locator("audio").first.get_attribute("src")
+        assert source and page.request.get(base + source).status == 200
+        page.get_by_role("tab", name="Run the exercise", exact=True).click()
+        lab = page.locator(".offline-lab")
+        expect(lab).to_be_visible()
+        expect(page.get_by_text("Response and results", exact=True)).to_be_hidden()
+        lab.get_by_role("button", name="Run offline host suite").click()
+        expect(lab.get_by_text("Assertions: 16/16 passed; 0 failed", exact=True)).to_be_visible(timeout=25000)
+        expect(lab.get_by_text("Complete-suite check: passed", exact=True)).to_be_visible()
+        lab.get_by_text("Mutation challenge: change only the denial policy", exact=True).click()
+        lab.get_by_role("button", name="Run offline host suite").click()
+        expect(lab.get_by_text("Assertions: 15/16 passed; 1 failed", exact=True)).to_be_visible(timeout=25000)
+        expect(lab.get_by_text("Complete-suite check: needs review", exact=True)).to_be_visible()
+        lab.get_by_text("Mutation challenge: change only the denial policy", exact=True).click()
+        lab.get_by_label("Synthetic replay").click()
+        page.get_by_role("option", name="Budget", exact=True).click()
+        lab.get_by_role("button", name="Replay synthetic stream").click()
+        expect(lab.get_by_text("Host status: budget", exact=False)).to_be_visible(timeout=25000)
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "offline-lesson51-phone.png"))
         assert not errors
     finally:
         context.close()
