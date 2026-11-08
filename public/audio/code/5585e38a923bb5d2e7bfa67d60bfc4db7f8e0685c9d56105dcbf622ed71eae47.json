@@ -1,0 +1,307 @@
+{
+  "lesson": 48,
+  "section": "rewrite",
+  "duration": 22.968,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.11
+    },
+    {
+      "word": "post",
+      "start": 0.11,
+      "end": 0.42
+    },
+    {
+      "word": "tool",
+      "start": 0.42,
+      "end": 0.61
+    },
+    {
+      "word": "hook",
+      "start": 0.61,
+      "end": 0.84
+    },
+    {
+      "word": "serializes",
+      "start": 0.84,
+      "end": 1.54
+    },
+    {
+      "word": "one",
+      "start": 1.54,
+      "end": 1.75
+    },
+    {
+      "word": "tool",
+      "start": 1.75,
+      "end": 1.95
+    },
+    {
+      "word": "response",
+      "start": 1.95,
+      "end": 2.54
+    },
+    {
+      "word": "and",
+      "start": 2.78,
+      "end": 3.02
+    },
+    {
+      "word": "replaces",
+      "start": 3.02,
+      "end": 3.53
+    },
+    {
+      "word": "exact",
+      "start": 3.53,
+      "end": 4.06
+    },
+    {
+      "word": "registered",
+      "start": 4.06,
+      "end": 4.54
+    },
+    {
+      "word": "synthetic",
+      "start": 4.54,
+      "end": 4.97
+    },
+    {
+      "word": "markers",
+      "start": 4.97,
+      "end": 5.53
+    },
+    {
+      "word": "It",
+      "start": 5.9,
+      "end": 6.08
+    },
+    {
+      "word": "returns",
+      "start": 6.08,
+      "end": 6.48
+    },
+    {
+      "word": "the",
+      "start": 6.48,
+      "end": 6.57
+    },
+    {
+      "word": "rewritten",
+      "start": 6.57,
+      "end": 6.97
+    },
+    {
+      "word": "response",
+      "start": 6.97,
+      "end": 7.57
+    },
+    {
+      "word": "and",
+      "start": 7.8,
+      "end": 8.03
+    },
+    {
+      "word": "records",
+      "start": 8.03,
+      "end": 8.4
+    },
+    {
+      "word": "hashes",
+      "start": 8.4,
+      "end": 9.03
+    },
+    {
+      "word": "and",
+      "start": 9.03,
+      "end": 9.19
+    },
+    {
+      "word": "whether",
+      "start": 9.19,
+      "end": 9.36
+    },
+    {
+      "word": "a",
+      "start": 9.36,
+      "end": 9.46
+    },
+    {
+      "word": "marker",
+      "start": 9.46,
+      "end": 9.78
+    },
+    {
+      "word": "remains",
+      "start": 9.78,
+      "end": 10.33
+    },
+    {
+      "word": "This",
+      "start": 10.56,
+      "end": 10.82
+    },
+    {
+      "word": "is",
+      "start": 10.82,
+      "end": 10.93
+    },
+    {
+      "word": "a",
+      "start": 10.93,
+      "end": 10.97
+    },
+    {
+      "word": "bounded",
+      "start": 10.97,
+      "end": 11.38
+    },
+    {
+      "word": "exact-value",
+      "start": 11.38,
+      "end": 12.01
+    },
+    {
+      "word": "check",
+      "start": 12.01,
+      "end": 12.33
+    },
+    {
+      "word": "Encoded",
+      "start": 12.7,
+      "end": 13.24
+    },
+    {
+      "word": "or",
+      "start": 13.24,
+      "end": 13.48
+    },
+    {
+      "word": "unknown",
+      "start": 13.48,
+      "end": 13.78
+    },
+    {
+      "word": "secrets",
+      "start": 13.78,
+      "end": 14.35
+    },
+    {
+      "word": "need",
+      "start": 14.38,
+      "end": 14.67
+    },
+    {
+      "word": "different",
+      "start": 14.67,
+      "end": 15.04
+    },
+    {
+      "word": "controls",
+      "start": 15.04,
+      "end": 15.68
+    },
+    {
+      "word": "and",
+      "start": 15.96,
+      "end": 16.14
+    },
+    {
+      "word": "a",
+      "start": 16.14,
+      "end": 16.18
+    },
+    {
+      "word": "hook",
+      "start": 16.18,
+      "end": 16.41
+    },
+    {
+      "word": "observation",
+      "start": 16.41,
+      "end": 16.94
+    },
+    {
+      "word": "alone",
+      "start": 16.94,
+      "end": 17.32
+    },
+    {
+      "word": "does",
+      "start": 17.56,
+      "end": 17.77
+    },
+    {
+      "word": "not",
+      "start": 17.77,
+      "end": 17.96
+    },
+    {
+      "word": "prove",
+      "start": 17.96,
+      "end": 18.17
+    },
+    {
+      "word": "what",
+      "start": 18.17,
+      "end": 18.41
+    },
+    {
+      "word": "reached",
+      "start": 18.41,
+      "end": 18.66
+    },
+    {
+      "word": "the",
+      "start": 18.66,
+      "end": 18.73
+    },
+    {
+      "word": "model",
+      "start": 18.73,
+      "end": 19.16
+    },
+    {
+      "word": "The",
+      "start": 19.43,
+      "end": 19.58
+    },
+    {
+      "word": "live",
+      "start": 19.58,
+      "end": 19.87
+    },
+    {
+      "word": "observer",
+      "start": 19.87,
+      "end": 20.34
+    },
+    {
+      "word": "checks",
+      "start": 20.34,
+      "end": 20.67
+    },
+    {
+      "word": "model-bound",
+      "start": 20.67,
+      "end": 21.23
+    },
+    {
+      "word": "request",
+      "start": 21.23,
+      "end": 21.57
+    },
+    {
+      "word": "bytes",
+      "start": 21.57,
+      "end": 21.99
+    },
+    {
+      "word": "separately",
+      "start": 22.02,
+      "end": 22.65
+    }
+  ]
+}

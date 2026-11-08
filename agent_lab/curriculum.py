@@ -426,8 +426,8 @@ ROWS = [
     (
         53,
         "Debugging an agent run",
-        "Correlate events by run id and redact secret-like values from diagnostic bundles.",
-        "Use the exercise tool and explain the redacted diagnostic trace.",
+        "Reproduce a failure and locate the first useful evidence in a retained diagnostic bundle.",
+        "Replay the fixed diagnostic scenario, inspect its first causal finding and compare one changed setting.",
         "debugging",
         "exercise",
     ),

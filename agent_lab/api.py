@@ -46,6 +46,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     from agent_lab.api_client_lifecycle import install_client_lifecycle_routes
     from agent_lab.api_cloud import install_cloud_routes
     from agent_lab.api_config_root import install_config_root_routes
+    from agent_lab.api_debugging import install_debugging_routes
     from agent_lab.api_desk import install_desk_routes
     from agent_lab.api_drops import install_drops_routes
     from agent_lab.api_evals import install_evals_routes
@@ -100,6 +101,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     install_headless_routes(app, runner)
     install_desk_routes(app, runner)
     install_evals_routes(app, runner)
+    install_debugging_routes(app, runner)
     install_offline_routes(app, runner)
     install_drops_routes(app, runner)
     install_suggestion_routes(app, runner)

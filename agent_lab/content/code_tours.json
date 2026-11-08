@@ -1406,37 +1406,25 @@
     ]
   },
   "53": {
-    "source_sha256": "8a6aae72029b7ffed60793e47e6f00f9d605c746a6c31b8de6e40d00ca0ff9da",
+    "source_sha256": "f8b52ddfbd5715007e63f8556fb959cc30e339779fd0f230d49151bca27c3c7e",
     "sections": [
       {
-        "title": "Patterns for secrets",
+        "title": "Create a fixed prepared run",
         "start": 7,
-        "end": 8,
-        "text": "Two patterns define what counts as secret: key names mentioning token, secret, password, api key or authorization, and values that look like an sk-ant key or a Bearer token."
+        "end": 10,
+        "text": "The selected fixed fault and owned UUID determine this classroom replay."
       },
       {
-        "title": "Recursive redaction",
+        "title": "Reload the saved bundle",
         "start": 11,
-        "end": 19,
-        "text": "redact walks dictionaries and lists, replaces the whole value of any secret-looking key, and masks secret-looking text inside strings. Anything else passes through unchanged, so the trace stays useful while the secrets disappear."
+        "end": 12,
+        "text": "The store writes a bounded redacted file, then independently reloads it."
       },
       {
-        "title": "One run id everywhere",
-        "start": 23,
-        "end": 28,
-        "text": "A fresh run_id is created once, and the stderr callback tags every line the CLI writes to standard error with it. That lets you line up CLI output with the messages from the same run."
-      },
-      {
-        "title": "Tagging events and the result",
-        "start": 29,
-        "end": 39,
-        "text": "Every message becomes an event with the run_id and its type name. The ResultMessage adds session_id, subtype and errors, which tell you how the run ended and which session to inspect."
-      },
-      {
-        "title": "Only redacted output leaves",
-        "start": 40,
-        "end": 40,
-        "text": "The whole trace goes through redact before it is printed, so the bundle you would paste into a bug report has its secrets masked."
+        "title": "Check causal evidence",
+        "start": 13,
+        "end": 14,
+        "text": "The first finding is a policy decision, and the automatic check verifies the run identity and saved rows."
       }
     ]
   },

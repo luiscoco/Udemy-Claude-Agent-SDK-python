@@ -10555,117 +10555,203 @@
     "id": 53,
     "prerequisites": [
       28,
-      44
+      51
     ],
-    "concept_brief": "Debugging an agent run means correlating its events by a run id and sharing diagnostics only after secrets are masked. This repo's `redact` masks keys matching token, secret, password, api key or authorization and strings like `sk-ant-...` or `Bearer ...`, and raw SDK payloads are never returned to the browser.",
-    "lab_brief": "The `debugging` exercise builds a small diagnostic trace tagged with this run's id as `correlation_id`, including a request with an `api_key`, and passes it through `redact`. It shows what a safe, correlatable diagnostic bundle looks like before you attach it to a bug report.",
+    "concept_brief": "A diagnostic trace is a causal record, not a summary of assistant prose. Lesson 53 tags host, hook, permission, SDK and stderr observations with one run UUID, correlates Read calls to results and independent fixture hashes, then persists a redacted bounded bundle. Prepared rows are authored; native rows are measured provider evidence.",
+    "lab_brief": "Replay an offline diagnostic, then compare a changed configuration. Follow the causal sequence from the initial failure to the terminal state. Inspect the first useful finding before downstream symptoms. One changed effective field can clarify a hypothesis, but fresh IDs and model variation prevent a statistical causal claim. Optional native scenarios require fresh paid consent and a bounded isolated query.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 53 (or run `uv run agent-lab lesson 53` in a terminal).",
-      "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+      "Complete Lessons 28 and 51 and start the local portal.",
+      "The prepared replays require no provider key, model call or network request."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Learn how to build a diagnostic bundle that is correlated by run and safe to share."
+        "text": "Locate the first actionable evidence, not the last visible symptom."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `debugging` in `agent_lab/exercises.py` and `redact` in `agent_lab/policy.py`, and predict which values will be masked."
+        "text": "Select a prepared fault and leave log capture on."
       },
       {
         "title": "Run one example",
-        "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+        "text": "Replay an offline diagnostic, then compare a changed configuration."
       },
       {
         "title": "Verify the evidence",
-        "text": "Confirm the api_key is [REDACTED] and that `correlation_id` matches the run_id in the Diagnostics STARTED event."
+        "text": "Inspect the start UUID, contiguous trace rows, first finding, Read call/result ID, independent fixture hashes, saved digest and bounded redacted log."
       },
       {
         "title": "Try the challenge",
-        "text": "Pass your own fake diagnostic dict through `redact` and check what is masked."
+        "text": "Change one variable and explain whether it fixes the cause. Compare denied with success by changing only policy, then inspect both retained first findings."
       }
     ],
-    "inspect": "`trace` (its `correlation_id`, `request` and `events`), `match_with` and `raw_sdk_logs`. Then open Diagnostics and compare `correlation_id` with the `run_id` of the STARTED and DONE events.",
-    "expected": "`trace.request.api_key` is [REDACTED], every event carries the same `correlation_id`, and it equals the `run_id` shown in the STARTED and DONE events under Diagnostics. `raw_sdk_logs` is 'Never returned to the browser.'.",
-    "evidence_criterion": "The check confirms that a redacted trace was produced and that raw SDK logs are withheld from the browser.",
+    "inspect": "Follow the causal sequence from the initial failure to the terminal state. Denial is a policy decision before execution; missing-file has an admitted Read plus actual error. An API error can have a success subtype and isError true, and a later iterator exception does not erase that terminal. A missing log is unavailable evidence, not proof of no errors. Check run UUID and persisted SHA before judging.",
+    "expected": "Seven fixed prepared replay shapes produce first findings: success none, denied permission-denied, missing missing-file, max-turns max-turns, startup startup, api-error api-error then iterator-exception, truncated missing-terminal. Prepared mode reports zero model calls and zero real cost. The saved bundle reloads by UUID with an exact digest; one-variable comparison names the changed effective field.",
+    "evidence_criterion": "Saved diagnostic bundle correlates trace rows and actionable findings to this run.",
     "evidence_checks": [
       {
-        "key": "trace",
-        "rule": "truthy"
-      },
-      {
-        "key": "raw_sdk_logs",
+        "key": "experiment_passed",
         "rule": "equals",
-        "value": "Never returned to the browser."
+        "value": true
       }
     ],
-    "challenge": "Run `uv run python -c \"from agent_lab.policy import redact; print(redact({'Authorization': 'abc', 'note': 'call with Bearer xyz.123', 'steps': [{'password': 'p'}]}))\"`. Confirm all three secrets become [REDACTED], including the one nested in a list.",
+    "challenge": "Change one effective variable between two retained runs. For example, compare a denied run with a success run by changing only policy. Explain whether the first permission-denied finding disappears, and why this local comparison does not prove general model reliability.",
     "hints": [
-      "Redaction works on key names and on known secret patterns inside strings.",
-      "`redact` recurses through dicts and lists: any key matching token, secret, password, api key or authorization is replaced, and string values have `sk-ant-...` and `Bearer ...` patterns replaced. Values under harmless keys stay readable."
+      "Start with the earliest finding row and its nextCheck, then follow the matching call ID through the trace.",
+      "Compare the five effective fields: policy, fixture, maxTurns, captureLog and producerFault. A one-variable comparison needs exactly one changed field and the same prepared/live provenance."
     ],
-    "reference": "The trace keeps what you need to debug, the correlation id and the event sequence, while the credential is replaced by [REDACTED]. Because the id is the real run id, this bundle can be matched with the run's own STARTED and DONE events. Raw SDK logs and request payloads can contain secrets, so the host never sends them to the browser.",
+    "reference": "The denied replay's first useful evidence is the false pre-read decision; a later error result and success-subtype terminal do not undo the denial. Changing only policy to allow can remove that cause in the authored success replay, whose exact Read result matches an unchanged independently hashed fixture. The store reloads the redacted bundle and hashes serialized bytes before the check. This is a fixed classroom contrast, not a controlled model experiment.",
     "recovery": [
-      "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 53` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
-      "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+      "If a run stops, use Recover saved bundle with its recorded UUID after cleanup; an interrupted bundle never earns automatic credit.",
+      "If live mode is denied, confirm the private backend key, enable_live, fresh consent and a supported fixed scenario. Prepared replays remain free."
     ],
     "quiz": [
       {
-        "prompt": "Why is `api_key` replaced while `type` is kept in the trace?",
+        "prompt": "What is the first useful evidence in a denied Read?",
         "options": [
           {
-            "text": "Because `redact` masks values whose key name matches patterns such as 'api key', and leaves other keys readable.",
-            "explanation": "Correct. Masking by key name removes credentials but keeps useful diagnostics."
+            "text": "The false pre-use policy decision for the exact call ID.",
+            "explanation": "Correct. Authorization happens before execution."
           },
           {
-            "text": "Because the key was invalid.",
-            "explanation": "Validity does not matter; any value under that key name is masked."
+            "text": "The assistant's final apology.",
+            "explanation": "No. Authorization happens before execution."
           },
           {
-            "text": "Because Claude removed it.",
-            "explanation": "Redaction is host code; no model is involved."
+            "text": "A higher max-turn setting.",
+            "explanation": "No. Authorization happens before execution."
           }
         ],
         "correct": 0
       },
       {
-        "prompt": "Why does this lab never return raw SDK logs to the browser?",
+        "prompt": "Why keep a result followed by an iterator exception?",
         "options": [
           {
-            "text": "They are too large to display.",
-            "explanation": "Size is not the reason given; safety is."
+            "text": "Both observations occurred and may explain different parts of the run.",
+            "explanation": "Correct. The collector preserves arrival order and a known terminal cost."
           },
           {
-            "text": "They are only produced in offline mode.",
-            "explanation": "Raw logs relate to live SDK runs; offline runs produce local evidence."
+            "text": "The later exception makes the result imaginary.",
+            "explanation": "No. The collector preserves arrival order and a known terminal cost."
           },
           {
-            "text": "Raw payloads can contain credentials or private data, so only redacted diagnostics are shown.",
-            "explanation": "Correct. The runtime also replaces unexpected exceptions with a safe generic message for the same reason."
+            "text": "Only the assistant text matters.",
+            "explanation": "No. The collector preserves arrival order and a known terminal cost."
           }
         ],
-        "correct": 2
+        "correct": 0
+      },
+      {
+        "prompt": "What proves a missing-file diagnosis?",
+        "options": [
+          {
+            "text": "An admitted matching Read error plus independent absence of the owned fixture.",
+            "explanation": "Correct. The host checks the actual file and correlated result."
+          },
+          {
+            "text": "The selected scenario label alone.",
+            "explanation": "No. The host checks the actual file and correlated result."
+          },
+          {
+            "text": "A missing debug log.",
+            "explanation": "No. The host checks the actual file and correlated result."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "How is an API-error terminal distinguished?",
+        "options": [
+          {
+            "text": "It can have success subtype with isError true.",
+            "explanation": "Correct. Subtype and isError are separate SDK facts."
+          },
+          {
+            "text": "Any success subtype proves task success.",
+            "explanation": "No. Subtype and isError are separate SDK facts."
+          },
+          {
+            "text": "Only stderr determines it.",
+            "explanation": "No. Subtype and isError are separate SDK facts."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does a missing raw log establish?",
+        "options": [
+          {
+            "text": "The log evidence is unavailable; it does not establish no errors.",
+            "explanation": "Correct. The bounded reader reports found false explicitly."
+          },
+          {
+            "text": "The agent had no errors.",
+            "explanation": "No. The bounded reader reports found false explicitly."
+          },
+          {
+            "text": "The provider was never called.",
+            "explanation": "No. The bounded reader reports found false explicitly."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Which concept-map path produces a shareable bundle?",
+        "options": [
+          {
+            "text": "Captured rows, bounded redaction, causal findings, then persisted reload and digest.",
+            "explanation": "Correct. Each boundary contributes independently checked evidence."
+          },
+          {
+            "text": "Assistant prose straight to a bug report.",
+            "explanation": "No. Each boundary contributes independently checked evidence."
+          },
+          {
+            "text": "A selected fault label straight to pass.",
+            "explanation": "No. Each boundary contributes independently checked evidence."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does the walkthrough's one-variable comparison show?",
+        "options": [
+          {
+            "text": "Exactly one effective field changed under the same provenance, with both first findings retained.",
+            "explanation": "Correct. Fresh UUIDs and model variation remain limitations."
+          },
+          {
+            "text": "A statistically controlled model experiment.",
+            "explanation": "No. Fresh UUIDs and model variation remain limitations."
+          },
+          {
+            "text": "The earlier bundle was overwritten.",
+            "explanation": "No. Fresh UUIDs and model variation remain limitations."
+          }
+        ],
+        "correct": 0
       }
     ],
-    "concept_code": "import re\nimport uuid\nfrom typing import Any\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\nSECRET_KEY = re.compile(r\"token|secret|password|api.?key|authorization\", re.IGNORECASE)\nSECRET_VALUE = re.compile(r\"sk-ant-[\\w-]+|Bearer\\s+\\S+\")\n\n\ndef redact(value: Any) -> Any:\n    if isinstance(value, dict):\n        return {\n            k: \"[REDACTED]\" if SECRET_KEY.search(k) else redact(v)\n            for k, v in value.items()\n        }\n    if isinstance(value, list):\n        return [redact(item) for item in value]\n    return SECRET_VALUE.sub(\"[REDACTED]\", value) if isinstance(value, str) else value\n\n\nasync def main() -> None:\n    run_id = uuid.uuid4().hex\n    trace: list[dict[str, Any]] = []\n    options = ClaudeAgentOptions(\n        max_turns=3,\n        stderr=lambda line: trace.append({\"run_id\": run_id, \"stderr\": line}),\n    )\n    async for message in query(\n        prompt=\"List the Python files in src/.\", options=options\n    ):\n        event: dict[str, Any] = {\"run_id\": run_id, \"type\": type(message).__name__}\n        if isinstance(message, ResultMessage):\n            event |= {\n                \"session_id\": message.session_id,\n                \"subtype\": message.subtype,\n                \"errors\": message.errors,\n            }\n        trace.append(event)\n    print(redact(trace))  # only the redacted bundle leaves the process",
-    "code_focus": "Every message and every CLI stderr line (via the stderr callback) is tagged with one `run_id`, and the bundle passes through redact() before it is printed or shared.",
+    "concept_code": "from agent_lab.debug_lab import DebugInput, diagnose, prepared_run, criterion\nfrom agent_lab.debug_store import DebugStore\nimport asyncio\nimport uuid\nfrom pathlib import Path\n\nroot = Path('.lab-data/lesson-53-example')\nselected = DebugInput(scenario='denied')\nrun_id = uuid.uuid4()\nbundle = asyncio.run(prepared_run(selected, root, run_id))\nloaded = DebugStore(root).save(bundle)\nassert bundle['findings'][0]['code'] == 'permission-denied'\nassert loaded['source'] == 'persisted-file-reload'\nassert criterion(str(run_id), selected, bundle, loaded['bundle'])",
+    "code_focus": "`prepared_run` owns the fixture, collects normalized rows and closes before saving. `diagnose` names the first supported cause; `DebugStore` reloads the exact redacted bundle and `criterion` checks its run identity and rows.",
     "concept_points": [
       {
-        "title": "One id per run",
-        "text": "Tagging each event and stderr line with the same `run_id` lets you line up host logs, CLI output and the SDK `session_id`."
+        "title": "Keep one run identity",
+        "text": "Tag every host and SDK observation with a UUID and pair Read results with their call ID."
       },
       {
-        "title": "Result tells the outcome",
-        "text": "ResultMessage.subtype, errors and `session_id` say how the run ended and which session to inspect."
+        "title": "Find the first cause",
+        "text": "A denied policy decision or missing owned file can precede a later terminal symptom."
       },
       {
-        "title": "Redact before sharing",
-        "text": "Mask secret-looking keys and values such as sk-ant-... or Bearer tokens before a trace leaves your machine."
+        "title": "Bound before sharing",
+        "text": "Read at most 128,001 log bytes, label truncation, redact the exported text and reload a persisted digest."
       }
     ],
     "misconception": {
-      "claim": "Debug logs are internal, so it is fine to paste raw SDK payloads into a bug report.",
-      "correction": "Payloads and stderr can contain API keys, tokens and customer data, and bug reports travel far. Redact first and share only what is needed."
+      "claim": "A successful terminal subtype means every tool operation succeeded.",
+      "correction": "A denied or missing Read can have an error result and still be followed by a success-subtype terminal. Inspect call/result IDs, isError, host effects and any later exception."
     }
   },
   {

@@ -1,0 +1,36 @@
+{
+  "lesson": 53,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "log",
+      "title": "Read a bounded log",
+      "path": "agent_lab/debug_lab.py",
+      "start_line": 93,
+      "end_line": 111,
+      "reviewed_source_sha256": "b8f050aedfc589c50b4007c88b273b60ebedc87d86c6e913f0354d0c338fe48e",
+      "spoken_text": "This helper reads only this run's raw debug log. It first distinguishes a missing file from an empty one, then opens a descriptor and checks that the same regular single-link file was opened. It reads one byte beyond the one hundred twenty eight thousand byte export ceiling so truncation is visible. Finally always closes the descriptor and redacts the text before it leaves the host."
+    },
+    {
+      "id": "lifecycle",
+      "title": "Own the native lifecycle",
+      "path": "agent_lab/debug_native.py",
+      "start_line": 181,
+      "end_line": 205,
+      "reviewed_source_sha256": "a89221e26e42a544acc5ea19ee57e351a9262d4b3584f6407be55ed268e2fcb1",
+      "spoken_text": "The native finalizer closes the stream and raw log descriptor before assembling its bundle. It records stream end and cleanup as distinct host rows, then checks the fixture's before and after hashes independently of the assistant reply. The bundle retains all collected rows and findings, interruption and overflow flags, and a known terminal cost even if a later iterator exception occurred. Only then does the host save the redacted result."
+    },
+    {
+      "id": "diagnosis",
+      "title": "Find the first cause",
+      "path": "agent_lab/debug_lab.py",
+      "start_line": 143,
+      "end_line": 175,
+      "reviewed_source_sha256": "b8f050aedfc589c50b4007c88b273b60ebedc87d86c6e913f0354d0c338fe48e",
+      "spoken_text": "The diagnosis scans captured rows for a first supported cause. A denied pre-use decision points to policy, while a missing-file finding needs an admitted matching Read error and independently absent fixture. An API error checks the terminal isError flag even if its subtype says success. Later exceptions and missing terminals stay visible as separate findings, ordered by their supporting rows."
+    }
+  ]
+}

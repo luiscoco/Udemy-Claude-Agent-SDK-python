@@ -398,6 +398,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 53:
+        with card("Lesson 53 debugging walkthrough", "Replay, inspect, reload and compare"):
+            ui.image("/assets/lesson-53-lab-walkthrough.svg").props('alt="Choose a fault, inspect its first finding, reload its saved bundle, then compare one changed variable"').classes("w-full")
     if lesson_id == 52:
         with card("Lesson 52 evaluation walkthrough", "Cases, calibration and baseline gate"):
             ui.image("/assets/lesson-52-lab-walkthrough.svg").props('alt="Run fixed cases, inspect checks, calibrate, compare, and review promotion"').classes("w-full")
@@ -492,6 +495,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 53:
+        with card("Diagnostic evidence concept map", "Lesson 53"):
+            ui.image("/assets/lesson-53-concept-map.svg").props('alt="Owned run evidence and SDK call IDs flow through causal findings and bounded persisted redaction"').classes("w-full")
     if lesson_id == 52:
         with card("Evaluation concept map", "Lesson 52"):
             ui.image("/assets/lesson-52-concept-map.svg").props('alt="Business facts and judge verdicts flow into statistical comparison"').classes("w-full")

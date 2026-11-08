@@ -2807,3 +2807,44 @@ def test_browser_lesson52_evals_and_calibration(server, guide_browser_context):
         assert not errors
     finally:
         context.close()
+
+
+def test_browser_lesson53_debugging_replay_and_recovery(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=53")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Visual guide", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-53-concept-map.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Lab walkthrough", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-53-lab-walkthrough.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Python source", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        page.get_by_role("tab", name="Run the exercise", exact=True).click()
+        lab = page.locator(".debugging-lab")
+        expect(lab).to_be_visible()
+        lab.get_by_label("Fault scenario").click()
+        page.get_by_role("option", name="Denied", exact=True).click()
+        lab.get_by_role("button", name="Run prepared replay").click()
+        expect(lab.get_by_text("Saved diagnostic passed", exact=True)).to_be_visible(timeout=25000)
+        expect(lab.get_by_text("First useful finding: row", exact=False)).to_be_visible()
+        run_id = lab.get_by_text("Saved bundle:", exact=False).inner_text().split()[2]
+        lab.get_by_label("Compare saved run UUID (optional)").fill(run_id)
+        lab.get_by_label("Fault scenario").click()
+        page.get_by_role("option", name="Success", exact=True).click()
+        lab.get_by_role("button", name="Run prepared replay").click()
+        expect(lab.get_by_text("Saved diagnostic passed", exact=True)).to_be_visible(timeout=25000)
+        expect(lab.get_by_text("one variable: True", exact=False)).to_be_visible()
+        lab.get_by_role("button", name="Recover saved bundle").click()
+        expect(lab.get_by_text("Recovered the persisted redacted bundle", exact=True)).to_be_visible(timeout=25000)
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "debugging-lesson53-phone.png"))
+        assert not errors
+    finally:
+        context.close()

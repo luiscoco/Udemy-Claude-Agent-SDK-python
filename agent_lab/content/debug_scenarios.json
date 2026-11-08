@@ -1,0 +1,45 @@
+{
+  "success": [
+    {"kind": "sdk", "name": "init", "data": {"session": "prepared-session"}},
+    {"kind": "hook", "name": "pre-read", "data": {"callId": "read-1", "allowed": true}},
+    {"kind": "sdk", "name": "read-call", "data": {"callId": "read-1", "target": "fixture.txt"}},
+    {"kind": "hook", "name": "post-success", "data": {"callId": "read-1"}},
+    {"kind": "sdk", "name": "read-result", "data": {"callId": "read-1", "isError": false, "containsFixture": true}},
+    {"kind": "sdk", "name": "terminal", "data": {"session": "prepared-session", "subtype": "success", "isError": false}}
+  ],
+  "denied": [
+    {"kind": "sdk", "name": "init", "data": {"session": "prepared-session"}},
+    {"kind": "hook", "name": "pre-read", "data": {"callId": "read-1", "allowed": false}},
+    {"kind": "sdk", "name": "read-call", "data": {"callId": "read-1", "target": "fixture.txt"}},
+    {"kind": "sdk", "name": "read-result", "data": {"callId": "read-1", "isError": true, "reason": "permission denied"}},
+    {"kind": "sdk", "name": "terminal", "data": {"session": "prepared-session", "subtype": "success", "isError": false}}
+  ],
+  "missing": [
+    {"kind": "sdk", "name": "init", "data": {"session": "prepared-session"}},
+    {"kind": "hook", "name": "pre-read", "data": {"callId": "read-1", "allowed": true}},
+    {"kind": "sdk", "name": "read-call", "data": {"callId": "read-1", "target": "fixture.txt"}},
+    {"kind": "hook", "name": "post-failure", "data": {"callId": "read-1", "reason": "ENOENT"}},
+    {"kind": "sdk", "name": "read-result", "data": {"callId": "read-1", "isError": true, "fixtureMissing": true}},
+    {"kind": "sdk", "name": "terminal", "data": {"session": "prepared-session", "subtype": "success", "isError": false}}
+  ],
+  "max-turns": [
+    {"kind": "sdk", "name": "init", "data": {"session": "prepared-session"}},
+    {"kind": "hook", "name": "pre-read", "data": {"callId": "read-1", "allowed": true}},
+    {"kind": "sdk", "name": "read-call", "data": {"callId": "read-1", "target": "fixture.txt"}},
+    {"kind": "sdk", "name": "read-result", "data": {"callId": "read-1", "isError": false, "containsFixture": true}},
+    {"kind": "sdk", "name": "terminal", "data": {"session": "prepared-session", "subtype": "error_max_turns", "isError": true}}
+  ],
+  "startup": [
+    {"kind": "stderr", "name": "startup", "data": {"text": "ANTHROPIC_API_KEY=sk-ant-synthetic-demo-credential startup failed"}},
+    {"kind": "host", "name": "iterator-exception", "data": {"class": "StartupError"}}
+  ],
+  "api-error": [
+    {"kind": "sdk", "name": "init", "data": {"session": "prepared-session"}},
+    {"kind": "sdk", "name": "terminal", "data": {"session": "prepared-session", "subtype": "success", "isError": true}},
+    {"kind": "host", "name": "iterator-exception", "data": {"class": "ProviderError"}}
+  ],
+  "truncated": [
+    {"kind": "sdk", "name": "init", "data": {"session": "prepared-session"}},
+    {"kind": "sdk", "name": "partial-text", "data": {"text": "Reading the fixture..."}}
+  ]
+}

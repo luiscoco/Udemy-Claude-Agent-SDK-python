@@ -1,0 +1,357 @@
+{
+  "lesson": 53,
+  "section": "lifecycle",
+  "duration": 24.24,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.12
+    },
+    {
+      "word": "native",
+      "start": 0.12,
+      "end": 0.44
+    },
+    {
+      "word": "finalizer",
+      "start": 0.44,
+      "end": 1.21
+    },
+    {
+      "word": "closes",
+      "start": 1.21,
+      "end": 1.61
+    },
+    {
+      "word": "the",
+      "start": 1.61,
+      "end": 1.69
+    },
+    {
+      "word": "stream",
+      "start": 1.69,
+      "end": 2.11
+    },
+    {
+      "word": "and",
+      "start": 2.27,
+      "end": 2.47
+    },
+    {
+      "word": "raw",
+      "start": 2.47,
+      "end": 2.65
+    },
+    {
+      "word": "log",
+      "start": 2.65,
+      "end": 2.89
+    },
+    {
+      "word": "descriptor",
+      "start": 2.89,
+      "end": 3.5
+    },
+    {
+      "word": "before",
+      "start": 3.56,
+      "end": 3.92
+    },
+    {
+      "word": "assembling",
+      "start": 3.92,
+      "end": 4.37
+    },
+    {
+      "word": "its",
+      "start": 4.37,
+      "end": 4.53
+    },
+    {
+      "word": "bundle",
+      "start": 4.53,
+      "end": 4.92
+    },
+    {
+      "word": "It",
+      "start": 5.51,
+      "end": 5.69
+    },
+    {
+      "word": "records",
+      "start": 5.69,
+      "end": 6.07
+    },
+    {
+      "word": "stream",
+      "start": 6.07,
+      "end": 6.4
+    },
+    {
+      "word": "end",
+      "start": 6.4,
+      "end": 6.58
+    },
+    {
+      "word": "and",
+      "start": 6.58,
+      "end": 6.74
+    },
+    {
+      "word": "cleanup",
+      "start": 6.74,
+      "end": 7.19
+    },
+    {
+      "word": "as",
+      "start": 7.19,
+      "end": 7.4
+    },
+    {
+      "word": "distinct",
+      "start": 7.4,
+      "end": 7.79
+    },
+    {
+      "word": "host",
+      "start": 7.79,
+      "end": 8.12
+    },
+    {
+      "word": "rows",
+      "start": 8.12,
+      "end": 8.53
+    },
+    {
+      "word": "then",
+      "start": 8.82,
+      "end": 9.05
+    },
+    {
+      "word": "checks",
+      "start": 9.05,
+      "end": 9.32
+    },
+    {
+      "word": "the",
+      "start": 9.32,
+      "end": 9.4
+    },
+    {
+      "word": "fixture's",
+      "start": 9.4,
+      "end": 9.83
+    },
+    {
+      "word": "before",
+      "start": 9.83,
+      "end": 10.2
+    },
+    {
+      "word": "and",
+      "start": 10.2,
+      "end": 10.31
+    },
+    {
+      "word": "after",
+      "start": 10.31,
+      "end": 10.6
+    },
+    {
+      "word": "hashes",
+      "start": 10.6,
+      "end": 11.16
+    },
+    {
+      "word": "independently",
+      "start": 11.21,
+      "end": 11.88
+    },
+    {
+      "word": "of",
+      "start": 11.88,
+      "end": 12.01
+    },
+    {
+      "word": "the",
+      "start": 12.01,
+      "end": 12.09
+    },
+    {
+      "word": "assistant",
+      "start": 12.09,
+      "end": 12.51
+    },
+    {
+      "word": "reply",
+      "start": 12.51,
+      "end": 12.92
+    },
+    {
+      "word": "The",
+      "start": 13.33,
+      "end": 13.46
+    },
+    {
+      "word": "bundle",
+      "start": 13.46,
+      "end": 13.82
+    },
+    {
+      "word": "retains",
+      "start": 13.82,
+      "end": 14.23
+    },
+    {
+      "word": "all",
+      "start": 14.23,
+      "end": 14.48
+    },
+    {
+      "word": "collected",
+      "start": 14.48,
+      "end": 14.9
+    },
+    {
+      "word": "rows",
+      "start": 14.9,
+      "end": 15.13
+    },
+    {
+      "word": "and",
+      "start": 15.13,
+      "end": 15.24
+    },
+    {
+      "word": "findings",
+      "start": 15.24,
+      "end": 15.87
+    },
+    {
+      "word": "interruption",
+      "start": 16.04,
+      "end": 16.61
+    },
+    {
+      "word": "and",
+      "start": 16.61,
+      "end": 16.72
+    },
+    {
+      "word": "overflow",
+      "start": 16.72,
+      "end": 17.09
+    },
+    {
+      "word": "flags",
+      "start": 17.09,
+      "end": 17.58
+    },
+    {
+      "word": "and",
+      "start": 17.82,
+      "end": 17.97
+    },
+    {
+      "word": "a",
+      "start": 17.97,
+      "end": 18.01
+    },
+    {
+      "word": "known",
+      "start": 18.01,
+      "end": 18.28
+    },
+    {
+      "word": "terminal",
+      "start": 18.28,
+      "end": 18.67
+    },
+    {
+      "word": "cost",
+      "start": 18.67,
+      "end": 19.1
+    },
+    {
+      "word": "even",
+      "start": 19.17,
+      "end": 19.45
+    },
+    {
+      "word": "if",
+      "start": 19.45,
+      "end": 19.59
+    },
+    {
+      "word": "a",
+      "start": 19.59,
+      "end": 19.62
+    },
+    {
+      "word": "later",
+      "start": 19.62,
+      "end": 19.97
+    },
+    {
+      "word": "iterator",
+      "start": 19.97,
+      "end": 20.34
+    },
+    {
+      "word": "exception",
+      "start": 20.34,
+      "end": 20.78
+    },
+    {
+      "word": "occurred",
+      "start": 20.78,
+      "end": 21.15
+    },
+    {
+      "word": "Only",
+      "start": 21.47,
+      "end": 21.8
+    },
+    {
+      "word": "then",
+      "start": 21.8,
+      "end": 22.04
+    },
+    {
+      "word": "does",
+      "start": 22.04,
+      "end": 22.21
+    },
+    {
+      "word": "the",
+      "start": 22.21,
+      "end": 22.29
+    },
+    {
+      "word": "host",
+      "start": 22.29,
+      "end": 22.62
+    },
+    {
+      "word": "save",
+      "start": 22.62,
+      "end": 22.92
+    },
+    {
+      "word": "the",
+      "start": 22.92,
+      "end": 23.01
+    },
+    {
+      "word": "redacted",
+      "start": 23.01,
+      "end": 23.47
+    },
+    {
+      "word": "result",
+      "start": 23.47,
+      "end": 23.95
+    }
+  ]
+}

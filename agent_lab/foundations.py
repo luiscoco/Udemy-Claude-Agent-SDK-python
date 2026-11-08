@@ -1247,6 +1247,14 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 53:
+        from agent_lab.api_debugging import debug_code
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n",
+                 "question": item["question"]}
+                for title, item in zip(("Read a bounded debug log", "Own the native lifecycle",
+                                        "Find the first cause"), debug_code(), strict=True)]
     if lesson_id == 52:
         from agent_lab.api_evals import eval_code
 

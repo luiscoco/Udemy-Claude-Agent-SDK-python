@@ -243,6 +243,22 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 53:
+        from agent_lab.debug_lab import DebugInput, criterion
+
+        start, loaded, selected = (evidence.get(key) for key in ("start", "loaded", "selected"))
+        try:
+            parsed = DebugInput.model_validate(selected)
+            passed = (mode == "offline" and parsed.mode == "prepared" and
+                      isinstance(start, dict) and isinstance(loaded, dict) and
+                      loaded.get("source") == "persisted-file-reload" and
+                      isinstance(loaded.get("sha256"), str) and len(loaded["sha256"]) == 64 and
+                      criterion(start["runId"], parsed, loaded["bundle"], loaded))
+        except (KeyError, TypeError, ValueError):
+            passed = False
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail=("Saved prepared bundle correlates run identity, rows and causal findings."
+                                   if passed else "Reload a complete matching diagnostic bundle and inspect its trace."))
     if lesson_id == 52:
         from agent_lab.evals_core import synthetic_criterion
 

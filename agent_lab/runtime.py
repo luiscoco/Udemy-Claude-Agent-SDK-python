@@ -91,8 +91,26 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 75) if lesson_id == 53 else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 53:
+                    from agent_lab.debug_lab import DebugInput, criterion, prepared_run
+                    from agent_lab.debug_native import native_run
+                    from agent_lab.debug_store import DebugStore
+
+                    debug_selected = DebugInput.model_validate(request.lesson_options)
+                    debug_store = DebugStore(self.settings.data_dir / "lesson-53")
+                    identifier = uuid.uuid4()
+                    bundle = (await prepared_run(debug_selected, debug_store.root, identifier)
+                              if request.mode == "offline" else
+                              await native_run(debug_selected, debug_store.root, identifier, self.settings))
+                    loaded = debug_store.save(bundle)
+                    result = {"start": {"runId": str(identifier)}, "loaded": loaded,
+                              "selected": debug_selected.model_dump(mode="json"),
+                              "experiment_passed": criterion(str(identifier), debug_selected, bundle, loaded)}
+                    await emit(Event(kind="evidence", data={"source": "Lesson 53 persisted diagnostic bundle",
+                                                            "lesson_id": 53, "result": result}))
+                    return
                 if lesson.id == 52:
                     from agent_lab.evals_core import compare, synthetic_criterion, synthetic_report
                     from agent_lab.evals_live import native_eval

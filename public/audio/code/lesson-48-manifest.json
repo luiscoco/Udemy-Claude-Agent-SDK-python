@@ -2,9 +2,9 @@
   "lesson": 48,
   "entries": [
     {
-      "identity": "80cb851d9b59cd29cefe6c6422d3fc8b5431022294ec1a67323290b0e2ae16a5",
+      "identity": "b86b5a1ac1af142c5f5938e91dd5073ac4d7a589c15d7e78e8ab5e98a7a50fda",
       "section": "environment",
-      "source_sha256": "3b832892d0230e832e2c72336ec5f934b0fbd9ffba0f239d6d73b5ce6196d9db",
+      "source_sha256": "b4d5d3d92aa14357ef24361636cb903dc11bc8cd3b9c09a2c8b1ab9487a02c3f",
       "text_sha256": "a575b8099d07736d0426d475df206081239ac49e77f91ebcd1817eea168eeec6",
       "settings": {
         "voiceId": "Yash",
@@ -19,17 +19,17 @@
         "timestampType": "WORD",
         "applyTextNormalization": "OFF"
       },
-      "audio_path": "public/audio/code/bbda54b6f1c00024d1902d4b5cf557b56aa7967ea88a9b147f6bad68621cdc3b.mp3",
-      "audio_sha256": "bbda54b6f1c00024d1902d4b5cf557b56aa7967ea88a9b147f6bad68621cdc3b",
-      "timing_path": "public/audio/code/bbda54b6f1c00024d1902d4b5cf557b56aa7967ea88a9b147f6bad68621cdc3b.json",
-      "timing_sha256": "b77160759b720ab04b91a55c68fdfbbabe7af1084101debe0f0d731e247c42b2",
-      "duration": 21.648,
+      "audio_path": "public/audio/code/24a02b82a19c96374af67fa1713e569bf4c8232e83c547167b40b08448c7e78c.mp3",
+      "audio_sha256": "24a02b82a19c96374af67fa1713e569bf4c8232e83c547167b40b08448c7e78c",
+      "timing_path": "public/audio/code/24a02b82a19c96374af67fa1713e569bf4c8232e83c547167b40b08448c7e78c.json",
+      "timing_sha256": "9d03a9e42e1053bee48419696634237a52dc6566854e994f474e4a133d87023e",
+      "duration": 22.176,
       "processed_characters": 362
     },
     {
-      "identity": "e7acdc7a6281c563dc0326cd528e23f1033a6152fcccdefe740c3587fcd93eb8",
+      "identity": "8cef0bcca298f41253a7399da11e1b9afde1e19306abe7c465f70bea771caebb",
       "section": "admission",
-      "source_sha256": "3b832892d0230e832e2c72336ec5f934b0fbd9ffba0f239d6d73b5ce6196d9db",
+      "source_sha256": "b4d5d3d92aa14357ef24361636cb903dc11bc8cd3b9c09a2c8b1ab9487a02c3f",
       "text_sha256": "326451418402bf8c05ac299ef0279bd17b20e62cff91aba2b814e16b3868416b",
       "settings": {
         "voiceId": "Yash",
@@ -44,17 +44,17 @@
         "timestampType": "WORD",
         "applyTextNormalization": "OFF"
       },
-      "audio_path": "public/audio/code/5a4cdc4fe455cc6ce533c3da0b20f674799e99fa35104e91305da4e46846a38c.mp3",
-      "audio_sha256": "5a4cdc4fe455cc6ce533c3da0b20f674799e99fa35104e91305da4e46846a38c",
-      "timing_path": "public/audio/code/5a4cdc4fe455cc6ce533c3da0b20f674799e99fa35104e91305da4e46846a38c.json",
-      "timing_sha256": "4beaccde86fb582637e244e64b8ef7ea1b4f78c0c121fa05c3135918141ca8d1",
-      "duration": 23.928,
+      "audio_path": "public/audio/code/92be5f9e21949743d3851760b08d97447b8de035a77dc2ce5cbf4f7fa37d127c.mp3",
+      "audio_sha256": "92be5f9e21949743d3851760b08d97447b8de035a77dc2ce5cbf4f7fa37d127c",
+      "timing_path": "public/audio/code/92be5f9e21949743d3851760b08d97447b8de035a77dc2ce5cbf4f7fa37d127c.json",
+      "timing_sha256": "bf1f70d78d3e284242f3c9e47102715b26bb5b8b8c01fe5bd41bb95cd157bb67",
+      "duration": 24.12,
       "processed_characters": 388
     },
     {
-      "identity": "3fbd6b513614f0425f9f15e8ce73f212e7bf90385ea44b3a67ad2aaeb49c4d74",
+      "identity": "a6d83534bc8b854e5123694b3059ac5af4cfca150a88e0a622537088b558f568",
       "section": "rewrite",
-      "source_sha256": "3b832892d0230e832e2c72336ec5f934b0fbd9ffba0f239d6d73b5ce6196d9db",
+      "source_sha256": "b4d5d3d92aa14357ef24361636cb903dc11bc8cd3b9c09a2c8b1ab9487a02c3f",
       "text_sha256": "a699914d2f2ac227040e8b005ee65a9096c11ef2a93b4f4bdb27341f2ac5a328",
       "settings": {
         "voiceId": "Yash",
@@ -69,11 +69,11 @@
         "timestampType": "WORD",
         "applyTextNormalization": "OFF"
       },
-      "audio_path": "public/audio/code/4dd7432a06da9fd612dcb2a34b49f528775f0f2d8c7da17fc4e0aa3ca644c7df.mp3",
-      "audio_sha256": "4dd7432a06da9fd612dcb2a34b49f528775f0f2d8c7da17fc4e0aa3ca644c7df",
-      "timing_path": "public/audio/code/4dd7432a06da9fd612dcb2a34b49f528775f0f2d8c7da17fc4e0aa3ca644c7df.json",
-      "timing_sha256": "48fda14da6848d38cdec68b462f64c3fdeaee6969aaa665c40fc6756d48c15f3",
-      "duration": 22.992,
+      "audio_path": "public/audio/code/5585e38a923bb5d2e7bfa67d60bfc4db7f8e0685c9d56105dcbf622ed71eae47.mp3",
+      "audio_sha256": "5585e38a923bb5d2e7bfa67d60bfc4db7f8e0685c9d56105dcbf622ed71eae47",
+      "timing_path": "public/audio/code/5585e38a923bb5d2e7bfa67d60bfc4db7f8e0685c9d56105dcbf622ed71eae47.json",
+      "timing_sha256": "92e431b760cb31684990725fbfd4b010066b0c6ea3a2ccc22b16590fe6a5eedd",
+      "duration": 22.968,
       "processed_characters": 399
     }
   ]

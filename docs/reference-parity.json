@@ -918,7 +918,7 @@
       "foundation_component": "src/concepts/Concept53Debugging.tsx",
       "reference_parity": "not-certified",
       "written_guide": "written",
-      "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+      "gap": "Seven free prepared scenarios, four guarded native scenarios, strict routes, bounded correlated traces and log capture, causal findings, one-variable saved comparison, redacted persisted bundles, Stop/recovery, seven questions, two diagrams, three source-bound Yash clips and mobile browser panel pass. Final live four-scenario matrix passed with $0.018331 in reported SDK terminal fields; free matrix passed with zero calls. The combined full regression remains open after older browser timeouts and split-run failures that passed on isolated rerun. Human listening and independent student acceptance remain open.",
       "written_guide_content": "lesson-content"
     },
     {

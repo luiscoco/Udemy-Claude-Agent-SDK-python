@@ -1,0 +1,307 @@
+{
+  "lesson": 53,
+  "section": "diagnosis",
+  "duration": 24.24,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.09
+    },
+    {
+      "word": "diagnosis",
+      "start": 0.09,
+      "end": 0.66
+    },
+    {
+      "word": "scans",
+      "start": 0.66,
+      "end": 1.07
+    },
+    {
+      "word": "captured",
+      "start": 1.07,
+      "end": 1.53
+    },
+    {
+      "word": "rows",
+      "start": 1.53,
+      "end": 1.94
+    },
+    {
+      "word": "for",
+      "start": 1.97,
+      "end": 2.13
+    },
+    {
+      "word": "a",
+      "start": 2.13,
+      "end": 2.17
+    },
+    {
+      "word": "first",
+      "start": 2.17,
+      "end": 2.46
+    },
+    {
+      "word": "supported",
+      "start": 2.46,
+      "end": 2.91
+    },
+    {
+      "word": "cause",
+      "start": 2.91,
+      "end": 3.36
+    },
+    {
+      "word": "A",
+      "start": 3.97,
+      "end": 4.11
+    },
+    {
+      "word": "denied",
+      "start": 4.11,
+      "end": 4.5
+    },
+    {
+      "word": "pre-use",
+      "start": 4.5,
+      "end": 4.81
+    },
+    {
+      "word": "decision",
+      "start": 4.81,
+      "end": 5.22
+    },
+    {
+      "word": "points",
+      "start": 5.22,
+      "end": 5.54
+    },
+    {
+      "word": "to",
+      "start": 5.54,
+      "end": 5.64
+    },
+    {
+      "word": "policy",
+      "start": 5.64,
+      "end": 6.22
+    },
+    {
+      "word": "while",
+      "start": 6.67,
+      "end": 6.89
+    },
+    {
+      "word": "a",
+      "start": 6.89,
+      "end": 6.94
+    },
+    {
+      "word": "missing-file",
+      "start": 6.94,
+      "end": 7.5
+    },
+    {
+      "word": "finding",
+      "start": 7.5,
+      "end": 8
+    },
+    {
+      "word": "needs",
+      "start": 8.07,
+      "end": 8.37
+    },
+    {
+      "word": "an",
+      "start": 8.37,
+      "end": 8.46
+    },
+    {
+      "word": "admitted",
+      "start": 8.46,
+      "end": 8.88
+    },
+    {
+      "word": "matching",
+      "start": 8.88,
+      "end": 9.38
+    },
+    {
+      "word": "Read",
+      "start": 9.68,
+      "end": 9.93
+    },
+    {
+      "word": "error",
+      "start": 9.93,
+      "end": 10.31
+    },
+    {
+      "word": "and",
+      "start": 10.52,
+      "end": 10.7
+    },
+    {
+      "word": "independently",
+      "start": 10.7,
+      "end": 11.34
+    },
+    {
+      "word": "absent",
+      "start": 11.34,
+      "end": 11.8
+    },
+    {
+      "word": "fixture",
+      "start": 11.8,
+      "end": 12.32
+    },
+    {
+      "word": "An",
+      "start": 13,
+      "end": 13.15
+    },
+    {
+      "word": "API",
+      "start": 13.15,
+      "end": 13.41
+    },
+    {
+      "word": "error",
+      "start": 13.41,
+      "end": 13.76
+    },
+    {
+      "word": "checks",
+      "start": 13.76,
+      "end": 14.05
+    },
+    {
+      "word": "the",
+      "start": 14.05,
+      "end": 14.15
+    },
+    {
+      "word": "terminal",
+      "start": 14.15,
+      "end": 14.61
+    },
+    {
+      "word": "isError",
+      "start": 14.61,
+      "end": 15.12
+    },
+    {
+      "word": "flag",
+      "start": 15.12,
+      "end": 15.52
+    },
+    {
+      "word": "even",
+      "start": 15.89,
+      "end": 16.18
+    },
+    {
+      "word": "if",
+      "start": 16.18,
+      "end": 16.3
+    },
+    {
+      "word": "its",
+      "start": 16.3,
+      "end": 16.43
+    },
+    {
+      "word": "subtype",
+      "start": 16.43,
+      "end": 16.86
+    },
+    {
+      "word": "says",
+      "start": 16.86,
+      "end": 17.17
+    },
+    {
+      "word": "success",
+      "start": 17.17,
+      "end": 17.83
+    },
+    {
+      "word": "Later",
+      "start": 18.23,
+      "end": 18.64
+    },
+    {
+      "word": "exceptions",
+      "start": 18.64,
+      "end": 19.34
+    },
+    {
+      "word": "and",
+      "start": 19.38,
+      "end": 19.54
+    },
+    {
+      "word": "missing",
+      "start": 19.54,
+      "end": 19.83
+    },
+    {
+      "word": "terminals",
+      "start": 19.83,
+      "end": 20.24
+    },
+    {
+      "word": "stay",
+      "start": 20.24,
+      "end": 20.47
+    },
+    {
+      "word": "visible",
+      "start": 20.47,
+      "end": 20.93
+    },
+    {
+      "word": "as",
+      "start": 20.96,
+      "end": 21.14
+    },
+    {
+      "word": "separate",
+      "start": 21.14,
+      "end": 21.51
+    },
+    {
+      "word": "findings",
+      "start": 21.51,
+      "end": 22.14
+    },
+    {
+      "word": "ordered",
+      "start": 22.49,
+      "end": 22.86
+    },
+    {
+      "word": "by",
+      "start": 22.86,
+      "end": 23.02
+    },
+    {
+      "word": "their",
+      "start": 23.02,
+      "end": 23.14
+    },
+    {
+      "word": "supporting",
+      "start": 23.14,
+      "end": 23.58
+    },
+    {
+      "word": "rows",
+      "start": 23.58,
+      "end": 24
+    }
+  ]
+}

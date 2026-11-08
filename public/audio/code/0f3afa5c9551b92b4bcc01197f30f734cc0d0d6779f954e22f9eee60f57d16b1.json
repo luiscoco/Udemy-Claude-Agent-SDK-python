@@ -1,0 +1,332 @@
+{
+  "lesson": 53,
+  "section": "log",
+  "duration": 21.72,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.19
+    },
+    {
+      "word": "helper",
+      "start": 0.19,
+      "end": 0.55
+    },
+    {
+      "word": "reads",
+      "start": 0.55,
+      "end": 0.84
+    },
+    {
+      "word": "only",
+      "start": 0.84,
+      "end": 1.06
+    },
+    {
+      "word": "this",
+      "start": 1.06,
+      "end": 1.28
+    },
+    {
+      "word": "run's",
+      "start": 1.28,
+      "end": 1.67
+    },
+    {
+      "word": "raw",
+      "start": 1.67,
+      "end": 1.88
+    },
+    {
+      "word": "debug",
+      "start": 1.88,
+      "end": 2.24
+    },
+    {
+      "word": "log",
+      "start": 2.24,
+      "end": 2.58
+    },
+    {
+      "word": "It",
+      "start": 3.11,
+      "end": 3.28
+    },
+    {
+      "word": "first",
+      "start": 3.28,
+      "end": 3.59
+    },
+    {
+      "word": "distinguishes",
+      "start": 3.59,
+      "end": 4.19
+    },
+    {
+      "word": "a",
+      "start": 4.19,
+      "end": 4.24
+    },
+    {
+      "word": "missing",
+      "start": 4.24,
+      "end": 4.6
+    },
+    {
+      "word": "file",
+      "start": 4.6,
+      "end": 4.88
+    },
+    {
+      "word": "from",
+      "start": 4.88,
+      "end": 5.09
+    },
+    {
+      "word": "an",
+      "start": 5.09,
+      "end": 5.2
+    },
+    {
+      "word": "empty",
+      "start": 5.2,
+      "end": 5.49
+    },
+    {
+      "word": "one",
+      "start": 5.49,
+      "end": 5.76
+    },
+    {
+      "word": "then",
+      "start": 6.25,
+      "end": 6.47
+    },
+    {
+      "word": "opens",
+      "start": 6.47,
+      "end": 6.77
+    },
+    {
+      "word": "a",
+      "start": 6.77,
+      "end": 6.81
+    },
+    {
+      "word": "descriptor",
+      "start": 6.81,
+      "end": 7.48
+    },
+    {
+      "word": "and",
+      "start": 7.78,
+      "end": 7.96
+    },
+    {
+      "word": "checks",
+      "start": 7.96,
+      "end": 8.26
+    },
+    {
+      "word": "that",
+      "start": 8.26,
+      "end": 8.4
+    },
+    {
+      "word": "the",
+      "start": 8.4,
+      "end": 8.49
+    },
+    {
+      "word": "same",
+      "start": 8.49,
+      "end": 8.8
+    },
+    {
+      "word": "regular",
+      "start": 8.8,
+      "end": 9.17
+    },
+    {
+      "word": "single-link",
+      "start": 9.17,
+      "end": 9.71
+    },
+    {
+      "word": "file",
+      "start": 9.71,
+      "end": 9.96
+    },
+    {
+      "word": "was",
+      "start": 9.96,
+      "end": 10.15
+    },
+    {
+      "word": "opened",
+      "start": 10.15,
+      "end": 10.55
+    },
+    {
+      "word": "It",
+      "start": 10.97,
+      "end": 11.16
+    },
+    {
+      "word": "reads",
+      "start": 11.16,
+      "end": 11.45
+    },
+    {
+      "word": "one",
+      "start": 11.45,
+      "end": 11.69
+    },
+    {
+      "word": "byte",
+      "start": 11.69,
+      "end": 11.93
+    },
+    {
+      "word": "beyond",
+      "start": 11.93,
+      "end": 12.29
+    },
+    {
+      "word": "the",
+      "start": 12.29,
+      "end": 12.35
+    },
+    {
+      "word": "one",
+      "start": 12.35,
+      "end": 12.44
+    },
+    {
+      "word": "hundred",
+      "start": 12.44,
+      "end": 12.65
+    },
+    {
+      "word": "twenty",
+      "start": 12.65,
+      "end": 12.95
+    },
+    {
+      "word": "eight",
+      "start": 12.95,
+      "end": 13.12
+    },
+    {
+      "word": "thousand",
+      "start": 13.12,
+      "end": 13.44
+    },
+    {
+      "word": "byte",
+      "start": 13.44,
+      "end": 13.8
+    },
+    {
+      "word": "export",
+      "start": 13.98,
+      "end": 14.42
+    },
+    {
+      "word": "ceiling",
+      "start": 14.42,
+      "end": 14.81
+    },
+    {
+      "word": "so",
+      "start": 15.28,
+      "end": 15.47
+    },
+    {
+      "word": "truncation",
+      "start": 15.47,
+      "end": 16.01
+    },
+    {
+      "word": "is",
+      "start": 16.01,
+      "end": 16.15
+    },
+    {
+      "word": "visible",
+      "start": 16.15,
+      "end": 16.6
+    },
+    {
+      "word": "Finally",
+      "start": 16.93,
+      "end": 17.43
+    },
+    {
+      "word": "always",
+      "start": 17.43,
+      "end": 17.84
+    },
+    {
+      "word": "closes",
+      "start": 17.84,
+      "end": 18.19
+    },
+    {
+      "word": "the",
+      "start": 18.19,
+      "end": 18.28
+    },
+    {
+      "word": "descriptor",
+      "start": 18.28,
+      "end": 18.91
+    },
+    {
+      "word": "and",
+      "start": 19.26,
+      "end": 19.45
+    },
+    {
+      "word": "redacts",
+      "start": 19.45,
+      "end": 19.83
+    },
+    {
+      "word": "the",
+      "start": 19.83,
+      "end": 19.92
+    },
+    {
+      "word": "text",
+      "start": 19.92,
+      "end": 20.24
+    },
+    {
+      "word": "before",
+      "start": 20.24,
+      "end": 20.55
+    },
+    {
+      "word": "it",
+      "start": 20.55,
+      "end": 20.65
+    },
+    {
+      "word": "leaves",
+      "start": 20.65,
+      "end": 20.91
+    },
+    {
+      "word": "the",
+      "start": 20.91,
+      "end": 20.98
+    },
+    {
+      "word": "host",
+      "start": 20.98,
+      "end": 21.47
+    }
+  ]
+}

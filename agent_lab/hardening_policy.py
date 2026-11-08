@@ -92,7 +92,9 @@ def parse_fixed_command(command: str, executable: Path, script: Path,
     if not command or SHELL_RE.search(command) or "\\n" in command:
         return None
     try:
-        argv = tuple(shlex.split(command, posix=True))
+        parts = shlex.split(command, posix=os.name != "nt")
+        argv = tuple(part[1:-1] if os.name == "nt" and part.startswith('"') and
+                     part.endswith('"') else part for part in parts)
     except ValueError:
         return None
     if len(argv) != 3 or _canonical_argument(argv[0]) != _canonical_argument(str(executable)) or \
