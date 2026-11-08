@@ -113,6 +113,21 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             raise LessonError("Lesson 52 mode must match the requested run mode.")
         parsed.lesson_options = options.model_dump()
         return parsed
+    if lesson_id == 54:
+        from agent_lab.curriculum import get_lesson
+        from agent_lab.tool_design_lab import DesignInput
+
+        selected = dict(data)
+        selected.setdefault("prompt", get_lesson(54).prompt)
+        parsed = FoundationRunRequest.model_validate(selected)
+        if parsed.scenario != "success" or parsed.prompt != get_lesson(54).prompt:
+            raise LessonError("Lesson 54 uses the fixed catalog task.")
+        options = DesignInput.model_validate({"mode": "live" if parsed.mode == "live" else "prepared",
+                                              **parsed.lesson_options})
+        if options.mode != ("live" if parsed.mode == "live" else "prepared"):
+            raise LessonError("Lesson 54 mode must match the requested run mode.")
+        parsed.lesson_options = options.model_dump(mode="json")
+        return parsed
     if lesson_id == 53:
         from agent_lab.curriculum import get_lesson
         from agent_lab.debug_lab import DebugInput

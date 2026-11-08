@@ -1,0 +1,36 @@
+{
+  "lesson": 54,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "handler",
+      "title": "Validate and measure a tool result",
+      "path": "agent_lab/tool_design_catalog.py",
+      "start_line": 117,
+      "end_line": 151,
+      "reviewed_source_sha256": "57885b37c2ba6a02a4386877c3f9dcabe7317552b9f18a68f1f5ca28dbcd4958",
+      "spoken_text": "The catalog handler is shared by direct calls and native model tools. Pydantic validates arguments before the handler runs, so an invalid search never reaches the catalog. Every admitted call receives a unique call ID and a serialized envelope. The byte count comes from that exact UTF eight envelope, including the selected concise or detailed response format. A stale cursor, unknown ID, or empty result has a separate, actionable outcome."
+    },
+    {
+      "id": "consumer",
+      "title": "Follow the returned cursor",
+      "path": "agent_lab/tool_design_lab.py",
+      "start_line": 141,
+      "end_line": 183,
+      "reviewed_source_sha256": "5307ef54fc4dbfb2e68c28356626e3a2e54afd6a022ed02715355f909d6006e5",
+      "spoken_text": "The prepared consumer makes the profile difference observable without model spend. The vague profile calls lookup once and receives the broad catalog. The focused profile searches with exact camping and price filters, follows each returned cursor instead of inventing one, and gets each matching product by stable ID. It saves the calls, returned envelopes, and summary so both response formats can be compared from the same fixture."
+    },
+    {
+      "id": "grader",
+      "title": "Grade the evidence",
+      "path": "agent_lab/tool_design_lab.py",
+      "start_line": 44,
+      "end_line": 87,
+      "reviewed_source_sha256": "5307ef54fc4dbfb2e68c28356626e3a2e54afd6a022ed02715355f909d6006e5",
+      "spoken_text": "The grader checks evidence, not an asserted success label. It requires the immutable fixture hash, admitted matching calls, real result envelopes and hashes, the focused search cursor chain, and the exact product IDs. It also checks that the run finished and cleaned up. Vague lookup remains an observation; only the focused sequence can satisfy the lesson check."
+    }
+  ]
+}

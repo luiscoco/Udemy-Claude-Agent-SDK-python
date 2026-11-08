@@ -1,0 +1,3 @@
+# Lesson 54 narration status
+
+Three reviewed English scripts in `agent_lab/content/lesson_54_narration.json` are pinned to the current Python source excerpts for handler validation and byte measurement, cursor-following consumption, and evidence grading. `scripts/lesson54_audio.py plan --lessons=54` reports 1,237 UTF-16 characters for Inworld Yash with `inworld-tts-2`. All three clips were recorded with provider word timing and indexed by `public/audio/code/lesson-54-manifest.json`. The player exposes a clip only when source, text, settings, MP3, and timing hashes still match. Human listening review remains open.

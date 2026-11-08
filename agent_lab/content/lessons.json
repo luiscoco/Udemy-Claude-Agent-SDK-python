@@ -10757,117 +10757,204 @@
   {
     "id": 54,
     "prerequisites": [
-      5
+      5,
+      51
     ],
-    "concept_brief": "Tools the model uses well have a precise description, a strict input schema and actionable errors: when validation fails, report the field, the problem and how to fix it, so the model can correct its next call.",
-    "lab_brief": "The `tool_design` exercise validates five bad calculator inputs with Pydantic and turns each `ValidationError` into per-field feedback with a concrete fix, next to the tool description and schema the model sees.",
+    "concept_brief": "A useful tool contract narrows the model's choice and makes recovery possible. The vague lookup and focused search/get tools read one immutable synthetic catalog. Focused search filters integer EUR cents and real stock, returns stable IDs and a snapshot-bound cursor, and measures actual handler-envelope bytes.",
+    "lab_brief": "Call a valid and invalid tool directly, then compare scripted vague and focused consumers. The scripted cursor loop demonstrates the host contract with zero model calls; optional native mode observes one bounded model choice per profile. Handler receipts and unchanged fixture hashes, not assistant prose, support the automatic check.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 54 (or run `uv run agent-lab lesson 54`).",
-      "Live (optional): set `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE=true` in `.env`, then restart the app. The live calculator profile uses the same `Calculation` schema."
+      "Complete Lessons 5 and 51 and open the local portal.",
+      "Free direct calls and prepared comparisons need no API key or network request."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Design error messages a model can act on."
+        "text": "Compare vague lookup with focused search and get over the same five-product fixture."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `FIX_HINTS` and `tool_design` in the source."
+        "text": "Call catalog_get with SKU-101, then try an invalid product name instead of an ID."
       },
       {
         "title": "Run one example",
-        "text": "Run the offline exercise and open `feedback`."
+        "text": "Compare both prepared profiles in concise format, then repeat detailed format."
       },
       {
         "title": "Verify the evidence",
-        "text": "Check that each row names a `field`, a `problem` and a `fix`."
+        "text": "Inspect schema rejection versus executed NOT_FOUND, cursor chain, call/result IDs, host receipts, actual envelope bytes and unchanged fixture hash."
       },
       {
         "title": "Try the challenge",
-        "text": "Add a bad input and give it an actionable fix."
+        "text": "Rewrite the vague input description with category, price units, stock semantics and cursor recovery. Predict how the model's choice might improve without claiming the scripted run proves it."
       }
     ],
-    "inspect": "`tool_description`, `input_schema`, the `valid_call`, the `feedback` table (`case`, `field`, `problem`, `fix`) and `every_error_actionable`.",
-    "expected": "`feedback` has one row per invalid field: boolean, NaN, the extra `shell` field, the missing `b` and the out-of-range `a`. `every_error_actionable` is true and `valid_call` sums to 42.0.",
-    "evidence_criterion": "The check confirms that every validation error came with an actionable fix.",
+    "inspect": "Direct invalid arguments return INVALID_INPUT without executing the business handler. A syntactically valid missing SKU executes and returns NOT_FOUND. Focused search pages contain SKU-101 then SKU-104 under pageSize 1; each returned nextCursor is used with unchanged filters. Compare the actual serialized envelope bytes and the same before/after fixture SHA-256.",
+    "expected": "Prepared vague produces one broad lookup and no lesson credit. Prepared focused makes two successful search pages and two successful get calls, returns exactly SKU-101 and SKU-104, no handler errors, zero model calls/cost, and unchanged fixture bytes. Concise envelopes are smaller than detailed envelopes for this fixture; they are not token or transport measurements.",
+    "evidence_criterion": "Explicit tool-contract run completed without handler errors; fixture/live scope retained.",
     "evidence_checks": [
       {
-        "key": "every_error_actionable",
+        "key": "experiment_passed",
         "rule": "equals",
         "value": true
-      },
-      {
-        "key": "feedback",
-        "rule": "truthy"
       }
     ],
-    "challenge": "Add the case `\"string number\": {\"a\": \"19\", \"b\": 23}` and run again. Which fix does it get, and why does strict mode reject it?",
+    "challenge": "Rewrite 'Look things up. Pass q.' to name category filters, integer EUR cents, positive stock, stable IDs, nextCursor and recovery. Predict a more reliable choice, then compare actual native receipts instead of claiming certainty from a scripted replay.",
     "hints": [
-      "`Calculation` uses `strict=True`, so a numeric string is not converted.",
-      "The error type is `float_type`, so the fix reads `Send a JSON number, not a string or boolean.`"
+      "Start with the direct call error: distinguish schema rejection before handler execution from an executed missing-ID result.",
+      "Follow each nextCursor with the same category, ceiling, stock flag, page size and format; then get the IDs returned by the final complete chain."
     ],
-    "reference": "Generic errors make the model guess. Per-field problems with a concrete fix let it repair the call in one step, and strict validation stays in force regardless of what the schema advertised.",
+    "reference": "The vague lookup returns broad verbose camping records, including an over-budget tent and out-of-stock lantern. The focused contract explicitly filters camping, <=3000 EUR cents and stock>0, then returns two stable IDs over two pages and retrieves each. A missing syntactically valid SKU gives NOT_FOUND with a search recovery; a product name gives INVALID_INPUT before the business handler. The real envelope byte count describes handler output only. Prepared behavior is scripted; a native run measures one model attempt, not general reliability.",
     "recovery": [
-      "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-      "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+      "If the direct call rejects your JSON, inspect the field list and recovery text, then retry with a valid object.",
+      "If a cursor mismatches, clear it and restart with unchanged filters. A stopped or partial run needs review; fresh paid consent is required for another native call."
     ],
     "quiz": [
       {
-        "prompt": "Which error helps the model fix its call fastest?",
+        "prompt": "Which price unit does focused search accept?",
         "options": [
           {
-            "text": "\"Invalid input.\"",
-            "explanation": "It names neither the field nor the fix."
+            "text": "Integer EUR cents.",
+            "explanation": "Correct. The bounded schema makes the unit unambiguous."
           },
           {
-            "text": "A stack trace.",
-            "explanation": "Stack traces describe the host, not the correction."
+            "text": "Floating-point euros.",
+            "explanation": "No. The bounded schema makes the unit unambiguous."
           },
           {
-            "text": "\"b: field required. Add this required number.\"",
-            "explanation": "Correct. Field, problem and fix in one line."
+            "text": "A currency symbol string.",
+            "explanation": "No. The bounded schema makes the unit unambiguous."
           }
         ],
-        "correct": 2
+        "correct": 0
       },
       {
-        "prompt": "Why keep strict validation in the tool even with a schema?",
+        "prompt": "What proves a camping item is available?",
         "options": [
           {
-            "text": "The model may still send inputs the schema did not prevent.",
-            "explanation": "Correct. The handler is the last line of defense."
+            "text": "Its actual fixture stock is greater than zero after filtering.",
+            "explanation": "Correct. The host handler applies the real stock field."
           },
           {
-            "text": "Schemas are ignored by the SDK.",
-            "explanation": "The SDK sends the schema; it just cannot guarantee compliance."
+            "text": "The item name contains Trail.",
+            "explanation": "No. The host handler applies the real stock field."
           },
           {
-            "text": "Strict mode makes the tool faster.",
-            "explanation": "Speed is not the reason."
+            "text": "The assistant says it is available.",
+            "explanation": "No. The host handler applies the real stock field."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "A valid SKU is absent. What should catalog_get return?",
+        "options": [
+          {
+            "text": "Executed NOT_FOUND with instructions to search for an existing ID.",
+            "explanation": "Correct. The input shape is valid but no record matches."
+          },
+          {
+            "text": "A guessed matching SKU.",
+            "explanation": "No. The input shape is valid but no record matches."
+          },
+          {
+            "text": "An input-schema error for any missing record.",
+            "explanation": "No. The input shape is valid but no record matches."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What must stay unchanged when following nextCursor?",
+        "options": [
+          {
+            "text": "The category, ceiling, stock flag, page size and format, plus the snapshot version.",
+            "explanation": "Correct. A cursor binds the exact normalized search and snapshot."
+          },
+          {
+            "text": "Only the category.",
+            "explanation": "No. A cursor binds the exact normalized search and snapshot."
+          },
+          {
+            "text": "Only the model prompt.",
+            "explanation": "No. A cursor binds the exact normalized search and snapshot."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Which metric is the reported byte value?",
+        "options": [
+          {
+            "text": "UTF-8 bytes of the serialized handler envelope.",
+            "explanation": "Correct. The host measures JSON bytes after the handler returns."
+          },
+          {
+            "text": "Model tokens.",
+            "explanation": "No. The host measures JSON bytes after the handler returns."
+          },
+          {
+            "text": "Full network traffic.",
+            "explanation": "No. The host measures JSON bytes after the handler returns."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does a passing prepared cursor loop prove?",
+        "options": [
+          {
+            "text": "The scripted host consumer can follow the contract and verify returned IDs.",
+            "explanation": "Correct. Prepared runs make zero model calls and are explicitly scripted."
+          },
+          {
+            "text": "Any model will paginate unaided.",
+            "explanation": "No. Prepared runs make zero model calls and are explicitly scripted."
+          },
+          {
+            "text": "The native SDK was called.",
+            "explanation": "No. Prepared runs make zero model calls and are explicitly scripted."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why inspect pre-handler schema rejections separately?",
+        "options": [
+          {
+            "text": "The SDK may reject an input before the business handler receives it.",
+            "explanation": "Correct. Handler error counts cannot include calls blocked before execution."
+          },
+          {
+            "text": "They prove the handler executed successfully.",
+            "explanation": "No. Handler error counts cannot include calls blocked before execution."
+          },
+          {
+            "text": "They are always billed as zero tokens.",
+            "explanation": "No. Handler error counts cannot include calls blocked before execution."
           }
         ],
         "correct": 0
       }
     ],
-    "concept_code": "from typing import Any\n\nfrom claude_agent_sdk import tool\nfrom pydantic import BaseModel, ConfigDict, Field, ValidationError\n\n\nclass AddInput(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\")\n    a: float = Field(ge=-1e9, le=1e9, description=\"First number to add\")\n    b: float = Field(ge=-1e9, le=1e9, description=\"Second number to add\")\n\n\ndef feedback(error: ValidationError) -> str:\n    return \"; \".join(\n        f\"{'.'.join(map(str, e['loc'])) or 'input'}: {e['msg']}. Fix: send only a and b, numbers in [-1e9, 1e9].\"\n        for e in error.errors()\n    )\n\n\n@tool(\n    \"add\",\n    \"Add two numbers a and b and return the exact sum. Use it for arithmetic, not for counting text.\",\n    AddInput.model_json_schema(),\n)\nasync def add(args: dict[str, Any]) -> dict[str, Any]:\n    try:\n        data = AddInput.model_validate(args)\n    except ValidationError as error:\n        return {\n            \"content\": [{\"type\": \"text\", \"text\": feedback(error)}],\n            \"is_error\": True,\n        }\n    return {\"content\": [{\"type\": \"text\", \"text\": str(data.a + data.b)}]}",
-    "code_focus": "The @tool call pairs a precise description with AddInput.model_json_schema(), and the handler turns a Pydantic ValidationError into `is_error` feedback naming the field, the problem and the fix.",
+    "concept_code": "from agent_lab.tool_design_catalog import Catalog\nfrom agent_lab.tool_design_lab import DesignInput, prepared, grade\nimport asyncio\nimport uuid\n\ncatalog = Catalog()  # one immutable synthetic source\ninvalid = catalog.invoke('focused', 'catalog_get', {'sku': 'Trail mug'})\nassert invalid['errorCode'] == 'INVALID_INPUT'\nselected = DesignInput(profile='focused', format='concise')\nreport = asyncio.run(prepared(selected, uuid.uuid4(), catalog=catalog))\nassert report['summary']['searchIds'] == ['SKU-101', 'SKU-104']\nassert grade(selected, report)\n",
+    "code_focus": "`Catalog.invoke` is shared by direct calls and consumers. Strict validation precedes execution; the prepared consumer follows returned cursors and the grade checks correlated receipts and fixture hashes.",
     "concept_points": [
       {
-        "title": "Say when to use it",
-        "text": "The description tells the model what the tool does and when it is the right choice."
+        "title": "One immutable source",
+        "text": "Both profiles read the same five synthetic products and the host hashes the raw bytes."
       },
       {
-        "title": "Strict, bounded schema",
-        "text": "A Pydantic model with bounds and extra='forbid' produces the JSON Schema the model sees and rejects anything else."
+        "title": "Focused recoverable contract",
+        "text": "Typed filters, stable IDs, bounded pages and actionable errors reduce ambiguity."
       },
       {
-        "title": "Errors that teach",
-        "text": "Returning `is_error` with the field, the problem and a concrete fix lets the model correct its next call."
+        "title": "Evidence before prose",
+        "text": "Handler receipts, exact call/result IDs and known cost determine the check."
       }
     ],
     "misconception": {
-      "claim": "If the input is invalid, raising an exception from the tool is the clearest signal for the model.",
-      "correction": "An unhandled exception gives the model a vague failure. A returned `is_error` result that names the field and the fix is what lets it retry correctly."
+      "claim": "A shorter tool response proves the model used the tool correctly.",
+      "correction": "Response bytes measure only serialized handler output. Correct tool use also needs valid calls, complete cursor and detail receipts, unchanged host fixture and a successful closed run."
     }
   },
   {

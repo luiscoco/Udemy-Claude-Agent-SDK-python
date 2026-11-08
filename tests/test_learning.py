@@ -2854,3 +2854,50 @@ def test_browser_lesson53_debugging_replay_and_recovery(server, guide_browser_co
         assert not errors
     finally:
         context.close()
+
+
+def test_browser_lesson54_catalog_contract_and_comparison(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=54")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Visual guide", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-54-concept-map.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Lab walkthrough", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-54-lab-walkthrough.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Python source", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        page.get_by_role("tab", name="Run the exercise", exact=True).click()
+        lab = page.locator(".tool-design-lab")
+        expect(lab).to_be_visible()
+        lab.get_by_role("button", name="Call selected tool").click()
+        expect(lab.get_by_text("Direct catalog_search: OK", exact=True)).to_be_visible(timeout=15000)
+        expect(lab.get_by_text("Handler executed: True", exact=False)).to_be_visible()
+        lab.get_by_label("Direct JSON arguments").fill('{"category":"camping","maxPriceCents":"3000"}')
+        lab.get_by_role("button", name="Call selected tool").click()
+        expect(lab.get_by_text("Direct catalog_search: INVALID_INPUT", exact=True)).to_be_visible(timeout=15000)
+        lab.get_by_role("button", name="Compare profiles").click()
+        expect(lab.get_by_text("Comparison complete", exact=True)).to_be_visible(timeout=20000)
+        expect(lab.get_by_text("Automatic check: passed", exact=True)).to_be_visible()
+        expect(lab.get_by_text("prepared / vague / concise", exact=True)).to_be_visible()
+        expect(lab.get_by_text("prepared / focused / concise", exact=True)).to_be_visible()
+        lab.get_by_label("Format", exact=True).click()
+        page.get_by_role("option", name="Detailed", exact=True).click()
+        expect(lab.get_by_text("Inputs changed; run again for current evidence", exact=True)).to_be_visible()
+        lab.get_by_role("button", name="Compare profiles").click()
+        expect(lab.get_by_text("prepared / focused / detailed", exact=True)).to_be_visible(timeout=20000)
+        lab.get_by_label("Mode", exact=True).click()
+        page.get_by_role("option", name="Live, paid", exact=True).click()
+        lab.get_by_role("button", name="Run selected consumer").click()
+        expect(lab.get_by_text("Fresh paid consent and the reserved comparison budget are required", exact=True)).to_be_visible()
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "tool-design-lesson54-phone.png"))
+        assert not errors
+    finally:
+        context.close()

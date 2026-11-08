@@ -398,6 +398,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 54:
+        with card("Lesson 54 catalog walkthrough", "Direct calls, scripted cursor loop, guarded native comparison"):
+            ui.image("/assets/lesson-54-lab-walkthrough.svg").props('alt="Direct valid and invalid calls, vague replay, focused cursor loop and paid comparison"').classes("w-full")
     if lesson_id == 53:
         with card("Lesson 53 debugging walkthrough", "Replay, inspect, reload and compare"):
             ui.image("/assets/lesson-53-lab-walkthrough.svg").props('alt="Choose a fault, inspect its first finding, reload its saved bundle, then compare one changed variable"').classes("w-full")
@@ -495,6 +498,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 54:
+        with card("Catalog tool contract concept map", "Lesson 54"):
+            ui.image("/assets/lesson-54-concept-map.svg").props('alt="One immutable catalog feeds vague and focused tool contracts, then a correlated evidence gate"').classes("w-full")
     if lesson_id == 53:
         with card("Diagnostic evidence concept map", "Lesson 53"):
             ui.image("/assets/lesson-53-concept-map.svg").props('alt="Owned run evidence and SDK call IDs flow through causal findings and bounded persisted redaction"').classes("w-full")

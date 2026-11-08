@@ -1,0 +1,11 @@
+{
+  "currency": "EUR",
+  "supplierNotes": "Synthetic read-only classroom inventory. No purchases, stock changes, or external commerce API.",
+  "products": [
+    {"id":"SKU-101","name":"Trail mug","category":"camping","priceCents":1800,"stock":12,"tags":["outdoors","drinkware"]},
+    {"id":"SKU-102","name":"Expedition tent","category":"camping","priceCents":12900,"stock":3,"tags":["outdoors","shelter"]},
+    {"id":"SKU-103","name":"Trail lantern","category":"camping","priceCents":2200,"stock":0,"tags":["outdoors","lighting"]},
+    {"id":"SKU-104","name":"Trail blanket","category":"camping","priceCents":2900,"stock":7,"tags":["outdoors","comfort"]},
+    {"id":"SKU-105","name":"Desk flask","category":"office","priceCents":2100,"stock":5,"tags":["desk","drinkware"]}
+  ]
+}

@@ -1,0 +1,342 @@
+{
+  "lesson": 54,
+  "section": "consumer",
+  "duration": 25.608,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.1
+    },
+    {
+      "word": "prepared",
+      "start": 0.1,
+      "end": 0.53
+    },
+    {
+      "word": "consumer",
+      "start": 0.53,
+      "end": 1.11
+    },
+    {
+      "word": "makes",
+      "start": 1.22,
+      "end": 1.58
+    },
+    {
+      "word": "the",
+      "start": 1.58,
+      "end": 1.66
+    },
+    {
+      "word": "profile",
+      "start": 1.66,
+      "end": 2.07
+    },
+    {
+      "word": "difference",
+      "start": 2.07,
+      "end": 2.46
+    },
+    {
+      "word": "observable",
+      "start": 2.46,
+      "end": 3.09
+    },
+    {
+      "word": "without",
+      "start": 3.41,
+      "end": 3.84
+    },
+    {
+      "word": "model",
+      "start": 3.84,
+      "end": 4.14
+    },
+    {
+      "word": "spend",
+      "start": 4.14,
+      "end": 4.57
+    },
+    {
+      "word": "The",
+      "start": 4.95,
+      "end": 5.13
+    },
+    {
+      "word": "vague",
+      "start": 5.13,
+      "end": 5.43
+    },
+    {
+      "word": "profile",
+      "start": 5.43,
+      "end": 5.8
+    },
+    {
+      "word": "calls",
+      "start": 5.8,
+      "end": 6.14
+    },
+    {
+      "word": "lookup",
+      "start": 6.14,
+      "end": 6.53
+    },
+    {
+      "word": "once",
+      "start": 6.53,
+      "end": 6.88
+    },
+    {
+      "word": "and",
+      "start": 6.88,
+      "end": 7.04
+    },
+    {
+      "word": "receives",
+      "start": 7.04,
+      "end": 7.42
+    },
+    {
+      "word": "the",
+      "start": 7.42,
+      "end": 7.5
+    },
+    {
+      "word": "broad",
+      "start": 7.5,
+      "end": 7.78
+    },
+    {
+      "word": "catalog",
+      "start": 7.78,
+      "end": 8.37
+    },
+    {
+      "word": "The",
+      "start": 8.81,
+      "end": 8.94
+    },
+    {
+      "word": "focused",
+      "start": 8.94,
+      "end": 9.39
+    },
+    {
+      "word": "profile",
+      "start": 9.39,
+      "end": 9.75
+    },
+    {
+      "word": "searches",
+      "start": 9.75,
+      "end": 10.21
+    },
+    {
+      "word": "with",
+      "start": 10.21,
+      "end": 10.36
+    },
+    {
+      "word": "exact",
+      "start": 10.36,
+      "end": 10.87
+    },
+    {
+      "word": "camping",
+      "start": 10.87,
+      "end": 11.35
+    },
+    {
+      "word": "and",
+      "start": 11.35,
+      "end": 11.51
+    },
+    {
+      "word": "price",
+      "start": 11.51,
+      "end": 11.8
+    },
+    {
+      "word": "filters",
+      "start": 11.8,
+      "end": 12.38
+    },
+    {
+      "word": "follows",
+      "start": 12.79,
+      "end": 13.25
+    },
+    {
+      "word": "each",
+      "start": 13.25,
+      "end": 13.53
+    },
+    {
+      "word": "returned",
+      "start": 13.53,
+      "end": 13.85
+    },
+    {
+      "word": "cursor",
+      "start": 13.85,
+      "end": 14.34
+    },
+    {
+      "word": "instead",
+      "start": 14.37,
+      "end": 14.71
+    },
+    {
+      "word": "of",
+      "start": 14.71,
+      "end": 14.86
+    },
+    {
+      "word": "inventing",
+      "start": 14.86,
+      "end": 15.32
+    },
+    {
+      "word": "one",
+      "start": 15.32,
+      "end": 15.6
+    },
+    {
+      "word": "and",
+      "start": 16.01,
+      "end": 16.21
+    },
+    {
+      "word": "gets",
+      "start": 16.21,
+      "end": 16.46
+    },
+    {
+      "word": "each",
+      "start": 16.49,
+      "end": 16.77
+    },
+    {
+      "word": "matching",
+      "start": 16.77,
+      "end": 17.13
+    },
+    {
+      "word": "product",
+      "start": 17.13,
+      "end": 17.55
+    },
+    {
+      "word": "by",
+      "start": 17.55,
+      "end": 17.7
+    },
+    {
+      "word": "stable",
+      "start": 17.7,
+      "end": 18.05
+    },
+    {
+      "word": "ID",
+      "start": 18.05,
+      "end": 18.25
+    },
+    {
+      "word": "It",
+      "start": 18.81,
+      "end": 19.02
+    },
+    {
+      "word": "saves",
+      "start": 19.02,
+      "end": 19.37
+    },
+    {
+      "word": "the",
+      "start": 19.37,
+      "end": 19.45
+    },
+    {
+      "word": "calls",
+      "start": 19.45,
+      "end": 20.01
+    },
+    {
+      "word": "returned",
+      "start": 20.21,
+      "end": 20.59
+    },
+    {
+      "word": "envelopes",
+      "start": 20.59,
+      "end": 21.18
+    },
+    {
+      "word": "and",
+      "start": 21.18,
+      "end": 21.38
+    },
+    {
+      "word": "summary",
+      "start": 21.38,
+      "end": 21.84
+    },
+    {
+      "word": "so",
+      "start": 22.11,
+      "end": 22.3
+    },
+    {
+      "word": "both",
+      "start": 22.3,
+      "end": 22.57
+    },
+    {
+      "word": "response",
+      "start": 22.57,
+      "end": 23.04
+    },
+    {
+      "word": "formats",
+      "start": 23.04,
+      "end": 23.49
+    },
+    {
+      "word": "can",
+      "start": 23.49,
+      "end": 23.64
+    },
+    {
+      "word": "be",
+      "start": 23.64,
+      "end": 23.75
+    },
+    {
+      "word": "compared",
+      "start": 23.75,
+      "end": 24.23
+    },
+    {
+      "word": "from",
+      "start": 24.23,
+      "end": 24.41
+    },
+    {
+      "word": "the",
+      "start": 24.41,
+      "end": 24.48
+    },
+    {
+      "word": "same",
+      "start": 24.48,
+      "end": 24.79
+    },
+    {
+      "word": "fixture",
+      "start": 24.79,
+      "end": 25.21
+    }
+  ]
+}

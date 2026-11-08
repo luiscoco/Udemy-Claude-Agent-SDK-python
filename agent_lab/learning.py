@@ -243,6 +243,18 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 54:
+        from agent_lab.tool_design_lab import DesignInput, grade
+
+        report = evidence.get("report")
+        try:
+            selected = DesignInput.model_validate({"mode": report["mode"], "profile": report["profile"],
+                                                   "format": report["format"]})
+            passed = mode == "offline" and selected.mode == "prepared" and grade(selected, report)
+        except (KeyError, TypeError, ValueError):
+            passed = False
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail="Explicit tool-contract run completed without handler errors; fixture/live scope retained.")
     if lesson_id == 53:
         from agent_lab.debug_lab import DebugInput, criterion
 

@@ -1429,31 +1429,25 @@
     ]
   },
   "54": {
-    "source_sha256": "dd5e039ae5dac329cdab8c55fd732c8a8ec6ef0104e9f1007feef16efc986769",
+    "source_sha256": "0b370b3dfc3ce1063b8eeea25dff7d3d6ba4f75e8f6030d102a9d7a8d3dd60b3",
     "sections": [
       {
-        "title": "A strict, bounded schema",
-        "start": 7,
+        "title": "Validate direct input",
+        "start": 6,
+        "end": 7,
+        "text": "A product name is rejected before catalog_get executes."
+      },
+      {
+        "title": "Follow the scripted cursor",
+        "start": 8,
         "end": 10,
-        "text": "AddInput is a Pydantic model that forbids extra fields and bounds both numbers, each with a description. It is the single source of the rules: it produces the JSON Schema the model sees and validates what the model sends."
+        "text": "The prepared consumer obtains the two qualifying IDs from real handler pages."
       },
       {
-        "title": "Errors that teach",
-        "start": 13,
-        "end": 17,
-        "text": "feedback turns each validation error into the field name, the problem and a concrete fix. The model can read that text and correct its next call instead of guessing."
-      },
-      {
-        "title": "Description and schema together",
-        "start": 20,
-        "end": 24,
-        "text": "The tool description says what add does and when to use it, arithmetic rather than counting text. The input schema comes straight from model_json_schema on AddInput, so the model sees the same bounds the handler enforces."
-      },
-      {
-        "title": "Returning is_error, not raising",
-        "start": 25,
-        "end": 33,
-        "text": "The handler validates the arguments and, on failure, returns the feedback with is_error set instead of letting an exception escape. On success it returns the exact sum as text."
+        "title": "Check correlated evidence",
+        "start": 11,
+        "end": 11,
+        "text": "The grade checks host receipts and closure instead of assistant prose."
       }
     ]
   },

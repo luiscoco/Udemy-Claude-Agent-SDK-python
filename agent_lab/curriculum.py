@@ -434,8 +434,8 @@ ROWS = [
     (
         54,
         "Designing tools the model uses well",
-        "Use clear descriptions, bounded input schemas and actionable validation failures.",
-        "Use the calculator to add 12.5 and 29.5.",
+        "Design tool schemas and recovery messages for reliable use.",
+        "Find all in-stock camping items at most 3000 EUR cents, follow each catalog cursor and verify stable SKUs.",
         "tool_design",
         "calculator",
     ),

@@ -91,8 +91,22 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 75) if lesson_id == 53 else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 54:
+                    from agent_lab.tool_design_lab import DesignInput, grade, prepared
+                    from agent_lab.tool_design_native import native
+
+                    design_selected = DesignInput.model_validate(request.lesson_options)
+                    design_id = uuid.uuid4()
+                    design_report = (await prepared(design_selected, design_id) if request.mode == "offline" else
+                                     await native(design_selected, design_id, self.settings,
+                                                  self.settings.data_dir / "lesson-54"))
+                    await emit(Event(kind="evidence", data={"source": "Lesson 54 catalog handler receipts",
+                                                            "lesson_id": 54,
+                                                            "result": {"report": design_report,
+                                                                       "experiment_passed": grade(design_selected, design_report)}}))
+                    return
                 if lesson.id == 53:
                     from agent_lab.debug_lab import DebugInput, criterion, prepared_run
                     from agent_lab.debug_native import native_run
