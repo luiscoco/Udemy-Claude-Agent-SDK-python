@@ -442,8 +442,8 @@ ROWS = [
     (
         55,
         "Upgrading the SDK safely",
-        "Check installed public interfaces and pin Python dependencies reproducibly.",
-        "Use the exercise tool and explain the SDK compatibility report.",
+        "Rehearse SDK promotion and rollback against application contracts.",
+        "Run offline compatibility gates and a simulated canary for a fixed candidate.",
         "upgrade",
         "exercise",
     ),

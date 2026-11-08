@@ -1,0 +1,307 @@
+{
+  "lesson": 55,
+  "section": "transition",
+  "duration": 24.624,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.09
+    },
+    {
+      "word": "transition",
+      "start": 0.09,
+      "end": 0.61
+    },
+    {
+      "word": "handler",
+      "start": 0.61,
+      "end": 1.02
+    },
+    {
+      "word": "recomputes",
+      "start": 1.02,
+      "end": 1.76
+    },
+    {
+      "word": "the",
+      "start": 1.79,
+      "end": 1.94
+    },
+    {
+      "word": "selected",
+      "start": 1.94,
+      "end": 2.44
+    },
+    {
+      "word": "candidate's",
+      "start": 2.44,
+      "end": 3
+    },
+    {
+      "word": "assessment",
+      "start": 3,
+      "end": 3.62
+    },
+    {
+      "word": "and",
+      "start": 4.04,
+      "end": 4.24
+    },
+    {
+      "word": "current",
+      "start": 4.24,
+      "end": 4.61
+    },
+    {
+      "word": "installed",
+      "start": 4.61,
+      "end": 5.04
+    },
+    {
+      "word": "inventory",
+      "start": 5.04,
+      "end": 5.59
+    },
+    {
+      "word": "for",
+      "start": 5.62,
+      "end": 5.82
+    },
+    {
+      "word": "each",
+      "start": 5.82,
+      "end": 6.04
+    },
+    {
+      "word": "action",
+      "start": 6.04,
+      "end": 6.44
+    },
+    {
+      "word": "Only",
+      "start": 6.749104,
+      "end": 7.109104
+    },
+    {
+      "word": "an",
+      "start": 7.109104,
+      "end": 7.2191043
+    },
+    {
+      "word": "eligible",
+      "start": 7.2191043,
+      "end": 7.6591043
+    },
+    {
+      "word": "checked",
+      "start": 7.6591043,
+      "end": 7.979104
+    },
+    {
+      "word": "candidate",
+      "start": 7.979104,
+      "end": 8.519104
+    },
+    {
+      "word": "may",
+      "start": 8.519104,
+      "end": 8.649104
+    },
+    {
+      "word": "start",
+      "start": 8.649104,
+      "end": 8.9991045
+    },
+    {
+      "word": "a",
+      "start": 8.9991045,
+      "end": 9.039104
+    },
+    {
+      "word": "simulated",
+      "start": 9.039104,
+      "end": 9.589104
+    },
+    {
+      "word": "canary",
+      "start": 9.589104,
+      "end": 10.079104
+    },
+    {
+      "word": "and",
+      "start": 10.639104,
+      "end": 10.819104
+    },
+    {
+      "word": "only",
+      "start": 10.819104,
+      "end": 11.119104
+    },
+    {
+      "word": "an",
+      "start": 11.119104,
+      "end": 11.229104
+    },
+    {
+      "word": "eligible",
+      "start": 11.229104,
+      "end": 11.629105
+    },
+    {
+      "word": "canary",
+      "start": 11.629105,
+      "end": 12.199104
+    },
+    {
+      "word": "may",
+      "start": 12.229104,
+      "end": 12.389104
+    },
+    {
+      "word": "be",
+      "start": 12.389104,
+      "end": 12.509104
+    },
+    {
+      "word": "promoted",
+      "start": 12.509104,
+      "end": 13.069104
+    },
+    {
+      "word": "Rollback",
+      "start": 13.7491045,
+      "end": 14.2491045
+    },
+    {
+      "word": "is",
+      "start": 14.2491045,
+      "end": 14.379105
+    },
+    {
+      "word": "allowed",
+      "start": 14.379105,
+      "end": 14.659104
+    },
+    {
+      "word": "from",
+      "start": 14.659104,
+      "end": 14.869104
+    },
+    {
+      "word": "canary",
+      "start": 14.869104,
+      "end": 15.329104
+    },
+    {
+      "word": "or",
+      "start": 15.359104,
+      "end": 15.559104
+    },
+    {
+      "word": "promoted",
+      "start": 15.559104,
+      "end": 16.019104
+    },
+    {
+      "word": "state",
+      "start": 16.019104,
+      "end": 16.439104
+    },
+    {
+      "word": "including",
+      "start": 16.789104,
+      "end": 17.309105
+    },
+    {
+      "word": "when",
+      "start": 17.309105,
+      "end": 17.479105
+    },
+    {
+      "word": "the",
+      "start": 17.479105,
+      "end": 17.559105
+    },
+    {
+      "word": "candidate",
+      "start": 17.559105,
+      "end": 18.089104
+    },
+    {
+      "word": "now",
+      "start": 18.089104,
+      "end": 18.269104
+    },
+    {
+      "word": "fails",
+      "start": 18.269104,
+      "end": 18.859104
+    },
+    {
+      "word": "The",
+      "start": 19.249104,
+      "end": 19.369104
+    },
+    {
+      "word": "submitted",
+      "start": 19.369104,
+      "end": 19.869104
+    },
+    {
+      "word": "state",
+      "start": 19.869104,
+      "end": 20.189104
+    },
+    {
+      "word": "is",
+      "start": 20.189104,
+      "end": 20.309105
+    },
+    {
+      "word": "a",
+      "start": 20.309105,
+      "end": 20.379105
+    },
+    {
+      "word": "teaching",
+      "start": 20.379105,
+      "end": 20.739103
+    },
+    {
+      "word": "input",
+      "start": 20.739103,
+      "end": 21.169104
+    },
+    {
+      "word": "no",
+      "start": 21.629105,
+      "end": 21.889105
+    },
+    {
+      "word": "package",
+      "start": 21.889105,
+      "end": 22.309105
+    },
+    {
+      "word": "installation",
+      "start": 22.309105,
+      "end": 22.999104
+    },
+    {
+      "word": "or",
+      "start": 23.099104,
+      "end": 23.289104
+    },
+    {
+      "word": "deployment",
+      "start": 23.289104,
+      "end": 23.819103
+    },
+    {
+      "word": "occurs",
+      "start": 23.819103,
+      "end": 24.399105
+    }
+  ]
+}

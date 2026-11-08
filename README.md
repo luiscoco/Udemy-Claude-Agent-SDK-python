@@ -122,6 +122,8 @@ Lesson 52 adds a three-case support evaluation lab with synthetic baseline compa
 Lesson 53 adds a bounded debugging lab with seven free authored traces, four guarded native scenarios, first-cause findings, one-variable saved-run comparison, redacted persisted bundles, Stop and recovery. Run `uv run python scripts/debugging_check.py` for the free matrix or add `--live --budget 1` for a paid provider-backed matrix. See the [debugging guide](docs/lesson-53-debugging.md) and [narration status](docs/lesson-53-narration.md).
 
 Lesson 54 compares a vague catalog lookup with focused search/get tools over a fixed synthetic catalog. It measures actual result-envelope bytes, validates arguments and cursors, and runs a free four-case profile/format matrix plus an optional guarded native two-profile matrix. Run `uv run python scripts/tool_design_check.py` or add `--live --budget 0.5`. See the [tool design guide](docs/lesson-54-tool-design.md) and [narration status](docs/lesson-54-narration.md).
+
+Lesson 55 is an offline-only SDK upgrade workshop. Nine synthetic candidates exercise export, stream, permission and metric gates against observed installed Python SDK inventory; a stateless canary, promotion and rollback simulation changes no dependencies. Run `uv run python scripts/upgrading_check.py` with no arguments. See the [upgrade workshop](docs/lesson-55-upgrading.md) and [narration status](docs/lesson-55-narration.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

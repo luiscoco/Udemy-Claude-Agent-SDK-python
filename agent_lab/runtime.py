@@ -93,6 +93,16 @@ class RunService:
             )
             deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 55:
+                    from agent_lab.upgrading_lab import RunInput, criterion, run_upgrade
+
+                    selected_upgrade = RunInput.model_validate(request.lesson_options)
+                    upgrade_report = run_upgrade(selected_upgrade)
+                    await emit(Event(kind="evidence", data={"source": "Lesson 55 offline fixture contracts",
+                                                            "lesson_id": 55,
+                                                            "result": {"report": upgrade_report,
+                                                                       "experiment_passed": criterion(selected_upgrade, upgrade_report)}}))
+                    return
                 if lesson.id == 54:
                     from agent_lab.tool_design_lab import DesignInput, grade, prepared
                     from agent_lab.tool_design_native import native

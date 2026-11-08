@@ -1,0 +1,327 @@
+{
+  "lesson": 55,
+  "section": "adapter",
+  "duration": 24.84,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.1
+    },
+    {
+      "word": "stream",
+      "start": 0.1,
+      "end": 0.42
+    },
+    {
+      "word": "adapter",
+      "start": 0.42,
+      "end": 1
+    },
+    {
+      "word": "checks",
+      "start": 1.2,
+      "end": 1.51
+    },
+    {
+      "word": "the",
+      "start": 1.51,
+      "end": 1.66
+    },
+    {
+      "word": "authored",
+      "start": 1.66,
+      "end": 2.07
+    },
+    {
+      "word": "candidate",
+      "start": 2.07,
+      "end": 2.54
+    },
+    {
+      "word": "records",
+      "start": 2.54,
+      "end": 3.1
+    },
+    {
+      "word": "as",
+      "start": 3.14,
+      "end": 3.4
+    },
+    {
+      "word": "application",
+      "start": 3.4,
+      "end": 3.94
+    },
+    {
+      "word": "contracts",
+      "start": 3.94,
+      "end": 4.7
+    },
+    {
+      "word": "It",
+      "start": 5.08,
+      "end": 5.25
+    },
+    {
+      "word": "requires",
+      "start": 5.25,
+      "end": 5.66
+    },
+    {
+      "word": "one",
+      "start": 5.66,
+      "end": 5.88
+    },
+    {
+      "word": "initialized",
+      "start": 5.88,
+      "end": 6.41
+    },
+    {
+      "word": "session",
+      "start": 6.41,
+      "end": 6.88
+    },
+    {
+      "word": "an",
+      "start": 7.08,
+      "end": 7.26
+    },
+    {
+      "word": "owned",
+      "start": 7.29,
+      "end": 7.56
+    },
+    {
+      "word": "Read",
+      "start": 7.56,
+      "end": 7.77
+    },
+    {
+      "word": "of",
+      "start": 7.77,
+      "end": 7.86
+    },
+    {
+      "word": "fixture",
+      "start": 7.86,
+      "end": 8.31
+    },
+    {
+      "word": "dot",
+      "start": 8.31,
+      "end": 8.57
+    },
+    {
+      "word": "text",
+      "start": 8.57,
+      "end": 8.99
+    },
+    {
+      "word": "a",
+      "start": 9.21,
+      "end": 9.34
+    },
+    {
+      "word": "return",
+      "start": 9.34,
+      "end": 9.67
+    },
+    {
+      "word": "with",
+      "start": 9.67,
+      "end": 9.8
+    },
+    {
+      "word": "the",
+      "start": 9.8,
+      "end": 9.88
+    },
+    {
+      "word": "same",
+      "start": 9.88,
+      "end": 10.23
+    },
+    {
+      "word": "call",
+      "start": 10.23,
+      "end": 10.46
+    },
+    {
+      "word": "ID",
+      "start": 10.46,
+      "end": 10.63
+    },
+    {
+      "word": "and",
+      "start": 10.87,
+      "end": 11.05
+    },
+    {
+      "word": "fixture",
+      "start": 11.05,
+      "end": 11.44
+    },
+    {
+      "word": "evidence",
+      "start": 11.44,
+      "end": 12.08
+    },
+    {
+      "word": "a",
+      "start": 12.19,
+      "end": 12.3
+    },
+    {
+      "word": "completed",
+      "start": 12.3,
+      "end": 12.83
+    },
+    {
+      "word": "task",
+      "start": 12.83,
+      "end": 13.11
+    },
+    {
+      "word": "notification",
+      "start": 13.11,
+      "end": 13.84
+    },
+    {
+      "word": "and",
+      "start": 14.13,
+      "end": 14.35
+    },
+    {
+      "word": "one",
+      "start": 14.35,
+      "end": 14.53
+    },
+    {
+      "word": "successful",
+      "start": 14.53,
+      "end": 15.12
+    },
+    {
+      "word": "non-error",
+      "start": 15.12,
+      "end": 15.56
+    },
+    {
+      "word": "terminal",
+      "start": 15.56,
+      "end": 16.08
+    },
+    {
+      "word": "with",
+      "start": 16.11,
+      "end": 16.29
+    },
+    {
+      "word": "a",
+      "start": 16.29,
+      "end": 16.33
+    },
+    {
+      "word": "nonempty",
+      "start": 16.33,
+      "end": 16.81
+    },
+    {
+      "word": "result",
+      "start": 16.81,
+      "end": 17.25
+    },
+    {
+      "word": "An",
+      "start": 17.52,
+      "end": 17.7
+    },
+    {
+      "word": "unknown",
+      "start": 17.7,
+      "end": 18.07
+    },
+    {
+      "word": "additive",
+      "start": 18.07,
+      "end": 18.42
+    },
+    {
+      "word": "event",
+      "start": 18.42,
+      "end": 18.7
+    },
+    {
+      "word": "is",
+      "start": 18.7,
+      "end": 18.83
+    },
+    {
+      "word": "counted",
+      "start": 18.83,
+      "end": 19.34
+    },
+    {
+      "word": "and",
+      "start": 19.46,
+      "end": 19.66
+    },
+    {
+      "word": "tolerated",
+      "start": 19.66,
+      "end": 20.3
+    },
+    {
+      "word": "Missing",
+      "start": 20.49,
+      "end": 21.03
+    },
+    {
+      "word": "duplicated",
+      "start": 21.15,
+      "end": 21.89
+    },
+    {
+      "word": "foreign",
+      "start": 22,
+      "end": 22.54
+    },
+    {
+      "word": "renamed",
+      "start": 22.61,
+      "end": 23.07
+    },
+    {
+      "word": "or",
+      "start": 23.07,
+      "end": 23.19
+    },
+    {
+      "word": "error",
+      "start": 23.19,
+      "end": 23.45
+    },
+    {
+      "word": "evidence",
+      "start": 23.45,
+      "end": 23.85
+    },
+    {
+      "word": "fails",
+      "start": 23.85,
+      "end": 24.13
+    },
+    {
+      "word": "the",
+      "start": 24.13,
+      "end": 24.21
+    },
+    {
+      "word": "gate",
+      "start": 24.21,
+      "end": 24.56
+    }
+  ]
+}

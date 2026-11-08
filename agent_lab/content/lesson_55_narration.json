@@ -1,0 +1,36 @@
+{
+  "lesson": 55,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "inventory",
+      "title": "Inspect the installed SDK",
+      "path": "agent_lab/upgrading_lab.py",
+      "start_line": 56,
+      "end_line": 84,
+      "reviewed_source_sha256": "b4df1e42ebfdc80b34f7ef81dee79ab511405d7c7a4c0539620581216c65242c",
+      "spoken_text": "The runtime inventory reads the declared Python package pin, the locked version, installed package metadata, and three callable public exports. It also hashes the project and lock bytes. This inspection never queries Claude or changes the environment. Agreement among the pin, lock and installed version is a prerequisite for the workshop's automatic check, but it does not establish that a future SDK candidate will work."
+    },
+    {
+      "id": "adapter",
+      "title": "Adapt fixture stream evidence",
+      "path": "agent_lab/upgrading_lab.py",
+      "start_line": 100,
+      "end_line": 133,
+      "reviewed_source_sha256": "b4df1e42ebfdc80b34f7ef81dee79ab511405d7c7a4c0539620581216c65242c",
+      "spoken_text": "The stream adapter checks the authored candidate records as application contracts. It requires one initialized session, an owned Read of fixture dot text, a return with the same call ID and fixture evidence, a completed task notification, and one successful non-error terminal with a nonempty result. An unknown additive event is counted and tolerated. Missing, duplicated, foreign, renamed or error evidence fails the gate."
+    },
+    {
+      "id": "transition",
+      "title": "Rehearse state changes",
+      "path": "agent_lab/upgrading_lab.py",
+      "start_line": 213,
+      "end_line": 222,
+      "reviewed_source_sha256": "b4df1e42ebfdc80b34f7ef81dee79ab511405d7c7a4c0539620581216c65242c",
+      "spoken_text": "The transition handler recomputes the selected candidate's assessment and current installed inventory for each action. Only an eligible checked candidate may start a simulated canary, and only an eligible canary may be promoted. Rollback is allowed from canary or promoted state, including when the candidate now fails. The submitted state is a teaching input; no package installation or deployment occurs."
+    }
+  ]
+}

@@ -1247,6 +1247,13 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 55:
+        from agent_lab.api_upgrading import code_excerpts
+
+        return [{"title": title, "path": item["file"], "start": item["start_line"],
+                 "end": item["end_line"], "code": item["code"] + "\n", "question": item["question"]}
+                for title, item in zip(("Inspect installed inventory", "Adapt synthetic stream",
+                                        "Order simulated transitions"), code_excerpts(), strict=True)]
     if lesson_id == 54:
         from agent_lab.api_tool_design import code_excerpts
 

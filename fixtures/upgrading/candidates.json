@@ -1,0 +1,27 @@
+{
+  "baseline": {
+    "correctness": 0.94,
+    "costUsd": 0.01,
+    "latencyMs": 1000,
+    "requiredExports": ["query", "tool", "create_sdk_mcp_server"]
+  },
+  "compatibleMessages": [
+    {"type": "system", "subtype": "init", "session_id": "fixture-session"},
+    {"type": "assistant", "callId": "call-read", "tool": "Read", "path": "fixture.txt"},
+    {"type": "user", "callId": "call-read", "is_error": false, "content": "fixture-evidence"},
+    {"type": "system", "subtype": "task_notification", "task_id": "task-1", "status": "completed"},
+    {"type": "future_additive_event", "data": "ignored but counted"},
+    {"type": "result", "subtype": "success", "is_error": false, "session_id": "fixture-session", "result": "fixture answer"}
+  ],
+  "scenarios": {
+    "compatible": {"label": "Synthetic compatible candidate", "exports": ["query", "tool", "create_sdk_mcp_server"], "metrics": {"correctness": 0.94, "costUsd": 0.011, "latencyMs": 1100}, "outsideWriteAllowed": false},
+    "removed-export": {"label": "Synthetic removed export", "removeExport": "tool"},
+    "renamed-result": {"label": "Synthetic renamed result", "renameResult": true},
+    "permission-drift": {"label": "Synthetic permission drift", "outsideWriteAllowed": true},
+    "quality-regression": {"label": "Synthetic quality regression", "metrics": {"correctness": 0.90, "costUsd": 0.011, "latencyMs": 1100}},
+    "cost-regression": {"label": "Synthetic cost regression", "metrics": {"correctness": 0.94, "costUsd": 0.013, "latencyMs": 1100}},
+    "latency-regression": {"label": "Synthetic latency regression", "metrics": {"correctness": 0.94, "costUsd": 0.011, "latencyMs": 1300}},
+    "missing-evidence": {"label": "Synthetic missing evidence", "removeTask": true, "metrics": {"correctness": null, "costUsd": null, "latencyMs": null}},
+    "error-result": {"label": "Synthetic error result", "errorResult": true}
+  }
+}

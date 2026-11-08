@@ -10960,118 +10960,204 @@
   {
     "id": 55,
     "prerequisites": [
-      51
+      51,
+      52
     ],
-    "concept_brief": "Upgrade safely by pinning the SDK exactly, locking the full dependency tree (`uv.lock`), installing with `uv sync --locked`, and gating on the public interfaces your code uses before accepting a new version.",
-    "lab_brief": "The `upgrade` exercise reads the pin from `pyproject.toml`, the locked version from `uv.lock` and the installed version, checks 16 interfaces the app relies on, and shows a candidate missing `ClaudeSDKClient.interrupt` being blocked.",
+    "concept_brief": "An SDK version number alone cannot establish application compatibility. Compare observed installed inventory with four independent synthetic candidate contracts: exports, correlated stream events, denied outside Write and quality/cost/latency limits. This workshop rehearses decisions offline; it installs and deploys nothing.",
+    "lab_brief": "Run all nine fixed candidate fixtures. A compatible candidate must pass every gate; each incompatible one must fail a concrete gate. Rehearse checked, canary, promoted and rolled-back states without changing dependencies. Synthetic records are not real candidate SDK transcripts or benchmarks.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 55 (or run `uv run agent-lab lesson 55`).",
-      "No network access or upgrade happens; the exercise only reads files and the installed package."
+      "Complete Lessons 51 and 52 and open the local portal.",
+      "This lesson needs no API key, model call, network request or SDK installation."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Verify pins and interfaces before changing the SDK."
+        "text": "Inspect the actual pin, lock and installed SDK, then the four independent synthetic gates."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `upgrade` in the source, then the pin in `pyproject.toml`."
+        "text": "Select compatible and predict why every gate should pass."
       },
       {
         "title": "Run one example",
-        "text": "Run the offline exercise."
+        "text": "Run compatibility gates, start the simulated canary, promote, then roll back."
       },
       {
         "title": "Verify the evidence",
-        "text": "Check `pin_lock_install_match`, `missing_interfaces` and both gates."
+        "text": "Inspect gate observations, unchanged dependency SHA-256, zero model/network/cost counters and the simulation label."
       },
       {
         "title": "Try the challenge",
-        "text": "Require an interface that does not exist."
+        "text": "Select renamed-result or another failing fixture and verify that promotion is blocked by a specific contract."
       }
     ],
-    "inspect": "`declared_pin`, `locked_version`, `installed_version`, `pin_lock_install_match`, `required_interfaces`, `missing_interfaces`, `current_gate` and `simulated_candidate`.",
-    "expected": "Pin `claude-agent-sdk==0.2.174`, lock and install all 0.2.174 (`pin_lock_install_match` true). No interfaces are missing, so `current_gate` is `pass`, while the simulated candidate is `blocked`.",
-    "evidence_criterion": "The check confirms the pin, lockfile and installation agree and the interface gate passes.",
+    "inspect": "The compatible fixture has init, exact owned Read and matching result, completed task notification, additive event and nonerror terminal. Each incompatible fixture changes one independent contract. Observe failed gate evidence and recovery, not only an eligible label.",
+    "expected": "Observed declared, locked and installed SDK versions agree. Compatible passes exports, stream, permissions and eval gates and can be simulated through canary, promotion and rollback. Eight incompatible fixtures are blocked by concrete failures. Dependency bytes remain unchanged and model/network/cost counters are zero.",
+    "evidence_criterion": "The offline compatibility gates agreed with the selected fixture: a compatible candidate passed every gate, or an incompatible candidate was blocked by a failing gate. This is a simulation, not a real SDK upgrade.",
     "evidence_checks": [
       {
-        "key": "pin_lock_install_match",
+        "key": "experiment_passed",
         "rule": "equals",
         "value": true
-      },
-      {
-        "key": "current_gate",
-        "rule": "equals",
-        "value": "pass"
       }
     ],
-    "challenge": "Add `\"stream_everything\"` to the `methods` list in `upgrade`, run again and confirm `missing_interfaces` names it and `current_gate` becomes `blocked`.",
+    "challenge": "Select the renamed-result fixture, inspect its failed stream gate, and explain why an additive future event is tolerated while a missing required result field blocks promotion.",
     "hints": [
-      "The gate is an explicit list of what your code depends on.",
-      "`ClaudeSDKClient.stream_everything` does not exist, so it is reported missing and the gate blocks, exactly as a real breaking release would be caught."
+      "Compare the fixture's terminal fields with what the application adapter requires.",
+      "The adapter needs a nonempty terminal `result`, matched session and call IDs, a successful owned Read and a completed task notification. `answer` cannot replace `result`; an unknown additive event may be counted and ignored."
     ],
-    "reference": "Reproducible installs come from an exact pin plus a lockfile installed with `--locked`. Before upgrading, run the interface gate and the offline tests against the candidate; anything missing blocks the upgrade instead of breaking students at runtime.",
+    "reference": "The compatible candidate passes all four independent synthetic gates and may enter a simulated canary from checked state. Renamed-result changes the required terminal field, so the stream gate fails even though an unknown additive event is harmless. An ineligible candidate cannot start canary or promote. Rollback is allowed from a simulated canary or promoted state. Real upgrade work still needs isolated candidate installation, release-note review, real SDK behavior tests, comparable evaluations and a measured canary.",
     "recovery": [
-      "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-      "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+      "If inventory is inconsistent, restore the exact pyproject pin, lock and installed environment before interpreting candidate eligibility.",
+      "If a fixture is blocked, read each failed gate's observed evidence and recovery instruction. Stop or edit the scenario before running fresh gates."
     ],
     "quiz": [
       {
-        "prompt": "What does uv sync --locked guarantee?",
+        "prompt": "Does a newer SDK version alone make a candidate eligible?",
         "options": [
           {
-            "text": "The newest versions of every package.",
-            "explanation": "It installs the locked versions, not the newest."
+            "text": "No; every application contract and observed inventory must pass.",
+            "explanation": "Correct. Version order does not prove stream, permission or metric behavior."
           },
           {
-            "text": "Exactly the versions recorded in uv.lock, or a failure.",
-            "explanation": "Correct. No silent drift."
+            "text": "Yes; newer means compatible.",
+            "explanation": "No. Version order does not prove stream, permission or metric behavior."
           },
           {
-            "text": "That the SDK has no bugs.",
-            "explanation": "Locking controls versions, not quality."
+            "text": "Yes, if it imports.",
+            "explanation": "No. Version order does not prove stream, permission or metric behavior."
           }
         ],
-        "correct": 1
+        "correct": 0
       },
       {
-        "prompt": "A candidate SDK version removes a method your app calls. What should happen?",
+        "prompt": "Which artifacts should be retained for a real rollback?",
         "options": [
           {
-            "text": "Block the upgrade until the code is adapted.",
-            "explanation": "Correct. The gate exists for this."
+            "text": "Known-good package/lock, configuration, evaluation baseline and data snapshots.",
+            "explanation": "Correct. Rollback must restore code and data that the old runtime can read."
           },
           {
-            "text": "Upgrade and fix errors as students report them.",
-            "explanation": "That ships a break to students."
+            "text": "Only the latest SDK version string.",
+            "explanation": "No. Rollback must restore code and data that the old runtime can read."
           },
           {
-            "text": "Remove the method from your gate list.",
-            "explanation": "That hides the incompatibility."
+            "text": "Only the synthetic fixture report.",
+            "explanation": "No. Rollback must restore code and data that the old runtime can read."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What happens to an unknown additive stream event?",
+        "options": [
+          {
+            "text": "It is counted but does not replace required evidence.",
+            "explanation": "Correct. The adapter tolerates additions while requiring exact init, call, task and terminal evidence."
+          },
+          {
+            "text": "It automatically passes the stream gate.",
+            "explanation": "No. The adapter tolerates additions while requiring exact init, call, task and terminal evidence."
+          },
+          {
+            "text": "It always fails the gate.",
+            "explanation": "No. The adapter tolerates additions while requiring exact init, call, task and terminal evidence."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why does renamed-result block the synthetic candidate?",
+        "options": [
+          {
+            "text": "The required nonempty terminal result field is absent.",
+            "explanation": "Correct. An `answer` field does not satisfy the application adapter's `result` contract."
+          },
+          {
+            "text": "The candidate is older.",
+            "explanation": "No. An `answer` field does not satisfy the application adapter's `result` contract."
+          },
+          {
+            "text": "The unknown event appears.",
+            "explanation": "No. An `answer` field does not satisfy the application adapter's `result` contract."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does permission-drift change?",
+        "options": [
+          {
+            "text": "The simulated decision allows an outside Write that must be denied.",
+            "explanation": "Correct. The fixed permission probe evaluates actual simulated decisions, not an OS Write."
+          },
+          {
+            "text": "It changes the operating system sandbox.",
+            "explanation": "No. The fixed permission probe evaluates actual simulated decisions, not an OS Write."
+          },
+          {
+            "text": "It removes the Read fixture.",
+            "explanation": "No. The fixed permission probe evaluates actual simulated decisions, not an OS Write."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Which transition can promote a compatible candidate?",
+        "options": [
+          {
+            "text": "Canary to promoted after an eligible checked run.",
+            "explanation": "Correct. The state machine requires an eligible checked-to-canary step first."
+          },
+          {
+            "text": "Baseline directly to promoted.",
+            "explanation": "No. The state machine requires an eligible checked-to-canary step first."
+          },
+          {
+            "text": "Rolled-back directly to promoted.",
+            "explanation": "No. The state machine requires an eligible checked-to-canary step first."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What does a 20% synthetic cost limit compare?",
+        "options": [
+          {
+            "text": "Candidate cost against the positive baseline cost, inclusively.",
+            "explanation": "Correct. The metric gate uses fixed authored values, not billed usage."
+          },
+          {
+            "text": "Actual vendor billing.",
+            "explanation": "No. The metric gate uses fixed authored values, not billed usage."
+          },
+          {
+            "text": "A model token count.",
+            "explanation": "No. The metric gate uses fixed authored values, not billed usage."
           }
         ],
         "correct": 0
       }
     ],
-    "concept_code": "import importlib.metadata\nimport inspect\n\nimport claude_agent_sdk\n\n# pyproject.toml pins claude-agent-sdk==0.2.174; uv.lock locks the tree; CI runs `uv sync --locked`.\nPIN = \"0.2.174\"\nEXPORTS = [\n    \"query\",\n    \"tool\",\n    \"create_sdk_mcp_server\",\n    \"ClaudeAgentOptions\",\n    \"ClaudeSDKClient\",\n    \"HookMatcher\",\n    \"PermissionResultAllow\",\n    \"PermissionResultDeny\",\n    \"ResultMessage\",\n]\nCLIENT_METHODS = [\"connect\", \"query\", \"receive_response\", \"interrupt\", \"disconnect\"]\nOPTION_FIELDS = [\n    \"model\",\n    \"max_turns\",\n    \"max_budget_usd\",\n    \"can_use_tool\",\n    \"hooks\",\n    \"mcp_servers\",\n]\n\n\ndef compatibility_problems() -> list[str]:\n    problems: list[str] = []\n    installed = importlib.metadata.version(\"claude-agent-sdk\")\n    if installed != PIN:\n        problems.append(f\"installed {installed} but pinned {PIN}\")\n    problems += [\n        f\"missing export {name}\"\n        for name in EXPORTS\n        if not hasattr(claude_agent_sdk, name)\n    ]\n    client = claude_agent_sdk.ClaudeSDKClient\n    problems += [\n        f\"ClaudeSDKClient lost {m}\" for m in CLIENT_METHODS if not hasattr(client, m)\n    ]\n    fields = inspect.signature(claude_agent_sdk.ClaudeAgentOptions).parameters\n    problems += [\n        f\"ClaudeAgentOptions lost {f}\" for f in OPTION_FIELDS if f not in fields\n    ]\n    return problems",
-    "code_focus": "`compatibility_problems()` compares the installed version with the exact pin and checks, with hasattr and inspect.signature, every export, ClaudeSDKClient method and ClaudeAgentOptions field the app relies on.",
+    "concept_code": "from agent_lab.upgrading_lab import RunInput, TransitionInput, run_upgrade, criterion, transition\n\nselected = RunInput(scenario='compatible')\nreport = run_upgrade(selected)  # synthetic fixture, observed installed inventory\nassert report['modelCalls'] == report['networkAttempts'] == 0\nassert criterion(selected, report)\ncanary = transition(TransitionInput(scenario='compatible', state='checked', action='start-canary'))\nassert canary['newState'] == 'canary'\nblocked = run_upgrade(RunInput(scenario='renamed-result'))\nassert blocked['decision'] == 'blocked'\n",
+    "code_focus": "`run_upgrade` observes the installed environment and applies four actual evaluators to authored candidate records. `criterion` recomputes the evidence, while `transition` enforces simulated state order.",
     "concept_points": [
       {
-        "title": "Pin exactly, lock fully",
-        "text": "An exact pin in pyproject.toml plus uv.lock and uv sync --locked installs the same tree on every machine."
+        "title": "Observed environment",
+        "text": "Read pyproject, uv.lock, installed metadata and public exports without installing or querying."
       },
       {
-        "title": "Gate on what you use",
-        "text": "Check the exports, methods and option fields your code calls, such as ClaudeSDKClient.interrupt."
+        "title": "Independent contracts",
+        "text": "Required stream evidence and permission boundaries cannot be offset by a higher quality score."
       },
       {
-        "title": "Upgrade deliberately",
-        "text": "Move the pin on a branch, rerun the gate and the tests, and only then accept the new version."
+        "title": "Simulated rollout",
+        "text": "Eligibility permits checked-to-canary-to-promoted state teaching; rollback restores only the demonstration state."
       }
     ],
     "misconception": {
-      "claim": "A range like claude-agent-sdk>=0.2 is safer because you always get the latest fixes.",
-      "correction": "A range lets an install pick up a release that renamed or removed something you call. An exact pin plus a lockfile changes only when you upgrade on purpose."
+      "claim": "A passing synthetic canary proves a real SDK upgrade is safe.",
+      "correction": "The workshop tests authored fixture contracts. A real candidate needs isolated installation, release review, native SDK behavior checks, repeated evaluation and measured rollout evidence."
     }
   },
   {

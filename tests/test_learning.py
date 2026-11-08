@@ -2901,3 +2901,49 @@ def test_browser_lesson54_catalog_contract_and_comparison(server, guide_browser_
         assert not errors
     finally:
         context.close()
+
+
+def test_browser_lesson55_offline_upgrade_simulation(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=55")
+        expect(page.get_by_text("Offline simulation · no model calls", exact=True).first).to_be_visible()
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Visual guide", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-55-concept-map.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Lab walkthrough", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-55-lab-walkthrough.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Python source", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        page.get_by_role("tab", name="Run the exercise", exact=True).click()
+        lab = page.locator(".upgrading-lab")
+        expect(lab).to_be_visible()
+        expect(lab.get_by_text("Inventory consistent: True", exact=False)).to_be_visible(timeout=15000)
+        lab.get_by_role("button", name="Run compatibility gates").click()
+        expect(lab.get_by_text("Compatible fixture eligible", exact=True)).to_be_visible(timeout=15000)
+        expect(lab.get_by_text("Automatic diagnostic: passed", exact=True)).to_be_visible()
+        lab.get_by_role("button", name="Start simulated canary").click()
+        expect(lab.get_by_text("Simulated state: canary", exact=True)).to_be_visible(timeout=15000)
+        lab.get_by_role("button", name="Promote simulation").click()
+        expect(lab.get_by_text("Simulated state: promoted", exact=True)).to_be_visible(timeout=15000)
+        lab.get_by_role("button", name="Roll back simulation").click()
+        expect(lab.get_by_text("Simulated state: rolled-back", exact=True)).to_be_visible(timeout=15000)
+        lab.get_by_label("Synthetic candidate").click()
+        page.get_by_role("option", name="Renamed Result", exact=True).click()
+        expect(lab.get_by_text("Candidate changed; run fresh gates", exact=False)).to_be_visible()
+        expect(lab.get_by_role("button", name="Start simulated canary")).to_be_disabled()
+        lab.get_by_role("button", name="Run compatibility gates").click()
+        expect(lab.get_by_text("Incompatible fixture blocked", exact=False)).to_be_visible(timeout=15000)
+        expect(lab.get_by_text("Automatic diagnostic: passed", exact=True)).to_be_visible()
+        expect(lab.get_by_role("button", name="Start simulated canary")).to_be_disabled()
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "upgrading-lesson55-phone.png"))
+        assert not errors
+    finally:
+        context.close()

@@ -243,6 +243,17 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 55:
+        from agent_lab.upgrading_lab import RunInput, criterion
+
+        report = evidence.get("report")
+        try:
+            selected = RunInput.model_validate({"scenario": report["scenario"]})
+            passed = mode == "offline" and criterion(selected, report)
+        except (KeyError, TypeError, ValueError):
+            passed = False
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail="Synthetic offline gates matched the fixed candidate and installed inventory.")
     if lesson_id == 54:
         from agent_lab.tool_design_lab import DesignInput, grade
 

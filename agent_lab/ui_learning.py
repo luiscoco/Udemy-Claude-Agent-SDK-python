@@ -203,6 +203,7 @@ def lesson_header(lesson_id: int, live_enabled: bool) -> None:
     ui.label(lesson.objective).classes("text-lg text-slate-600 guide-goal-target")
     with ui.row().classes("items-center gap-3"):
         ui.badge(
+            "Offline simulation · no model calls" if lesson_id == 55 else
             "Offline exercise + optional live SDK" if live_enabled else "Offline exercise",
             color="secondary",
         )
@@ -398,6 +399,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 55:
+        with card("Lesson 55 simulated canary", "Observe gates, then rehearse promotion and rollback"):
+            ui.image("/assets/lesson-55-lab-walkthrough.svg").props('alt="Fixed candidate assessment leads through checked, canary, promoted and rolled back states"').classes("w-full")
     if lesson_id == 54:
         with card("Lesson 54 catalog walkthrough", "Direct calls, scripted cursor loop, guarded native comparison"):
             ui.image("/assets/lesson-54-lab-walkthrough.svg").props('alt="Direct valid and invalid calls, vague replay, focused cursor loop and paid comparison"').classes("w-full")
@@ -498,6 +502,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 55:
+        with card("SDK compatibility gate concept map", "Lesson 55"):
+            ui.image("/assets/lesson-55-concept-map.svg").props('alt="Installed inventory and four independent synthetic contract gates feed eligibility"').classes("w-full")
     if lesson_id == 54:
         with card("Catalog tool contract concept map", "Lesson 54"):
             ui.image("/assets/lesson-54-concept-map.svg").props('alt="One immutable catalog feeds vague and focused tool contracts, then a correlated evidence gate"').classes("w-full")

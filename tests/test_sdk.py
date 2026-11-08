@@ -24,8 +24,8 @@ from agent_lab.sdk import run_sdk
 async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_lifecycle(
     lesson_id, tmp_path, monkeypatch
 ):
-    if lesson_id == 51:
-        pytest.skip("Lesson 51's pinned contract expressly forbids live SDK calls.")
+    if lesson_id in {51, 55}:
+        pytest.skip("The pinned lesson contract expressly forbids live SDK calls.")
     if lesson_id in {52, 53, 54}:
         pytest.skip("This lesson uses its separate bounded native transport.")
     if lesson_id in {37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49}:

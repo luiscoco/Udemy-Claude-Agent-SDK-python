@@ -1452,31 +1452,25 @@
     ]
   },
   "55": {
-    "source_sha256": "cb782c9137804d94e38d89cc48da70eb5d241ee7c7a26517137c3b413ef6e648",
+    "source_sha256": "a3ca9272c3716600681dceb2448322dd27b9077d279da0113d3e011aeeddfdf4",
     "sections": [
       {
-        "title": "The exact pin",
-        "start": 6,
-        "end": 7,
-        "text": "The comment records the upgrade discipline: an exact pin in pyproject, a lockfile for the whole tree, and a locked sync in CI. PIN repeats that version so the code can check it."
+        "title": "Observe a fixed candidate",
+        "start": 3,
+        "end": 4,
+        "text": "The workshop reads actual installed inventory while assessing an authored synthetic candidate."
       },
       {
-        "title": "What the app relies on",
-        "start": 8,
-        "end": 27,
-        "text": "These three lists name the public interfaces this app actually calls: top-level exports, ClaudeSDKClient methods such as interrupt, and ClaudeAgentOptions fields such as max_budget_usd. The gate checks only what you use, not the whole SDK."
+        "title": "Check the bounded evidence",
+        "start": 5,
+        "end": 6,
+        "text": "The criterion requires a complete zero-call report matching the selected fixture."
       },
       {
-        "title": "Checking the installed version",
-        "start": 30,
-        "end": 39,
-        "text": "compatibility_problems reads the installed version from package metadata and reports a mismatch with the pin. It then reports any listed export that is missing from the claude_agent_sdk package."
-      },
-      {
-        "title": "Methods and option fields",
-        "start": 40,
-        "end": 48,
-        "text": "It checks that the client class still has each method and inspects the ClaudeAgentOptions signature for each field. An empty list means the gate passes; any entry names exactly what a new version renamed or removed."
+        "title": "Rehearse and challenge",
+        "start": 7,
+        "end": 10,
+        "text": "Only an eligible checked candidate can start canary; the renamed terminal is blocked."
       }
     ]
   },
