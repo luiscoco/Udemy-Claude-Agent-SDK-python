@@ -1953,6 +1953,7 @@ def test_browser_background_watcher_endings_and_review(server, guide_browser_con
         page.get_by_label("Recorded scenario", exact=True).click()
         page.get_by_role("option", name="Watcher cleanup absent", exact=True).click()
         page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("missing-cleanup", exact=True)).to_be_visible(timeout=15000)
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=15000)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=str(data / "background-watcher-phone.png"))
@@ -2187,6 +2188,7 @@ def test_browser_output_style_variants_and_changed_file(server, guide_browser_co
         page.get_by_label("Recorded scenario", exact=True).click()
         page.get_by_role("option", name="Owned style file changed", exact=True).click()
         page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("changed-style", exact=True)).to_be_visible(timeout=15000)
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=15000)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=str(data / "output-styles-phone.png"))
@@ -2533,6 +2535,7 @@ def test_browser_hardening_lanes_and_mobile_evidence(server, guide_browser_conte
         page.get_by_label("Recorded scenario", exact=True).click()
         page.get_by_role("option", name="Known canary leaked", exact=True).click()
         page.get_by_role("button", name="Run exercise", exact=True).click()
+        expect(page.get_by_text("leaked", exact=True)).to_be_visible(timeout=25000)
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=25000)
         page.wait_for_function("document.documentElement.scrollWidth <= innerWidth + 1")
         page.screenshot(path=str(data / "hardening-phone.png"))
@@ -2564,11 +2567,14 @@ def test_browser_headless_processes_worker_and_mobile_evidence(server, guide_bro
         assert audio_source and page.request.get(base + audio_source).status == 200
         page.get_by_role("tab", name="Run the exercise", exact=True).click()
         expect(page.get_by_label("Prompt", exact=True)).to_have_attribute("readonly", "")
-        for action in ("CLI and SDK", "Clean and buggy CI", "Process failure limits",
-                       "Local worker drain"):
+        for action, action_code in (("CLI and SDK", "headless"),
+                                    ("Clean and buggy CI", "ci"),
+                                    ("Process failure limits", "limits"),
+                                    ("Local worker drain", "deploy")):
             page.get_by_label("Headless action", exact=True).click()
             page.get_by_role("option", name=action, exact=True).click()
             page.get_by_role("button", name="Run exercise", exact=True).click()
+            expect(page.get_by_text(action_code, exact=True)).to_be_visible(timeout=30000)
             expect(page.get_by_role("button", name="Run exercise", exact=True)).to_be_enabled(timeout=30000)
             expect(page.get_by_text("Check passed", exact=True)).to_be_visible(timeout=25000)
             if action == "Local worker drain":
