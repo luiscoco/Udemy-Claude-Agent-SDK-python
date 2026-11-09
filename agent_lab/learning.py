@@ -243,6 +243,17 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 56:
+        from agent_lab.teams_lab import ReplayInput, grade
+
+        report = evidence.get("report")
+        try:
+            selected = ReplayInput.model_validate({"commands": report["commands"]})
+            passed = mode == "offline" and grade(selected, report)
+        except (KeyError, TypeError, ValueError):
+            passed = False
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail="Application team reducer verified exact ownership, acknowledgment and cleanup; native observations remain separate.")
     if lesson_id == 55:
         from agent_lab.upgrading_lab import RunInput, criterion
 

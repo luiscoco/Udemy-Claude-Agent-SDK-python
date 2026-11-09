@@ -1,0 +1,36 @@
+{
+  "lesson": 56,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "reducer",
+      "title": "Reduce commands into team state",
+      "path": "agent_lab/teams_lab.py",
+      "start_line": 95,
+      "end_line": 138,
+      "reviewed_source_sha256": "6a6fdf2c861350c6418be301a776999495f0aa3aa9d27ead3f20d067a6541c85",
+      "spoken_text": "The free reducer creates fresh member, task, inbox and receipt state for each request. Claims require an idle member, an unowned task and completed dependencies. A send queues one envelope; an identical repeat retains that envelope, while a conflicting ID is refused. Delivery and acknowledgment change inbox status, but neither completes a task. Rejected commands still add an ordered receipt and leave the underlying team state unchanged."
+    },
+    {
+      "id": "grader",
+      "title": "Grade the completed replay",
+      "path": "agent_lab/teams_lab.py",
+      "start_line": 204,
+      "end_line": 229,
+      "reviewed_source_sha256": "6a6fdf2c861350c6418be301a776999495f0aa3aa9d27ead3f20d067a6541c85",
+      "spoken_text": "The offline grader recomputes the selected command history and compares the entire state and history hash with the report. It then requires exact research and review owners and evidence, shutdown workers, acknowledged peer evidence and an accepted final cleanup receipt. The five intentional refusals remain visible in the passing walkthrough. A partial, edited or forged run cannot borrow a previous passing result."
+    },
+    {
+      "id": "native",
+      "title": "Observe named SDK tools",
+      "path": "agent_lab/teams_native.py",
+      "start_line": 111,
+      "end_line": 152,
+      "reviewed_source_sha256": "9cc430ae5498fa03b2ff51dca4eb7a2d1da6d46cc067f43727bd04e17d96a2a2",
+      "spoken_text": "The native observer is a separate paid named-subagent demonstration. It creates one isolated run, accepts only the advertised Agent or Task spawning tool and SendMessage through a pre-use hook, and records actual tool IDs and results across two turns. It retains cumulative SDK cost and closes the owned stream. A SendMessage attempt, transport result or answer containing thirty seven does not independently verify delivery or worker completion, and this is not an interactive native team."
+    }
+  ]
+}

@@ -113,6 +113,21 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             raise LessonError("Lesson 52 mode must match the requested run mode.")
         parsed.lesson_options = options.model_dump()
         return parsed
+    if lesson_id == 56:
+        from agent_lab.curriculum import get_lesson
+        from agent_lab.teams_lab import LiveInput, ReplayInput, walkthrough
+
+        selected = dict(data)
+        selected.setdefault("prompt", get_lesson(56).prompt)
+        parsed = FoundationRunRequest.model_validate(selected)
+        if parsed.prompt != get_lesson(56).prompt or parsed.scenario != "success":
+            raise LessonError("Lesson 56 uses the fixed team workshop.")
+        if parsed.mode == "offline":
+            options = parsed.lesson_options or {"commands": walkthrough()}
+            parsed.lesson_options = ReplayInput.model_validate(options).model_dump(mode="json")
+        else:
+            parsed.lesson_options = LiveInput.model_validate(parsed.lesson_options).model_dump(mode="json")
+        return parsed
     if lesson_id == 55:
         from agent_lab.curriculum import get_lesson
         from agent_lab.upgrading_lab import RunInput

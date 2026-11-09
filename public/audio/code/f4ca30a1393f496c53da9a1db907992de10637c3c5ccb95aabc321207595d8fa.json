@@ -1,0 +1,317 @@
+{
+  "lesson": 56,
+  "section": "grader",
+  "duration": 24.984,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.2
+    },
+    {
+      "word": "offline",
+      "start": 0.2,
+      "end": 0.6
+    },
+    {
+      "word": "grader",
+      "start": 0.6,
+      "end": 0.96
+    },
+    {
+      "word": "recomputes",
+      "start": 0.96,
+      "end": 1.56
+    },
+    {
+      "word": "the",
+      "start": 1.56,
+      "end": 1.65
+    },
+    {
+      "word": "selected",
+      "start": 1.65,
+      "end": 2.07
+    },
+    {
+      "word": "command",
+      "start": 2.07,
+      "end": 2.39
+    },
+    {
+      "word": "history",
+      "start": 2.39,
+      "end": 2.88
+    },
+    {
+      "word": "and",
+      "start": 3.25,
+      "end": 3.44
+    },
+    {
+      "word": "compares",
+      "start": 3.44,
+      "end": 3.92
+    },
+    {
+      "word": "the",
+      "start": 3.92,
+      "end": 4.03
+    },
+    {
+      "word": "entire",
+      "start": 4.03,
+      "end": 4.43
+    },
+    {
+      "word": "state",
+      "start": 4.43,
+      "end": 4.79
+    },
+    {
+      "word": "and",
+      "start": 4.79,
+      "end": 4.9
+    },
+    {
+      "word": "history",
+      "start": 4.9,
+      "end": 5.23
+    },
+    {
+      "word": "hash",
+      "start": 5.23,
+      "end": 5.69
+    },
+    {
+      "word": "with",
+      "start": 5.72,
+      "end": 5.9
+    },
+    {
+      "word": "the",
+      "start": 5.9,
+      "end": 6
+    },
+    {
+      "word": "report",
+      "start": 6,
+      "end": 6.45
+    },
+    {
+      "word": "It",
+      "start": 6.99,
+      "end": 7.16
+    },
+    {
+      "word": "then",
+      "start": 7.16,
+      "end": 7.34
+    },
+    {
+      "word": "requires",
+      "start": 7.34,
+      "end": 7.77
+    },
+    {
+      "word": "exact",
+      "start": 7.77,
+      "end": 8.27
+    },
+    {
+      "word": "research",
+      "start": 8.27,
+      "end": 8.7
+    },
+    {
+      "word": "and",
+      "start": 8.7,
+      "end": 8.87
+    },
+    {
+      "word": "review",
+      "start": 8.87,
+      "end": 9.14
+    },
+    {
+      "word": "owners",
+      "start": 9.14,
+      "end": 9.65
+    },
+    {
+      "word": "and",
+      "start": 9.65,
+      "end": 9.77
+    },
+    {
+      "word": "evidence",
+      "start": 9.77,
+      "end": 10.41
+    },
+    {
+      "word": "shutdown",
+      "start": 10.75,
+      "end": 11.22
+    },
+    {
+      "word": "workers",
+      "start": 11.22,
+      "end": 11.84
+    },
+    {
+      "word": "acknowledged",
+      "start": 12.07,
+      "end": 12.67
+    },
+    {
+      "word": "peer",
+      "start": 12.67,
+      "end": 12.92
+    },
+    {
+      "word": "evidence",
+      "start": 12.92,
+      "end": 13.51
+    },
+    {
+      "word": "and",
+      "start": 13.7,
+      "end": 13.87
+    },
+    {
+      "word": "an",
+      "start": 13.87,
+      "end": 13.95
+    },
+    {
+      "word": "accepted",
+      "start": 13.95,
+      "end": 14.44
+    },
+    {
+      "word": "final",
+      "start": 14.44,
+      "end": 14.79
+    },
+    {
+      "word": "cleanup",
+      "start": 14.79,
+      "end": 15.15
+    },
+    {
+      "word": "receipt",
+      "start": 15.15,
+      "end": 15.56
+    },
+    {
+      "word": "The",
+      "start": 15.95,
+      "end": 16.11
+    },
+    {
+      "word": "five",
+      "start": 16.11,
+      "end": 16.46
+    },
+    {
+      "word": "intentional",
+      "start": 16.46,
+      "end": 17.01
+    },
+    {
+      "word": "refusals",
+      "start": 17.01,
+      "end": 17.76
+    },
+    {
+      "word": "remain",
+      "start": 17.79,
+      "end": 18.13
+    },
+    {
+      "word": "visible",
+      "start": 18.13,
+      "end": 18.58
+    },
+    {
+      "word": "in",
+      "start": 18.61,
+      "end": 18.72
+    },
+    {
+      "word": "the",
+      "start": 18.72,
+      "end": 18.79
+    },
+    {
+      "word": "passing",
+      "start": 18.79,
+      "end": 19.16
+    },
+    {
+      "word": "walkthrough",
+      "start": 19.16,
+      "end": 19.63
+    },
+    {
+      "word": "A",
+      "start": 20.22,
+      "end": 20.31
+    },
+    {
+      "word": "partial",
+      "start": 20.31,
+      "end": 20.99
+    },
+    {
+      "word": "edited",
+      "start": 21.2,
+      "end": 21.65
+    },
+    {
+      "word": "or",
+      "start": 21.65,
+      "end": 21.75
+    },
+    {
+      "word": "forged",
+      "start": 21.75,
+      "end": 22.15
+    },
+    {
+      "word": "run",
+      "start": 22.15,
+      "end": 22.5
+    },
+    {
+      "word": "cannot",
+      "start": 22.76,
+      "end": 23.09
+    },
+    {
+      "word": "borrow",
+      "start": 23.09,
+      "end": 23.44
+    },
+    {
+      "word": "a",
+      "start": 23.44,
+      "end": 23.47
+    },
+    {
+      "word": "previous",
+      "start": 23.47,
+      "end": 23.87
+    },
+    {
+      "word": "passing",
+      "start": 23.87,
+      "end": 24.21
+    },
+    {
+      "word": "result",
+      "start": 24.21,
+      "end": 24.67
+    }
+  ]
+}

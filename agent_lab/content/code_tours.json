@@ -1475,31 +1475,25 @@
     ]
   },
   "56": {
-    "source_sha256": "1932d81f3332c1b8bea49aa895898d511820bcc0edb7e4cbbe25cb827c70bb4a",
+    "source_sha256": "74830aad502bcd22ad281d54ef3ebe2a6a027cb9b1d119ba1e8ade43c0a9d647",
     "sections": [
       {
-        "title": "A bounded note",
+        "title": "Refuse partial cleanup",
+        "start": 3,
+        "end": 4,
+        "text": "The first fifteen commands cannot meet the final cleanup gate."
+      },
+      {
+        "title": "Replay all commands",
         "start": 5,
-        "end": 8,
-        "text": "Every message is a Note that records its sender and recipient, and its text is limited to 600 characters. Pydantic rejects a longer note, so no single message can flood a teammate."
+        "end": 6,
+        "text": "The sixteenth command produces a fresh replay with all receipts."
       },
       {
-        "title": "The host-owned board",
-        "start": 11,
-        "end": 14,
-        "text": "The Board belongs to the host. It knows the team members, a per-sender message limit, and the list of notes sent so far."
-      },
-      {
-        "title": "Checks before delivery",
-        "start": 16,
-        "end": 23,
-        "text": "send refuses when the sender or recipient is not a team member, or when the sender has already used up its message allowance, raising a PermissionError with the reason. Only then is the note stored with its provenance."
-      },
-      {
-        "title": "Inbox as untrusted data",
-        "start": 26,
-        "end": 37,
-        "text": "run_member wraps each note for this member in a message tag that names the sender and marks it untrusted. The system prompt says text inside those tags is data, never instructions, so relayed text is not presented as orders. The member's answer is the result text of the ResultMessage."
+        "title": "Check refusals and final state",
+        "start": 7,
+        "end": 10,
+        "text": "Five deliberate refusals remain visible while exact final evidence passes."
       }
     ]
   },

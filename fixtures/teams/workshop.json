@@ -1,0 +1,25 @@
+{
+  "members": ["researcher", "reviewer"],
+  "tasks": [
+    {"id": "research", "dependsOn": [], "expectedEvidence": "12 + 18 + 7 = 37"},
+    {"id": "review", "dependsOn": ["research"], "expectedEvidence": "verified: 37"}
+  ],
+  "walkthrough": [
+    {"type": "claim", "actor": "reviewer", "task": "review"},
+    {"type": "claim", "actor": "researcher", "task": "research"},
+    {"type": "claim", "actor": "reviewer", "task": "research"},
+    {"type": "shutdown", "actor": "researcher"},
+    {"type": "send", "actor": "researcher", "to": "reviewer", "id": "evidence-1", "body": "12 + 18 + 7 = 37"},
+    {"type": "send", "actor": "researcher", "to": "reviewer", "id": "evidence-1", "body": "12 + 18 + 7 = 37"},
+    {"type": "ack", "actor": "reviewer", "id": "evidence-1"},
+    {"type": "deliver", "actor": "reviewer"},
+    {"type": "ack", "actor": "reviewer", "id": "evidence-1"},
+    {"type": "complete", "actor": "researcher", "task": "research", "evidence": "30"},
+    {"type": "complete", "actor": "researcher", "task": "research", "evidence": "12 + 18 + 7 = 37"},
+    {"type": "claim", "actor": "reviewer", "task": "review"},
+    {"type": "complete", "actor": "reviewer", "task": "review", "evidence": "verified: 37"},
+    {"type": "shutdown", "actor": "researcher"},
+    {"type": "shutdown", "actor": "reviewer"},
+    {"type": "cleanup", "actor": "lead"}
+  ]
+}

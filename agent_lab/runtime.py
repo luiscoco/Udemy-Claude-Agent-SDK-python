@@ -91,8 +91,26 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 100) if lesson_id == 56 else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 56:
+                    from agent_lab.teams_lab import LiveInput, ReplayInput, grade, run_replay
+                    from agent_lab.teams_native import evaluate_native, native_run
+
+                    if request.mode == "offline":
+                        team_selected = ReplayInput.model_validate(request.lesson_options)
+                        team_report = run_replay(team_selected)
+                        passed = grade(team_selected, team_report)
+                    else:
+                        team_live_selected = LiveInput.model_validate(request.lesson_options)
+                        team_report = await native_run(team_live_selected, self.settings,
+                                                       self.settings.data_dir / "lesson-56")
+                        passed = evaluate_native(team_report)
+                    await emit(Event(kind="evidence", data={"source": "Lesson 56 team reducer/native observer",
+                                                            "lesson_id": 56,
+                                                            "result": {"report": team_report,
+                                                                       "experiment_passed": passed}}))
+                    return
                 if lesson.id == 55:
                     from agent_lab.upgrading_lab import RunInput, criterion, run_upgrade
 

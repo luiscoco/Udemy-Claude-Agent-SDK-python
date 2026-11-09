@@ -450,8 +450,8 @@ ROWS = [
     (
         56,
         "Agent teams and inter-agent messaging",
-        "Use a bounded host message board and preserve message provenance.",
-        "Use the exercise tool to inspect the team handoff.",
+        "Assign worker ownership and exchange evidence through messaging.",
+        "Step through the bounded team workshop and verify evidence-gated cleanup.",
         "board",
         "exercise",
     ),

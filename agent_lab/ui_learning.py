@@ -399,6 +399,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 56:
+        with card("Lesson 56 team walkthrough", "Sixteen commands, five deliberate refusals"):
+            ui.image("/assets/lesson-56-lab-walkthrough.svg").props('alt="Researcher and reviewer step through claims, message delivery, exact evidence, shutdown and cleanup"').classes("w-full")
     if lesson_id == 55:
         with card("Lesson 55 simulated canary", "Observe gates, then rehearse promotion and rollback"):
             ui.image("/assets/lesson-55-lab-walkthrough.svg").props('alt="Fixed candidate assessment leads through checked, canary, promoted and rolled back states"').classes("w-full")
@@ -502,6 +505,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 56:
+        with card("Team coordination concept map", "Lesson 56"):
+            ui.image("/assets/lesson-56-concept-map.svg").props('alt="Ownership, inbox delivery and exact evidence are independent team coordination gates"').classes("w-full")
     if lesson_id == 55:
         with card("SDK compatibility gate concept map", "Lesson 55"):
             ui.image("/assets/lesson-55-concept-map.svg").props('alt="Installed inventory and four independent synthetic contract gates feed eligibility"').classes("w-full")

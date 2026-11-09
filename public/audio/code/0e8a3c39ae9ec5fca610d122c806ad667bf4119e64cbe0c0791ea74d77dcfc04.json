@@ -1,0 +1,382 @@
+{
+  "lesson": 56,
+  "section": "native",
+  "duration": 28.296,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.11
+    },
+    {
+      "word": "native",
+      "start": 0.11,
+      "end": 0.45
+    },
+    {
+      "word": "observer",
+      "start": 0.45,
+      "end": 0.95
+    },
+    {
+      "word": "is",
+      "start": 0.98,
+      "end": 1.13
+    },
+    {
+      "word": "a",
+      "start": 1.13,
+      "end": 1.18
+    },
+    {
+      "word": "separate",
+      "start": 1.18,
+      "end": 1.67
+    },
+    {
+      "word": "paid",
+      "start": 1.67,
+      "end": 1.89
+    },
+    {
+      "word": "named-subagent",
+      "start": 1.89,
+      "end": 2.7
+    },
+    {
+      "word": "demonstration",
+      "start": 2.7,
+      "end": 3.37
+    },
+    {
+      "word": "It",
+      "start": 3.87,
+      "end": 4.06
+    },
+    {
+      "word": "creates",
+      "start": 4.06,
+      "end": 4.44
+    },
+    {
+      "word": "one",
+      "start": 4.44,
+      "end": 4.61
+    },
+    {
+      "word": "isolated",
+      "start": 4.61,
+      "end": 5.19
+    },
+    {
+      "word": "run",
+      "start": 5.19,
+      "end": 5.45
+    },
+    {
+      "word": "accepts",
+      "start": 5.83,
+      "end": 6.28
+    },
+    {
+      "word": "only",
+      "start": 6.28,
+      "end": 6.53
+    },
+    {
+      "word": "the",
+      "start": 6.53,
+      "end": 6.62
+    },
+    {
+      "word": "advertised",
+      "start": 6.62,
+      "end": 7.25
+    },
+    {
+      "word": "Agent",
+      "start": 7.28,
+      "end": 7.68
+    },
+    {
+      "word": "or",
+      "start": 7.68,
+      "end": 7.77
+    },
+    {
+      "word": "Task",
+      "start": 7.77,
+      "end": 8.1
+    },
+    {
+      "word": "spawning",
+      "start": 8.1,
+      "end": 8.48
+    },
+    {
+      "word": "tool",
+      "start": 8.48,
+      "end": 8.79
+    },
+    {
+      "word": "and",
+      "start": 9.11,
+      "end": 9.33
+    },
+    {
+      "word": "SendMessage",
+      "start": 9.33,
+      "end": 9.94
+    },
+    {
+      "word": "through",
+      "start": 9.94,
+      "end": 10.1
+    },
+    {
+      "word": "a",
+      "start": 10.1,
+      "end": 10.14
+    },
+    {
+      "word": "pre-use",
+      "start": 10.14,
+      "end": 10.56
+    },
+    {
+      "word": "hook",
+      "start": 10.56,
+      "end": 10.83
+    },
+    {
+      "word": "and",
+      "start": 11.21,
+      "end": 11.39
+    },
+    {
+      "word": "records",
+      "start": 11.39,
+      "end": 11.79
+    },
+    {
+      "word": "actual",
+      "start": 11.79,
+      "end": 12.16
+    },
+    {
+      "word": "tool",
+      "start": 12.16,
+      "end": 12.43
+    },
+    {
+      "word": "IDs",
+      "start": 12.43,
+      "end": 12.85
+    },
+    {
+      "word": "and",
+      "start": 13.03,
+      "end": 13.22
+    },
+    {
+      "word": "results",
+      "start": 13.22,
+      "end": 13.62
+    },
+    {
+      "word": "across",
+      "start": 13.62,
+      "end": 14
+    },
+    {
+      "word": "two",
+      "start": 14,
+      "end": 14.17
+    },
+    {
+      "word": "turns",
+      "start": 14.17,
+      "end": 14.65
+    },
+    {
+      "word": "It",
+      "start": 15.07,
+      "end": 15.27
+    },
+    {
+      "word": "retains",
+      "start": 15.27,
+      "end": 15.62
+    },
+    {
+      "word": "cumulative",
+      "start": 15.62,
+      "end": 16.12
+    },
+    {
+      "word": "SDK",
+      "start": 16.12,
+      "end": 16.51
+    },
+    {
+      "word": "cost",
+      "start": 16.51,
+      "end": 16.94
+    },
+    {
+      "word": "and",
+      "start": 16.97,
+      "end": 17.18
+    },
+    {
+      "word": "closes",
+      "start": 17.18,
+      "end": 17.55
+    },
+    {
+      "word": "the",
+      "start": 17.55,
+      "end": 17.66
+    },
+    {
+      "word": "owned",
+      "start": 17.66,
+      "end": 17.92
+    },
+    {
+      "word": "stream",
+      "start": 17.92,
+      "end": 18.27
+    },
+    {
+      "word": "A",
+      "start": 18.74,
+      "end": 18.85
+    },
+    {
+      "word": "SendMessage",
+      "start": 18.85,
+      "end": 19.38
+    },
+    {
+      "word": "attempt",
+      "start": 19.38,
+      "end": 19.78
+    },
+    {
+      "word": "transport",
+      "start": 20.03,
+      "end": 20.52
+    },
+    {
+      "word": "result",
+      "start": 20.52,
+      "end": 20.88
+    },
+    {
+      "word": "or",
+      "start": 20.88,
+      "end": 21.14
+    },
+    {
+      "word": "answer",
+      "start": 21.14,
+      "end": 21.39
+    },
+    {
+      "word": "containing",
+      "start": 21.39,
+      "end": 21.81
+    },
+    {
+      "word": "thirty",
+      "start": 21.81,
+      "end": 22.03
+    },
+    {
+      "word": "seven",
+      "start": 22.03,
+      "end": 22.46
+    },
+    {
+      "word": "does",
+      "start": 22.8,
+      "end": 23.06
+    },
+    {
+      "word": "not",
+      "start": 23.06,
+      "end": 23.28
+    },
+    {
+      "word": "independently",
+      "start": 23.28,
+      "end": 23.86
+    },
+    {
+      "word": "verify",
+      "start": 23.86,
+      "end": 24.24
+    },
+    {
+      "word": "delivery",
+      "start": 24.24,
+      "end": 24.73
+    },
+    {
+      "word": "or",
+      "start": 24.81,
+      "end": 24.94
+    },
+    {
+      "word": "worker",
+      "start": 24.94,
+      "end": 25.22
+    },
+    {
+      "word": "completion",
+      "start": 25.22,
+      "end": 25.76
+    },
+    {
+      "word": "and",
+      "start": 26.23,
+      "end": 26.41
+    },
+    {
+      "word": "this",
+      "start": 26.41,
+      "end": 26.57
+    },
+    {
+      "word": "is",
+      "start": 26.57,
+      "end": 26.68
+    },
+    {
+      "word": "not",
+      "start": 26.68,
+      "end": 26.88
+    },
+    {
+      "word": "an",
+      "start": 26.88,
+      "end": 26.98
+    },
+    {
+      "word": "interactive",
+      "start": 26.98,
+      "end": 27.44
+    },
+    {
+      "word": "native",
+      "start": 27.44,
+      "end": 27.74
+    },
+    {
+      "word": "team",
+      "start": 27.74,
+      "end": 27.97
+    }
+  ]
+}

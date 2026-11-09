@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 460" role="img" aria-labelledby="title desc">
+  <title id="title">Team coordination concept map</title>
+  <desc id="desc">Membership and ownership, message delivery and acknowledgment, and exact task evidence are separate gates before cleanup.</desc>
+  <rect width="960" height="460" fill="#f8fafc"/>
+  <text x="40" y="49" font-family="Arial" font-size="28" font-weight="700" fill="#0f172a">Coordination needs separate evidence</text>
+  <rect x="42" y="100" width="255" height="160" rx="15" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="64" y="139" font-family="Arial" font-size="21" font-weight="700" fill="#1e3a8a">Ownership</text>
+  <text x="64" y="176" font-family="Arial" font-size="17" fill="#1e3a8a">Researcher → research</text>
+  <text x="64" y="206" font-family="Arial" font-size="17" fill="#1e3a8a">Reviewer → review</text>
+  <text x="64" y="236" font-family="Arial" font-size="17" fill="#1e3a8a">Dependencies checked</text>
+  <path d="M297 178 H338" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="345" y="100" width="270" height="160" rx="15" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+  <text x="367" y="139" font-family="Arial" font-size="21" font-weight="700" fill="#92400e">Inbox lifecycle</text>
+  <text x="367" y="176" font-family="Arial" font-size="17" fill="#92400e">Queued → delivered</text>
+  <text x="367" y="206" font-family="Arial" font-size="17" fill="#92400e">→ acknowledged</text>
+  <text x="367" y="236" font-family="Arial" font-size="17" fill="#92400e">No task completion implied</text>
+  <path d="M615 178 H656" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="663" y="100" width="255" height="160" rx="15" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="685" y="139" font-family="Arial" font-size="21" font-weight="700" fill="#166534">Exact evidence</text>
+  <text x="685" y="176" font-family="Arial" font-size="17" fill="#166534">Research: 37</text>
+  <text x="685" y="206" font-family="Arial" font-size="17" fill="#166534">Review: verified 37</text>
+  <text x="685" y="236" font-family="Arial" font-size="17" fill="#166534">Owner completes task</text>
+  <path d="M785 260 V317 H475" stroke="#475569" stroke-width="3" marker-end="url(#arrow)"/>
+  <rect x="310" y="324" width="330" height="77" rx="13" fill="#e0e7ff" stroke="#4f46e5" stroke-width="2"/>
+  <text x="475" y="357" text-anchor="middle" font-family="Arial" font-size="20" font-weight="700" fill="#312e81">Shutdown then cleanup</text>
+  <text x="475" y="383" text-anchor="middle" font-family="Arial" font-size="15" fill="#312e81">Retain receipts and acknowledged messages</text>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L0 6 L9 3 Z" fill="#475569"/></marker></defs>
+</svg>
