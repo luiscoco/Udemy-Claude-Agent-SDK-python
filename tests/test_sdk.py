@@ -26,7 +26,7 @@ async def test_every_live_profile_constructs_real_sdk_options_and_owns_client_li
 ):
     if lesson_id in {51, 55}:
         pytest.skip("The pinned lesson contract expressly forbids live SDK calls.")
-    if lesson_id in {52, 53, 54, 56}:
+    if lesson_id in {52, 53, 54, 56, 57}:
         pytest.skip("This lesson uses its separate bounded native transport.")
     if lesson_id in {37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49}:
         pytest.skip("This lesson uses a custom SDK transport covered by its focused and live tests.")

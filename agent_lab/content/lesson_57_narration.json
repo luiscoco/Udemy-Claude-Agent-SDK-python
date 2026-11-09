@@ -1,0 +1,36 @@
+{
+  "lesson": 57,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "reducer",
+      "title": "Launch owned workers",
+      "path": "agent_lab/worktrees_lab.py",
+      "start_line": 137,
+      "end_line": 182,
+      "reviewed_source_sha256": "407a85535b4402255c9f193db26f7ce49f2c063aee93edf13668a3cb3fe506f8",
+      "spoken_text": "The host creates a fresh owned repository and commits a known base before adding two separate worker branches. Both workers start before either commit is accepted. Each worker may change exactly one assigned source file. The host verifies the branch, base commit, changed path, exact source bytes and fixed Node behavior before it creates the worker commit. The workers share Git history, so Git operations are serialized while their file work can overlap."
+    },
+    {
+      "id": "grader",
+      "title": "Grade real integration",
+      "path": "agent_lab/worktrees_lab.py",
+      "start_line": 318,
+      "end_line": 366,
+      "reviewed_source_sha256": "407a85535b4402255c9f193db26f7ce49f2c063aee93edf13668a3cb3fe506f8",
+      "spoken_text": "The grader requires the independent scenario to carry two real worker commits, each parented to the base. It checks two serial integrated commits and their parent chain, successful worker and combined Node assertions, clean main, original worker refs and nonforce removal of both worker worktrees. The deliberate conflict is retained for inspection and needs review. A model statement or a partial report cannot satisfy these actual Git and test gates."
+    },
+    {
+      "id": "native",
+      "title": "Gate native file tools",
+      "path": "agent_lab/worktrees_native.py",
+      "start_line": 13,
+      "end_line": 32,
+      "reviewed_source_sha256": "c810c8704d7eb660f66c7a91094375e04e30668a4b2166a122c530ce32007577",
+      "spoken_text": "The native file gate admits only Read, Write or Edit targeting the existing assigned regular file. Both the pre-use hook and permission callback apply the same exact path decision; Bash, Git commands, delegation and other files are denied. A successful SDK terminal still needs a correlated admitted write or edit and nonerror tool result. The coordinator then independently validates the file, runs Node tests and commits it. The two SDK cost thresholds are stop rules, not prepaid billing caps."
+    }
+  ]
+}

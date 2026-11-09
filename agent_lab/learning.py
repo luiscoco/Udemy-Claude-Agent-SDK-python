@@ -243,6 +243,13 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 57:
+        from agent_lab.worktrees_lab import grade
+
+        report = evidence.get("report")
+        passed = isinstance(report, dict) and report.get("mode") == ("live" if mode == "live" else "prepared") and grade(report)
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail="Owned Git worker commits, host Node tests, serial integration and clean removal are required.")
     if lesson_id == 56:
         from agent_lab.teams_lab import ReplayInput, grade
 

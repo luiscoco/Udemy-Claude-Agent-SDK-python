@@ -1,0 +1,21 @@
+"""Recorded Lesson 57 narration stays bound to the reviewed source and timing."""
+
+import json
+from pathlib import Path
+
+from agent_lab.foundations import source_sections
+from agent_lab.lesson57_audio import clip_for_section
+from scripts.lesson57_audio import plan, reviewed_sections, verify_published
+
+
+def test_lesson57_audio_matches_source_and_timing() -> None:
+    script, settings = reviewed_sections()
+    manifest = json.loads(Path("public/audio/code/lesson-57-manifest.json").read_text(encoding="utf-8"))
+    sections = source_sections(57)
+    assert len(sections) == len(manifest["entries"]) == 3
+    assert plan(script, settings)["total_characters"] == 1404
+    for index, section in enumerate(script["sections"]):
+        entry = next(item for item in manifest["entries"] if item["section"] == section["id"])
+        verify_published(entry, section)
+        visible = sections[index]
+        assert clip_for_section(index, visible["path"], visible["start"], visible["end"])

@@ -126,6 +126,8 @@ Lesson 54 compares a vague catalog lookup with focused search/get tools over a f
 Lesson 55 is an offline-only SDK upgrade workshop. Nine synthetic candidates exercise export, stream, permission and metric gates against observed installed Python SDK inventory; a stateless canary, promotion and rollback simulation changes no dependencies. Run `uv run python scripts/upgrading_check.py` with no arguments. See the [upgrade workshop](docs/lesson-55-upgrading.md) and [narration status](docs/lesson-55-narration.md).
 
 Lesson 56 adds a free sixteen-command team reducer with ownership, inbox acknowledgment and exact completion gates, plus one optional bounded native Agent/SendMessage observation. Run `uv run python scripts/teams_check.py` for the zero-call matrix, or explicitly add `--live --budget 1` to `scripts/live_teams_check.py` for one paid SDK observation. See the [team workshop](docs/lesson-56-teams.md) and [narration status](docs/lesson-56-narration.md).
+
+Lesson 57 adds a real local Git workshop with two worker worktrees, exact file and Node checks, serial integration and a retained conflict path. Run `uv run python scripts/worktrees_check.py` for the free independent and conflict matrix; the optional two-worker provider path is `uv run python scripts/live_worktrees_check.py --live --budget 1`. See the [worktree workshop](docs/lesson-57-worktrees.md) and [narration status](docs/lesson-57-narration.md).
 The **Response and results** panel displays formatted Claude answers, local
 exercise results, structured data and downloads. Offline fixtures are labelled
 separately from live answers. Raw SDK events remain in a collapsed **Diagnostics**

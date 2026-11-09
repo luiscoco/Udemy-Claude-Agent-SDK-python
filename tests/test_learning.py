@@ -2987,3 +2987,43 @@ def test_browser_lesson56_team_replay_and_native_guard(server, guide_browser_con
         assert not errors
     finally:
         context.close()
+
+
+def test_browser_lesson57_owned_worktrees(server, guide_browser_context):
+    from playwright.sync_api import expect
+
+    base, data = server
+    context = guide_browser_context.browser.new_context(viewport={"width": 390, "height": 844})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(base + "/?lesson=57")
+        expect(page.locator(".quiz-question")).to_have_count(7)
+        page.get_by_role("tab", name="Visual guide", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-57-concept-map.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Lab walkthrough", exact=True).click()
+        expect(page.locator('img[src="/assets/lesson-57-lab-walkthrough.svg"]')).to_be_visible()
+        page.get_by_role("tab", name="Python source", exact=True).click()
+        expect(page.locator(".foundation-source-excerpt")).to_have_count(3)
+        page.get_by_role("tab", name="Run the exercise", exact=True).click()
+        lab = page.locator(".worktrees-lab")
+        expect(lab).to_be_visible()
+        lab.get_by_role("button", name="Run worktree lab").click()
+        expect(lab.get_by_text("Owned report verified", exact=True)).to_be_visible(timeout=30000)
+        expect(lab.get_by_text("· prepared · independent · completed · passed", exact=False)).to_be_visible()
+        expect(lab.get_by_text("Combined tests: 2 · clean removals: 2 · observed worktrees: 1", exact=True)).to_be_visible()
+        lab.get_by_label("Scenario").click()
+        page.get_by_role("option", name="Deliberate conflict", exact=True).click()
+        expect(lab.get_by_text("Configuration changed; prior check invalidated", exact=False)).to_be_visible()
+        lab.get_by_role("button", name="Run worktree lab").click()
+        expect(lab.get_by_text("Owned report verified", exact=True)).to_be_visible(timeout=30000)
+        expect(lab.get_by_text("· prepared · conflict · conflict · needs-review", exact=False)).to_be_visible()
+        expect(lab.get_by_text("Conflict: ['greeting.mjs']", exact=False)).to_be_visible()
+        lab.get_by_role("button", name="Recover retained report").click()
+        expect(lab.get_by_text("Retained evidence recovered; no new check awarded", exact=True)).to_be_visible()
+        assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
+        page.screenshot(path=str(data / "worktrees-lesson57-phone.png"))
+        assert not errors
+    finally:
+        context.close()

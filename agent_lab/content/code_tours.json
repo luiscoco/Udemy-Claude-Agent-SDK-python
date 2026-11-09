@@ -1498,31 +1498,25 @@
     ]
   },
   "57": {
-    "source_sha256": "533163e29052740e82fec51907e14acebed1b2f002184f5cf4ea045381e517f8",
+    "source_sha256": "dd8d4af281a1dc715bc6afdaa81a5ce12a8964e0c344d6e9d8228346f6527a71",
     "sections": [
       {
-        "title": "Serializing shared git state",
-        "start": 6,
-        "end": 14,
-        "text": "Commands like worktree add change the shared .git directory, so the git helper holds one asyncio Lock while it runs. It also gives each command a timeout and raises if git exits with a nonzero status."
+        "title": "Fresh owned independent run",
+        "start": 5,
+        "end": 7,
+        "text": "The host creates one fresh owned Git repository and grades actual integration."
       },
       {
-        "title": "One worktree per worker",
-        "start": 17,
-        "end": 19,
-        "text": "Each worker gets its own folder next to the repository and its own agent branch, created with git worktree add through the locked helper. Parallel workers therefore never edit the same checkout."
+        "title": "Conflict observation",
+        "start": 8,
+        "end": 10,
+        "text": "The second greeting pick records an actual unmerged path."
       },
       {
-        "title": "cwd scopes the agent",
-        "start": 20,
-        "end": 26,
-        "text": "The options point cwd at the worker's own worktree, so its file tools operate there, and allowed_tools pre-approves reading, editing and searching. The worker returns the result text from the ResultMessage."
-      },
-      {
-        "title": "Running workers in parallel",
-        "start": 29,
-        "end": 32,
-        "text": "A TaskGroup starts two workers concurrently on different tasks. Their agent runs overlap, while the git commands that touch shared repository state still take turns behind the lock."
+        "title": "No conflict pass",
+        "start": 11,
+        "end": 11,
+        "text": "A retained conflict is teaching evidence, not independent integration."
       }
     ]
   },

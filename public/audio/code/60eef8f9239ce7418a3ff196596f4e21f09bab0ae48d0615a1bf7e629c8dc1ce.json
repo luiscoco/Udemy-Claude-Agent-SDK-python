@@ -1,0 +1,357 @@
+{
+  "lesson": 57,
+  "section": "grader",
+  "duration": 26.424,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.09
+    },
+    {
+      "word": "grader",
+      "start": 0.09,
+      "end": 0.47
+    },
+    {
+      "word": "requires",
+      "start": 0.47,
+      "end": 0.97
+    },
+    {
+      "word": "the",
+      "start": 0.97,
+      "end": 1.12
+    },
+    {
+      "word": "independent",
+      "start": 1.12,
+      "end": 1.64
+    },
+    {
+      "word": "scenario",
+      "start": 1.64,
+      "end": 2.28
+    },
+    {
+      "word": "to",
+      "start": 2.54,
+      "end": 2.65
+    },
+    {
+      "word": "carry",
+      "start": 2.65,
+      "end": 3.02
+    },
+    {
+      "word": "two",
+      "start": 3.02,
+      "end": 3.21
+    },
+    {
+      "word": "real",
+      "start": 3.21,
+      "end": 3.46
+    },
+    {
+      "word": "worker",
+      "start": 3.46,
+      "end": 3.71
+    },
+    {
+      "word": "commits",
+      "start": 3.71,
+      "end": 4.28
+    },
+    {
+      "word": "each",
+      "start": 4.58,
+      "end": 4.84
+    },
+    {
+      "word": "parented",
+      "start": 4.84,
+      "end": 5.33
+    },
+    {
+      "word": "to",
+      "start": 5.33,
+      "end": 5.41
+    },
+    {
+      "word": "the",
+      "start": 5.41,
+      "end": 5.5
+    },
+    {
+      "word": "base",
+      "start": 5.5,
+      "end": 6.02
+    },
+    {
+      "word": "It",
+      "start": 6.34,
+      "end": 6.54
+    },
+    {
+      "word": "checks",
+      "start": 6.54,
+      "end": 6.81
+    },
+    {
+      "word": "two",
+      "start": 6.81,
+      "end": 6.99
+    },
+    {
+      "word": "serial",
+      "start": 6.99,
+      "end": 7.34
+    },
+    {
+      "word": "integrated",
+      "start": 7.34,
+      "end": 7.87
+    },
+    {
+      "word": "commits",
+      "start": 7.87,
+      "end": 8.41
+    },
+    {
+      "word": "and",
+      "start": 8.64,
+      "end": 8.9
+    },
+    {
+      "word": "their",
+      "start": 8.9,
+      "end": 9.06
+    },
+    {
+      "word": "parent",
+      "start": 9.06,
+      "end": 9.4
+    },
+    {
+      "word": "chain",
+      "start": 9.4,
+      "end": 9.78
+    },
+    {
+      "word": "successful",
+      "start": 10.01,
+      "end": 10.62
+    },
+    {
+      "word": "worker",
+      "start": 10.62,
+      "end": 11.08
+    },
+    {
+      "word": "and",
+      "start": 11.16,
+      "end": 11.37
+    },
+    {
+      "word": "combined",
+      "start": 11.37,
+      "end": 11.76
+    },
+    {
+      "word": "Node",
+      "start": 11.76,
+      "end": 11.95
+    },
+    {
+      "word": "assertions",
+      "start": 11.95,
+      "end": 12.62
+    },
+    {
+      "word": "clean",
+      "start": 13.04,
+      "end": 13.31
+    },
+    {
+      "word": "main",
+      "start": 13.31,
+      "end": 13.74
+    },
+    {
+      "word": "original",
+      "start": 13.99,
+      "end": 14.45
+    },
+    {
+      "word": "worker",
+      "start": 14.45,
+      "end": 14.73
+    },
+    {
+      "word": "refs",
+      "start": 14.73,
+      "end": 15.2
+    },
+    {
+      "word": "and",
+      "start": 15.34,
+      "end": 15.58
+    },
+    {
+      "word": "nonforce",
+      "start": 15.58,
+      "end": 16.09
+    },
+    {
+      "word": "removal",
+      "start": 16.09,
+      "end": 16.4
+    },
+    {
+      "word": "of",
+      "start": 16.4,
+      "end": 16.52
+    },
+    {
+      "word": "both",
+      "start": 16.55,
+      "end": 16.8
+    },
+    {
+      "word": "worker",
+      "start": 16.8,
+      "end": 17.09
+    },
+    {
+      "word": "worktrees",
+      "start": 17.09,
+      "end": 17.81
+    },
+    {
+      "word": "The",
+      "start": 18.06,
+      "end": 18.21
+    },
+    {
+      "word": "deliberate",
+      "start": 18.21,
+      "end": 18.68
+    },
+    {
+      "word": "conflict",
+      "start": 18.68,
+      "end": 19.14
+    },
+    {
+      "word": "is",
+      "start": 19.14,
+      "end": 19.25
+    },
+    {
+      "word": "retained",
+      "start": 19.25,
+      "end": 19.66
+    },
+    {
+      "word": "for",
+      "start": 19.66,
+      "end": 19.81
+    },
+    {
+      "word": "inspection",
+      "start": 19.81,
+      "end": 20.44
+    },
+    {
+      "word": "and",
+      "start": 20.54,
+      "end": 20.73
+    },
+    {
+      "word": "needs",
+      "start": 20.73,
+      "end": 21
+    },
+    {
+      "word": "review",
+      "start": 21,
+      "end": 21.39
+    },
+    {
+      "word": "A",
+      "start": 21.66,
+      "end": 21.79
+    },
+    {
+      "word": "model",
+      "start": 21.79,
+      "end": 22.1
+    },
+    {
+      "word": "statement",
+      "start": 22.1,
+      "end": 22.59
+    },
+    {
+      "word": "or",
+      "start": 22.59,
+      "end": 22.67
+    },
+    {
+      "word": "a",
+      "start": 22.67,
+      "end": 22.71
+    },
+    {
+      "word": "partial",
+      "start": 22.71,
+      "end": 23.15
+    },
+    {
+      "word": "report",
+      "start": 23.15,
+      "end": 23.58
+    },
+    {
+      "word": "cannot",
+      "start": 23.74,
+      "end": 24.06
+    },
+    {
+      "word": "satisfy",
+      "start": 24.06,
+      "end": 24.56
+    },
+    {
+      "word": "these",
+      "start": 24.56,
+      "end": 24.77
+    },
+    {
+      "word": "actual",
+      "start": 24.77,
+      "end": 25.14
+    },
+    {
+      "word": "Git",
+      "start": 25.14,
+      "end": 25.34
+    },
+    {
+      "word": "and",
+      "start": 25.34,
+      "end": 25.48
+    },
+    {
+      "word": "test",
+      "start": 25.48,
+      "end": 25.72
+    },
+    {
+      "word": "gates",
+      "start": 25.72,
+      "end": 26.16
+    }
+  ]
+}

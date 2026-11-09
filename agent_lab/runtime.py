@@ -91,8 +91,25 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 100) if lesson_id == 56 else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 100) if lesson_id in {56, 57} else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 57:
+                    from agent_lab.headless_native import bundled_cli, private_key
+                    from agent_lab.worktrees_lab import RunInput, run_workshop
+
+                    selected_worktrees = RunInput.model_validate(request.lesson_options)
+                    if request.mode == "live":
+                        if not self.settings.enable_live or not selected_worktrees.consent:
+                            raise LessonError("Lesson 57 live mode requires fresh consent and enabled access.")
+                        bundled_cli()
+                        private_key()
+                    worktree_report = await run_workshop(selected_worktrees, self.settings.data_dir,
+                                                         allow_live=self.settings.enable_live)
+                    await emit(Event(kind="evidence", data={"source": "Lesson 57 owned Git workshop",
+                                                            "lesson_id": 57,
+                                                            "result": {"report": worktree_report,
+                                                                       "experiment_passed": worktree_report["check"] == "passed"}}))
+                    return
                 if lesson.id == 56:
                     from agent_lab.teams_lab import LiveInput, ReplayInput, grade, run_replay
                     from agent_lab.teams_native import evaluate_native, native_run

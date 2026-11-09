@@ -1,0 +1,372 @@
+{
+  "lesson": 57,
+  "section": "reducer",
+  "duration": 26.616,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.08
+    },
+    {
+      "word": "host",
+      "start": 0.08,
+      "end": 0.45
+    },
+    {
+      "word": "creates",
+      "start": 0.45,
+      "end": 0.81
+    },
+    {
+      "word": "a",
+      "start": 0.81,
+      "end": 0.86
+    },
+    {
+      "word": "fresh",
+      "start": 0.86,
+      "end": 1.21
+    },
+    {
+      "word": "owned",
+      "start": 1.21,
+      "end": 1.47
+    },
+    {
+      "word": "repository",
+      "start": 1.47,
+      "end": 2.17
+    },
+    {
+      "word": "and",
+      "start": 2.57,
+      "end": 2.76
+    },
+    {
+      "word": "commits",
+      "start": 2.76,
+      "end": 3.09
+    },
+    {
+      "word": "a",
+      "start": 3.09,
+      "end": 3.13
+    },
+    {
+      "word": "known",
+      "start": 3.13,
+      "end": 3.4
+    },
+    {
+      "word": "base",
+      "start": 3.4,
+      "end": 3.73
+    },
+    {
+      "word": "before",
+      "start": 3.73,
+      "end": 4.06
+    },
+    {
+      "word": "adding",
+      "start": 4.06,
+      "end": 4.37
+    },
+    {
+      "word": "two",
+      "start": 4.37,
+      "end": 4.53
+    },
+    {
+      "word": "separate",
+      "start": 4.53,
+      "end": 4.95
+    },
+    {
+      "word": "worker",
+      "start": 4.95,
+      "end": 5.23
+    },
+    {
+      "word": "branches",
+      "start": 5.23,
+      "end": 5.86
+    },
+    {
+      "word": "Both",
+      "start": 6.35,
+      "end": 6.63
+    },
+    {
+      "word": "workers",
+      "start": 6.63,
+      "end": 7.04
+    },
+    {
+      "word": "start",
+      "start": 7.04,
+      "end": 7.34
+    },
+    {
+      "word": "before",
+      "start": 7.34,
+      "end": 7.7
+    },
+    {
+      "word": "either",
+      "start": 7.7,
+      "end": 7.98
+    },
+    {
+      "word": "commit",
+      "start": 7.98,
+      "end": 8.28
+    },
+    {
+      "word": "is",
+      "start": 8.28,
+      "end": 8.41
+    },
+    {
+      "word": "accepted",
+      "start": 8.41,
+      "end": 8.96
+    },
+    {
+      "word": "Each",
+      "start": 9.56,
+      "end": 9.84
+    },
+    {
+      "word": "worker",
+      "start": 9.84,
+      "end": 10.11
+    },
+    {
+      "word": "may",
+      "start": 10.11,
+      "end": 10.32
+    },
+    {
+      "word": "change",
+      "start": 10.32,
+      "end": 10.6
+    },
+    {
+      "word": "exactly",
+      "start": 10.6,
+      "end": 11.07
+    },
+    {
+      "word": "one",
+      "start": 11.07,
+      "end": 11.28
+    },
+    {
+      "word": "assigned",
+      "start": 11.28,
+      "end": 11.65
+    },
+    {
+      "word": "source",
+      "start": 11.65,
+      "end": 11.93
+    },
+    {
+      "word": "file",
+      "start": 11.93,
+      "end": 12.21
+    },
+    {
+      "word": "The",
+      "start": 12.7,
+      "end": 12.83
+    },
+    {
+      "word": "host",
+      "start": 12.83,
+      "end": 13.15
+    },
+    {
+      "word": "verifies",
+      "start": 13.15,
+      "end": 13.64
+    },
+    {
+      "word": "the",
+      "start": 13.64,
+      "end": 13.72
+    },
+    {
+      "word": "branch",
+      "start": 13.72,
+      "end": 14.2
+    },
+    {
+      "word": "base",
+      "start": 14.36,
+      "end": 14.66
+    },
+    {
+      "word": "commit",
+      "start": 14.66,
+      "end": 15.05
+    },
+    {
+      "word": "changed",
+      "start": 15.26,
+      "end": 15.65
+    },
+    {
+      "word": "path",
+      "start": 15.65,
+      "end": 15.97
+    },
+    {
+      "word": "exact",
+      "start": 16.26,
+      "end": 16.71
+    },
+    {
+      "word": "source",
+      "start": 16.71,
+      "end": 17
+    },
+    {
+      "word": "bytes",
+      "start": 17,
+      "end": 17.49
+    },
+    {
+      "word": "and",
+      "start": 17.57,
+      "end": 17.77
+    },
+    {
+      "word": "fixed",
+      "start": 17.77,
+      "end": 18.09
+    },
+    {
+      "word": "Node",
+      "start": 18.09,
+      "end": 18.29
+    },
+    {
+      "word": "behavior",
+      "start": 18.29,
+      "end": 18.82
+    },
+    {
+      "word": "before",
+      "start": 19.08,
+      "end": 19.42
+    },
+    {
+      "word": "it",
+      "start": 19.42,
+      "end": 19.53
+    },
+    {
+      "word": "creates",
+      "start": 19.53,
+      "end": 19.87
+    },
+    {
+      "word": "the",
+      "start": 19.87,
+      "end": 19.96
+    },
+    {
+      "word": "worker",
+      "start": 19.96,
+      "end": 20.26
+    },
+    {
+      "word": "commit",
+      "start": 20.26,
+      "end": 20.56
+    },
+    {
+      "word": "The",
+      "start": 20.95,
+      "end": 21.09
+    },
+    {
+      "word": "workers",
+      "start": 21.09,
+      "end": 21.47
+    },
+    {
+      "word": "share",
+      "start": 21.47,
+      "end": 21.73
+    },
+    {
+      "word": "Git",
+      "start": 21.73,
+      "end": 21.93
+    },
+    {
+      "word": "history",
+      "start": 21.93,
+      "end": 22.42
+    },
+    {
+      "word": "so",
+      "start": 22.7,
+      "end": 22.9
+    },
+    {
+      "word": "Git",
+      "start": 22.9,
+      "end": 23.1
+    },
+    {
+      "word": "operations",
+      "start": 23.1,
+      "end": 23.63
+    },
+    {
+      "word": "are",
+      "start": 23.63,
+      "end": 23.74
+    },
+    {
+      "word": "serialized",
+      "start": 23.74,
+      "end": 24.41
+    },
+    {
+      "word": "while",
+      "start": 24.67,
+      "end": 24.91
+    },
+    {
+      "word": "their",
+      "start": 24.91,
+      "end": 25.04
+    },
+    {
+      "word": "file",
+      "start": 25.04,
+      "end": 25.35
+    },
+    {
+      "word": "work",
+      "start": 25.35,
+      "end": 25.62
+    },
+    {
+      "word": "can",
+      "start": 25.62,
+      "end": 25.78
+    },
+    {
+      "word": "overlap",
+      "start": 25.78,
+      "end": 26.29
+    }
+  ]
+}

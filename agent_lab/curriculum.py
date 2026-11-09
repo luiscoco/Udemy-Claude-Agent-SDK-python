@@ -458,8 +458,8 @@ ROWS = [
     (
         57,
         "Parallel workers in Git worktrees",
-        "Create isolated Git worktrees and serialize operations on shared repository state.",
-        "Use the exercise tool to inspect the worktree paths.",
+        "Isolate workers in Git worktrees and integrate validated changes.",
+        "Run the fixed owned Git workshop and inspect worker commits, host tests, serial integration and cleanup.",
         "worktrees",
         "exercise",
     ),

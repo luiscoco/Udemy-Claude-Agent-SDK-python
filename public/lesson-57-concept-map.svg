@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+<title id="title">Worktree coordination concept map</title><desc id="desc">One shared Git history creates two isolated worker checkouts; host file policy, tests and serial integration remain separate controls.</desc>
+<rect width="960" height="520" rx="26" fill="#f1f5f9"/><text x="44" y="68" fill="#0f172a" font-family="Arial" font-size="30" font-weight="700">One history, two worker checkouts</text>
+<rect x="340" y="105" width="280" height="82" rx="16" fill="#1e293b"/><text x="480" y="153" text-anchor="middle" fill="white" font-family="Arial" font-size="23">base commit on main</text>
+<path d="M420 187 L245 238 M540 187 L715 238" stroke="#475569" stroke-width="5" fill="none"/>
+<rect x="62" y="238" width="360" height="130" rx="18" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/><text x="242" y="280" text-anchor="middle" fill="#1e3a8a" font-family="Arial" font-size="24" font-weight="700">greeting worktree</text><text x="242" y="317" text-anchor="middle" fill="#1e3a8a" font-family="Arial" font-size="18">assigned greeting.mjs</text><text x="242" y="346" text-anchor="middle" fill="#1e3a8a" font-family="Arial" font-size="17">own branch and original commit</text>
+<rect x="538" y="238" width="360" height="130" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/><text x="718" y="280" text-anchor="middle" fill="#14532d" font-family="Arial" font-size="24" font-weight="700">tax worktree</text><text x="718" y="317" text-anchor="middle" fill="#14532d" font-family="Arial" font-size="18">assigned tax.mjs</text><text x="718" y="346" text-anchor="middle" fill="#14532d" font-family="Arial" font-size="17">own branch and original commit</text>
+<path d="M242 368 L400 420 M718 368 L560 420" stroke="#475569" stroke-width="5" fill="none"/>
+<rect x="243" y="416" width="474" height="68" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="3"/><text x="480" y="457" text-anchor="middle" fill="#78350f" font-family="Arial" font-size="20" font-weight="700">Host checks exact files, tests and serial picks</text>
+</svg>

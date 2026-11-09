@@ -11366,118 +11366,204 @@
   {
     "id": 57,
     "prerequisites": [
-      47
+      47,
+      51
     ],
-    "concept_brief": "Parallel coding agents need isolated working copies: each worker gets its own `git worktree` and branch from one repository, and the host runs operations that touch shared repository state one at a time. A live SDK worker would get `ClaudeAgentOptions(cwd=...)` pointing at its own worktree.",
-    "lab_brief": "The `worktrees` exercise creates a disposable repository in the run workspace, makes an empty commit on main, then adds worktrees T1 and T2 on new branches by awaiting `git` subprocesses one after another with a 15-second timeout. It returns `git worktree list --porcelain` and confirms that no remote was contacted.",
+    "concept_brief": "Each worker edits a separate Git worktree and branch from one base commit. The host waits for both workers, validates exact assigned bytes and Node behavior, commits each worker, then cherry-picks sequentially into main. Worktrees share Git metadata; file-tool permission remains a separate gate.",
+    "lab_brief": "Run the real local Git workshop in Independent mode to inspect two worker commits, successful host tests, serial integration and clean removal. Conflict mode makes both workers edit greeting.mjs from one base and retains the original worktrees after aborting the second conflicting pick. Optional live mode replaces fixed worker edits with two bounded SDK file workers; host validation still decides.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 57 (or run `uv run agent-lab lesson 57` in a terminal).",
-      "Install Git and make sure `git --version` works in the same terminal that starts the app; no remote or account is needed.",
-      "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence."
+      "Install Git and Node 24; the free workshop runs local Git and Node child processes without model calls or remote operations.",
+      "Optional live mode needs a private Anthropic key, enabled backend and fresh consent for two SDK workers."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Learn how worktrees isolate parallel workers and why shared repository operations are serialized."
+        "text": "Separate worker checkouts and coordinator integration duties."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `worktrees` in `agent_lab/exercises.py`: note that each `await git(...)` finishes before the next starts."
+        "text": "Select Independent and predict the branch and original commit for each assigned file."
       },
       {
         "title": "Run one example",
-        "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+        "text": "Run the prepared local workshop and inspect the two worker receipts."
       },
       {
         "title": "Verify the evidence",
-        "text": "Find three worktree blocks (repo on main, T1 on refs/heads/T1, T2 on refs/heads/T2) sharing one HEAD commit, and `remote_operations` No."
+        "text": "Compare original worker SHAs, serial integrated SHAs, host tests, clean removals and the single remaining main worktree."
       },
       {
         "title": "Try the challenge",
-        "text": "Run the lesson twice and compare the paths, or reproduce the worktrees by hand in an empty folder."
+        "text": "Run Conflict and explain why the host aborts only the second pick and retains both original worker worktrees."
       }
     ],
-    "inspect": "The `worktrees` list (lines starting with `worktree`, `HEAD` and `branch`) and `remote_operations`.",
-    "expected": "`worktrees` shows `worktree .../work/repo` with `branch refs/heads/main`, `worktree .../work/T1` with `branch refs/heads/T1` and `worktree .../work/T2` with `branch refs/heads/T2`, all with the same HEAD hash. `remote_operations` is No.",
-    "evidence_criterion": "The check confirms that the worktree list was produced and that no remote operation took place.",
+    "inspect": "Independent starts both workers before either commit, checks each exact file and Node behavior, records original and integrated commits, then removes clean worker worktrees without force. Conflict records an actual unmerged greeting.mjs on the second pick and aborts it.",
+    "expected": "Independent passes with two worker commits whose parents equal the base, two serial picks with a parent chain, successful worker and combined Node assertions, clean main and exactly one worktree. Conflict needs review, retains three worktrees and both original refs, and runs no combined tests or cleanup.",
+    "evidence_criterion": "Independent worktrees carry commits, integrate and clean up with successful host tests.",
     "evidence_checks": [
       {
-        "key": "worktrees",
-        "rule": "truthy"
-      },
-      {
-        "key": "remote_operations",
+        "key": "experiment_passed",
         "rule": "equals",
-        "value": false
+        "value": true
       }
     ],
-    "challenge": "Run the lesson twice: the paths change because each run gets a fresh workspace, but the branch lines stay the same. Then in an empty folder run `git init -b main`, `git commit --allow-empty -m x`, `git worktree add -b T3 ../T3` and `git worktree list` to reproduce a third isolated worker.",
+    "challenge": "Inspect the conflicting greeting change. Compare the first integrated Hello version with the second worker's Hi version, then explain why the host preserves both original commits and does not claim automatic integration.",
     "hints": [
-      "A worktree is a second checkout of the same repository on its own branch.",
-      "All workers share one .git directory, so commands like `worktree add` change shared state; the exercise awaits them sequentially rather than in parallel. The `-c core.longpaths=true` option avoids Windows path-length failures."
+      "Find `conflict.unmerged`, `integration` and `worktreeCount` in the retained report.",
+      "The greeting and alternative workers both start from the same base greeting.mjs. After the first Hello pick, the second Hi pick conflicts. The host records the unmerged path, aborts that pick and keeps three checkouts for inspection."
     ],
-    "reference": "The host created one repository and two extra worktrees, each on its own branch from the same commit, so workers can edit files without touching each other's checkout. Repository-wide operations ran one at a time to avoid races on shared Git state. Everything stayed local: no remote was added, fetched or pushed.",
+    "reference": "Independent workers produce exact greeting and tax source in separate branches, pass fixed Node assertions, and receive original commits whose parents are the base. The coordinator cherry-picks one original SHA at a time, records the new integrated SHAs and parent chain, reruns both assertions on main, then removes only clean worker worktrees. Conflict mode deliberately assigns greeting.mjs twice. The second pick creates an unmerged path; the host aborts only that pick and retains both original branches and worktrees. A worker's SDK success alone is insufficient without host file, test and Git evidence.",
     "recovery": [
-      "If the error says 'Install Git to run the worktree lesson.', install Git, restart the terminal and the app, and check `git --version`. If a 'Git fixture operation failed' message mentions paths, move the repo to a shorter folder.",
-      "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+      "If Git or Node is missing, install Git and activate Node 24 before rerunning. The owned fixture report remains under lesson storage.",
+      "If live execution stops, Recover reads the finalized owned report without resuming execution or awarding a new check. A fresh paid run requires fresh consent."
     ],
     "quiz": [
       {
-        "prompt": "Why does each worker get its own worktree?",
+        "prompt": "Why does each worker use a separate worktree?",
         "options": [
           {
-            "text": "To make Git commands run faster.",
-            "explanation": "Speed is not the goal; isolation is."
+            "text": "To edit its own checkout and branch from the common base.",
+            "explanation": "Correct. Git worktrees isolate working files while sharing repository metadata."
           },
           {
-            "text": "So each worker edits its own checkout and branch without overwriting another worker's files.",
-            "explanation": "Correct. Worktrees give isolated working directories that share one repository history."
+            "text": "To create an OS sandbox.",
+            "explanation": "No. Git worktrees isolate working files while sharing repository metadata."
           },
           {
-            "text": "Because the SDK cannot work in the main checkout.",
-            "explanation": "The SDK can use any `cwd`; separation is a coordination choice."
+            "text": "To create separate remote repositories.",
+            "explanation": "No. Git worktrees isolate working files while sharing repository metadata."
           }
         ],
-        "correct": 1
+        "correct": 0
       },
       {
-        "prompt": "Why does the exercise await each `git worktree add` before starting the next?",
+        "prompt": "Who validates and commits worker changes?",
         "options": [
           {
-            "text": "Because these commands change shared repository state in .git, and running them concurrently could race.",
-            "explanation": "Correct. Shared state is serialized while workers stay parallel in their own folders."
+            "text": "The coordinator host after exact file and Node checks.",
+            "explanation": "Correct. Worker tool success is only one input to host validation."
           },
           {
-            "text": "Because asyncio cannot run subprocesses in parallel.",
-            "explanation": "It can; the exercise chooses not to for shared state."
+            "text": "The model's final answer.",
+            "explanation": "No. Worker tool success is only one input to host validation."
           },
           {
-            "text": "Because Git requires a network round trip for each worktree.",
-            "explanation": "Worktrees are local; `remote_operations` is false."
+            "text": "The remote server.",
+            "explanation": "No. Worker tool success is only one input to host validation."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What blocks an extra untracked file?",
+        "options": [
+          {
+            "text": "The exact union of tracked and untracked changed paths.",
+            "explanation": "Correct. The host reads actual Git changes before running source tests."
+          },
+          {
+            "text": "The model saying it edited one file.",
+            "explanation": "No. The host reads actual Git changes before running source tests."
+          },
+          {
+            "text": "The branch name alone.",
+            "explanation": "No. The host reads actual Git changes before running source tests."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why can a successful SDK terminal still fail?",
+        "options": [
+          {
+            "text": "The assigned source or host assertions may be wrong.",
+            "explanation": "Correct. The host independently validates source bytes, tests and commits."
+          },
+          {
+            "text": "A terminal success always proves integration.",
+            "explanation": "No. The host independently validates source bytes, tests and commits."
+          },
+          {
+            "text": "It skips Git commits automatically.",
+            "explanation": "No. The host independently validates source bytes, tests and commits."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What happens after one worker fails?",
+        "options": [
+          {
+            "text": "Both workers settle; no cherry-pick begins.",
+            "explanation": "Correct. A failure blocks integration while partial evidence is retained."
+          },
+          {
+            "text": "The successful worker is immediately integrated.",
+            "explanation": "No. A failure blocks integration while partial evidence is retained."
+          },
+          {
+            "text": "The failed branch is force removed.",
+            "explanation": "No. A failure blocks integration while partial evidence is retained."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "How is the deliberate conflict handled?",
+        "options": [
+          {
+            "text": "Record unmerged greeting.mjs, abort the current pick and retain worktrees.",
+            "explanation": "Correct. The first pick remains and the second original commit is inspectable."
+          },
+          {
+            "text": "Force merge Hi over Hello.",
+            "explanation": "No. The first pick remains and the second original commit is inspectable."
+          },
+          {
+            "text": "Delete both worker branches.",
+            "explanation": "No. The first pick remains and the second original commit is inspectable."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What proves clean independent completion?",
+        "options": [
+          {
+            "text": "Two worker commits, serial picks, host tests and nonforce cleanup.",
+            "explanation": "Correct. The criterion joins actual worker and integrated Git evidence."
+          },
+          {
+            "text": "Two generated prose summaries.",
+            "explanation": "No. The criterion joins actual worker and integrated Git evidence."
+          },
+          {
+            "text": "A clean main branch before workers start.",
+            "explanation": "No. The criterion joins actual worker and integrated Git evidence."
           }
         ],
         "correct": 0
       }
     ],
-    "concept_code": "import asyncio\nfrom pathlib import Path\n\nfrom claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query\n\nGIT_LOCK = asyncio.Lock()\n\n\nasync def git(repo: Path, *args: str) -> None:\n    async with GIT_LOCK:  # one operation on shared repository state at a time\n        process = await asyncio.create_subprocess_exec(\"git\", \"-C\", str(repo), *args)\n        async with asyncio.timeout(15):\n            if await process.wait() != 0:\n                raise RuntimeError(f\"git {' '.join(args)} failed\")\n\n\nasync def worker(repo: Path, task_id: str, task: str) -> str | None:\n    tree = repo.parent / f\"{repo.name}-{task_id}\"\n    await git(repo, \"worktree\", \"add\", \"-b\", f\"agent/{task_id}\", str(tree))\n    options = ClaudeAgentOptions(\n        cwd=tree, allowed_tools=[\"Read\", \"Edit\", \"Grep\"], max_turns=8\n    )\n    async for message in query(prompt=task, options=options):\n        if isinstance(message, ResultMessage):\n            return message.result\n    return None\n\n\nasync def main(repo: Path) -> None:\n    async with asyncio.TaskGroup() as group:\n        group.create_task(worker(repo, \"T1\", \"Add type hints to src/tags.py.\"))\n        group.create_task(worker(repo, \"T2\", \"Add docstrings to src/search.py.\"))",
-    "code_focus": "Each worker runs git worktree add on its own branch through the `GIT_LOCK`-guarded git() helper, then points ClaudeAgentOptions(cwd=tree) at that worktree so parallel agents never share a working copy.",
+    "concept_code": "import asyncio\nfrom pathlib import Path\nfrom agent_lab.worktrees_lab import RunInput, grade, run_workshop\n\nasync def main() -> None:\n    independent = await run_workshop(RunInput(), Path('.lab-data'))\n    assert grade(independent)\n    conflict = await run_workshop(RunInput(scenario='conflict'), Path('.lab-data'))\n    assert conflict['status'] == 'conflict'\n    assert conflict['conflict']['unmerged'] == ['greeting.mjs']\n    assert not grade(conflict)\n\nasyncio.run(main())\n",
+    "code_focus": "`run_workshop` starts two owned workers, validates their exact files and tests, then integrates one commit at a time. `grade` checks the actual parent chain and clean removal; `exact_file` limits native file tools independently.",
     "concept_points": [
       {
-        "title": "One worktree per worker",
-        "text": "Each agent edits its own checkout and branch, so parallel edits cannot overwrite each other's files."
+        "title": "Separate checkout",
+        "text": "Each worker gets an assigned file, worktree and branch from one base commit."
       },
       {
-        "title": "Serialize shared state",
-        "text": "Commands that change the shared .git directory, such as worktree add, run one at a time behind an asyncio.Lock."
+        "title": "Host validation",
+        "text": "Exact source bytes and Node assertions precede coordinator commits."
       },
       {
-        "title": "cwd scopes the agent",
-        "text": "ClaudeAgentOptions(cwd=tree) makes the worker's file tools operate inside its own worktree."
+        "title": "Serial integration",
+        "text": "The host cherry-picks original worker commits one at a time and keeps conflicts inspectable."
       }
     ],
     "misconception": {
-      "claim": "Parallel agents can share one checkout if each is told to edit different files.",
-      "correction": "Agents can still touch shared files, run formatters or switch branches, and nothing in a prompt prevents it. Separate worktrees isolate the files themselves."
+      "claim": "Separate worktrees automatically make workers safe and their changes mergeable.",
+      "correction": "Worktrees share Git metadata and are not OS sandboxes. File-tool policy, host tests and serial merge checks are separate requirements."
     }
   },
   {

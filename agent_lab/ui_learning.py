@@ -399,6 +399,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 57:
+        with card("Lesson 57 integration walkthrough", "Two worker commits, serial picks and retained conflict"):
+            ui.image("/assets/lesson-57-lab-walkthrough.svg").props('alt="Two worktrees run worker checks before the host cherry-picks serially or retains a conflict"').classes("w-full")
     if lesson_id == 56:
         with card("Lesson 56 team walkthrough", "Sixteen commands, five deliberate refusals"):
             ui.image("/assets/lesson-56-lab-walkthrough.svg").props('alt="Researcher and reviewer step through claims, message delivery, exact evidence, shutdown and cleanup"').classes("w-full")
@@ -505,6 +508,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 57:
+        with card("Worktree coordination concept map", "Lesson 57"):
+            ui.image("/assets/lesson-57-concept-map.svg").props('alt="Shared Git history connects isolated worker checkouts, host validation and serial integration"').classes("w-full")
     if lesson_id == 56:
         with card("Team coordination concept map", "Lesson 56"):
             ui.image("/assets/lesson-56-concept-map.svg").props('alt="Ownership, inbox delivery and exact evidence are independent team coordination gates"').classes("w-full")

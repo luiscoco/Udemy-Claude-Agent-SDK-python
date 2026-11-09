@@ -1,0 +1,23 @@
+{
+  "base": {
+    "greeting.mjs": "export function greet(name) { return 'TODO'; }\n",
+    "tax.mjs": "export function tax(amount) { return 0; }\n"
+  },
+  "workers": {
+    "greeting": {
+      "file": "greeting.mjs",
+      "source": "export function greet(name) { return `Hello, ${name}!`; }\n",
+      "tests": "import assert from 'node:assert/strict'; import { greet } from './greeting.mjs'; assert.equal(greet('Ada'), 'Hello, Ada!'); assert.equal(greet('Lin'), 'Hello, Lin!');"
+    },
+    "tax": {
+      "file": "tax.mjs",
+      "source": "export function tax(amount) { return Math.round(amount * 20) / 100; }\n",
+      "tests": "import assert from 'node:assert/strict'; import { tax } from './tax.mjs'; assert.equal(tax(100), 20); assert.equal(tax(99), 19.8); assert.equal(tax(0), 0);"
+    },
+    "alternative": {
+      "file": "greeting.mjs",
+      "source": "export function greet(name) { return `Hi, ${name}!`; }\n",
+      "tests": "import assert from 'node:assert/strict'; import { greet } from './greeting.mjs'; assert.equal(greet('Ada'), 'Hi, Ada!');"
+    }
+  }
+}
