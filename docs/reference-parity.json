@@ -986,14 +986,14 @@
       "title": "Tool search and large tool catalogs",
       "exercise": "tool_search",
       "live_profile": "exercise",
-      "adaptation": "",
-      "python_line": 1631,
+      "adaptation": "64-tool in-process MCP catalog, local scorer and plan, owned synthetic refund ledger, native ToolSearch and silent context controls",
+      "python_line": 1,
       "reference_contract": "docs/prompts/l58-lesson-58-tool-search-and-large-tool-catalogs.md",
       "reference_blob_sha": "74750345c8eddd439f3ff270c11dd87109321bdc",
       "foundation_component": "src/concepts/Concept58ToolSearch.tsx",
       "reference_parity": "not-certified",
       "written_guide": "written",
-      "gap": "Python content and exercise exist; lesson-specific controls and all reference scenarios still need individual acceptance checks.",
+      "gap": "The 64-tool catalog, strict API, 390px browser controls, seven questions, two diagrams and three source-bound Yash clips pass. Native CLI and API structured discovery passed, as did deferred/eager silent context measurements and a live Stop probe. Full offline regression: 2,050 passed and 22 skipped; Ruff, focused mypy and offline wheel build passed. Native eager context reported 6,311 tokens versus 917 deferred, but both modes reported zero isLoaded flags; human audio listening and independent student acceptance remain open.",
       "written_guide_content": "lesson-content"
     },
     {

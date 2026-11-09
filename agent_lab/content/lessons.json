@@ -11572,120 +11572,202 @@
       5,
       13
     ],
-    "concept_brief": "With a large tool catalog, give the model only a small, relevant subset per request, for example by setting `allowed_tools` or `tools` on `ClaudeAgentOptions`. This lab's host-side selection is separate from the SDK's native tool-search feature, which it does not use.",
-    "lab_brief": "The `tool_search` exercise scores a catalog of three tools (orders.read, policy.search, sales.analyze) by the words their descriptions share with the request, and selects at most two tools with a score above zero. It shows how to cap what the model sees before the call.",
+    "concept_brief": "ToolSearch defers a large MCP catalog until the model discovers a relevant definition. A local scorer and character estimate help explain the idea, while native context usage and a real ToolSearch result show what this SDK actually did.",
+    "lab_brief": "Search 64 synthetic tools across eight domains. Compare clear and vague refund metadata, deferred and eager plans, then run an owned duplicate-charge refund. The optional native run must show an actual ToolSearch reference before an exact refund call and a host-verified ledger receipt.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 58 (or run `uv run agent-lab lesson 58` in a terminal).",
-      "Live (optional): put `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env and restart the app. The live `exercise` profile gives Claude one read-only tool, `inspect_exercise`, that returns this run's local evidence.",
-      "Type search terms in the Prompt box to change the catalog query; leave it empty to search for `search refund policy`."
+      "Open Lesson 58 in the browser and use Local search, Estimate load, and Prepared refund without a provider call.",
+      "For native discovery, enable LAB_ENABLE_LIVE and configure ANTHROPIC_API_KEY in the private .env, then give fresh consent in the lab.",
+      "CLI: python scripts/tool_search_check.py; optional paid run: python scripts/live_tool_search_check.py --live --budget 1; silent measurements: python scripts/measure_tool_search_context.py --live."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Learn to select a bounded tool set from a catalog instead of exposing every tool."
+        "text": "Search refund duplicate charge with Clear metadata, then Vague. The local scorer finds the clear refund but needs select:billing_op_7 for the vague tool."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `tool_search` in `agent_lab/exercises.py` and predict which tools match the lesson prompt."
+        "text": "Compare true, false, auto and alwaysLoad. These are serialized-character estimates, not billed tokens."
       },
       {
         "title": "Run one example",
-        "text": "Keep the mode on Offline Python exercise and click Run exercise. The badge LOCAL PYTHON RESULT confirms that no prompt was sent to Claude."
+        "text": "With consent, measure true and false in separate silent SDK sessions. Read MCP connected status, category tokens and per-tool isLoaded flags."
       },
       {
         "title": "Verify the evidence",
-        "text": "Confirm `catalog_size` is 3 and `selected` lists policy.search first, then orders.read."
+        "text": "Prepared mode writes one synthetic ledger entry. Native mode must discover the refund with ToolSearch, pass both permission gates, and produce one exact receipt."
       },
       {
         "title": "Try the challenge",
-        "text": "Search with different words from the terminal and check that the ranking follows the overlap."
+        "text": "Compare the ordered ToolSearch result, refund call/result, host ledger hash and terminal cost. A prose mention of a tool is not discovery evidence."
       }
     ],
-    "inspect": "`query`, `catalog_size`, the `scores` table (every tool with its `score`), the `selected` tools, `no_match` and `note`.",
-    "expected": "With the default query `search refund policy`, `scores` gives policy.search 3 and the others 0, so `selected` contains only policy.search. `no_match` is empty and `catalog_size` is 3.",
-    "evidence_criterion": "The check confirms that a three-tool catalog was searched and a bounded selection was returned.",
+    "inspect": "Look at /api/c58/code for the scorer, exact refund ledger and native admission. Inspect the structured reference, ledger and actual SDK context categories separately.",
+    "expected": "64 distinct tools; clear refund matches; vague refund needs exact select; deferred local plan loads zero or one pinned definition; eager loads 64. Native success needs a structured ToolSearch reference before one exact refund and a matching ledger receipt.",
+    "evidence_criterion": "A native ToolSearch reference precedes an exactly admitted refund, and the host verifies one owned ledger entry.",
     "evidence_checks": [
       {
-        "key": "catalog_size",
+        "key": "check",
         "rule": "equals",
-        "value": 3
-      },
-      {
-        "key": "selected",
-        "rule": "truthy"
-      },
-      {
-        "key": "scores",
-        "rule": "truthy"
+        "value": "pass"
       }
     ],
-    "challenge": "Type `compute sales totals` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 58 --prompt \"compute sales totals\"`), then confirm that `selected` contains only sales.analyze. Then try `book a flight` and read `no_match`.",
+    "challenge": "Pin the refund with alwaysLoad, then explain how this changes the loaded count while the other 63 tools stay deferred.",
     "hints": [
-      "The score is the number of description words shared with your query.",
-      "`compute sales totals` matches all three words of sales.analyze and nothing else, so it is the only tool selected. `book a flight` matches no tool, so `selected` is empty and `no_match` tells the agent to ask the user."
+      "Local search uses token substrings and deterministic weights; it is not the SDK ranking.",
+      "Use select:billing_op_7 to find vague metadata; the ledger lives under .lab-data/lesson-58/<run UUID>."
     ],
-    "reference": "The host scores each tool against the request and shows the model only tools that match, at most two. A zero-score tool is never included just to fill a slot, and when nothing matches the agent should ask rather than guess. This is a simple host filter, not the SDK's own tool-search mechanism.",
+    "reference": "The MCP server advertises 64 bounded tools. ToolSearch supplies a structured tool_reference for the synthetic refund. The model calls exactly mcp__ops__billing_refund_invoice with invoiceId INV-2042, amountCents 4900, currency EUR and reason duplicate-charge. Both permission gates admit the exact call; the handler writes RF-2042-1 once, and the host reloads the owned ledger. Silent SDK context usage is measured separately with no model input turns.",
     "recovery": [
-      "If the run fails, read the first error in the panel, run `uv run agent-lab lesson 58` in a terminal to see every event, and run `uv run agent-lab doctor` if the SDK or CLI looks missing.",
-      "If live mode is unavailable or rejects your key, stay offline: the local evidence and the automatic check are the same. Fix `ANTHROPIC_API_KEY` and `LAB_ENABLE_LIVE`=true in .env, restart the app, then try live again."
+      "If native access is unavailable, complete the local search, plan and prepared run and retain the native gap.",
+      "If a run fails, inspect call order, reference structure, admission and ledger before another paid attempt."
     ],
     "quiz": [
       {
-        "prompt": "Why is orders.read selected even though it shares no words with the lesson prompt?",
+        "prompt": "Why defer definitions in a large catalog?",
         "options": [
           {
-            "text": "Because orders are always relevant to support.",
-            "explanation": "The code has no domain rule; it only counts shared words."
+            "text": "Reduce tool-definition context until relevant tools are discovered.",
+            "explanation": "Correct. Reduce tool-definition context until relevant tools are discovered."
           },
           {
-            "text": "Because the selection always keeps two tools and ties keep catalog order.",
-            "explanation": "Correct. A score of 0 still fills the second slot, which a production filter should avoid."
+            "text": "Prevent all MCP calls.",
+            "explanation": "Review the catalog and evidence order. Prevent all MCP calls."
           },
           {
-            "text": "Because Claude asked for it.",
-            "explanation": "Offline, no model is called; the host made the choice."
+            "text": "Replace host permission checks.",
+            "explanation": "Review the catalog and evidence order. Replace host permission checks."
           }
         ],
-        "correct": 1
+        "correct": 0
       },
       {
-        "prompt": "How would you limit the tools a live Python agent can use to the selected ones?",
+        "prompt": "What does alwaysLoad do?",
         "options": [
           {
-            "text": "Write the tool names in the system prompt.",
-            "explanation": "Prompt text does not restrict tools; options and permissions do."
+            "text": "Pins a selected tool definition in context.",
+            "explanation": "Correct. Pins a selected tool definition in context."
           },
           {
-            "text": "Rename the other tools.",
-            "explanation": "Renaming does not remove them from the session."
+            "text": "Executes the tool automatically.",
+            "explanation": "Review the catalog and evidence order. Executes the tool automatically."
           },
           {
-            "text": "Pass only those tools through `ClaudeAgentOptions` (for example `allowed_tools` and the MCP servers you register).",
-            "explanation": "Correct. The options decide what the session can call, which is how sdk.py scopes every lesson."
+            "text": "Grants mutation permission.",
+            "explanation": "Review the catalog and evidence order. Grants mutation permission."
           }
         ],
-        "correct": 2
+        "correct": 0
+      },
+      {
+        "prompt": "The clear refund matches locally but the vague operation does not. What changed?",
+        "options": [
+          {
+            "text": "Its descriptive name and search hint were removed.",
+            "explanation": "Correct. Its descriptive name and search hint were removed."
+          },
+          {
+            "text": "The ledger was deleted.",
+            "explanation": "Review the catalog and evidence order. The ledger was deleted."
+          },
+          {
+            "text": "The SDK charged more.",
+            "explanation": "Review the catalog and evidence order. The SDK charged more."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why does a second refund return already-recorded?",
+        "options": [
+          {
+            "text": "The owned ledger allows one exact synthetic refund.",
+            "explanation": "Correct. The owned ledger allows one exact synthetic refund."
+          },
+          {
+            "text": "ToolSearch blocks all later queries.",
+            "explanation": "Review the catalog and evidence order. ToolSearch blocks all later queries."
+          },
+          {
+            "text": "The invoice amount changed.",
+            "explanation": "Review the catalog and evidence order. The invoice amount changed."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "A run prints the refund name in prose but no tool_reference. Is native discovery proven?",
+        "options": [
+          {
+            "text": "No; inspect the structured ToolSearch result.",
+            "explanation": "Correct. No; inspect the structured ToolSearch result."
+          },
+          {
+            "text": "Yes; any text is enough.",
+            "explanation": "Review the catalog and evidence order. Yes; any text is enough."
+          },
+          {
+            "text": "Yes, if local search found it.",
+            "explanation": "Review the catalog and evidence order. Yes, if local search found it."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "In a deferred plan, one pinned refund is loaded. How many remain deferred?",
+        "options": [
+          {
+            "text": "63",
+            "explanation": "Correct. 63"
+          },
+          {
+            "text": "64",
+            "explanation": "Review the catalog and evidence order. 64"
+          },
+          {
+            "text": "0",
+            "explanation": "Review the catalog and evidence order. 0"
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "In the native timeline, which event must occur before the refund handler?",
+        "options": [
+          {
+            "text": "A successful ToolSearch reference result.",
+            "explanation": "Correct. A successful ToolSearch reference result."
+          },
+          {
+            "text": "A terminal success frame.",
+            "explanation": "Review the catalog and evidence order. A terminal success frame."
+          },
+          {
+            "text": "A duplicate ledger entry.",
+            "explanation": "Review the catalog and evidence order. A duplicate ledger entry."
+          }
+        ],
+        "correct": 0
       }
     ],
-    "concept_code": "from typing import Any\n\nfrom claude_agent_sdk import ClaudeAgentOptions, SdkMcpTool, create_sdk_mcp_server, tool\n\n\ndef make_tool(name: str, description: str) -> SdkMcpTool[Any]:\n    async def handler(args: dict[str, Any]) -> dict[str, Any]:\n        return {\"content\": [{\"type\": \"text\", \"text\": f\"{name} ran with {args}\"}]}\n\n    return tool(name, description, {\"query\": str})(handler)\n\n\nCATALOG = [\n    make_tool(\"orders_read\", \"read customer orders\"),\n    make_tool(\"policy_search\", \"search refund policy\"),\n    make_tool(\"sales_analyze\", \"compute sales totals\"),\n]\n\n\ndef options_for(request: str, limit: int = 2) -> ClaudeAgentOptions:\n    terms = set(request.lower().split())\n\n    def score(item: SdkMcpTool[Any]) -> int:\n        return len(terms & set(item.description.split()))\n\n    selected = [\n        item\n        for item in sorted(CATALOG, key=score, reverse=True)[:limit]\n        if score(item) > 0\n    ]\n    server = create_sdk_mcp_server(\"shop\", tools=selected)\n    return ClaudeAgentOptions(\n        mcp_servers={\"shop\": server},\n        tools=[],  # no built-ins: the model sees only the subset\n        allowed_tools=[f\"mcp__shop__{item.name}\" for item in selected],\n    )",
-    "code_focus": "`options_for()` scores CATALOG against the request, registers only the top matches with `create_sdk_mcp_server`, sets tools=[] to hide built-ins and pre-approves exactly those mcp__shop__ names in `allowed_tools`.",
+    "concept_code": "from agent_lab.tool_search_lab import SearchInput, PlanInput, search, plan\n\nprint(search(SearchInput(query='refund duplicate charge'))['references'])\nprint(plan(PlanInput(searchMode='true'))['loadedCount'])\nprint(plan(PlanInput(searchMode='false'))['loadedCount'])\n# Native discovery uses tools=['ToolSearch'] and an in-process 64-tool MCP server.\n",
+    "code_focus": "search() explains local relevance. plan() estimates serialized characters. tool_search_native.live() uses actual ToolSearch and verifies the owned ledger; measure() asks the SDK for context categories in a separate silent session.",
     "concept_points": [
       {
-        "title": "Show a small subset",
-        "text": "Registering only the few relevant tools keeps the model's choice small and the prompt short."
+        "title": "Deferred definitions",
+        "text": "ToolSearch discovers a definition when needed; alwaysLoad can pin one critical tool."
       },
       {
-        "title": "tools versus `allowed_tools`",
-        "text": "tools controls which built-in tools exist; `allowed_tools` only pre-approves names and does not hide anything."
+        "title": "Different measurements",
+        "text": "Local scores and character counts are explanations. Native context categories and isLoaded flags are SDK observations."
       },
       {
-        "title": "No match, no filler",
-        "text": "Tools that share nothing with the request are left out instead of padding the list."
+        "title": "Discovery is evidence",
+        "text": "A successful tool_reference result must precede the exact refund admission and ledger mutation."
       }
     ],
     "misconception": {
-      "claim": "Putting a tool name in `allowed_tools` is how you hide the other tools from the model.",
-      "correction": "`allowed_tools` only skips the permission prompt for those names. To shrink what the model sees, register fewer MCP tools and set tools for built-ins."
+      "claim": "A local search score proves native ToolSearch selected the same tool.",
+      "correction": "The local scorer is deterministic teaching code. Native discovery requires the actual ToolSearch result and ordered tool call evidence."
     }
   },
   {

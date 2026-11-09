@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" role="img" aria-label="Tool discovery and refund walkthrough">
+<rect width="900" height="360" rx="24" fill="#f4f7fb"/>
+<text x="34" y="49" font-family="Arial" font-size="25" font-weight="700" fill="#172b4d">One native refund, verified in order</text>
+<g font-family="Arial" text-anchor="middle" font-size="16">
+<rect x="30" y="100" width="190" height="92" rx="13" fill="#dce9ff" stroke="#4267a1"/><text x="125" y="136">1. ToolSearch call</text><text x="125" y="164">refund query</text>
+<rect x="247" y="100" width="190" height="92" rx="13" fill="#e9e2ff" stroke="#704ca7"/><text x="342" y="136">2. Actual result</text><text x="342" y="164">tool_reference</text>
+<rect x="464" y="100" width="190" height="92" rx="13" fill="#fff0d6" stroke="#a66e21"/><text x="559" y="136">3. Exact admission</text><text x="559" y="164">hook + callback</text>
+<rect x="681" y="100" width="190" height="92" rx="13" fill="#d7f1e6" stroke="#267554"/><text x="776" y="136">4. Owned ledger</text><text x="776" y="164">RF-2042-1 once</text>
+<path d="M220 146h22m195 0h22m195 0h22" stroke="#52617a" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="140" y="245" width="620" height="66" rx="15" fill="#fff" stroke="#9ba9ba"/>
+<text x="450" y="272" fill="#172b4d">Host reloads bytes and hash, matches call ID and arguments</text>
+<text x="450" y="296" fill="#172b4d">then checks one terminal success and bounded cost</text>
+</g><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 10 5 0 10z" fill="#52617a"/></marker></defs>
+</svg>

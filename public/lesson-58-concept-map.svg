@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" role="img" aria-label="Tool search concept map">
+<rect width="900" height="340" rx="24" fill="#f4f7fb"/>
+<text x="35" y="48" font-family="Arial" font-size="26" font-weight="700" fill="#172b4d">Lesson 58: tool search in a 64-tool catalog</text>
+<g font-family="Arial" font-size="17" text-anchor="middle">
+<rect x="35" y="94" width="225" height="112" rx="15" fill="#dce9ff" stroke="#4267a1"/>
+<text x="147" y="133" fill="#172b4d">8 domains × 8 actions</text><text x="147" y="165" fill="#172b4d">64 MCP definitions</text>
+<rect x="335" y="94" width="225" height="112" rx="15" fill="#e9e2ff" stroke="#704ca7"/>
+<text x="447" y="133" fill="#2d1855">ToolSearch</text><text x="447" y="165" fill="#2d1855">structured reference</text>
+<rect x="635" y="94" width="225" height="112" rx="15" fill="#d7f1e6" stroke="#267554"/>
+<text x="747" y="133" fill="#164d38">Exact refund call</text><text x="747" y="165" fill="#164d38">host permission gates</text>
+<path d="M260 150h65m235 0h65" stroke="#506078" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="120" y="244" width="295" height="57" rx="13" fill="#fff" stroke="#9ba9ba"/>
+<text x="267" y="279" fill="#172b4d">Local scorer + character estimate</text>
+<rect x="485" y="244" width="295" height="57" rx="13" fill="#fff" stroke="#9ba9ba"/>
+<text x="632" y="279" fill="#172b4d">Native context + isLoaded flags</text>
+</g><defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 10 5 0 10z" fill="#506078"/></marker></defs>
+</svg>

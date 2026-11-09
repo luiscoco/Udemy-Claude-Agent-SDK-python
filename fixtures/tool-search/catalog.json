@@ -1,0 +1,1169 @@
+[
+  {
+    "name": "billing_get_record",
+    "description": "Get one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_search_record",
+    "description": "Search one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_create_record",
+    "description": "Create one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_update_record",
+    "description": "Update one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_archive_record",
+    "description": "Archive one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_list_record",
+    "description": "List one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_audit_record",
+    "description": "Audit one synthetic billing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "billing_refund_invoice",
+    "description": "Refund the duplicate invoice charge for the exact EUR cent amount on synthetic invoice INV-2042.",
+    "searchHint": "refund duplicate charge invoice billing payment reimbursement",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "invoiceId": {
+          "type": "string",
+          "const": "INV-2042"
+        },
+        "amountCents": {
+          "type": "integer",
+          "const": 4900
+        },
+        "currency": {
+          "type": "string",
+          "const": "EUR"
+        },
+        "reason": {
+          "type": "string",
+          "const": "duplicate-charge"
+        }
+      },
+      "required": [
+        "invoiceId",
+        "amountCents",
+        "currency",
+        "reason"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_get_record",
+    "description": "Get one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_search_record",
+    "description": "Search one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_create_record",
+    "description": "Create one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_update_record",
+    "description": "Update one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_archive_record",
+    "description": "Archive one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_list_record",
+    "description": "List one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_audit_record",
+    "description": "Audit one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "crm_export_record",
+    "description": "Export one synthetic crm record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_get_record",
+    "description": "Get one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_search_record",
+    "description": "Search one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_create_record",
+    "description": "Create one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_update_record",
+    "description": "Update one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_archive_record",
+    "description": "Archive one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_list_record",
+    "description": "List one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_audit_record",
+    "description": "Audit one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "shipping_export_record",
+    "description": "Export one synthetic shipping record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_get_record",
+    "description": "Get one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_search_record",
+    "description": "Search one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_create_record",
+    "description": "Create one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_update_record",
+    "description": "Update one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_archive_record",
+    "description": "Archive one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_list_record",
+    "description": "List one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_audit_record",
+    "description": "Audit one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "inventory_export_record",
+    "description": "Export one synthetic inventory record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_get_record",
+    "description": "Get one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_search_record",
+    "description": "Search one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_create_record",
+    "description": "Create one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_update_record",
+    "description": "Update one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_archive_record",
+    "description": "Archive one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_list_record",
+    "description": "List one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_audit_record",
+    "description": "Audit one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "hr_export_record",
+    "description": "Export one synthetic hr record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_get_record",
+    "description": "Get one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_search_record",
+    "description": "Search one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_create_record",
+    "description": "Create one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_update_record",
+    "description": "Update one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_archive_record",
+    "description": "Archive one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_list_record",
+    "description": "List one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_audit_record",
+    "description": "Audit one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "analytics_export_record",
+    "description": "Export one synthetic analytics record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_get_record",
+    "description": "Get one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_search_record",
+    "description": "Search one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_create_record",
+    "description": "Create one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_update_record",
+    "description": "Update one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_archive_record",
+    "description": "Archive one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_list_record",
+    "description": "List one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_audit_record",
+    "description": "Audit one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "support_export_record",
+    "description": "Export one synthetic support record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_get_record",
+    "description": "Get one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_search_record",
+    "description": "Search one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_create_record",
+    "description": "Create one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_update_record",
+    "description": "Update one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_archive_record",
+    "description": "Archive one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_list_record",
+    "description": "List one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_audit_record",
+    "description": "Audit one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "marketing_export_record",
+    "description": "Export one synthetic marketing record by record ID. This fixture operation returns unsupported and changes nothing.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "recordId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        }
+      },
+      "required": [
+        "recordId"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

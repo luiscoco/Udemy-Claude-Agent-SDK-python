@@ -1,0 +1,13 @@
+{
+  "voiceId": "Yash",
+  "modelId": "inworld-tts-2",
+  "audioConfig": {
+    "audioEncoding": "MP3",
+    "sampleRateHertz": 48000,
+    "speakingRate": 1.25
+  },
+  "enhanceGeneration": true,
+  "deliveryMode": "BALANCED",
+  "timestampType": "WORD",
+  "applyTextNormalization": "OFF"
+}

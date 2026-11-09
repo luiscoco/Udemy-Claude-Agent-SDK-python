@@ -371,18 +371,37 @@ def test_browser_enables_the_prompt_only_for_offline_exercises_that_read_it(serv
     with sync_playwright() as playwright:
         browser = launch_browser(playwright)
         page = browser.new_page()
-        page.goto(base + "/?lesson=58")
+        page.goto(base + "/?lesson=59")
         page.get_by_role("tab", name="Run the exercise").click()
         prompt = page.get_by_label("Prompt (optional)")
         assert prompt.is_enabled()
-        prompt.fill("compute sales totals")
+        prompt.fill("compare a complex workflow")
         page.get_by_role("button", name="Run exercise").click()
         page.get_by_text("Check passed", exact=True).wait_for(timeout=15000)
-        assert page.get_by_text("sales.analyze").count() >= 1
+        assert page.get_by_text("capable").count() >= 1
         page.goto(base + "/?lesson=51")
         page.get_by_role("tab", name="Run the exercise").click()
         assert page.get_by_label("Agent prompt (live mode)").is_disabled()
         browser.close()
+
+
+def test_lesson58_mobile_catalog_controls_and_prepared_refund(server, guide_browser_context):
+    base, _ = server
+    page = guide_browser_context.new_page()
+    page.set_viewport_size({"width": 390, "height": 844})
+    try:
+        page.goto(base + "/?lesson=58")
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_text("Tool search across 64 tools").wait_for(timeout=15000)
+        page.get_by_role("button", name="Local search").click()
+        page.get_by_text("mcp__ops__billing_refund_invoice").first.wait_for(timeout=15000)
+        page.get_by_role("button", name="Estimate load").click()
+        page.get_by_text('"loadedCount": 0').wait_for(timeout=15000)
+        page.get_by_role("button", name="Prepared refund").click()
+        page.get_by_text('"check": "pass"').wait_for(timeout=15000)
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 2")
+    finally:
+        page.close()
 
 
 def test_browser_exports_progress_and_imports_it_into_another_browser(server, tmp_path):

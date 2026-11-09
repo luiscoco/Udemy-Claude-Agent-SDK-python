@@ -1,0 +1,382 @@
+{
+  "lesson": 58,
+  "section": "search",
+  "duration": 25.488,
+  "cues": [
+    {
+      "word": "This",
+      "start": 0,
+      "end": 0.23
+    },
+    {
+      "word": "local",
+      "start": 0.23,
+      "end": 0.53
+    },
+    {
+      "word": "scorer",
+      "start": 0.53,
+      "end": 0.91
+    },
+    {
+      "word": "explains",
+      "start": 0.91,
+      "end": 1.46
+    },
+    {
+      "word": "why",
+      "start": 1.46,
+      "end": 1.69
+    },
+    {
+      "word": "clear",
+      "start": 1.69,
+      "end": 1.97
+    },
+    {
+      "word": "refund",
+      "start": 1.97,
+      "end": 2.26
+    },
+    {
+      "word": "metadata",
+      "start": 2.26,
+      "end": 2.86
+    },
+    {
+      "word": "is",
+      "start": 2.91,
+      "end": 3.07
+    },
+    {
+      "word": "easy",
+      "start": 3.1,
+      "end": 3.4
+    },
+    {
+      "word": "to",
+      "start": 3.4,
+      "end": 3.5
+    },
+    {
+      "word": "find",
+      "start": 3.5,
+      "end": 3.91
+    },
+    {
+      "word": "in",
+      "start": 3.97,
+      "end": 4.11
+    },
+    {
+      "word": "a",
+      "start": 4.11,
+      "end": 4.16
+    },
+    {
+      "word": "catalog",
+      "start": 4.16,
+      "end": 4.64
+    },
+    {
+      "word": "of",
+      "start": 4.64,
+      "end": 4.72
+    },
+    {
+      "word": "sixty-four",
+      "start": 4.72,
+      "end": 5.25
+    },
+    {
+      "word": "tools",
+      "start": 5.25,
+      "end": 5.72
+    },
+    {
+      "word": "It",
+      "start": 6.26,
+      "end": 6.47
+    },
+    {
+      "word": "tokenizes",
+      "start": 6.47,
+      "end": 7.03
+    },
+    {
+      "word": "the",
+      "start": 7.03,
+      "end": 7.14
+    },
+    {
+      "word": "query",
+      "start": 7.14,
+      "end": 7.56
+    },
+    {
+      "word": "gives",
+      "start": 7.92,
+      "end": 8.23
+    },
+    {
+      "word": "three",
+      "start": 8.23,
+      "end": 8.42
+    },
+    {
+      "word": "points",
+      "start": 8.42,
+      "end": 8.75
+    },
+    {
+      "word": "for",
+      "start": 8.75,
+      "end": 8.88
+    },
+    {
+      "word": "a",
+      "start": 8.88,
+      "end": 8.91
+    },
+    {
+      "word": "name",
+      "start": 8.91,
+      "end": 9.18
+    },
+    {
+      "word": "match",
+      "start": 9.18,
+      "end": 9.59
+    },
+    {
+      "word": "two",
+      "start": 9.86,
+      "end": 10
+    },
+    {
+      "word": "for",
+      "start": 10,
+      "end": 10.18
+    },
+    {
+      "word": "a",
+      "start": 10.18,
+      "end": 10.22
+    },
+    {
+      "word": "search",
+      "start": 10.22,
+      "end": 10.56
+    },
+    {
+      "word": "hint",
+      "start": 10.56,
+      "end": 10.89
+    },
+    {
+      "word": "and",
+      "start": 11.12,
+      "end": 11.31
+    },
+    {
+      "word": "one",
+      "start": 11.31,
+      "end": 11.5
+    },
+    {
+      "word": "for",
+      "start": 11.5,
+      "end": 11.65
+    },
+    {
+      "word": "a",
+      "start": 11.65,
+      "end": 11.71
+    },
+    {
+      "word": "description",
+      "start": 11.71,
+      "end": 12.3
+    },
+    {
+      "word": "The",
+      "start": 12.77,
+      "end": 12.93
+    },
+    {
+      "word": "vague",
+      "start": 12.93,
+      "end": 13.2
+    },
+    {
+      "word": "billing",
+      "start": 13.2,
+      "end": 13.54
+    },
+    {
+      "word": "operation",
+      "start": 13.54,
+      "end": 14.04
+    },
+    {
+      "word": "has",
+      "start": 14.04,
+      "end": 14.25
+    },
+    {
+      "word": "no",
+      "start": 14.25,
+      "end": 14.45
+    },
+    {
+      "word": "refund",
+      "start": 14.45,
+      "end": 14.77
+    },
+    {
+      "word": "hint",
+      "start": 14.77,
+      "end": 15.1
+    },
+    {
+      "word": "so",
+      "start": 15.28,
+      "end": 15.53
+    },
+    {
+      "word": "a",
+      "start": 15.53,
+      "end": 15.56
+    },
+    {
+      "word": "broad",
+      "start": 15.56,
+      "end": 15.91
+    },
+    {
+      "word": "refund",
+      "start": 15.91,
+      "end": 16.21
+    },
+    {
+      "word": "query",
+      "start": 16.21,
+      "end": 16.49
+    },
+    {
+      "word": "cannot",
+      "start": 16.49,
+      "end": 16.82
+    },
+    {
+      "word": "find",
+      "start": 16.82,
+      "end": 17.1
+    },
+    {
+      "word": "it",
+      "start": 17.1,
+      "end": 17.31
+    },
+    {
+      "word": "An",
+      "start": 17.74,
+      "end": 17.87
+    },
+    {
+      "word": "exact",
+      "start": 17.87,
+      "end": 18.26
+    },
+    {
+      "word": "select",
+      "start": 18.26,
+      "end": 18.59
+    },
+    {
+      "word": "query",
+      "start": 18.59,
+      "end": 18.89
+    },
+    {
+      "word": "still",
+      "start": 18.89,
+      "end": 19.18
+    },
+    {
+      "word": "resolves",
+      "start": 19.18,
+      "end": 19.6
+    },
+    {
+      "word": "it",
+      "start": 19.6,
+      "end": 19.81
+    },
+    {
+      "word": "These",
+      "start": 20.28,
+      "end": 20.55
+    },
+    {
+      "word": "scores",
+      "start": 20.55,
+      "end": 20.93
+    },
+    {
+      "word": "are",
+      "start": 20.93,
+      "end": 21.05
+    },
+    {
+      "word": "teaching",
+      "start": 21.05,
+      "end": 21.38
+    },
+    {
+      "word": "estimates",
+      "start": 21.41,
+      "end": 22.09
+    },
+    {
+      "word": "not",
+      "start": 22.27,
+      "end": 22.59
+    },
+    {
+      "word": "native",
+      "start": 22.59,
+      "end": 22.9
+    },
+    {
+      "word": "ToolSearch",
+      "start": 22.9,
+      "end": 23.38
+    },
+    {
+      "word": "ranking",
+      "start": 23.38,
+      "end": 23.82
+    },
+    {
+      "word": "or",
+      "start": 24.04,
+      "end": 24.2
+    },
+    {
+      "word": "billed",
+      "start": 24.2,
+      "end": 24.45
+    },
+    {
+      "word": "token",
+      "start": 24.45,
+      "end": 24.74
+    },
+    {
+      "word": "counts",
+      "start": 24.74,
+      "end": 25.25
+    }
+  ]
+}

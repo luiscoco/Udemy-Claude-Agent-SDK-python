@@ -91,8 +91,28 @@ class RunService:
                     },
                 )
             )
-            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 100) if lesson_id in {56, 57} else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
+            deadline = max(self.settings.timeout_seconds, 350) if lesson_id == 48 else max(self.settings.timeout_seconds, 180) if lesson_id in {45, 46, 47, 49, 50, 52} else max(self.settings.timeout_seconds, 100) if lesson_id in {56, 57, 58} else max(self.settings.timeout_seconds, 75) if lesson_id in {53, 54} else self.settings.timeout_seconds
             async with asyncio.timeout(deadline):
+                if lesson.id == 58:
+                    from agent_lab.headless_native import bundled_cli, private_key
+                    from agent_lab.tool_search_lab import RunInput as ToolSearchRunInput
+                    from agent_lab.tool_search_lab import prepared as prepared_tool_search
+                    from agent_lab.tool_search_native import live as live_tool_search
+
+                    selected = ToolSearchRunInput.model_validate(request.lesson_options)
+                    if request.mode == "live":
+                        if not self.settings.enable_live or not selected.consent:
+                            raise LessonError("Lesson 58 live mode requires fresh consent and enabled access.")
+                        bundled_cli()
+                        private_key()
+                        report = await live_tool_search(selected, self.settings.data_dir)
+                    else:
+                        report = prepared_tool_search(selected, self.settings.data_dir)
+                    await emit(Event(kind="evidence", data={"source": "Lesson 58 tool-search catalog",
+                                                            "lesson_id": 58,
+                                                            "result": {"report": report,
+                                                                       "experiment_passed": report["check"] == "pass"}}))
+                    return
                 if lesson.id == 57:
                     from agent_lab.headless_native import bundled_cli, private_key
                     from agent_lab.worktrees_lab import RunInput, run_workshop

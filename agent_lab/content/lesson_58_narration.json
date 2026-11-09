@@ -1,0 +1,36 @@
+{
+  "lesson": 58,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "search",
+      "title": "Rank the local catalog",
+      "path": "agent_lab/tool_search_lab.py",
+      "start_line": 96,
+      "end_line": 127,
+      "reviewed_source_sha256": "e40a0abf0547f3378df040dd85d0c2dce8bd1a613679a471d62b7196afc03b44",
+      "spoken_text": "This local scorer explains why clear refund metadata is easy to find in a catalog of sixty-four tools. It tokenizes the query, gives three points for a name match, two for a search hint and one for a description. The vague billing operation has no refund hint, so a broad refund query cannot find it. An exact select query still resolves it. These scores are teaching estimates, not native ToolSearch ranking or billed token counts."
+    },
+    {
+      "id": "refund",
+      "title": "Record one exact refund",
+      "path": "agent_lab/tool_search_lab.py",
+      "start_line": 179,
+      "end_line": 203,
+      "reviewed_source_sha256": "e40a0abf0547f3378df040dd85d0c2dce8bd1a613679a471d62b7196afc03b44",
+      "spoken_text": "The refund handler accepts only the synthetic invoice INV-2042, exactly forty-nine hundred euro cents, currency EUR and reason duplicate-charge. It reloads an owned ledger under a run UUID. With a lock, the first valid call writes receipt RF-2042-1 and its tool call ID; a duplicate returns already-recorded. The host independently reloads and hashes the ledger before awarding a check."
+    },
+    {
+      "id": "native",
+      "title": "Verify native discovery",
+      "path": "agent_lab/tool_search_native.py",
+      "start_line": 77,
+      "end_line": 118,
+      "reviewed_source_sha256": "bdada00981053ef329efffdc8cffb44e021068c0a8be24c1487f940c806ce41e",
+      "spoken_text": "The native run registers sixty-four in-process MCP tools and enables ToolSearch. The pre-use hook and permission callback admit only search and the exact refund input. The host requires a structured tool reference result before the refund handler, a matching tool result and ledger receipt, one successful SDK terminal and bounded cost. A model statement alone does not prove discovery or mutation."
+    }
+  ]
+}

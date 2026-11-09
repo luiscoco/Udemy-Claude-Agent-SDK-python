@@ -1521,31 +1521,25 @@
     ]
   },
   "58": {
-    "source_sha256": "2285fa4341de587e06e870a22d5533d17ee5f9aca4b4fa8094a2c59135c312df",
+    "source_sha256": "34fa5305f4be9d614f76df9f2e338edbb0c64039b1d3aaf8c388bd1d6dcb70f5",
     "sections": [
       {
-        "title": "Building catalog tools",
-        "start": 6,
-        "end": 17,
-        "text": "make_tool wraps a simple handler with the tool decorator so each catalog entry is a real SdkMcpTool with a name and description. CATALOG stands in for a large library of tools the host can choose from."
+        "title": "Import bounded teaching controls",
+        "start": 1,
+        "end": 1,
+        "text": "The local search and plan are host teaching functions. Their output is separate from native SDK ToolSearch and context usage."
       },
       {
-        "title": "Scoring against the request",
-        "start": 20,
-        "end": 24,
-        "text": "options_for splits the request into words, and score counts how many of them appear in each tool's description. That count is the host's own relevance signal; it is not the SDK's native tool search."
+        "title": "Compare local discovery",
+        "start": 2,
+        "end": 3,
+        "text": "A clear refund query returns a catalog reference from the deterministic local scorer, not from a model."
       },
       {
-        "title": "Keep the top matches only",
-        "start": 26,
-        "end": 31,
-        "text": "The catalog is sorted by score, cut to the limit, and any tool with a score of zero is dropped rather than used as filler. Only the selected tools are registered in an in-process server named shop."
-      },
-      {
-        "title": "Hide built-ins, approve the subset",
-        "start": 32,
-        "end": 36,
-        "text": "Setting tools to an empty list removes the built-in tools, so the model sees only the chosen shop tools. allowed_tools then pre-approves exactly those mcp__shop__ names; it skips the permission prompt but does not hide anything by itself."
+        "title": "Compare estimated load",
+        "start": 4,
+        "end": 6,
+        "text": "The local plan contrasts deferred and eager definition counts. Native discovery keeps ToolSearch available and obtains real SDK evidence in a separate bounded run."
       }
     ]
   },

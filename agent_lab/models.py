@@ -113,6 +113,20 @@ def lesson_request(lesson_id: int, value: RunRequest | dict[str, Any]) -> RunReq
             raise LessonError("Lesson 52 mode must match the requested run mode.")
         parsed.lesson_options = options.model_dump()
         return parsed
+    if lesson_id == 58:
+        from agent_lab.curriculum import get_lesson
+        from agent_lab.tool_search_lab import RunInput as ToolSearchRunInput
+
+        selected = dict(data)
+        selected.setdefault("prompt", get_lesson(58).prompt)
+        parsed = FoundationRunRequest.model_validate(selected)
+        if parsed.prompt != get_lesson(58).prompt or parsed.scenario != "success":
+            raise LessonError("Lesson 58 uses the fixed synthetic refund case.")
+        mode = "live" if parsed.mode == "live" else "prepared"
+        parsed.lesson_options = ToolSearchRunInput.model_validate({"mode": mode, **parsed.lesson_options}).model_dump(mode="json")
+        if parsed.lesson_options["mode"] != mode:
+            raise LessonError("Lesson 58 mode must match the requested run mode.")
+        return parsed
     if lesson_id == 57:
         from agent_lab.curriculum import get_lesson
         from agent_lab.worktrees_lab import RunInput

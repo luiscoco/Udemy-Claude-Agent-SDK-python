@@ -466,8 +466,8 @@ ROWS = [
     (
         58,
         "Tool search and large tool catalogs",
-        "Select a bounded relevant tool set from a labelled catalog.",
-        "Use the exercise tool to search the tool catalog.",
+        "Discover one relevant definition in a 64-tool MCP catalog and verify a bounded refund.",
+        "Compare local search and native ToolSearch with an owned synthetic refund.",
         "tool_search",
         "exercise",
     ),

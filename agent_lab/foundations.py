@@ -1247,6 +1247,24 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 58:
+        from agent_lab.config import ROOT
+
+        anchors = (("Local ranking", "agent_lab/tool_search_lab.py", "def search(", 32,
+                    "Which weights belong only to the local scorer?"),
+                   ("Owned refund", "agent_lab/tool_search_lab.py", "def refund(", 25,
+                    "How does the ledger reject a duplicate?"),
+                   ("Native discovery", "agent_lab/tool_search_native.py", "async def live(", 42,
+                    "How does ToolSearch precede the refund handler?"))
+        sections = []
+        for title, path, marker, length, question in anchors:
+            lines = (ROOT / path).read_text(encoding="utf-8").splitlines()
+            start = next(i for i, line in enumerate(lines, 1) if line.startswith(marker))
+            sections.append({"title": title, "path": path, "start": start,
+                             "end": min(start + length - 1, len(lines)),
+                             "code": "\n".join(lines[start - 1:start + length - 1]) + "\n",
+                             "question": question})
+        return sections
     if lesson_id == 57:
         from agent_lab.api_worktrees import code_excerpts
 

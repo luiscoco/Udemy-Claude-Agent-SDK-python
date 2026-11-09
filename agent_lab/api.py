@@ -62,6 +62,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     from agent_lab.api_teams import install_team_routes
     from agent_lab.api_telemetry import install_telemetry_routes
     from agent_lab.api_tool_design import install_tool_design_routes
+    from agent_lab.api_tool_search import install_tool_search_routes
     from agent_lab.api_upgrading import install_upgrading_routes
     from agent_lab.api_usage import install_usage_routes
     from agent_lab.api_web_tools import install_web_tool_routes
@@ -110,6 +111,7 @@ def create_app(service: RunService | None = None, with_ui: bool = True) -> FastA
     install_upgrading_routes(app)
     install_team_routes(app, runner)
     install_worktree_routes(app, runner)
+    install_tool_search_routes(app, runner)
     install_offline_routes(app, runner)
     install_drops_routes(app, runner)
     install_suggestion_routes(app, runner)
