@@ -27,9 +27,9 @@
       "id": "native",
       "title": "Verify native discovery",
       "path": "agent_lab/tool_search_native.py",
-      "start_line": 77,
-      "end_line": 118,
-      "reviewed_source_sha256": "bdada00981053ef329efffdc8cffb44e021068c0a8be24c1487f940c806ce41e",
+      "start_line": 89,
+      "end_line": 130,
+      "reviewed_source_sha256": "d81d7a8dc4e87ed1979b58ed06d1e86c3e4cc4ce99c54086c4217cedd08b12a2",
       "spoken_text": "The native run registers sixty-four in-process MCP tools and enables ToolSearch. The pre-use hook and permission callback admit only search and the exact refund input. The host requires a structured tool reference result before the refund handler, a matching tool result and ledger receipt, one successful SDK terminal and bounded cost. A model statement alone does not prove discovery or mutation."
     }
   ]

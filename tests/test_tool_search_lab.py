@@ -25,7 +25,7 @@ from agent_lab.tool_search_lab import (
     search,
     verify_ledger,
 )
-from agent_lab.tool_search_native import _has_reference, server_for
+from agent_lab.tool_search_native import _has_reference, context_definition_tokens, server_for
 
 
 def test_catalog_scoring_and_plans() -> None:
@@ -72,6 +72,19 @@ def test_structured_reference_and_server() -> None:
 
     server = server_for(Config(), handler)
     assert server["type"] == "sdk"
+
+
+def test_context_categories_drive_loading_result() -> None:
+    deferred = {"categories": [{"id": "mcp_tools_deferred", "kind": "deferred", "tokens": 6312}],
+                "mcpTools": [{"isLoaded": False}] * 64}
+    eager = {"categories": [{"id": "mcp_tools", "kind": "used", "tokens": 6303}],
+             "mcpTools": [{"isLoaded": False}] * 64}
+    pinned = {"categories": [{"id": "mcp_tools", "kind": "used", "tokens": 144},
+                             {"id": "mcp_tools_deferred", "kind": "deferred", "tokens": 6168}],
+              "mcpTools": [{"isLoaded": True}] + [{"isLoaded": False}] * 63}
+    assert context_definition_tokens(deferred) == (0, 6312, 0)
+    assert context_definition_tokens(eager) == (6303, 0, 0)
+    assert context_definition_tokens(pinned) == (144, 6168, 1)
 
 
 @pytest.mark.asyncio

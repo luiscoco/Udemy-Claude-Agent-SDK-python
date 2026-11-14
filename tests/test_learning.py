@@ -385,23 +385,31 @@ def test_browser_enables_the_prompt_only_for_offline_exercises_that_read_it(serv
         browser.close()
 
 
-def test_lesson58_mobile_catalog_controls_and_prepared_refund(server, guide_browser_context):
+def test_lesson58_mobile_catalog_controls_and_prepared_refund(server):
+    from concurrent.futures import ThreadPoolExecutor
+
+    from playwright.sync_api import sync_playwright
+
     base, _ = server
-    page = guide_browser_context.new_page()
-    page.set_viewport_size({"width": 390, "height": 844})
-    try:
-        page.goto(base + "/?lesson=58")
-        page.get_by_role("tab", name="Run the exercise").click()
-        page.get_by_text("Tool search across 64 tools").wait_for(timeout=15000)
-        page.get_by_role("button", name="Local search").click()
-        page.get_by_text("mcp__ops__billing_refund_invoice").first.wait_for(timeout=15000)
-        page.get_by_role("button", name="Estimate load").click()
-        page.get_by_text('"loadedCount": 0').wait_for(timeout=15000)
-        page.get_by_role("button", name="Prepared refund").click()
-        page.get_by_text('"check": "pass"').wait_for(timeout=15000)
-        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 2")
-    finally:
-        page.close()
+
+    def check() -> None:
+        with sync_playwright() as playwright:
+            browser = launch_browser(playwright)
+            page = browser.new_page(viewport={"width": 390, "height": 844})
+            page.goto(base + "/?lesson=58")
+            page.get_by_role("tab", name="Run the exercise").click()
+            page.get_by_text("Tool search across 64 tools").wait_for(timeout=15000)
+            page.get_by_role("button", name="Local search").click()
+            page.get_by_text("mcp__ops__billing_refund_invoice").first.wait_for(timeout=15000)
+            page.get_by_role("button", name="Estimate load").click()
+            page.get_by_text('"loadedCount": 0').wait_for(timeout=15000)
+            page.get_by_role("button", name="Prepared refund").click()
+            page.get_by_text('"check": "pass"').wait_for(timeout=15000)
+            assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 2")
+            browser.close()
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        pool.submit(check).result()
 
 
 def test_browser_exports_progress_and_imports_it_into_another_browser(server, tmp_path):
@@ -2553,6 +2561,9 @@ def test_browser_hardening_lanes_and_mobile_evidence(server, guide_browser_conte
             expect(page.get_by_role("columnheader", name="Host decision")).to_be_visible()
         page.get_by_label("Recorded scenario", exact=True).click()
         page.get_by_role("option", name="Known canary leaked", exact=True).click()
+        # NiceGUI sends the select change over a websocket; let the server own it
+        # before the next click snapshots scenario.value for the new run.
+        page.wait_for_timeout(150)
         page.get_by_role("button", name="Run exercise", exact=True).click()
         expect(page.get_by_text("leaked", exact=True)).to_be_visible(timeout=25000)
         expect(page.get_by_text("Needs review", exact=True)).to_be_visible(timeout=25000)

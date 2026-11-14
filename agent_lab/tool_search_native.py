@@ -6,6 +6,7 @@ import asyncio
 import json
 import math
 import uuid
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -52,6 +53,17 @@ def _has_reference(value: Any, name: str) -> bool:
     if isinstance(value, list):
         return any(_has_reference(child, name) for child in value)
     return False
+
+
+def context_definition_tokens(usage: Mapping[str, Any]) -> tuple[int, int, int]:
+    """Use SDK category kinds for context; retain per-tool flags as a separate observation."""
+    categories = usage.get("categories", [])
+    used = sum(row.get("tokens", 0) for row in categories
+               if row.get("id") == "mcp_tools" and row.get("kind") == "used")
+    deferred = sum(row.get("tokens", 0) for row in categories
+                   if row.get("id") == "mcp_tools_deferred" and row.get("kind") == "deferred")
+    flagged = sum(bool(row.get("isLoaded")) for row in usage.get("mcpTools", []))
+    return used, deferred, flagged
 
 
 def _options(owned: Path, selected: Config, server: Any, hook: Any = None,
@@ -243,12 +255,16 @@ async def measure(selected: Config, root: Path, run_id: str | None = None) -> di
     finally:
         await client.disconnect()
     mcp = usage.get("mcpTools", [])
+    categories = usage.get("categories", [])
+    used_mcp, deferred_mcp, flagged = context_definition_tokens(usage)
     return {"runId": run_id, "kind": "native-silent-context", "connected": connected,
             "mcpStatus": [{"name": row.get("name"), "status": row.get("status"),
                            "toolCount": len(row.get("tools", []))}
                           for row in status.get("mcpServers", [])],
             "catalogCount": 64, "totalTokens": usage.get("totalTokens"),
-            "categories": usage.get("categories"), "mcpTools": mcp,
-            "loadedCount": sum(bool(row.get("isLoaded")) for row in mcp),
+            "categories": categories, "mcpTools": mcp,
+            "usedMcpDefinitionTokens": used_mcp,
+            "deferredMcpDefinitionTokens": deferred_mcp,
+            "loadedFlagCount": flagged,
             "sdkQueries": 0, "modelInputTurns": 0,
             "note": "No model input turns; control traffic may still occur."}
