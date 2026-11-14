@@ -993,7 +993,7 @@
       "foundation_component": "src/concepts/Concept58ToolSearch.tsx",
       "reference_parity": "not-certified",
       "written_guide": "written",
-      "gap": "The 64-tool catalog, strict API, 390px browser controls, seven questions, two diagrams and three source-bound Yash clips pass. Native CLI/API discovery and live Stop passed. Silent native deferred, eager and pinned measurements use SDK category kinds: 0/6,312, 6,303/0 and 144/6,168 used/deferred MCP definition tokens. Clips pass decode, timing, hash and volume checks. The last clean pre-clarification full regression passed 2,050 tests with 22 skips; post-change full reruns were unconfirmed after unrelated Lesson 48 browser timing and Lesson 17 subprocess timeout failures, each of which passed alone. Human listening and independent student acceptance remain open.",
+      "gap": "The 64-tool catalog, strict API, 390px browser controls, seven questions, two diagrams and three source-bound Yash clips pass. Native CLI/API discovery and live Stop passed. Silent native deferred, eager and pinned measurements use SDK category kinds: 0/6,312, 6,303/0 and 144/6,168 used/deferred MCP definition tokens. Clips pass decode, timing, hash and volume checks. The post-change full regression passed 2,052 tests with 22 skips on 14 November 2026. Human listening and independent student acceptance remain open.",
       "written_guide_content": "lesson-content"
     },
     {
