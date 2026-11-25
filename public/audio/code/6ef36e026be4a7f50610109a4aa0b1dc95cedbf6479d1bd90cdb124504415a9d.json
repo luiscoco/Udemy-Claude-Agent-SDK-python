@@ -1,0 +1,292 @@
+{
+  "lesson": 59,
+  "section": "metrics",
+  "duration": 23.16,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.15
+    },
+    {
+      "word": "metrics",
+      "start": 0.15,
+      "end": 0.57
+    },
+    {
+      "word": "function",
+      "start": 0.57,
+      "end": 0.99
+    },
+    {
+      "word": "uses",
+      "start": 0.99,
+      "end": 1.36
+    },
+    {
+      "word": "the",
+      "start": 1.36,
+      "end": 1.44
+    },
+    {
+      "word": "last",
+      "start": 1.44,
+      "end": 1.83
+    },
+    {
+      "word": "cumulative",
+      "start": 1.83,
+      "end": 2.35
+    },
+    {
+      "word": "billing",
+      "start": 2.35,
+      "end": 2.59
+    },
+    {
+      "word": "snapshot",
+      "start": 2.59,
+      "end": 3.24
+    },
+    {
+      "word": "once",
+      "start": 3.52,
+      "end": 3.87
+    },
+    {
+      "word": "for",
+      "start": 3.87,
+      "end": 4.03
+    },
+    {
+      "word": "each",
+      "start": 4.03,
+      "end": 4.25
+    },
+    {
+      "word": "query",
+      "start": 4.25,
+      "end": 4.62
+    },
+    {
+      "word": "Classification",
+      "start": 5.16,
+      "end": 5.91
+    },
+    {
+      "word": "and",
+      "start": 5.91,
+      "end": 6.06
+    },
+    {
+      "word": "solving",
+      "start": 6.06,
+      "end": 6.53
+    },
+    {
+      "word": "use",
+      "start": 6.56,
+      "end": 6.83
+    },
+    {
+      "word": "separate",
+      "start": 6.83,
+      "end": 7.24
+    },
+    {
+      "word": "queries",
+      "start": 7.24,
+      "end": 7.77
+    },
+    {
+      "word": "so",
+      "start": 8.05,
+      "end": 8.24
+    },
+    {
+      "word": "both",
+      "start": 8.24,
+      "end": 8.49
+    },
+    {
+      "word": "costs",
+      "start": 8.49,
+      "end": 8.95
+    },
+    {
+      "word": "and",
+      "start": 8.98,
+      "end": 9.15
+    },
+    {
+      "word": "durations",
+      "start": 9.15,
+      "end": 9.66
+    },
+    {
+      "word": "belong",
+      "start": 9.66,
+      "end": 10
+    },
+    {
+      "word": "in",
+      "start": 10,
+      "end": 10.08
+    },
+    {
+      "word": "the",
+      "start": 10.08,
+      "end": 10.17
+    },
+    {
+      "word": "route",
+      "start": 10.17,
+      "end": 10.38
+    },
+    {
+      "word": "Failed",
+      "start": 10.84,
+      "end": 11.21
+    },
+    {
+      "word": "attempts",
+      "start": 11.21,
+      "end": 11.74
+    },
+    {
+      "word": "and",
+      "start": 11.77,
+      "end": 11.94
+    },
+    {
+      "word": "unknown",
+      "start": 11.94,
+      "end": 12.25
+    },
+    {
+      "word": "usage",
+      "start": 12.25,
+      "end": 12.76
+    },
+    {
+      "word": "remain",
+      "start": 12.76,
+      "end": 13.05
+    },
+    {
+      "word": "visible",
+      "start": 13.05,
+      "end": 13.48
+    },
+    {
+      "word": "When",
+      "start": 13.91,
+      "end": 14.14
+    },
+    {
+      "word": "cost",
+      "start": 14.14,
+      "end": 14.47
+    },
+    {
+      "word": "is",
+      "start": 14.47,
+      "end": 14.59
+    },
+    {
+      "word": "unknown",
+      "start": 14.59,
+      "end": 15
+    },
+    {
+      "word": "cost",
+      "start": 15.42,
+      "end": 15.75
+    },
+    {
+      "word": "per",
+      "start": 15.75,
+      "end": 15.94
+    },
+    {
+      "word": "correct",
+      "start": 15.94,
+      "end": 16.23
+    },
+    {
+      "word": "answer",
+      "start": 16.23,
+      "end": 16.55
+    },
+    {
+      "word": "is",
+      "start": 16.55,
+      "end": 16.78
+    },
+    {
+      "word": "unavailable",
+      "start": 16.78,
+      "end": 17.33
+    },
+    {
+      "word": "Prepared",
+      "start": 17.84,
+      "end": 18.21
+    },
+    {
+      "word": "numbers",
+      "start": 18.21,
+      "end": 18.7
+    },
+    {
+      "word": "are",
+      "start": 18.7,
+      "end": 18.81
+    },
+    {
+      "word": "authored",
+      "start": 18.81,
+      "end": 19.27
+    },
+    {
+      "word": "fixtures",
+      "start": 19.27,
+      "end": 19.95
+    },
+    {
+      "word": "native",
+      "start": 20.22,
+      "end": 20.62
+    },
+    {
+      "word": "numbers",
+      "start": 20.62,
+      "end": 20.99
+    },
+    {
+      "word": "are",
+      "start": 20.99,
+      "end": 21.06
+    },
+    {
+      "word": "reported",
+      "start": 21.06,
+      "end": 21.58
+    },
+    {
+      "word": "SDK",
+      "start": 21.58,
+      "end": 21.96
+    },
+    {
+      "word": "query",
+      "start": 21.96,
+      "end": 22.25
+    },
+    {
+      "word": "estimates",
+      "start": 22.25,
+      "end": 22.91
+    }
+  ]
+}

@@ -364,24 +364,61 @@ async def test_live_tutor_api_sends_the_model_source_to_claude(tmp_path, monkeyp
     assert 'ConfigDict(extra="forbid", strict=True)' in prompts[0]
 
 
-def test_browser_enables_the_prompt_only_for_offline_exercises_that_read_it(server):
+def test_lesson59_mobile_routing_controls_and_prepared_comparison(server):
+    from playwright.sync_api import expect, sync_playwright
+
+    base, _ = server
+    with sync_playwright() as playwright:
+        browser = launch_browser(playwright)
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(base + "/?lesson=59")
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_text("Model routing: thirteen fixed tasks").wait_for(timeout=15000)
+        assert page.get_by_role("checkbox", name=re.compile("invoice")).is_checked()
+        page.get_by_role("button", name="Select all tasks").click()
+        expect(page.get_by_role("checkbox", name=re.compile("^binomial"))).to_be_checked(timeout=15000)
+        page.get_by_role("button", name="Compare all prepared strategies").click()
+        page.get_by_text("200: needs-review").wait_for(timeout=15000)
+        page.get_by_text("light: 7/13 accepted").wait_for(timeout=15000)
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 2")
+        page.set_viewport_size({"width": 1440, "height": 1000})
+        page.goto(base + "/?lesson=59")
+        page.wait_for_timeout(500)
+        page.get_by_role("tab", name="Visual guide").click()
+        page.locator('img[src="/assets/lesson-59-concept-map.svg"]').wait_for(timeout=15000)
+        page.goto(base + "/?lesson=59")
+        page.wait_for_timeout(500)
+        walk_tab = page.get_by_role("tab", name="Lab walkthrough")
+        walk_tab.click()
+        expect(walk_tab).to_have_attribute("aria-selected", "true", timeout=15000)
+        page.locator('img[src="/assets/lesson-59-lab-walkthrough.svg"]').wait_for(timeout=15000)
+        assert page.request.get(base + "/assets/lesson-59-lab-walkthrough.svg").status == 200
+        page.get_by_role("tab", name="Run the exercise").click()
+        page.get_by_role("button", name="Select invoice only").click()
+        expect(page.get_by_role("checkbox", name=re.compile("^binomial"))).not_to_be_checked(timeout=15000)
+        page.get_by_role("button", name="Run selected strategy").click()
+        page.get_by_text('"status": "pass"').first.wait_for(timeout=15000)
+        page.goto(base + "/?lesson=51")
+        page.get_by_role("tab", name="Run the exercise").click()
+        assert page.get_by_label("Agent prompt (live mode)").is_disabled()
+        browser.close()
+
+
+def test_recent_source_excerpts_are_visible_in_python_tab(server):
     from playwright.sync_api import sync_playwright
 
     base, _ = server
     with sync_playwright() as playwright:
         browser = launch_browser(playwright)
-        page = browser.new_page()
-        page.goto(base + "/?lesson=59")
-        page.get_by_role("tab", name="Run the exercise").click()
-        prompt = page.get_by_label("Prompt (optional)")
-        assert prompt.is_enabled()
-        prompt.fill("compare a complex workflow")
-        page.get_by_role("button", name="Run exercise").click()
-        page.get_by_text("Check passed", exact=True).wait_for(timeout=15000)
-        assert page.get_by_text("capable").count() >= 1
-        page.goto(base + "/?lesson=51")
-        page.get_by_role("tab", name="Run the exercise").click()
-        assert page.get_by_label("Agent prompt (live mode)").is_disabled()
+        page = browser.new_page(viewport={"width": 1440, "height": 1000})
+        for lesson_id, title in ((58, "Local ranking"), (59, "Compute answer keys")):
+            page.goto(base + f"/?lesson={lesson_id}")
+            page.wait_for_timeout(500)
+            page.get_by_role("tab", name="Python source").click()
+            page.get_by_text("How the offline lab checks this concept").click()
+            page.get_by_text(title).wait_for(timeout=15000)
+            page.get_by_text(title).click()
+            page.locator('audio[src*="/assets/audio/code/"]').first.wait_for(timeout=15000)
         browser.close()
 
 

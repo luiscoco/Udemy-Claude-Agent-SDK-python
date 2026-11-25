@@ -245,6 +245,10 @@ async def _query(owned: Path, task_id: str, stage: str, tier: str,
                         "status": status, "closed": True, "subtype": result.subtype,
                         "isError": result.is_error, "model": requested_model, "effort": effort,
                         "output": output, "durationMs": elapsed, "billing": billing,
+                        "terminalReason": result.terminal_reason,
+                        "apiErrorStatus": result.api_error_status,
+                        "terminalErrors": [str(item)[:240] for item in (result.errors or [])][:5],
+                        "resultPreview": str(result.result or "")[:300] if output is None else None,
                         "rawTerminal": {"total_cost_usd": result.total_cost_usd,
                                         "model_usage": result.model_usage},
                         "toolEvidence": {"inits": [{"sessionId": x} for x in inits],
@@ -320,8 +324,10 @@ async def live(selected: RoutingInput, root: Path, run_id: str | None = None,
     except Exception as exc:
         errors.append(f"Native {type(exc).__name__}")
     by_query = {call["queryId"]: call for row in rows for call in row["history"]}
-    known = [call.get("billing", {}).get("cumulativeCostUsd") for call in by_query.values()]
-    reported = round(sum(known), 8) if all(isinstance(x, (int, float)) for x in known) else None
+    known = [call.get("billing", {}) for call in by_query.values()]
+    reported = (round(sum(item["cumulativeCostUsd"] for item in known), 8)
+                if all(item.get("valid") and isinstance(item.get("cumulativeCostUsd"), (int, float))
+                       for item in known) else None)
     report = {"lesson": 59, "runId": run_id, "config": {**selected.model_dump(), "runId": run_id},
               "mode": "live", "source": "native-sdk", "status": "success" if not errors else "failed",
               "rows": rows, "metrics": {strategy: metrics(rows, "sdk-query-pipeline-estimate")} if rows else {},
@@ -404,8 +410,10 @@ async def resolution(root: Path, *, mode: str, consent: bool, budget: float,
         if row["status"] != "success":
             break
     by_query = {call["queryId"]: call for row in rows for call in row["history"]}
-    costs = [call.get("billing", {}).get("cumulativeCostUsd") for call in by_query.values()]
-    known = round(sum(costs), 8) if all(isinstance(cost, (int, float)) for cost in costs) else None
+    billings = [call.get("billing", {}) for call in by_query.values()]
+    known = (round(sum(item["cumulativeCostUsd"] for item in billings), 8)
+             if all(item.get("valid") and isinstance(item.get("cumulativeCostUsd"), (int, float))
+                    for item in billings) else None)
     accepted = (len(rows) == 3 and all(row["status"] == "success" and
                row.get("grade", {}).get("accepted") for row in rows))
     if mode == "live" and accepted:
@@ -571,10 +579,11 @@ async def delegate(root: Path, *, mode: str, consent: bool, budget: float,
            "grade": grade_answer("lineup", output["answer"]) if isinstance(output, dict) and valid_output(output) else None,
            "history": [call], "delegation": {"observed": observed, "admissions": admissions,
                                                "calls": calls, "results": results}}
-    report = {"lesson": 59, "runId": run_id, "kind": "delegate", "mode": "live",
+    report: dict[str, Any] = {"lesson": 59, "runId": run_id, "kind": "delegate", "mode": "live",
             "source": "native-sdk-special", "status": status, "errors": [error] if error else [],
             "rows": [row], "sdkQueries": 1 if terminal is not None else 0,
-            "reportedSdkUsd": billing["cumulativeCostUsd"], "criterionAwarded": False,
+            "reportedSdkUsd": billing["cumulativeCostUsd"] if billing["valid"] else None,
+            "criterionAwarded": False,
             "note": "A matching native tool result does not independently audit the expert's execution."}
     report["check"] = assess_special(report, budget)
     if not report["check"]["passed"]:

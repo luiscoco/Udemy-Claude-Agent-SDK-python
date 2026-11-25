@@ -1,0 +1,36 @@
+{
+  "lesson": 59,
+  "status": "reviewed-script",
+  "language": "en",
+  "voice_requested": "Yash (Inworld)",
+  "audio_status": "recorded-needs-listening",
+  "sections": [
+    {
+      "id": "keys",
+      "title": "Compute answer keys",
+      "path": "agent_lab/routing_lab.py",
+      "start_line": 53,
+      "end_line": 127,
+      "reviewed_source_sha256": "843a8da6b6c3262a3e85f93a9e05543317d254e09fa4cc925a8906ab09d40ba1",
+      "spoken_text": "The answer key function computes each expected answer separately from the model route. It extracts the invoice identifier, converts the fixed January time, performs the default string sort, counts primes and digit sums, and checks puzzle permutations for one solution. The final grade compares case and whitespace normalized answers. A confident but wrong answer still fails this key."
+    },
+    {
+      "id": "metrics",
+      "title": "Count final query usage",
+      "path": "agent_lab/routing_lab.py",
+      "start_line": 211,
+      "end_line": 268,
+      "reviewed_source_sha256": "843a8da6b6c3262a3e85f93a9e05543317d254e09fa4cc925a8906ab09d40ba1",
+      "spoken_text": "The metrics function uses the last cumulative billing snapshot once for each query. Classification and solving use separate queries, so both costs and durations belong in the route. Failed attempts and unknown usage remain visible. When cost is unknown, cost per correct answer is unavailable. Prepared numbers are authored fixtures; native numbers are reported SDK query estimates."
+    },
+    {
+      "id": "native",
+      "title": "Switch one native session",
+      "path": "agent_lab/routing_native.py",
+      "start_line": 153,
+      "end_line": 247,
+      "reviewed_source_sha256": "436d2b82b9f80d032b9de0ddd55783b7ca8d1bd2545fd49a1681bc9a608e3dd9",
+      "spoken_text": "The native query starts in an owned directory with a fixed model and output schema. A pre-use hook admits only the selected structured answer. The host accepts structured output from a successful terminal, not assistant prose. For a review, the same SDK client acknowledges a switch to the deep model before a second prompt. Both turns retain one session identity and cumulative usage."
+    }
+  ]
+}

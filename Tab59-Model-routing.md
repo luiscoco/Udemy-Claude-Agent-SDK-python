@@ -1,130 +1,40 @@
 # Lesson 59: Model routing
 
-Route requests with a deterministic host policy and a per-call budget.
+Model routing assigns a bounded model choice to each task and checks whether the result is correct. The browser lab compares prepared strategies against independently computed answer keys. A separate live control uses the installed Claude Agent SDK to observe model selection, review switching, alias resolution and expert delegation.
 
-This lesson is part of **Production and deployment**. The Python implementation is shared by
-the NiceGUI screen, FastAPI endpoints and command-line exercise.
+## Run the lesson
 
-## Run it
+Install dependencies with `uv sync --locked`. Start the portal with `uv run agent-lab serve` and open lesson 59. The lesson includes a concept map, lab walkthrough, Python source excerpts and three Yash narration clips.
 
-Install the environment once with `uv sync --locked`. Then run:
+For a free command-line check, run:
 
 ```shell
 uv run agent-lab lesson 59
-uv run python -m agent_lab.lessons.lesson_59
+uv run python scripts/routing_check.py
 ```
 
-Both commands run **offline host code**. No model is called, no API cost is incurred,
-and recorded examples are labelled as fixtures rather than live SDK messages.
+This checks all 104 prepared task and strategy cases, the answer keys and network isolation. Prepared cost and duration labels are synthetic. A passing prepared row is evidence about the fixture and host rules, not a provider call.
 
-For the browser lab, run `uv run agent-lab serve`, then open
-[lesson 59](http://127.0.0.1:8080/?lesson=59).
+## How to use the lab
 
-## The concept in code
+Choose one or all thirteen fixed tasks, then compare the eight prepared strategies. The independent check computes the expected answer for each task; it does not trust a strategy's self-reported confidence. Six strategies pass the current fixtures. `light` and `cascade` need review because their outputs include wrong answers. The `power-mod` task is a useful trap: a confident `001` is still wrong.
 
-```python
-from dataclasses import dataclass
+The live controls are separate from the prepared suite. Invoice review checks a stable SDK session and a real switch from a light model to a deep model. Model listing checks installed CLI metadata without a model input turn. Alias resolution checks observed usage for each requested alias. Expert delegation checks the advertised and emitted tool, the bounded expert configuration, the matching tool result and the final answer. A terminal error, missing structured output or invalid billing evidence produces `needs-review`.
 
-from claude_agent_sdk import ClaudeAgentOptions
+The live invoice control uses a USD 0.10 per-query stop threshold and a 90-second deadline. This is a host budget threshold, not an exact provider billing cap.
 
-SIGNALS = ("refactor", "design", "debug", "architecture", "migrate", "security")
+## Run provider-backed checks
 
-
-@dataclass(frozen=True)
-class Route:
-    model: str
-    max_turns: int
-    max_budget_usd: float
-    reason: str
-
-
-def route(task: str) -> Route:
-    matched = [word for word in SIGNALS if word in task.lower()]
-    if matched or len(task) > 400:
-        reason = f"complex: {', '.join(matched) or 'long input'}"
-        return Route("sonnet", max_turns=6, max_budget_usd=0.25, reason=reason)
-    return Route("haiku", max_turns=2, max_budget_usd=0.05, reason="simple task")
-
-
-def options_for(task: str) -> ClaudeAgentOptions:
-    chosen = route(task)
-    print(f"routing to {chosen.model}: {chosen.reason}")
-    return ClaudeAgentOptions(
-        model=chosen.model,
-        max_turns=chosen.max_turns,
-        max_budget_usd=chosen.max_budget_usd,
-    )
-```
-
-route() applies explicit keyword and length rules and returns a Route whose model, `max_turns` and `max_budget_usd` are passed straight into ClaudeAgentOptions, with the reason logged.
-
-## How the offline lab checks it
-
-Predict the evidence, then run the exercise. A model's description of an action is
-not evidence that the action happened.
-
-The lab is `routing` in [agent_lab/exercises.py](agent_lab/exercises.py)
-(line 1660); the Python source tab shows it below the concept code. Host contracts
-are in [agent_lab/services.py](agent_lab/services.py); path and tool permissions are in
-[agent_lab/policy.py](agent_lab/policy.py).
-
-## Live Agent SDK exercise
-
-Copy `.env.example` to `.env`, configure `ANTHROPIC_API_KEY`, and explicitly set
-`LAB_ENABLE_LIVE=true`. Restart the app and choose **Live Agent SDK**.
+Configure `ANTHROPIC_API_KEY` in the ignored `.env`. Explicitly enable live mode in the portal when prompted. The command-line runner is:
 
 ```shell
-uv run agent-lab lesson 59 --live
+uv run python scripts/live_routing_check.py --live --budget 1
 ```
 
-Suggested prompt:
+On 25 November 2026, the fresh invoice run returned HTTP 401 from the provider. The report correctly stayed `needs-review` and marked cost unknown; a zero in that failed SDK envelope is not a free successful run. Provider-backed reruns await a working key. Do not treat the earlier 14 November observations as proof that the current code passes live.
 
-> Use the exercise tool to inspect model routing decisions.
+## Review the evidence
 
-The live profile is `exercise`. Its tools and configuration are in
-[agent_lab/sdk.py](agent_lab/sdk.py). Evidence profiles expose a read-only MCP
-tool; the model explains already computed evidence. They do not autonomously
-perform the offline exercise. Conversation profiles send two turns on one
-`ClaudeSDKClient`. Question profiles require an answer in the browser UI.
+The [implementation checkpoint](docs/lesson-59-model-routing.md) records observed reports and remaining gates. The [reference parity inventory](docs/reference-parity.md) tracks course coverage. Live reports are stored under ignored `.lab-data/lesson-59`; inspect terminal reason, model usage, SDK-reported cost and structured result together.
 
-`ClaudeAgentOptions` uses Python names such as `max_turns`, `max_budget_usd`,
-`setting_sources` and `include_partial_messages`. The SDK owns the agent loop;
-the host owns validation, tool authority and task lifecycle. The budget option
-is a threshold, not an exact billing cap.
-
-## API and lifecycle
-
-| Endpoint | Purpose |
-|---|---|
-| `GET /api/lessons/59` | Lesson metadata |
-| `POST /api/lessons/59/run` | Collected JSON events |
-| `POST /api/lessons/59/stream` | Server-Sent Events |
-| `/api/lessons/59/ws` | WebSocket events and cancellation |
-
-Pydantic validates the request before the run starts:
-
-```json
-{"mode": "offline", "prompt": "", "max_turns": 4, "max_budget_usd": 0.10}
-```
-
-All transports use [RunService](agent_lab/runtime.py). It bounds concurrency,
-owns the producer task and closes the SDK connection in the task that opened
-it. A run emits one terminal `done` event. Cancellation awaits cleanup before
-releasing the run slot.
-
-## Practice
-
-1. Identify trusted host inputs and untrusted model or source data.
-2. Change one bounded input and predict whether validation accepts it.
-3. Add a failure case and explain how the host should report it.
-4. Compare offline evidence with a live run without mistaking fixtures for model output.
-
-## Verification and references
-
-`uv run pytest` executes every offline lesson and checks host policies, tenant
-isolation, approvals, dependency failures, cancellation and API validation.
-Paid calls are separate, opt-in checks.
-
-- [Official Python Agent SDK reference](https://code.claude.com/docs/en/agent-sdk/python)
-- [Python SDK source](https://github.com/anthropics/claude-agent-sdk-python)
-- [Setup and migration coverage](README.md)
+Before moving to Lesson 60, run the complete offline regression and fresh provider-backed live scenarios. The narration clips have passed automated source and audio checks and still need a human listening review.

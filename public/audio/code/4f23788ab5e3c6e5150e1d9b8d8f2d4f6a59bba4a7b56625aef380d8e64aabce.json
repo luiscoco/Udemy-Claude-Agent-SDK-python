@@ -1,0 +1,322 @@
+{
+  "lesson": 59,
+  "section": "native",
+  "duration": 22.536,
+  "cues": [
+    {
+      "word": "The",
+      "start": 0,
+      "end": 0.08
+    },
+    {
+      "word": "native",
+      "start": 0.08,
+      "end": 0.42
+    },
+    {
+      "word": "query",
+      "start": 0.42,
+      "end": 0.7
+    },
+    {
+      "word": "starts",
+      "start": 0.7,
+      "end": 1.12
+    },
+    {
+      "word": "in",
+      "start": 1.12,
+      "end": 1.2
+    },
+    {
+      "word": "an",
+      "start": 1.2,
+      "end": 1.33
+    },
+    {
+      "word": "owned",
+      "start": 1.36,
+      "end": 1.65
+    },
+    {
+      "word": "directory",
+      "start": 1.65,
+      "end": 2.27
+    },
+    {
+      "word": "with",
+      "start": 2.36,
+      "end": 2.55
+    },
+    {
+      "word": "a",
+      "start": 2.55,
+      "end": 2.59
+    },
+    {
+      "word": "fixed",
+      "start": 2.59,
+      "end": 2.95
+    },
+    {
+      "word": "model",
+      "start": 2.95,
+      "end": 3.38
+    },
+    {
+      "word": "and",
+      "start": 3.42,
+      "end": 3.58
+    },
+    {
+      "word": "output",
+      "start": 3.58,
+      "end": 3.92
+    },
+    {
+      "word": "schema",
+      "start": 3.92,
+      "end": 4.27
+    },
+    {
+      "word": "A",
+      "start": 4.74,
+      "end": 4.87
+    },
+    {
+      "word": "pre-use",
+      "start": 4.87,
+      "end": 5.34
+    },
+    {
+      "word": "hook",
+      "start": 5.34,
+      "end": 5.57
+    },
+    {
+      "word": "admits",
+      "start": 5.6,
+      "end": 5.97
+    },
+    {
+      "word": "only",
+      "start": 6,
+      "end": 6.27
+    },
+    {
+      "word": "the",
+      "start": 6.27,
+      "end": 6.36
+    },
+    {
+      "word": "selected",
+      "start": 6.36,
+      "end": 6.81
+    },
+    {
+      "word": "structured",
+      "start": 6.81,
+      "end": 7.24
+    },
+    {
+      "word": "answer",
+      "start": 7.24,
+      "end": 7.66
+    },
+    {
+      "word": "The",
+      "start": 8.02,
+      "end": 8.13
+    },
+    {
+      "word": "host",
+      "start": 8.13,
+      "end": 8.48
+    },
+    {
+      "word": "accepts",
+      "start": 8.48,
+      "end": 8.84
+    },
+    {
+      "word": "structured",
+      "start": 8.84,
+      "end": 9.28
+    },
+    {
+      "word": "output",
+      "start": 9.28,
+      "end": 9.64
+    },
+    {
+      "word": "from",
+      "start": 9.64,
+      "end": 9.78
+    },
+    {
+      "word": "a",
+      "start": 9.78,
+      "end": 9.83
+    },
+    {
+      "word": "successful",
+      "start": 9.83,
+      "end": 10.39
+    },
+    {
+      "word": "terminal",
+      "start": 10.39,
+      "end": 10.87
+    },
+    {
+      "word": "not",
+      "start": 11.33,
+      "end": 11.64
+    },
+    {
+      "word": "assistant",
+      "start": 11.64,
+      "end": 12.09
+    },
+    {
+      "word": "prose",
+      "start": 12.09,
+      "end": 12.52
+    },
+    {
+      "word": "For",
+      "start": 12.96,
+      "end": 13.15
+    },
+    {
+      "word": "a",
+      "start": 13.15,
+      "end": 13.2
+    },
+    {
+      "word": "review",
+      "start": 13.2,
+      "end": 13.68
+    },
+    {
+      "word": "the",
+      "start": 13.71,
+      "end": 13.84
+    },
+    {
+      "word": "same",
+      "start": 13.84,
+      "end": 14.16
+    },
+    {
+      "word": "SDK",
+      "start": 14.16,
+      "end": 14.57
+    },
+    {
+      "word": "client",
+      "start": 14.57,
+      "end": 14.89
+    },
+    {
+      "word": "acknowledges",
+      "start": 14.89,
+      "end": 15.47
+    },
+    {
+      "word": "a",
+      "start": 15.47,
+      "end": 15.52
+    },
+    {
+      "word": "switch",
+      "start": 15.52,
+      "end": 15.89
+    },
+    {
+      "word": "to",
+      "start": 15.89,
+      "end": 16
+    },
+    {
+      "word": "the",
+      "start": 16,
+      "end": 16.09
+    },
+    {
+      "word": "deep",
+      "start": 16.09,
+      "end": 16.33
+    },
+    {
+      "word": "model",
+      "start": 16.33,
+      "end": 16.77
+    },
+    {
+      "word": "before",
+      "start": 17,
+      "end": 17.33
+    },
+    {
+      "word": "a",
+      "start": 17.33,
+      "end": 17.37
+    },
+    {
+      "word": "second",
+      "start": 17.37,
+      "end": 17.73
+    },
+    {
+      "word": "prompt",
+      "start": 17.73,
+      "end": 18.11
+    },
+    {
+      "word": "Both",
+      "start": 18.52,
+      "end": 18.88
+    },
+    {
+      "word": "turns",
+      "start": 18.88,
+      "end": 19.21
+    },
+    {
+      "word": "retain",
+      "start": 19.21,
+      "end": 19.59
+    },
+    {
+      "word": "one",
+      "start": 19.59,
+      "end": 19.79
+    },
+    {
+      "word": "session",
+      "start": 19.79,
+      "end": 20.09
+    },
+    {
+      "word": "identity",
+      "start": 20.09,
+      "end": 20.7
+    },
+    {
+      "word": "and",
+      "start": 21.03,
+      "end": 21.22
+    },
+    {
+      "word": "cumulative",
+      "start": 21.22,
+      "end": 21.69
+    },
+    {
+      "word": "usage",
+      "start": 21.69,
+      "end": 22.25
+    }
+  ]
+}

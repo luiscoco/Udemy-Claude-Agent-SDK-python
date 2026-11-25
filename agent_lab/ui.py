@@ -34,6 +34,7 @@ from agent_lab.lesson55_audio import clip_for_section as clip_for_upgrading_sect
 from agent_lab.lesson56_audio import clip_for_section as clip_for_teams_section
 from agent_lab.lesson57_audio import clip_for_section as clip_for_worktrees_section
 from agent_lab.lesson58_audio import clip_for_section as clip_for_tool_search_section
+from agent_lab.lesson59_audio import clip_for_section as clip_for_routing_section
 from agent_lab.lesson_guide import adjacent_lesson, learning_guides, lesson_url, route_id
 from agent_lab.models import Event, LessonError, RunRequest
 from agent_lab.my_learning import workspace_url
@@ -245,7 +246,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                             "The host exercise run by Run the exercise, the CLI and the API."
                         ).classes("text-sm text-slate-500")
                         ui.code(source, language="python").classes("w-full")
-                        if 2 <= lesson <= 57:
+                        if 2 <= lesson <= 59:
                             for section_index, section in enumerate(source_sections(lesson)):
                                 with ui.expansion(section["title"]).classes(
                                     "w-full foundation-source-excerpt"
@@ -255,7 +256,7 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                     ).classes("font-semibold")
                                     ui.code(section["code"], language="python").classes("w-full")
                                     ui.label(section["question"]).classes("font-semibold")
-                                    if lesson in {35, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58}:
+                                    if lesson in {35, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59}:
                                         reader = (clip_for_section if lesson == 35 else
                                                   clip_for_remote_section if lesson == 43 else
                                                   clip_for_telemetry_section if lesson == 44 else
@@ -272,7 +273,8 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                                                   clip_for_upgrading_section if lesson == 55 else
                                                   clip_for_teams_section if lesson == 56 else
                                                   clip_for_worktrees_section if lesson == 57 else
-                                                  clip_for_tool_search_section)
+                                                  clip_for_tool_search_section if lesson == 58 else
+                                                  clip_for_routing_section)
                                         clip = reader(section_index, section["path"], section["start"], section["end"])
                                         if clip:
                                             ui.audio(clip).classes("w-full")

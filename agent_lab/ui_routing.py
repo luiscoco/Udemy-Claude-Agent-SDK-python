@@ -57,6 +57,20 @@ def routing_panel(application: FastAPI) -> None:
         for control in (mode, strategy, budget, *tasks.values()):
             control.on_value_change(lambda _: edited())
 
+        def select_all() -> None:
+            if state["busy"] or mode.value != "prepared":
+                return
+            for checkbox in tasks.values():
+                checkbox.value = True
+            edited()
+
+        def select_invoice() -> None:
+            if state["busy"]:
+                return
+            for task_id, checkbox in tasks.items():
+                checkbox.value = task_id == "invoice"
+            edited()
+
         async def run(compare: bool) -> None:
             if state["busy"]:
                 return
@@ -145,6 +159,8 @@ def routing_panel(application: FastAPI) -> None:
                 model_consent.value = False
 
         with ui.row().classes("w-full flex-wrap gap-2 guide-controls-target"):
+            ui.button("Select all tasks", on_click=select_all).bind_enabled_from(mode, "value", lambda value: value == "prepared")
+            ui.button("Select invoice only", on_click=select_invoice)
             ui.button("Run selected strategy", on_click=lambda: run(False))
             ui.button("Compare all prepared strategies", on_click=lambda: run(True)).bind_enabled_from(mode, "value", lambda value: value == "prepared")
             ui.button("Configured / native models", on_click=models)

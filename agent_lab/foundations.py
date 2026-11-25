@@ -1247,6 +1247,24 @@ def source_excerpt(lesson_id: int) -> tuple[str, str, int]:
 
 
 def source_sections(lesson_id: int) -> list[dict[str, Any]]:
+    if lesson_id == 59:
+        from agent_lab.config import ROOT
+
+        anchors = (("Compute answer keys", "agent_lab/routing_lab.py", "def answer_key(", 75,
+                    "Which operations compute answers separately from model confidence?"),
+                   ("Count final query usage", "agent_lab/routing_lab.py", "def metrics(", 58,
+                    "Why does the final cumulative snapshot count once per query?"),
+                   ("Switch one native session", "agent_lab/routing_native.py", "async def _query(", 95,
+                    "Where does the host acknowledge a model switch before a review turn?"))
+        sections = []
+        for title, path, marker, length, question in anchors:
+            lines = (ROOT / path).read_text(encoding="utf-8").splitlines()
+            start = next(i for i, line in enumerate(lines, 1) if line.startswith(marker))
+            sections.append({"title": title, "path": path, "start": start,
+                             "end": min(start + length - 1, len(lines)),
+                             "code": "\n".join(lines[start - 1:start + length - 1]) + "\n",
+                             "question": question})
+        return sections
     if lesson_id == 58:
         from agent_lab.config import ROOT
 

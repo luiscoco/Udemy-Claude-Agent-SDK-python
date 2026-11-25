@@ -399,6 +399,9 @@ def workbook(lesson_id: int) -> None:
 
 def walkthrough_panel(lesson_id: int) -> None:
     item = guide(lesson_id)
+    if lesson_id == 59:
+        with card("Lesson 59 routing walkthrough", "Choose, compare, observe and verify"):
+            ui.image("/assets/lesson-59-lab-walkthrough.svg").props('alt="Five fixed routing lab steps lead from a selected task to independent terminal evidence"').classes("w-full")
     if lesson_id == 58:
         with card("Lesson 58 discovery walkthrough", "Search, admit, refund and verify"):
             ui.image("/assets/lesson-58-lab-walkthrough.svg").props('alt="ToolSearch reference precedes exact refund admission and owned ledger verification"').classes("w-full")
@@ -511,6 +514,9 @@ def infographic(lesson_id: int) -> None:
 
 def visual_panel(lesson_id: int) -> None:
     related = visual_guides_for(lesson_id)
+    if lesson_id == 59:
+        with card("Model routing concept map", "Lesson 59"):
+            ui.image("/assets/lesson-59-concept-map.svg").props('alt="Fixed tasks, host routing, SDK query, independent grade and whole-route accounting"').classes("w-full")
     if lesson_id == 58:
         with card("Tool search concept map", "Lesson 58"):
             ui.image("/assets/lesson-58-concept-map.svg").props('alt="64 tool catalog is compared with local estimates and native context measurements"').classes("w-full")

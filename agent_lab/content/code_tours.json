@@ -1544,31 +1544,25 @@
     ]
   },
   "59": {
-    "source_sha256": "5a82ef0904d7aec2bb2065a6804d11733b07e061e8f5e29f6cadc2f9763401f3",
+    "source_sha256": "ea9729a88eed750358ef048443529c0e8689abce802024662ff6a3b11f04d374",
     "sections": [
       {
-        "title": "Signals of a complex task",
+        "title": "Fixed workshop imports",
+        "start": 1,
+        "end": 1,
+        "text": "The import names the fixed routing request, prepared runner and independent answer grader. Reading this code does not start an SDK query."
+      },
+      {
+        "title": "Run and inspect the rule route",
+        "start": 3,
+        "end": 4,
+        "text": "The prepared rules suite returns a report with a bounded check. The assertion requires every selected task to have a successful independently graded answer."
+      },
+      {
+        "title": "Catch a confident wrong draft",
         "start": 5,
-        "end": 5,
-        "text": "SIGNALS lists the words that mark a task as complex, such as refactor, debug or security. Keeping them as data makes the routing rule explicit and easy to test."
-      },
-      {
-        "title": "A route carries its limits",
-        "start": 8,
-        "end": 13,
-        "text": "A Route bundles the model with its own max_turns and max_budget_usd, plus the reason for the choice. Limits travel with the model, so a cheap tier also gets tight limits."
-      },
-      {
-        "title": "Deterministic routing rules",
-        "start": 16,
-        "end": 21,
-        "text": "route sends a task to sonnet with more turns and budget when it contains a signal word or is longer than 400 characters, and to haiku with tight limits otherwise. The same task always routes the same way, so you can unit-test it."
-      },
-      {
-        "title": "From route to options",
-        "start": 24,
-        "end": 31,
-        "text": "options_for logs which model was chosen and why, then passes the model, max_turns and max_budget_usd straight into ClaudeAgentOptions. That logged reason is what you review later when checking cost and quality."
+        "end": 6,
+        "text": "The separate answer key rejects the confident power-mod draft. Native review then uses one SDK client and switches models before its second turn."
       }
     ]
   },

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Lesson 59 routing lab walkthrough</title>
+  <desc id="desc">A five-step lab flow runs a prepared strategy, compares all eight, inspects confident failure, authorizes one bounded live review, then checks actual terminal evidence without awarding the suite for special probes.</desc>
+  <rect width="1200" height="720" fill="#f3fbfa"/>
+  <g font-family="Arial,sans-serif">
+    <text x="60" y="70" font-size="36" font-weight="700" fill="#104b48">Routing lab walkthrough</text>
+    <text x="60" y="108" font-size="18" fill="#386a65">From one fixed task to an independently graded, evidence-backed comparison.</text>
+    <path d="M117 218H1060" stroke="#7bc6ba" stroke-width="6"/>
+    <g fill="#0f766e"><circle cx="145" cy="218" r="22"/><circle cx="370" cy="218" r="22"/><circle cx="595" cy="218" r="22"/><circle cx="820" cy="218" r="22"/><circle cx="1045" cy="218" r="22"/></g>
+    <g fill="#fff" font-size="20" font-weight="700" text-anchor="middle"><text x="145" y="225">1</text><text x="370" y="225">2</text><text x="595" y="225">3</text><text x="820" y="225">4</text><text x="1045" y="225">5</text></g>
+    <g fill="#fff" stroke="#0f766e" stroke-width="3">
+      <rect x="55" y="275" width="180" height="190" rx="16"/><rect x="280" y="275" width="180" height="190" rx="16"/><rect x="505" y="275" width="180" height="190" rx="16"/><rect x="730" y="275" width="180" height="190" rx="16"/><rect x="955" y="275" width="180" height="190" rx="16"/>
+    </g>
+    <g fill="#104b48" font-size="21" font-weight="700"><text x="75" y="315">Select</text><text x="300" y="315">Run rules</text><text x="525" y="315">Compare</text><text x="750" y="315">Observe live</text><text x="975" y="315">Verify</text></g>
+    <g fill="#345c59" font-size="17">
+      <text x="75" y="352">Choose fixed task</text><text x="75" y="379">and strategy.</text>
+      <text x="300" y="352">Read route and</text><text x="300" y="379">computed grade.</text>
+      <text x="525" y="352">Six policies pass;</text><text x="525" y="379">light and cascade</text><text x="525" y="406">need review.</text>
+      <text x="750" y="352">Fresh consent;</text><text x="750" y="379">one strategy, up to</text><text x="750" y="406">three tasks.</text>
+      <text x="975" y="352">Check terminal,</text><text x="975" y="379">session, usage and</text><text x="975" y="406">independent grade.</text>
+    </g>
+    <rect x="65" y="530" width="1070" height="105" rx="18" fill="#dff2ed" stroke="#3c9d8d" stroke-width="2"/>
+    <text x="90" y="570" font-size="21" font-weight="700" fill="#104b48">Special controls stay separate</text>
+    <text x="90" y="605" font-size="18" fill="#345c59">Silent model list, expert delegation and alias probes add observations; they do not pass the routing suite.</text>
+    <text x="60" y="683" font-size="17" fill="#386a65">Reading this diagram or changing tabs makes no native model call.</text>
+  </g>
+</svg>

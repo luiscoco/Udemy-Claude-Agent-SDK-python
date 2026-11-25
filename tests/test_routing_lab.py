@@ -1,12 +1,18 @@
 """Lesson 59 fixed task and routing acceptance checks."""
 
 import copy
+import json
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
 
 import httpx
 import pytest
 from fastapi import FastAPI
 
 from agent_lab.api_routing import install_routing_routes
+from agent_lab.config import ROOT
+from agent_lab.foundations import source_sections
 from agent_lab.routing_lab import (
     BY_ID,
     STRATEGIES,
@@ -16,6 +22,7 @@ from agent_lab.routing_lab import (
     check_suite,
     facts,
     grade_answer,
+    metrics,
     needs_escalation,
     prepared,
     rule_tier,
@@ -33,6 +40,29 @@ def test_fixed_keys_rules_and_confident_error() -> None:
     assert answer_key("positions") == "Eli,Alex,Cal,Dee,Bea,Fay"
     assert grade_answer("power-mod", "001")["accepted"] is False
     assert needs_escalation("power-mod", {"answer": "001", "confidence": .99}) is False
+
+
+def test_source_excerpts_are_anchored_for_both_recent_lessons() -> None:
+    for lesson_id in (58, 59):
+        sections = source_sections(lesson_id)
+        assert len(sections) == 3
+        assert all(row["start"] > 0 and row["end"] >= row["start"] and row["code"]
+                   for row in sections)
+
+
+def test_distinct_lesson59_visuals_parse_and_free_cli_has_no_network_or_sdk_calls() -> None:
+    visuals = [(ROOT / "public" / f"lesson-59-{name}.svg").read_bytes()
+               for name in ("concept-map", "lab-walkthrough")]
+    assert visuals[0] != visuals[1]
+    assert all(ET.fromstring(data).tag.endswith("svg") for data in visuals)
+    command = [sys.executable, str(ROOT / "scripts/routing_check.py")]
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, timeout=20)
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    assert report["passed"] and report["rows"] == 104
+    assert report["networkAttempts"] == report["sdkQueries"] == report["reportedSdkUsd"] == 0
+    assert subprocess.run([*command, "--live"], cwd=ROOT, capture_output=True,
+                          text=True, timeout=10).returncode != 0
 
 
 def test_all_prepared_strategies_have_expected_teaching_outcomes() -> None:
@@ -57,10 +87,24 @@ def test_incomplete_or_forged_answer_cannot_pass() -> None:
     for mutate in (lambda v: v["rows"].pop(),
                    lambda v: v["rows"][0]["output"].update(answer="wrong"),
                    lambda v: v["config"].update(runId="old"),
+                   lambda v: v["config"].update(budget=.2),
+                   lambda v: v["rows"][0].update(selectedTier="deep"),
+                   lambda v: v["rows"][0]["history"][0].update(closed=False),
+                   lambda v: v["rows"][1]["history"][0].update(queryId=v["rows"][0]["history"][0]["queryId"]),
+                   lambda v: v["rows"][0]["history"][0]["billing"].update(cumulativeCostUsd=9),
+                   lambda v: v["metrics"]["rules"].update(accepted=0),
                    lambda v: v.update(interrupted=True)):
         value = copy.deepcopy(report)
         mutate(value)
         assert check_suite(value, selected)["status"] == "needs-review"
+
+
+def test_invalid_terminal_usage_is_unknown_cost_even_if_zero() -> None:
+    row = prepared(RoutingInput(taskIds=["invoice"]))["rows"][0]
+    row["history"][0]["billing"] = {"valid": False, "cumulativeCostUsd": 0, "models": []}
+    summary = metrics([row], "sdk-query-pipeline-estimate")
+    assert summary["unknownCostQueries"] == 1
+    assert summary["costPerCorrectUsd"] is None
 
 
 def test_special_assessor_requires_correlated_native_evidence() -> None:
@@ -153,5 +197,9 @@ async def test_api_facts_plan_code_and_prepared_run(tmp_path) -> None:
         assert run.status_code == 200 and run.json()["check"]["status"] == "pass"
         assert (await client.post("/api/c59/run", json={"mode": "live", "taskIds": ["invoice"]})).status_code == 403
         assert (await client.post("/api/c59/run", json={"prompt": "injection"})).status_code == 400
+        assert (await client.post("/api/c59/resolution", json={})).json()["criterionAwarded"] is False
+        assert (await client.post("/api/c59/delegate", json={})).json()["rows"][0]["delegation"]["observed"] is False
+        assert (await client.post("/api/c59/resolution", json={"mode": "live", "consent": True})).status_code == 403
+        assert (await client.post("/api/c59/delegate", json={"provider": "other"})).status_code == 400
         assert (await client.post("/api/c59/stop", json={"runId": run.json()["runId"]})).status_code == 404
         assert facts()["models"]["light"].startswith("claude-haiku")

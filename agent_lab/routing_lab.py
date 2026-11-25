@@ -223,7 +223,8 @@ def metrics(rows: list[dict[str, Any]], source: str) -> dict[str, Any]:
         for call in by_query.values():
             billing = call.get("billing", {})
             value = billing.get("cumulativeCostUsd")
-            if not isinstance(value, (int, float)) or not math.isfinite(value):
+            if (not billing.get("valid") or not isinstance(value, (int, float))
+                    or not math.isfinite(value)):
                 unknown += 1
                 continue
             cost += value
@@ -247,7 +248,11 @@ def metrics(rows: list[dict[str, Any]], source: str) -> dict[str, Any]:
 def check_suite(report: dict[str, Any], selected: RoutingInput) -> dict[str, Any]:
     errors: list[str] = []
     mode = selected.mode
-    if report.get("runId") != report.get("config", {}).get("runId") or report.get("config", {}).get("taskIds") != selected.taskIds or report.get("config", {}).get("strategies") != selected.strategies:
+    try:
+        uuid.UUID(report.get("runId"))
+    except (TypeError, ValueError, AttributeError):
+        errors.append("Valid current run UUID required")
+    if report.get("config") != {**selected.model_dump(), "runId": report.get("runId")}:
         errors.append("Current run and exact configuration required")
     if report.get("mode") != mode or report.get("source") != ("scripted-fixture" if mode == "prepared" else "native-sdk"):
         errors.append("Truthful mode and source required")
@@ -302,6 +307,8 @@ def check_suite(report: dict[str, Any], selected: RoutingInput) -> dict[str, Any
         expected_reviews = 1 if should_escalate else 0
         if len(reviews) != expected_reviews or row.get("escalated") != should_escalate:
             errors.append(f"{task_id}: escalation decision mismatch")
+        if len(history) != (2 if strategy == "classifier" or should_escalate else 1):
+            errors.append(f"{task_id}: exact stage count required")
         if should_escalate and (not history[-1].get("modelSwitch", {}).get("acknowledged") or history[-1].get("model") != DEEP):
             errors.append(f"{task_id}: model switch receipt required")
         if history[-1].get("output") != output:
@@ -329,6 +336,15 @@ def check_suite(report: dict[str, Any], selected: RoutingInput) -> dict[str, Any
                              call.get("billing", {}).get("cumulativeCostUsd", -1) <
                              previous.get("billing", {}).get("cumulativeCostUsd", 0)):
                 errors.append(f"{task_id}: same-query identity or cumulative cost mismatch")
+            if previous:
+                before = {m.get("rawModel"): m for m in previous.get("billing", {}).get("models", [])}
+                after = {m.get("rawModel"): m for m in call.get("billing", {}).get("models", [])}
+                if not before.keys() <= after.keys() or any(
+                        any(after[name].get(key, -1) < item.get(key, 0)
+                            for key in ("inputTokens", "outputTokens", "cacheReadTokens",
+                                        "cacheCreationTokens", "costUsd"))
+                        for name, item in before.items() if name in after):
+                    errors.append(f"{task_id}: cumulative model usage regressed")
             queries[query_id] = call
             if (call.get("source") != ("scripted-fixture" if mode == "prepared" else "native-sdk")
                     or call.get("status") != "success" or not call.get("closed")
@@ -365,6 +381,15 @@ def check_suite(report: dict[str, Any], selected: RoutingInput) -> dict[str, Any
                 total > selected.budget + 1e-6 or
                 any(cost > .100001 for cost in known)):
             errors.append("Known bounded SDK query totals required")
+    try:
+        expected_metrics = {strategy: metrics([row for row in rows if row.get("strategy") == strategy],
+                                              "synthetic-authored-fixture" if mode == "prepared" else
+                                              "sdk-query-pipeline-estimate")
+                            for strategy in selected.strategies}
+        if report.get("metrics") != expected_metrics:
+            errors.append("Recomputed route metrics required")
+    except (KeyError, TypeError, ValueError, IndexError):
+        errors.append("Recomputed route metrics required")
     return {"status": "pass" if not errors else "needs-review", "criterion": "Routing suite returns a graded, successful result for every selected task.", "errors": errors}
 
 

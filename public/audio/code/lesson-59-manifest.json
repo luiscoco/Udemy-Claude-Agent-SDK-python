@@ -1,0 +1,80 @@
+{
+  "lesson": 59,
+  "entries": [
+    {
+      "identity": "5cf9be00fd060d55b838c0b0c48667a342e0f6a683c85f7232a63c231a06d772",
+      "section": "keys",
+      "source_sha256": "843a8da6b6c3262a3e85f93a9e05543317d254e09fa4cc925a8906ab09d40ba1",
+      "text_sha256": "ee7c63a87dbd0ae28e7aa664378f5268d19429fb32bb6205b8524c4619e80c0e",
+      "settings": {
+        "voiceId": "Yash",
+        "modelId": "inworld-tts-2",
+        "audioConfig": {
+          "audioEncoding": "MP3",
+          "sampleRateHertz": 48000,
+          "speakingRate": 1.25
+        },
+        "enhanceGeneration": true,
+        "deliveryMode": "BALANCED",
+        "timestampType": "WORD",
+        "applyTextNormalization": "OFF"
+      },
+      "audio_path": "public/audio/code/790de2ea45a5ba657685ea8be75f1b6cc2ae112c9b5d550076306c9e0eef7f27.mp3",
+      "audio_sha256": "790de2ea45a5ba657685ea8be75f1b6cc2ae112c9b5d550076306c9e0eef7f27",
+      "timing_path": "public/audio/code/790de2ea45a5ba657685ea8be75f1b6cc2ae112c9b5d550076306c9e0eef7f27.json",
+      "timing_sha256": "88d4f07e096a36e514478d5f293de533d133790d65b6128f1704e7090e00aded",
+      "duration": 23.328,
+      "processed_characters": 384
+    },
+    {
+      "identity": "137105d45a4fb389f7f2a32ab712b6e8315790448bad9ef3661bb52db4e96ec8",
+      "section": "metrics",
+      "source_sha256": "843a8da6b6c3262a3e85f93a9e05543317d254e09fa4cc925a8906ab09d40ba1",
+      "text_sha256": "7cdfcaa2a7e8328d4e4579b52f8e20f19d61feb8930e3e3b160fdaad84297cb1",
+      "settings": {
+        "voiceId": "Yash",
+        "modelId": "inworld-tts-2",
+        "audioConfig": {
+          "audioEncoding": "MP3",
+          "sampleRateHertz": 48000,
+          "speakingRate": 1.25
+        },
+        "enhanceGeneration": true,
+        "deliveryMode": "BALANCED",
+        "timestampType": "WORD",
+        "applyTextNormalization": "OFF"
+      },
+      "audio_path": "public/audio/code/6ef36e026be4a7f50610109a4aa0b1dc95cedbf6479d1bd90cdb124504415a9d.mp3",
+      "audio_sha256": "6ef36e026be4a7f50610109a4aa0b1dc95cedbf6479d1bd90cdb124504415a9d",
+      "timing_path": "public/audio/code/6ef36e026be4a7f50610109a4aa0b1dc95cedbf6479d1bd90cdb124504415a9d.json",
+      "timing_sha256": "aa853904f39ec2ce27bb12ceb9a8da1ab6cf73195cdcac3b963a95aee1c72808",
+      "duration": 23.16,
+      "processed_characters": 382
+    },
+    {
+      "identity": "f39e7bf4d874a26bf718af107b87c205c3fe69df19b337f12917922ec11c1f48",
+      "section": "native",
+      "source_sha256": "436d2b82b9f80d032b9de0ddd55783b7ca8d1bd2545fd49a1681bc9a608e3dd9",
+      "text_sha256": "95ba1e07f3aa95c3a92a4859de9848e9a02dd6b832e16e531f7b368248660a1a",
+      "settings": {
+        "voiceId": "Yash",
+        "modelId": "inworld-tts-2",
+        "audioConfig": {
+          "audioEncoding": "MP3",
+          "sampleRateHertz": 48000,
+          "speakingRate": 1.25
+        },
+        "enhanceGeneration": true,
+        "deliveryMode": "BALANCED",
+        "timestampType": "WORD",
+        "applyTextNormalization": "OFF"
+      },
+      "audio_path": "public/audio/code/4f23788ab5e3c6e5150e1d9b8d8f2d4f6a59bba4a7b56625aef380d8e64aabce.mp3",
+      "audio_sha256": "4f23788ab5e3c6e5150e1d9b8d8f2d4f6a59bba4a7b56625aef380d8e64aabce",
+      "timing_path": "public/audio/code/4f23788ab5e3c6e5150e1d9b8d8f2d4f6a59bba4a7b56625aef380d8e64aabce.json",
+      "timing_sha256": "19c38e4959913432759926dd46dce1a6822c85a7bb8cc7fb1b3cbed3520c7ace",
+      "duration": 22.536,
+      "processed_characters": 385
+    }
+  ]
+}

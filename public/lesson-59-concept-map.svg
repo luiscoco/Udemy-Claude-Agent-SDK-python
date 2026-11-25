@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">Model routing concept map</title>
+  <desc id="desc">Fixed tasks feed a host route policy, a bounded model query, independent grading and complete cost accounting. Confidence is a heuristic and cannot replace the grade.</desc>
+  <rect width="1200" height="720" fill="#f7f5ff"/>
+  <text x="60" y="72" font-family="Arial,sans-serif" font-size="36" font-weight="700" fill="#251754">Model routing</text>
+  <text x="60" y="110" font-family="Arial,sans-serif" font-size="18" fill="#554b75">Choose a route, then measure the whole path to a correct answer.</text>
+  <g font-family="Arial,sans-serif">
+    <rect x="60" y="175" width="220" height="145" rx="18" fill="#e8e1ff" stroke="#7c61d2" stroke-width="3"/>
+    <text x="84" y="217" font-size="23" font-weight="700" fill="#251754">13 fixed tasks</text>
+    <text x="84" y="252" font-size="17" fill="#3f3760">Teaching tier labels</text>
+    <text x="84" y="281" font-size="17" fill="#3f3760">Independent keys</text>
+    <path d="M280 247H350" stroke="#6948bf" stroke-width="5" marker-end="url(#arrow)"/>
+    <rect x="355" y="175" width="220" height="145" rx="18" fill="#d9f3f0" stroke="#168b81" stroke-width="3"/>
+    <text x="379" y="217" font-size="23" font-weight="700" fill="#104b48">Host route</text>
+    <text x="379" y="252" font-size="17" fill="#28625e">Rule or classifier</text>
+    <text x="379" y="281" font-size="17" fill="#28625e">Fixed model ID</text>
+    <path d="M575 247H645" stroke="#168b81" stroke-width="5" marker-end="url(#arrow)"/>
+    <rect x="650" y="175" width="220" height="145" rx="18" fill="#fff0d9" stroke="#cf8b23" stroke-width="3"/>
+    <text x="674" y="217" font-size="23" font-weight="700" fill="#69400d">SDK query</text>
+    <text x="674" y="252" font-size="17" fill="#754f1e">Structured result</text>
+    <text x="674" y="281" font-size="17" fill="#754f1e">Terminal + usage</text>
+    <path d="M870 247H940" stroke="#cf8b23" stroke-width="5" marker-end="url(#arrow)"/>
+    <rect x="945" y="175" width="195" height="145" rx="18" fill="#e3f5df" stroke="#42853a" stroke-width="3"/>
+    <text x="969" y="217" font-size="23" font-weight="700" fill="#245321">Grade</text>
+    <text x="969" y="252" font-size="17" fill="#356230">Computed key</text>
+    <text x="969" y="281" font-size="17" fill="#356230">Accepted?</text>
+    <rect x="160" y="405" width="350" height="175" rx="18" fill="#fff" stroke="#aa93e2" stroke-width="3"/>
+    <text x="188" y="450" font-size="23" font-weight="700" fill="#251754">Escalation heuristic</text>
+    <text x="188" y="484" font-size="17" fill="#4a3b70">Confidence &amp; format only</text>
+    <text x="188" y="513" font-size="17" fill="#4a3b70">Confident “001” can still be wrong</text>
+    <text x="188" y="542" font-size="17" fill="#4a3b70">Review always switches to deep</text>
+    <path d="M760 320V405" stroke="#cf8b23" stroke-width="5" marker-end="url(#arrow)"/>
+    <rect x="615" y="405" width="465" height="175" rx="18" fill="#fff" stroke="#cf8b23" stroke-width="3"/>
+    <text x="643" y="450" font-size="23" font-weight="700" fill="#69400d">Whole-route accounting</text>
+    <text x="643" y="484" font-size="17" fill="#754f1e">Count classifier + solver + escalation</text>
+    <text x="643" y="513" font-size="17" fill="#754f1e">Use final cumulative snapshot per query</text>
+    <text x="643" y="542" font-size="17" fill="#754f1e">Cost per correct = known cost ÷ accepted</text>
+    <text x="60" y="654" font-size="18" fill="#4a3b70">Prepared rates and durations are synthetic. Native SDK totals are query-pipeline estimates, not invoices.</text>
+  </g>
+  <defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto"><path d="M1 1L10 6L1 11Z" fill="#6948bf"/></marker></defs>
+</svg>
