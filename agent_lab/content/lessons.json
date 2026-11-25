@@ -11774,121 +11774,204 @@
     "id": 59,
     "prerequisites": [
       14,
-      15
+      15,
+      52
     ],
-    "concept_brief": "Model routing picks a model and limits per task with explicit host rules: simple tasks go to a fast model with tight limits, complex ones to a more capable model with a larger turn and budget allowance.",
-    "lab_brief": "The `routing` exercise routes three sample tasks (and your prompt, if given) to a `fast` tier (`LAB_MODEL`) or a `capable` tier (`LAB_ROUTE_MODEL`) using complexity keywords and input length, and records the reason for each choice.",
+    "concept_brief": "Model routing chooses a configured model and an output schema for each fixed task. Compare independently graded quality, total SDK-reported query cost and host duration; a cheap token rate alone cannot establish a cheap correct solution.",
+    "lab_brief": "Use /api/c59 or the dedicated browser panel to run one strategy on thirteen fixed tasks, compare eight prepared strategies, and optionally observe bounded native SDK calls. Prepared rates, costs and durations are authored teaching fixtures.",
     "preparation": [
-      "Offline: run `uv sync --locked` once, then `uv run agent-lab serve` and open lesson 59 (or run `uv run agent-lab lesson 59`).",
-      "Optional: set `LAB_ROUTE_MODEL` in `.env` to choose the capable tier's model; routing itself makes no model call."
+      "Offline: start the portal and open Lesson 59. Run the prepared rules suite before comparing all strategies.",
+      "Optional paid observation: configure the private backend Anthropic key and enable live mode. Authorize each bounded native run separately."
     ],
     "steps": [
       {
         "title": "Understand the goal",
-        "text": "Make routing decisions explicit and testable."
+        "text": "Read the thirteen task prompts, intended teaching tiers and rule routes; vowels, multiply and power-mod deliberately differ."
       },
       {
         "title": "Prepare your exercise",
-        "text": "Read `tiers`, `signals` and the routing rule in the source."
+        "text": "Select rules and a task or all tasks, then inspect the terminal history and independent grade."
       },
       {
         "title": "Run one example",
-        "text": "Run the offline exercise."
+        "text": "Compare all eight authored strategies, including light and cascade failures and classifier overhead."
       },
       {
         "title": "Verify the evidence",
-        "text": "Check each route's `tier`, `model`, limits and `reason`."
+        "text": "With fresh consent, run at most three tasks and one strategy. The invoice review smoke uses a persistent SDK session and acknowledged model switch."
       },
       {
         "title": "Try the challenge",
-        "text": "Type your own task in the Prompt box and route it."
+        "text": "Compare cost per correct answer and failed or escalated tasks; explain why the lowest token rate may cost more per successful answer."
       }
     ],
-    "inspect": "`tiers` (model, max_turns and max_budget_usd for fast and capable), the `routes` table with each `reason`, `decision_owner` and `fallback`.",
-    "expected": "The summary task routes to `fast` (`claude-haiku-4-5`, 2 turns, 0.05 USD). The debugging and architecture tasks route to `capable` (`claude-sonnet-5-5`, 6 turns, 0.25 USD) with reasons `matched debug` and `matched design, architecture`.",
-    "evidence_criterion": "The check confirms that routes were produced by the host policy with both tiers defined.",
+    "inspect": "Check /api/c59/code for computed answer keys, final-snapshot accounting and native session/model switching. Inspect each requested model, terminal ID, independent grade, duration, cost basis and report check.",
+    "expected": "Prepared rules gives thirteen graded successful answers. Prepared light and cascade are deliberately needs-review; the confident 001 power-mod draft evades the escalation heuristic but fails the computed key. Six other prepared strategies pass. The optional native invoice review must show an actual stable session and model switch.",
+    "evidence_criterion": "Routing suite returns a graded, successful result for every selected task.",
     "evidence_checks": [
       {
-        "key": "decision_owner",
+        "key": "check",
         "rule": "equals",
-        "value": "host policy"
-      },
-      {
-        "key": "routes",
-        "rule": "truthy"
-      },
-      {
-        "key": "tiers",
-        "rule": "truthy"
+        "value": "pass"
       }
     ],
-    "challenge": "Type `Migrate the session store to SQLite` in the Prompt box and run the offline exercise (or run `uv run agent-lab lesson 59 --prompt \"Migrate the session store to SQLite\"`), then confirm a fourth route with tier `capable` and reason `matched migrate`.",
+    "challenge": "Explain why the cheapest token price may not yield the cheapest solution after independently grading every answer and counting classifier, failed and escalated calls.",
     "hints": [
-      "The rule checks a fixed list of complexity words, then input length.",
-      "`migrate` is in `signals`, so the task goes to the capable tier; a short task without signal words would stay fast."
+      "Count accepted answers, not only tokens. A confident wrong answer can survive a format/confidence heuristic.",
+      "Cost per correct answer includes classifier and escalation calls; a policy that fails a task needs review even if its total token bill is low."
     ],
-    "reference": "Routing belongs to host policy, not to the model: explicit rules are cheap, auditable and testable. Each route carries its own turn and budget limits, and failures are not retried automatically on a more expensive model.",
+    "reference": "Routing is a host policy. The rule and classifier choose a tier before solving; review always escalates and cascade uses only a confidence/format heuristic. Grade the final answer from a separately computed key, then divide total known cost by accepted answers. Include classifier and failed attempts. Prepared costs are synthetic; native SDK costs are query-pipeline estimates.",
     "recovery": [
-      "If the run fails, read the first error in Response and results, fix it, and run again; the Diagnostics panel shows the raw events.",
-      "If Live Agent SDK is missing, live mode is disabled: the offline exercise still teaches the full concept without credentials."
+      "If a prepared policy is needs-review, inspect rejected task grades and stage history rather than changing the key.",
+      "If a native call fails, inspect its retained terminal, usage and session evidence. Do not automatically retry a paid run."
     ],
     "quiz": [
       {
-        "prompt": "Who should own the routing decision?",
+        "prompt": "Which result determines acceptance?",
         "options": [
           {
-            "text": "The model, by asking which model it prefers.",
-            "explanation": "That spends a call and is hard to audit."
+            "text": "An independently computed answer key.",
+            "explanation": "Correct. An independently computed answer key."
           },
           {
-            "text": "The host policy, with explicit rules.",
-            "explanation": "Correct. Rules are cheap, testable and auditable."
+            "text": "The model confidence alone.",
+            "explanation": "This ignores part of the route evidence."
           },
           {
-            "text": "Whichever model responds first.",
-            "explanation": "That is a race, not a policy."
+            "text": "The intended tier label.",
+            "explanation": "This does not establish a graded successful result."
           }
         ],
-        "correct": 1
+        "correct": 0
       },
       {
-        "prompt": "Why give each tier its own limits?",
+        "prompt": "What belongs in routing cost?",
         "options": [
           {
-            "text": "Capable models need room for longer tasks while fast tasks stay cheap.",
-            "explanation": "Correct. Limits follow the expected work."
+            "text": "Solver, classifier and escalation queries.",
+            "explanation": "Correct. Solver, classifier and escalation queries."
           },
           {
-            "text": "The SDK requires different limits per model.",
-            "explanation": "The SDK does not require that; it is a cost decision."
+            "text": "Only the final solver turn.",
+            "explanation": "This ignores part of the route evidence."
           },
           {
-            "text": "Limits replace the need for routing.",
-            "explanation": "Limits bound a run; routing chooses the model."
+            "text": "Only the cheapest token price.",
+            "explanation": "This does not establish a graded successful result."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "Why can cascade miss a wrong answer?",
+        "options": [
+          {
+            "text": "Its confidence and format heuristic does not consult the key.",
+            "explanation": "Correct. Its confidence and format heuristic does not consult the key."
+          },
+          {
+            "text": "It always runs the key during selection.",
+            "explanation": "This ignores part of the route evidence."
+          },
+          {
+            "text": "It only uses the deep model.",
+            "explanation": "This does not establish a graded successful result."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "What should a missing SDK terminal become?",
+        "options": [
+          {
+            "text": "An explicit no-result failure.",
+            "explanation": "Correct. An explicit no-result failure."
+          },
+          {
+            "text": "A zero-cost success.",
+            "explanation": "This ignores part of the route evidence."
+          },
+          {
+            "text": "The assistant prose as structured output.",
+            "explanation": "This does not establish a graded successful result."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "How are cumulative snapshots counted?",
+        "options": [
+          {
+            "text": "Use the last snapshot once per query.",
+            "explanation": "Correct. Use the last snapshot once per query."
+          },
+          {
+            "text": "Add every snapshot as a new bill.",
+            "explanation": "This ignores part of the route evidence."
+          },
+          {
+            "text": "Ignore the classifier snapshot.",
+            "explanation": "This does not establish a graded successful result."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "In the concept map, where does the grade originate?",
+        "options": [
+          {
+            "text": "From the independent computed key after execution.",
+            "explanation": "Correct. From the independent computed key after execution."
+          },
+          {
+            "text": "From the rule tier label.",
+            "explanation": "This ignores part of the route evidence."
+          },
+          {
+            "text": "From the model switch receipt.",
+            "explanation": "This does not establish a graded successful result."
+          }
+        ],
+        "correct": 0
+      },
+      {
+        "prompt": "In the walkthrough, what follows a successful review first turn?",
+        "options": [
+          {
+            "text": "An acknowledged set_model switch and second turn in the same session.",
+            "explanation": "Correct. An acknowledged set_model switch and second turn in the same session."
+          },
+          {
+            "text": "A fresh unrelated answer with no correlation.",
+            "explanation": "This ignores part of the route evidence."
+          },
+          {
+            "text": "A fixture result labeled as provider cost.",
+            "explanation": "This does not establish a graded successful result."
           }
         ],
         "correct": 0
       }
     ],
-    "concept_code": "from dataclasses import dataclass\n\nfrom claude_agent_sdk import ClaudeAgentOptions\n\nSIGNALS = (\"refactor\", \"design\", \"debug\", \"architecture\", \"migrate\", \"security\")\n\n\n@dataclass(frozen=True)\nclass Route:\n    model: str\n    max_turns: int\n    max_budget_usd: float\n    reason: str\n\n\ndef route(task: str) -> Route:\n    matched = [word for word in SIGNALS if word in task.lower()]\n    if matched or len(task) > 400:\n        reason = f\"complex: {', '.join(matched) or 'long input'}\"\n        return Route(\"sonnet\", max_turns=6, max_budget_usd=0.25, reason=reason)\n    return Route(\"haiku\", max_turns=2, max_budget_usd=0.05, reason=\"simple task\")\n\n\ndef options_for(task: str) -> ClaudeAgentOptions:\n    chosen = route(task)\n    print(f\"routing to {chosen.model}: {chosen.reason}\")\n    return ClaudeAgentOptions(\n        model=chosen.model,\n        max_turns=chosen.max_turns,\n        max_budget_usd=chosen.max_budget_usd,\n    )",
-    "code_focus": "route() applies explicit keyword and length rules and returns a Route whose model, `max_turns` and `max_budget_usd` are passed straight into ClaudeAgentOptions, with the reason logged.",
+    "concept_code": "from agent_lab.routing_lab import RoutingInput, prepared, grade_answer\n\nreport = prepared(RoutingInput(strategies=[\"rules\"]))\nassert report[\"check\"][\"status\"] == \"pass\"\nassert grade_answer(\"power-mod\", \"001\")[\"accepted\"] is False\n# Native review uses one ClaudeSDKClient and set_model() before its second turn.",
+    "code_focus": "answer_key computes task keys separately from fixture tiers. metrics counts the last cumulative snapshot once per query, including classifier calls. routing_native._query keeps the same session for a native review switch.",
     "concept_points": [
       {
-        "title": "Rules you can test",
-        "text": "A plain function chooses the model, so the same task always routes the same way and can be unit-tested."
+        "title": "Independent grade",
+        "text": "Confidence and intended tier never decide whether the final answer is accepted."
       },
       {
-        "title": "Limits travel with the model",
-        "text": "Each tier sets its own `max_turns` and `max_budget_usd`, so cheap tasks also get tight limits."
+        "title": "Whole-route cost",
+        "text": "Count classification, solving, failures and escalation before computing cost per correct answer."
       },
       {
-        "title": "Record the reason",
-        "text": "Logging why a task was routed makes cost and quality reviews possible later."
+        "title": "Truthful provenance",
+        "text": "Authored fixture rates and durations remain separate from native SDK usage estimates and host wall time."
       }
     ],
     "misconception": {
-      "claim": "Always using the most capable model is the safest choice for every task.",
-      "correction": "It raises cost and latency for simple tasks with no quality gain. Routing by explicit rules spends the stronger model only where the task needs it."
+      "claim": "The model with the cheapest token rate always makes the cheapest solution.",
+      "correction": "A wrong answer, extra classifier call or escalation changes the cost per correct answer. Grade independently and include every query."
     }
   },
   {

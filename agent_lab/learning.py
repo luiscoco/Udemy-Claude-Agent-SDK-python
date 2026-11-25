@@ -243,6 +243,20 @@ def check_evidence(
         )
     if not isinstance(evidence, dict):
         return CheckResult(status="needs-review", detail="No local exercise evidence was produced.")
+    if lesson_id == 59:
+        from agent_lab.routing_lab import RoutingInput, check_suite
+
+        routing_report = evidence.get("report", evidence)
+        try:
+            routing_config = routing_report["config"]
+            routing_selected = RoutingInput.model_validate({
+                key: routing_config[key] for key in RoutingInput.model_fields if key in routing_config})
+            passed = (routing_report.get("mode") == ("live" if mode == "live" else "prepared")
+                      and check_suite(routing_report, routing_selected)["status"] == "pass")
+        except (TypeError, ValueError, KeyError):
+            passed = False
+        return CheckResult(status="passed" if passed else "needs-review",
+                           detail="Every selected fixed task needs a successful independently graded route and coherent terminal evidence.")
     if lesson_id == 58:
         report = evidence.get("report")
         passed = (isinstance(report, dict) and report.get("mode") ==

@@ -102,11 +102,12 @@ def test_tool_design_feedback_names_field_problem_and_fix(work):
     assert evidence["every_error_actionable"]
 
 
-def test_routing_sends_complex_tasks_to_the_capable_tier(work):
-    evidence = routing(work, RunRequest(prompt="Migrate the session store to SQLite"), LESSONS[59])
-    tiers = [route["tier"] for route in evidence["routes"]]
-    assert tiers == ["fast", "capable", "capable", "capable"]
-    assert evidence["routes"][-1]["reason"] == "matched migrate"
+def test_routing_cli_uses_fixed_prepared_tasks_and_independent_grade(work):
+    evidence = routing(work, RunRequest(prompt="power-mod"), LESSONS[59])
+    assert evidence["check"]["status"] == "pass"
+    assert evidence["rows"][0]["taskId"] == "power-mod"
+    assert evidence["rows"][0]["selectedTier"] == "standard"
+    assert evidence["rows"][0]["grade"]["accepted"] is True
 
 
 def test_redaction_keeps_usage_counts_but_masks_credentials():

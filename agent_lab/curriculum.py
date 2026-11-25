@@ -474,8 +474,8 @@ ROWS = [
     (
         59,
         "Model routing",
-        "Route requests with a deterministic host policy and a per-call budget.",
-        "Use the exercise tool to inspect model routing decisions.",
+        "Route fixed tasks and grade answers independently across cost, latency and quality.",
+        "Run one bounded strategy, compare prepared strategies and inspect actual SDK evidence separately.",
         "routing",
         "exercise",
     ),

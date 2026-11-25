@@ -197,6 +197,10 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                 from agent_lab.tool_search_lab import search as search_tool_catalog
 
                 source = inspect.getsource(search_tool_catalog)
+            if lesson == 59:
+                from agent_lab.routing_lab import answer_key
+
+                source = inspect.getsource(answer_key)
             if lesson == 48:
                 from agent_lab.hardening_lab import local_action
 
@@ -849,6 +853,12 @@ def install_ui(application: FastAPI, runner: RunService, tutor: TutorService) ->
                         run_card.set_visibility(False)
                         generic_evidence_card.set_visibility(False)
                         tool_search_panel(application)
+                    if lesson == 59:
+                        from agent_lab.ui_routing import routing_panel
+
+                        run_card.set_visibility(False)
+                        generic_evidence_card.set_visibility(False)
+                        routing_panel(application)
 
                     saved_check = record(lesson)["check"]
                     check_result = CheckResult(**saved_check) if saved_check else None
